@@ -1,0 +1,23 @@
+[package]
+name = "core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde_json = { workspace = true }
+base64 = { workspace = true }
+mio = { workspace = true }
+thiserror = { workspace = true }
+aes = { workspace = true }
+block-modes = { workspace = true }
+block-padding = { workspace = true }
+chrono = { workspace = true }
+aes-gcm = { workspace = true }
+rand = { workspace = true }
+winapi = { workspace = true }
+rusqlite = { workspace = true }
+lazy_static = { workspace = true }
+tokio = { workspace = true }
+tauri = { workspace = true }
+serde = { workspace = true }
+config = { workspace = true }

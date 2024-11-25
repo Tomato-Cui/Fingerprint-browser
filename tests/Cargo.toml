@@ -1,0 +1,11 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true }
+rusqlite = { workspace = true }
+
+# internal crate dependencies
+core = { workspace = true }
