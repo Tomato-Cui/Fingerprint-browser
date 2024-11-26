@@ -16,19 +16,23 @@ from DrissionPage._pages.chromium_page import ChromiumPage
 from faker import Faker
 
 
+# 随机数
 def random_audio(num):
     return random.randint(0, num - 1)
 
 
+# 随机小数
 def generate_random_float():
     return round(random.uniform(0, 0.5), 2)  # 保留两位小数
 
 
+# 随机字符
 def random_hex_char():
     hex_chars = 'abcdef'
     return random.choice(hex_chars)
 
 
+# 随机小数
 def generate_random_in_range():
     return random.uniform(1.0000001, 1.0000003)
 

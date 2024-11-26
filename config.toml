@@ -1,0 +1,13 @@
+[app]
+id = "com.ads-hubstudio.browser"
+name = "ads-hubstudio"
+
+[cache]
+name = "ads-hubstudio.db"
+location = "cache"
+
+[setting]
+data_location = "datas"
+user_data_location = "user_data"
+user_proxy_location = "user_proxy"
+all_locations = ["user_data", "user_proxy"]

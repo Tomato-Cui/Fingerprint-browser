@@ -6,8 +6,7 @@ use std::path::PathBuf;
 use crate::utils::common::app_localer;
 
 lazy_static! {
-    // pub static ref AConfig: AppConfig = AppConfig::new("config.toml").unwrap();
-    pub static ref AConfig: AppConfig = AppConfig::new("..\\crates\\core\\config.toml").unwrap();
+    pub static ref AConfig: AppConfig = AppConfig::new("config.toml").unwrap();
 }
 
 #[cfg(test)]

@@ -1,7 +1,6 @@
+mod apis;
 mod test_config;
-
 mod test_db;
-
 mod utils;
 
 pub fn load_config() -> core::config::AppConfig {

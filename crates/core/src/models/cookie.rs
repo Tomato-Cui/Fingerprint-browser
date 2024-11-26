@@ -47,9 +47,8 @@ pub struct PluginsCookie {
 
 impl PluginsCookie {
     /// cookie表中查询所有数据
-    pub fn query_cookie(path: &str) -> Result<String, ApplicationServerError> {
+    pub fn query_cookie(path: &str) -> Result<Vec<PluginsCookie>, ApplicationServerError> {
         let key = get_encrypt_key(path)?;
-
         let db = Db::new(cookie_file(path))?;
 
         let sql = "select creation_utc, host_key, name, encrypted_value, path, expires_utc, is_secure, is_httponly from cookies";
@@ -78,23 +77,24 @@ impl PluginsCookie {
             })
         })?;
         //db 数据库会在离开作用域后自动断开
-        let cookie: Vec<PluginsCookie> = cookie_iter.filter_map(Result::ok).collect();
-
-        Ok(serde_json::to_string(&cookie)?)
+        let cookies: Vec<PluginsCookie> = cookie_iter.filter_map(Result::ok).collect();
+        Ok(cookies)
     }
 
     /// cookie表中更新数据
-    pub fn update_cookie(path: &str, cookie: &str) -> Result<bool, ApplicationServerError> {
+    pub fn update_cookie(
+        cookie: PluginsCookie,
+        path: &str,
+    ) -> Result<bool, ApplicationServerError> {
         let key = get_encrypt_key(path)?;
         let db = Db::new(cookie_file(path))?;
-        let cookies: PluginsCookie = serde_json::from_str(cookie)?;
 
         let en_cookie_val: Vec<u8>;
 
-        if cookies.value.is_empty() {
+        if cookie.value.is_empty() {
             en_cookie_val = Vec::new(); // 如果 cookies.value 为空，插入一个空的 Vec<u8>
         } else {
-            en_cookie_val = enc_cookie(&cookies.value, &key)?; // 如果 cookies.value 不为空，插入加密后的值
+            en_cookie_val = enc_cookie(&cookie.value, &key)?; // 如果 cookies.value 不为空，插入加密后的值
         }
         //根据creation_utc 更新cookie
         let sql = "
@@ -111,14 +111,13 @@ impl PluginsCookie {
         let status = db.query_table(
             &sql,
             params![
-                cookies.domain,
+                cookie.domain,
                 &en_cookie_val,
-                cookies.path,
-                seconds_to_timestamp(cookies.expiration_date.parse::<f64>().unwrap()),
-                bool_to_int(cookies.secure),
-                bool_to_int(cookies.http_only),
-                cookies.name,
-                cookies.creation_utc.parse::<u64>().unwrap(),
+                cookie.path,
+                seconds_to_timestamp(cookie.expiration_date.parse::<f64>().unwrap()),
+                bool_to_int(cookie.http_only),
+                cookie.name,
+                cookie.creation_utc.parse::<u64>().unwrap(),
             ],
         )?;
 
@@ -131,25 +130,27 @@ impl PluginsCookie {
 
     /// cookie表中添加数据
     /// WARN: (这里需要注意  插入数据库时  时间戳是同时生成的 也就是 creation_utc， last_access_utc， last_update_utc 字段是一样的值  不过不重要)
-    pub fn add_cookie(path: &str, cookie: &str) -> Result<bool, ApplicationServerError> {
+    pub fn insert_cookie(
+        path: &str,
+        cookie: PluginsCookie,
+    ) -> Result<bool, ApplicationServerError> {
         let key = get_encrypt_key(path)?;
         let db = Db::new(cookie_file(path))?;
-        let cookies: PluginsCookie = serde_json::from_str(cookie)?;
 
         let en_cookie_val: Vec<u8>;
 
-        if cookies.value.is_empty() {
+        if cookie.value.is_empty() {
             en_cookie_val = Vec::new(); // 如果 cookies.value 为空，插入一个空的 Vec<u8>
         } else {
-            en_cookie_val = enc_cookie(&cookies.value, &key)?; // 如果 cookies.value 不为空，插入加密后的值
+            en_cookie_val = enc_cookie(&cookie.value, &key)?; // 如果 cookies.value 不为空，插入加密后的值
         }
 
         let expiration: u64;
 
-        if cookies.expiration_date == "0.0" {
+        if cookie.expiration_date == "0.0" {
             expiration = generate_nanosecond_timestamp();
         } else {
-            expiration = seconds_to_timestamp(cookies.expiration_date.parse::<f64>().unwrap());
+            expiration = seconds_to_timestamp(cookie.expiration_date.parse::<f64>().unwrap());
         }
 
         let sql = "
@@ -161,15 +162,15 @@ impl PluginsCookie {
             &sql,
             params![
                 generate_nanosecond_timestamp(),
-                cookies.domain,
+                cookie.domain,
                 "".to_string(),
-                cookies.name,
+                cookie.name,
                 "".to_string(),
                 en_cookie_val,
-                cookies.path,
+                cookie.path,
                 expiration,
-                bool_to_int(cookies.secure),
-                bool_to_int(cookies.http_only),
+                bool_to_int(cookie.secure),
+                bool_to_int(cookie.http_only),
                 generate_nanosecond_timestamp(),
                 1,
                 1,

@@ -9,4 +9,5 @@ axum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
+core = { workspace = true }
 server = { workspace = true }

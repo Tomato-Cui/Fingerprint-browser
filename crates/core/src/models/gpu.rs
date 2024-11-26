@@ -14,14 +14,10 @@ pub struct Gpu {
 }
 impl Gpu {
     /// gpu表插入数据
-    pub fn insert_gpu(gpu: &str) -> Result<bool, ApplicationServerError> {
-        let gpu_info: Gpu = serde_json::from_str(gpu)?;
+    pub fn insert_gpu(gpu: Gpu) -> Result<bool, ApplicationServerError> {
         let db = Db::new(AConfig.get_cache_location())?;
         let sql = "insert into gpu_table (gpu_ven, gpu_rend, os_name) values(?1, ?2, ?3)";
-        let status = db.query_table(
-            sql,
-            params![gpu_info.gpu_ven, gpu_info.gpu_rend, gpu_info.os_name],
-        )?;
+        let status = db.query_table(sql, params![gpu.gpu_ven, gpu.gpu_rend, gpu.os_name])?;
         if status == 1 {
             Ok(true)
         } else {
@@ -29,7 +25,7 @@ impl Gpu {
         }
     }
     /// gpu表删除数据
-    pub fn delete_gpu(id: i32) -> Result<bool, ApplicationServerError> {
+    pub fn delete_gpu(id: i8) -> Result<bool, ApplicationServerError> {
         let db = Db::new(AConfig.get_cache_location())?;
         let sql = "delete from gpu_table where id = (?1)";
         let status = db.query_table(sql, params![id])?;
@@ -41,7 +37,7 @@ impl Gpu {
     }
 
     /// gpu表查询所有数据
-    pub fn query_gpu() -> Result<String, ApplicationServerError> {
+    pub fn query_gpu() -> Result<Vec<Gpu>, ApplicationServerError> {
         let db = Db::new(AConfig.get_cache_location())?;
         let sql = "select * from gpu_table";
         let mut stmt = db.query_map_table(sql)?;
@@ -55,6 +51,23 @@ impl Gpu {
         })?;
 
         let gpu: Vec<Gpu> = gpu_iter.filter_map(Result::ok).collect();
-        Ok(serde_json::to_string(&gpu)?)
+        Ok(gpu)
+    }
+
+    /// gpu表更新数据
+    pub fn update_gpu(gpu: Gpu, id: i8) -> Result<bool, ApplicationServerError> {
+        let db = Db::new(AConfig.get_cache_location())?;
+        let sql = "
+        update gpu_table 
+            set gpu_ven = ?1,
+                gpu_rend = ?2,
+                os_name = ?3, 
+            where id = ?4";
+        let status = db.query_table(sql, params![gpu.gpu_ven, gpu.gpu_rend, gpu.os_name, id])?;
+        if status == 1 {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 }

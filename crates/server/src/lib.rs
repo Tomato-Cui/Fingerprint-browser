@@ -1,8 +1,7 @@
 use axum::{http::StatusCode, routing::post, Router};
 
-mod browser;
-mod environment;
-mod group;
+pub mod response;
+pub mod routes;
 
 /// resource is not found
 /// 第二各返回值为空，由浏览器默认内容填充就好了。
@@ -15,10 +14,13 @@ pub fn build_root_router() -> Router {
         .nest(
             "/api/management/v1",
             Router::new()
-                .merge(browser::build_browser_router())
-                .merge(environment::build_environment_router())
-                .merge(group::build_group_router())
-                .merge(Router::new().route("/status", post(|| async {}))),
+                .merge(routes::browser::build_browser_router())
+                .merge(routes::environment::build_environment_router())
+                .merge(routes::group::build_group_router())
+                .merge(Router::new().route(
+                    "/status",
+                    post(|| async { String::from("status: running") }),
+                )),
         )
         // .route_layer(middleware::from_fn(lc_middlewares::auth::auth))
         // .layer(lc_middlewares::cors::cors())

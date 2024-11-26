@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use errors::ApplicationServerError;
 use utils::common::app_localer;
 
-// pub mod conf;
+pub mod apis;
 pub mod config;
 pub mod db;
 pub mod errors;

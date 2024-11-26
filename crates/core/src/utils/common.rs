@@ -1,3 +1,9 @@
+use std::fmt::Debug;
+
+use serde::Serialize;
+
+use super::fs::ApplicationServerError;
+
 pub mod app_localer {
     use crate::config;
     use std::{env, fs::canonicalize, path::PathBuf};
@@ -59,4 +65,12 @@ pub fn bool_to_int(value: bool) -> i32 {
     } else {
         0
     }
+}
+
+/// 将结构体转换为String
+pub fn to_string<T>(value: T) -> Result<String, ApplicationServerError>
+where
+    T: Serialize + Debug,
+{
+    Ok(serde_json::to_string(&value)?)
 }

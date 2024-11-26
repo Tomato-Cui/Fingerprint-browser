@@ -51,7 +51,8 @@ impl Db {
                     isTz INTEGER,
                     isPos INTEGER,
                     porxy_file TEXT NOT NULL,
-                    user_data_file TEXT NOT NULL
+                    user_data_file TEXT NOT NULL,
+                    status  INTEGER
             )",
         ];
         if meta.len() == 0 {

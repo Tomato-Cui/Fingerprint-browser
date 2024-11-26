@@ -21,3 +21,4 @@ tokio = { workspace = true }
 tauri = { workspace = true }
 serde = { workspace = true }
 config = { workspace = true }
+axum = { workspace = true }

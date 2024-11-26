@@ -12,17 +12,13 @@ pub struct Ua {
     pub os_ver: String,
     pub browser_ver: String,
 }
+
 impl Ua {
     /// ua表中插入数据
-    pub fn insert_ua(ua: &str) -> Result<bool, ApplicationServerError> {
-        let ua_info: Ua = serde_json::from_str(ua)?;
-
+    pub fn insert_ua(ua: Ua) -> Result<bool, ApplicationServerError> {
         let db = Db::new(AConfig.get_cache_location())?;
         let sql = "insert into ua_table (os_name, os_ver, browser_ver) values(?1, ?2, ?3)";
-        let status = db.query_table(
-            sql,
-            params![ua_info.os_name, ua_info.os_ver, ua_info.browser_ver],
-        )?;
+        let status = db.query_table(sql, params![ua.os_name, ua.os_ver, ua.browser_ver])?;
         if status == 1 {
             Ok(true)
         } else {
@@ -31,7 +27,7 @@ impl Ua {
     }
 
     /// ua表中删除数据
-    pub fn delete_ua(id: i32) -> Result<bool, ApplicationServerError> {
+    pub fn delete_ua(id: i8) -> Result<bool, ApplicationServerError> {
         let db = Db::new(AConfig.get_cache_location())?;
         let sql = "delete from ua_table where id = (?1)";
         let status = db.query_table(sql, params![id])?;
@@ -42,8 +38,8 @@ impl Ua {
         }
     }
 
-    /// uak查询所有数据
-    pub fn query_ua() -> Result<String, ApplicationServerError> {
+    /// ua查询所有数据
+    pub fn query_ua() -> Result<Vec<Ua>, ApplicationServerError> {
         let db = Db::new(AConfig.get_cache_location())?;
         let sql = "select * from ua_table";
         let mut stmt = db.query_map_table(sql)?;
@@ -57,6 +53,25 @@ impl Ua {
         })?;
 
         let ua: Vec<Ua> = ua_iter.filter_map(Result::ok).collect();
-        Ok(serde_json::to_string(&ua)?)
+        Ok(ua)
+    }
+
+    /// ua更新数据
+    pub fn update_ua(ua: Ua, id: i8) -> Result<bool, ApplicationServerError> {
+        let db = Db::new(AConfig.get_cache_location())?;
+
+        let sql = "
+            UPDATE ua_table
+            SET os_name = ?1,
+                os_ver = ?2,
+                browser_ver = ?3,
+            WHERE id = ?4
+        ";
+        let status = db.query_table(sql, params![ua.os_name, ua.os_ver, ua.browser_ver, id])?;
+        if status == 0 {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 }
