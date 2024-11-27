@@ -1,5 +1,5 @@
 /// user agent data models
-use crate::{config::AConfig, db::Db, errors::ApplicationServerError};
+use crate::{config::AConfig, db::Db, errors::ApplicationServerError, utils::common::to_string};
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
 
@@ -72,6 +72,28 @@ impl Ua {
             Ok(true)
         } else {
             Ok(false)
+        }
+    }
+
+    pub fn to_string(&self) -> Result<String, ApplicationServerError> {
+        Ok(format!(
+            "{} {} {}",
+            self.os_name, self.browser_ver, self.os_ver
+        ))
+    }
+
+    pub fn string_to(&self) -> Result<String, ApplicationServerError> {
+        to_string(self)
+    }
+}
+
+impl From<String> for Ua {
+    fn from(value: String) -> Self {
+        Self {
+            id: 0,
+            os_name: "".to_string(),
+            os_ver: "".to_string(),
+            browser_ver: value,
         }
     }
 }

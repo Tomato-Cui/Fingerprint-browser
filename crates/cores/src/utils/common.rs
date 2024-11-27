@@ -1,6 +1,12 @@
-use std::fmt::Debug;
+use std::{
+    ffi::CString,
+    fmt::Debug,
+    net::{Ipv4Addr, SocketAddrV4},
+    ptr,
+};
 
 use serde::Serialize;
+use tokio::net::TcpListener;
 
 use super::fs::ApplicationServerError;
 
@@ -67,10 +73,81 @@ pub fn bool_to_int(value: bool) -> i32 {
     }
 }
 
+/// option<vec<string>> to string
+pub fn option_vec_string_to_string(values: Option<Vec<String>>, sep: &str) -> String {
+    match values {
+        Some(v) => v.join(sep),
+        None => "".to_string(),
+    }
+}
+
+/// option<vec<string>> <- string
+pub fn string_to_option_vec_string(values: Option<String>, sep: &str) -> Option<Vec<String>> {
+    match values {
+        Some(v) => Some(v.split(sep).map(|v| v.to_string()).collect()),
+        None => Some(Vec::new()),
+    }
+}
+
 /// 将结构体转换为String
 pub fn to_string<T>(value: T) -> Result<String, ApplicationServerError>
 where
     T: Serialize + Debug,
 {
     Ok(serde_json::to_string(&value)?)
+}
+
+#[cfg(windows)]
+use winapi::um::{
+    winnt::KEY_READ,
+    winreg::{RegOpenKeyExA, RegQueryValueExA, HKEY_CURRENT_USER},
+};
+
+/// TODO: 未做其他系统的兼容。
+/// 获取系统代理
+#[cfg(windows)]
+pub fn get_proxy_from_registry() -> Option<String> {
+    let key = CString::new("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+    let key = match key {
+        Ok(k) => k,
+        Err(_) => return None,
+    };
+
+    let mut hkey = ptr::null_mut();
+    unsafe {
+        if RegOpenKeyExA(HKEY_CURRENT_USER, key.as_ptr(), 0, KEY_READ, &mut hkey) == 0 {
+            let mut value = vec![0u8; 1024];
+            let mut value_len = value.len() as u32;
+            let proxy_value_name = CString::new("ProxyServer").unwrap();
+
+            if RegQueryValueExA(
+                hkey,
+                proxy_value_name.as_ptr(),
+                0 as *mut u32,
+                ptr::null_mut(),
+                value.as_mut_ptr(),
+                &mut value_len,
+            ) == 0
+            {
+                return Some(String::from_utf8_lossy(&value[..value_len as usize]).to_string());
+            }
+        }
+    }
+
+    None
+}
+
+/// 获取随机的一个端口
+pub async fn get_debug_port() -> Result<u16, ApplicationServerError> {
+    let loopback = Ipv4Addr::new(127, 0, 0, 1);
+    let socket = SocketAddrV4::new(loopback, 0);
+    let listener = TcpListener::bind(socket).await?;
+    let port = listener.local_addr()?;
+    // println!("Listening on {}, access this port to end the program", port);
+    // let (mut tcp_stream, addr) = listener.accept()?; // 阻塞，直到被请求
+    // println!("Connection received! {:?} is sending data.", addr);
+    // let mut input = String::new();
+    // let _ = tcp_stream.read_to_string(&mut input)?;
+    // println!("{:?} says {}", addr, input);
+    Ok(port.port())
 }

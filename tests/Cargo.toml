@@ -8,4 +8,4 @@ tokio = { workspace = true }
 rusqlite = { workspace = true }
 
 # internal crate dependencies
-core = { workspace = true }
+cores = { workspace = true }

@@ -1,19 +1,19 @@
 #[test]
 fn test_app_data_location() {
-    use core::utils::common;
+    use cores::utils::common;
 
     println!("{:?}", common::app_localer::app_data_location());
 }
 
 #[test]
 fn test_app_location() {
-    use core::utils::common;
+    use cores::utils::common;
     println!("{:?}", common::app_localer::app_location());
 }
 
 #[test]
 fn test_timestamp_to_seconds() {
-    use core::utils::common;
+    use cores::utils::common;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     println!(
@@ -29,7 +29,7 @@ fn test_timestamp_to_seconds() {
 
 #[test]
 fn test_seconds_to_timestamp() {
-    use core::utils::common;
+    use cores::utils::common;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     println!(
@@ -45,7 +45,14 @@ fn test_seconds_to_timestamp() {
 
 #[test]
 fn test_generate_nanosecond_timestamp() {
-    use core::utils::common;
+    use cores::utils::common;
 
     println!("{:?}", common::app_timer::generate_nanosecond_timestamp());
+}
+
+#[test]
+fn test_get_proxy_from_registry() {
+    use cores::utils::common;
+
+    println!("{:?}", common::get_proxy_from_registry());
 }

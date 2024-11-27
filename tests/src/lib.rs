@@ -1,4 +1,4 @@
-pub mod core;
+pub mod cores;
 
 #[test]
 fn test_get_process_list() {

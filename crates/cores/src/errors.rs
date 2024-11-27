@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::utils::response::AppResponse;
+
 #[derive(Error, Debug)]
 pub enum ApplicationServerError {
     #[error("Database error: {0}")]
@@ -20,6 +22,27 @@ pub enum ApplicationServerError {
     #[error("InvalidKeyIvLength error: {0}")]
     InvalidKeyIvLength(#[from] block_modes::InvalidKeyIvLength),
 
-    #[error("BlockModeError error: {0}")]
+    #[error("blockmodeerror error: {0}")]
     BlockModeError(#[from] block_modes::BlockModeError),
+
+    #[error("Child Running Fail.")]
+    ChildRunningError,
+
+    #[error("Child Close Fail.")]
+    ChildCloseError,
+
+    #[error("ffi current null: {0}")]
+    FFINullError(#[from] std::ffi::NulError),
+}
+
+// impl Into<ApplicationServerError> for AppResponse<(bool)> {
+//     fn into(self) -> ApplicationServerError {
+//         todo!()
+//     }
+// }
+
+impl<T> Into<AppResponse<T>> for ApplicationServerError {
+    fn into(self) -> AppResponse<T> {
+        AppResponse::fail(Some(self.to_string()))
+    }
 }

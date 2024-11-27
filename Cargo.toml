@@ -1,6 +1,6 @@
 [workspace]
 resolver = "1"
-members = ["cmds", "crates/core", "crates/server", "crates/views", "tests"]
+members = ["cmds", "crates/cores", "crates/server", "crates/views", "tests"]
 
 [workspace.dependencies]
 axum = { version = "0.7", features = ["macros", "multipart"] }
@@ -26,5 +26,5 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 
 # internal crate dependencies
-core = { path = "./crates/core" }
+cores = { path = "./crates/cores" }
 server = { path = "./crates/server" }

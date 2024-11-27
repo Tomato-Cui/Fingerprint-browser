@@ -18,7 +18,7 @@ fn test_query_table() {
 #[test]
 fn test_query_map_table() {
     use super::load_db;
-    use core::models::ua::Ua;
+    use cores::models::ua::Ua;
     use rusqlite::params;
 
     let db = load_db();

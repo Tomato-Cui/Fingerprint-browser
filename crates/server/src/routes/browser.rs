@@ -19,17 +19,17 @@ mod start_browser {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Param {
-        pub user_id: String,                  // 环境ID，创建环境成功后生成的唯一ID。
-        pub serial_number: Option<String>,    // 通过环境编号关闭，如果已传递环境ID则优先用环境ID。
-        pub open_tabs: Option<bool>, // 是否打开平台和历史页面. true: (默认)打开,false不打开
-        pub ip_tab: Option<bool>,    // 是否打开ip检测页，true: (默认)打开，false: 不打开。
-        pub new_first_tab: Option<bool>, // 是否使用新版ip检测页： true: （默认）新版，false：旧版。
-        pub launch_args: Option<Vec<String>>, // 启动参数，例：--blink-settings=imagesEnabled=false: 禁止图片加载 --disable-notifications: 禁用通知。 使用API时，如果API传了“launch_args”，则以API传的值为准。
-        pub headless: Option<bool>, // 是否启动headless浏览器(无头浏览器) true: 是，false:否（默认）。
-        pub disable_password_filling: Option<bool>, // 是否禁用填充账密功能 true: 是，false: 否（默认）。
-        pub clear_cache_after_closing: Option<bool>, // 关闭浏览器后是否清除缓存 true: 是，false:否（默认）。
-        pub enable_password_saving: Option<bool>, // 是否允许保存密码 true:是，false: 否（默认）。
-        pub cdp_mask: Option<bool>,               // 是否屏蔽 CDP 检测 true：是（默认），false：否。
+        pub id: String, // 环境ID，创建环境成功后生成的唯一ID。
+                        // pub serial_number: Option<String>,    // 通过环境编号关闭，如果已传递环境ID则优先用环境ID。
+                        // pub open_tabs: Option<bool>, // 是否打开平台和历史页面. true: (默认)打开,false不打开
+                        // pub ip_tab: Option<bool>,    // 是否打开ip检测页，true: (默认)打开，false: 不打开。
+                        // pub new_first_tab: Option<bool>, // 是否使用新版ip检测页： true: （默认）新版，false：旧版。
+                        // pub launch_args: Option<Vec<String>>, // 启动参数，例：--blink-settings=imagesEnabled=false: 禁止图片加载 --disable-notifications: 禁用通知。 使用API时，如果API传了“launch_args”，则以API传的值为准。
+                        // pub headless: Option<bool>, // 是否启动headless浏览器(无头浏览器) true: 是，false:否（默认）。
+                        // pub disable_password_filling: Option<bool>, // 是否禁用填充账密功能 true: 是，false: 否（默认）。
+                        // pub clear_cache_after_closing: Option<bool>, // 关闭浏览器后是否清除缓存 true: 是，false:否（默认）。
+                        // pub enable_password_saving: Option<bool>, // 是否允许保存密码 true:是，false: 否（默认）。
+                        // pub cdp_mask: Option<bool>,               // 是否屏蔽 CDP 检测 true：是（默认），false：否。
     }
 
     /// 启动浏览器
@@ -75,6 +75,7 @@ mod active_browser {
 }
 
 mod view_active_browser {
+
     use super::*;
 
     #[derive(Deserialize, Serialize, Debug)]
