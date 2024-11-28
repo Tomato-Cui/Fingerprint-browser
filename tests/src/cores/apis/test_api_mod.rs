@@ -1,22 +1,30 @@
-#[test]
-fn test_get_browser_list_handle() {
+#[tokio::test]
+async fn test_get_browser_list_handle() {
     use cores::apis::enviroment;
-    use cores::apis::PageParam;
 
-    let page = PageParam {
-        page_num: Some(0),
-        page_size: Some(10),
-    };
-    let browsers = enviroment::get_browser_list_handle(page);
+    use crate::cores::init_config;
+    init_config().await;
+
+    // use cores::apis::PageParam;
+    // let page = PageParam {
+    //     page_num: Some(1),
+    //     page_size: Some(10),
+    // };
+    // let browsers = enviroment::get_browser_list_handle(page);
+    // println!("{:?}", browsers)
+
+    let browsers = enviroment::get_browser_by_id_handle(1);
     println!("{:?}", browsers)
 }
 
-#[test]
-fn test_update_browser_handle() {
+#[tokio::test]
+async fn test_update_browser_handle() {
     use cores::apis::enviroment;
     use cores::models::enviroment::Browser;
     use cores::models::enviroment::BrowserFp;
-    use cores::models::ua::Ua;
+
+    use crate::cores::init_config;
+    init_config().await;
 
     let browser_fp = BrowserFp {
         os_mem: 8192, // 内存 8GB
@@ -45,7 +53,7 @@ fn test_update_browser_handle() {
 
     let browser = Browser {
         id: Some(1),
-        name: Some(String::from("Test Browser")),
+        name: Some(String::from("ABC Browser")),
         domain_name: Some(vec![
             String::from("facebook.com"),
             String::from("amazon.com"),
@@ -59,7 +67,7 @@ fn test_update_browser_handle() {
         ignore_cookie_error: Some(1),
         tags: Some(vec![String::from("tag1"), String::from("tag2")]),
         group_id: Some(String::from("group_1")),
-        ua: Ua::from(String::from("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")),
+        ua: String::from("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"),
         os: String::from("Windows 10"),
         country: Some(String::from("US")),
         region: Some(String::from("California")),
@@ -77,27 +85,32 @@ fn test_update_browser_handle() {
         is_pos: true,
         user_data_file: String::from("path/to/user_data_file"),
         status: true,
-        lang:"".to_string(),
+        lang: Some("".to_string()),
     };
 
     let browsers = enviroment::update_browser_handle(browser);
     println!("{:?}", browsers)
 }
 
-#[test]
-fn test_delete_browser_handle() {
+#[tokio::test]
+async fn test_delete_browser_handle() {
     use cores::apis::enviroment;
+
+    use crate::cores::init_config;
+    init_config().await;
 
     let browsers = enviroment::delete_browser_handle(vec![1]);
     println!("{:?}", browsers)
 }
 
-#[test]
-fn test_add_browser_handle() {
+#[tokio::test]
+async fn test_add_browser_handle() {
     use cores::apis::enviroment;
     use cores::models::enviroment::Browser;
     use cores::models::enviroment::BrowserFp;
-    use cores::models::ua::Ua;
+
+    use crate::cores::init_config;
+    init_config().await;
 
     let browser_fp = BrowserFp {
         os_mem: 8192, // 内存 8GB
@@ -140,7 +153,7 @@ fn test_add_browser_handle() {
         ignore_cookie_error: Some(1),
         tags: Some(vec![String::from("tag1"), String::from("tag2")]),
         group_id: Some(String::from("group_1")),
-        ua: Ua::from(String::from("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")),
+        ua: String::from("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"),
         os: String::from("Windows 10"),
         country: Some(String::from("US")),
         region: Some(String::from("California")),
@@ -158,7 +171,7 @@ fn test_add_browser_handle() {
         is_pos: true,
         user_data_file: String::from("path/to/user_data_file"),
         status: true,
-        lang:"".to_string(),
+        lang: Some("".to_string()),
     };
 
     let browsers = enviroment::add_browser_handle(browser);

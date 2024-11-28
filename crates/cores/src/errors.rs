@@ -33,13 +33,19 @@ pub enum ApplicationServerError {
 
     #[error("ffi current null: {0}")]
     FFINullError(#[from] std::ffi::NulError),
-}
 
-// impl Into<ApplicationServerError> for AppResponse<(bool)> {
-//     fn into(self) -> ApplicationServerError {
-//         todo!()
-//     }
-// }
+    #[error("get processer fail.")]
+    GetProcesserError,
+
+    #[error("get processer fail.")]
+    SystemTimeError(#[from] std::time::SystemTimeError),
+
+    #[error("config load fail.")]
+    ConfigLoadError,
+
+    #[error("{0}")]
+    Error(#[from] anyhow::Error),
+}
 
 impl<T> Into<AppResponse<T>> for ApplicationServerError {
     fn into(self) -> AppResponse<T> {

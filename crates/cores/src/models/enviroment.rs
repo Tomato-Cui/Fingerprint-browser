@@ -1,15 +1,13 @@
 /// 浏览器的数据结构
 use crate::{
     apis::PageParam,
-    config::AConfig,
+    config::get_config,
     db::Db,
     errors::ApplicationServerError,
     utils::common::{option_vec_string_to_string, string_to_option_vec_string},
 };
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-
-use super::ua::Ua;
 
 /// 浏览器指纹数据结构
 #[derive(Debug, Deserialize, Serialize)]
@@ -41,7 +39,6 @@ pub struct BrowserFp {
 //定义浏览器环境数据结构
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Browser {
-    #[serde(skip_deserializing)] // 在反序列化时忽略该字段
     pub id: Option<i8>,
     pub name: Option<String>,             // 环境名
     pub domain_name: Option<Vec<String>>, // 账号平台的域名：facebook.com, amazon.com...会在打开浏览器时默认访问
@@ -54,7 +51,7 @@ pub struct Browser {
     pub ignore_cookie_error: Option<i32>, // 0：校验cookie失败时，直接返回cookie格式不正确；1：校验cookie失败时，过滤掉格式错误的数据，保留正确格式的cookie，仅支持Netscape格式
     pub tags: Option<Vec<String>>,        // 添加到对应标签ID，未分配标签则可以传0
     pub group_id: Option<String>,         // 添加到对应分组的ID，未分配分组则可以传0
-    pub ua: Ua,                           // user agent
+    pub ua: String,                       // user agent
     pub os: String,
     pub country: Option<String>, // 环境使用的代理国家/地区，lumauto、oxylabs如果没有IP则需要填写国家
     pub region: Option<String>,  // 环境使用的代理州/省，可不填
@@ -68,19 +65,17 @@ pub struct Browser {
     pub fingerprint_config: String, // 指纹配置，具体查看参数对象fingerprintConfig
     pub created_at: i64,
     pub fp_info: BrowserFp,
-    #[serde(rename = "isTz")]
     pub is_tz: bool,
-    #[serde(rename = "isPos")]
     pub is_pos: bool,
     pub user_data_file: String,
     pub status: bool, // 浏览器状态
-    pub lang: String,
+    pub lang: Option<String>,
 }
 
 impl Browser {
     /// browser表插入数据
     pub fn insert_browser(browser: Browser) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
         INSERT INTO environments (
@@ -112,8 +107,9 @@ impl Browser {
             is_tz, 
             is_pos, 
             user_data_file, 
-            status
-        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29)";
+            status,
+            lang 
+        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30)";
 
         let status = db.query_table(
             sql,
@@ -129,7 +125,7 @@ impl Browser {
                 browser.ignore_cookie_error.unwrap_or(0),
                 option_vec_string_to_string(browser.tags, ","),
                 browser.group_id.unwrap_or_default(),
-                browser.ua.to_string()?,
+                browser.ua,
                 browser.os,
                 browser.country.unwrap_or_default(),
                 browser.region.unwrap_or_default(),
@@ -147,6 +143,7 @@ impl Browser {
                 browser.is_pos, // Convert bool to integer (1 or 0)
                 browser.user_data_file,
                 browser.status,
+                browser.lang.unwrap_or_default()
             ],
         )?;
         if status == 1 {
@@ -158,15 +155,16 @@ impl Browser {
 
     /// browser表删除数据
     pub fn delete_browser(ids: Vec<u8>) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
-        let sql = "delete from environments where id = (?1)";
+        let db = Db::new(get_config()?.get_cache_location()?)?;
+
         let delete_ids = ids
             .iter()
             .map(|v| format!("{}", v))
             .collect::<Vec<String>>()
             .join(",");
 
-        let status = db.query_table(sql, params![delete_ids])?;
+        let sql = format!("delete from environments where id in ({})", delete_ids);
+        let status = db.query_table(&sql, params![])?;
         if status == 1 {
             Ok(true)
         } else {
@@ -176,16 +174,13 @@ impl Browser {
 
     /// browser表查询所有数据
     pub fn query_browser_by_id(id: i8) -> Result<Option<Browser>, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = &format!("select * from environments where id = ({})", id);
         let mut stmt = db.query_map_table(sql)?;
         let browser_iter = stmt.query_map(params![], |row| {
             let str_value: String = row.get(25)?;
             let browser_fp: BrowserFp = serde_json::from_str(&str_value).unwrap();
-
-            let str_value: String = row.get(12)?;
-            let ua: Ua = serde_json::from_str(&str_value).unwrap();
 
             Ok(Browser {
                 id: row.get(0)?,
@@ -200,7 +195,7 @@ impl Browser {
                 ignore_cookie_error: row.get(9)?,
                 tags: string_to_option_vec_string(row.get(10)?, ","),
                 group_id: row.get(11)?,
-                ua,
+                ua: row.get(12)?,
                 os: row.get(13)?,
                 country: row.get(14)?,
                 region: row.get(15)?,
@@ -232,7 +227,7 @@ impl Browser {
 
     /// browser表查询所有数据
     pub fn query_browser(payload: PageParam) -> Result<Vec<Browser>, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let page_num = payload.page_num.unwrap_or_else(|| 1);
         let page_size = payload.page_size.unwrap_or_else(|| 10);
@@ -248,8 +243,6 @@ impl Browser {
             let str_value: String = row.get(25)?;
             let browser_fp: BrowserFp = serde_json::from_str(&str_value).unwrap();
 
-            let str_value: String = row.get(12)?;
-            let ua: Ua = serde_json::from_str(&str_value).unwrap();
             Ok(Browser {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -263,7 +256,7 @@ impl Browser {
                 ignore_cookie_error: row.get(9)?,
                 tags: string_to_option_vec_string(row.get(10)?, ","),
                 group_id: row.get(11)?,
-                ua,
+                ua: row.get(12)?,
                 os: row.get(13)?,
                 country: row.get(14)?,
                 region: row.get(15)?,
@@ -286,15 +279,13 @@ impl Browser {
         })?;
 
         let browser: Vec<Browser> = browser_iter.filter_map(Result::ok).collect();
-        println!("{:?}", browser);
         Ok(browser)
-        // Ok(serde_json::to_string(&browser)?)
     }
 
     /// browser表查询所有数据
     /// 更新数据 由于更新的数据有好几个 为了简单索性更新全部数据 (根据id来更新数据)
     pub fn update_browser(browser: Browser) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
             UPDATE environments
@@ -323,11 +314,12 @@ impl Browser {
                 fingerprint_config = ?23,
                 created_at = ?24,
                 fp_info = ?25,
-                isTz = ?26,
-                isPos = ?27,
+                is_tz = ?26,
+                is_pos = ?27,
                 user_data_file = ?28,
-                status = ?29
-            WHERE id = ?30
+                status = ?29,
+                lang = ?30
+            WHERE id = ?31
         ";
 
         let status = db.query_table(
@@ -344,7 +336,7 @@ impl Browser {
                 browser.ignore_cookie_error.unwrap_or(0),
                 option_vec_string_to_string(browser.tags, ","),
                 browser.group_id.unwrap_or_default(),
-                browser.ua.to_string()?,
+                browser.ua,
                 browser.os,
                 browser.country.unwrap_or_default(),
                 browser.region.unwrap_or_default(),
@@ -362,7 +354,8 @@ impl Browser {
                 browser.is_pos, // Convert bool to integer (1 or 0)
                 browser.user_data_file,
                 browser.status,
-                browser.id,
+                browser.lang.unwrap_or_default(),
+                browser.id
             ],
         )?;
         if status == 1 {
@@ -376,7 +369,7 @@ impl Browser {
     ///
     /// 可以通过这个方法来更新浏览器的启动和关闭
     pub fn update_browser_status(id: i8, status: bool) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
             UPDATE environments 
@@ -396,7 +389,7 @@ impl Browser {
         id: i8,
         proxy: Option<&str>,
     ) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
             UPDATE environments 
@@ -415,7 +408,7 @@ impl Browser {
     ///
     /// empty ua 已经在函数外被筛选
     pub fn update_browser_ua(id: i8, ua: Option<&str>) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
             UPDATE environments 
@@ -431,8 +424,8 @@ impl Browser {
         }
     }
 
-    pub fn update_browser_group(id: u8, group_id: &str) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+    pub fn update_browser_group(id: u8, group_id: u8) -> Result<bool, ApplicationServerError> {
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
             UPDATE environments 

@@ -3,21 +3,27 @@ mod test_config;
 mod test_db;
 mod utils;
 
-pub fn load_config() -> cores::config::AppConfig {
-    use cores::config;
-    config::AppConfig::new(r#"..\config.toml"#).unwrap()
+use cores::config::{self, get_config};
+
+pub async fn init_config() {
+    config::init_config(r#"..\config.toml"#).await;
 }
 
-pub fn load_db() -> cores::db::Db {
-    let config = load_config();
-    cores::db::Db::new(config.get_cache_location()).unwrap()
+pub async fn load_db() -> cores::db::Db {
+    init_config().await;
+    cores::db::Db::new(get_config().unwrap().get_cache_location().unwrap()).unwrap()
 }
 
-#[test]
-fn test_init_location() {
+#[tokio::test]
+async fn test_init_location() {
     use cores::init_location;
 
-    let config = load_config();
+    init_config().await;
 
-    init_location(config.get_locations()).unwrap();
+    init_location(get_config().unwrap().get_locations().unwrap()).unwrap();
+}
+
+#[tokio::test]
+async fn test_init_config() {
+    init_config().await;
 }

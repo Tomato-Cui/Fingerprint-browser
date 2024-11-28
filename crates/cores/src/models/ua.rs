@@ -1,5 +1,5 @@
 /// user agent data models
-use crate::{config::AConfig, db::Db, errors::ApplicationServerError, utils::common::to_string};
+use crate::{config::get_config, db::Db, errors::ApplicationServerError, utils::common::to_string};
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ pub struct Ua {
 impl Ua {
     /// ua表中插入数据
     pub fn insert_ua(ua: Ua) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "insert into ua_table (os_name, os_ver, browser_ver) values(?1, ?2, ?3)";
         let status = db.query_table(sql, params![ua.os_name, ua.os_ver, ua.browser_ver])?;
         if status == 1 {
@@ -28,7 +28,7 @@ impl Ua {
 
     /// ua表中删除数据
     pub fn delete_ua(id: i8) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "delete from ua_table where id = (?1)";
         let status = db.query_table(sql, params![id])?;
         if status == 1 {
@@ -40,7 +40,7 @@ impl Ua {
 
     /// ua查询所有数据
     pub fn query_ua() -> Result<Vec<Ua>, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "select * from ua_table";
         let mut stmt = db.query_map_table(sql)?;
         let ua_iter = stmt.query_map(params![], |row| {
@@ -58,7 +58,7 @@ impl Ua {
 
     /// ua更新数据
     pub fn update_ua(ua: Ua, id: i8) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
 
         let sql = "
             UPDATE ua_table

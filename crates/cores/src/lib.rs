@@ -37,9 +37,9 @@ mod win_imports {
 /// 初始化应用的配置文件目录
 ///
 /// 先判断是否存在，不存在就创建
-pub fn init_location(locations: Vec<PathBuf>) -> Result<(), ApplicationServerError> {
+pub fn init_location(locations: Vec<PathBuf>) -> Result<()> {
     locations.iter().try_for_each(|v| {
-        let setting_file_location = app_localer::app_data_location().join(&v);
+        let setting_file_location = app_localer::app_data_location()?.join(&v);
 
         if !setting_file_location.exists() {
             std::fs::create_dir_all(setting_file_location)?;
@@ -50,3 +50,5 @@ pub fn init_location(locations: Vec<PathBuf>) -> Result<(), ApplicationServerErr
 
     Ok(())
 }
+
+pub type Result<T> = core::result::Result<T, ApplicationServerError>;

@@ -1,5 +1,5 @@
 use axum::{extract::Json, response::IntoResponse};
-use axum::{routing::post, Router};
+use axum::{routing::get, routing::post, Router};
 use cores::{apis, models::enviroment::Browser};
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +12,7 @@ pub fn build_environment_router() -> Router {
             .route("/list", post(list_environment::handle))
             .route("/delete", post(delete_environment::handle))
             .route("/regroup", post(regroup_environment::handle))
-            .route("/delete-cache", post(delete_cache_environment::handle)),
+            .route("/delete-cache", get(delete_cache_environment::handle)),
     )
 }
 
@@ -22,9 +22,7 @@ mod create_environment {
 
     /// 新建环境
     pub async fn handle(Json(payload): Json<Browser>) -> impl IntoResponse {
-        apis::enviroment::add_browser_handle(payload)
-            .map(|v| v)
-            .unwrap_or_else(|e| e.into())
+        apis::enviroment::add_browser_handle(payload).unwrap_or_else(|e| e.into())
     }
 }
 
@@ -34,9 +32,7 @@ mod update_environment {
 
     /// 更新环境
     pub async fn handle(Json(payload): Json<Browser>) -> impl IntoResponse {
-        apis::enviroment::update_browser_handle(payload)
-            .map(|v| v)
-            .unwrap_or_else(|e| e.into())
+        apis::enviroment::update_browser_handle(payload).unwrap_or_else(|e| e.into())
     }
 }
 
@@ -46,9 +42,7 @@ mod list_environment {
     use apis::PageParam;
 
     pub async fn handle(Json(payload): Json<PageParam>) -> impl IntoResponse {
-        apis::enviroment::get_browser_list_handle(payload)
-            .map(|v| v)
-            .unwrap_or_else(|e| e.into())
+        apis::enviroment::get_browser_list_handle(payload).unwrap_or_else(|e| e.into())
     }
 }
 
@@ -57,13 +51,11 @@ mod delete_environment {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Param {
-        pub user_ids: Vec<u8>, // 需要删除的环境ID，数组格式
+        pub browser_ids: Vec<u8>, // 需要删除的环境ID，数组格式
     }
 
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
-        apis::enviroment::delete_browser_handle(payload.user_ids)
-            .map(|v| v)
-            .unwrap_or_else(|e| e.into())
+        apis::enviroment::delete_browser_handle(payload.browser_ids).unwrap_or_else(|e| e.into())
     }
 }
 
@@ -72,13 +64,12 @@ mod regroup_environment {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Param {
-        pub user_id: u8,      // 需要分组的环境ID，数组格式
-        pub group_id: String, // 对应的分组ID
+        pub browser_id: u8, // 需要分组的环境ID，数组格式
+        pub group_id: u8,   // 对应的分组ID
     }
 
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
-        apis::enviroment::update_browser_group_handle(payload.user_id, &payload.group_id)
-            .map(|v| v)
+        apis::enviroment::update_browser_group_handle(payload.browser_id, payload.group_id)
             .unwrap_or_else(|e| e.into())
     }
 }
@@ -86,13 +77,10 @@ mod regroup_environment {
 mod delete_cache_environment {
     use super::*;
 
-    #[derive(Deserialize, Serialize, Debug)]
-    pub struct Param {}
-
-    pub async fn handle(Json(_payload): Json<Param>) -> impl IntoResponse {
-        apis::delete_cache()
-            .await
-            .map(|v| v)
-            .unwrap_or_else(|e| e.into())
+    // #[derive(Deserialize, Serialize, Debug)]
+    // pub struct Param {}
+    // pub async fn handle(Json(_payload): Json<Param>) -> impl IntoResponse {
+    pub async fn handle() -> impl IntoResponse {
+        apis::delete_cache().await.unwrap_or_else(|e| e.into())
     }
 }

@@ -1,6 +1,6 @@
-use crate::config::AConfig;
 use base64::{engine::general_purpose, Engine};
 
+use crate::apis::Result;
 pub use crate::errors::ApplicationServerError;
 use std::{fs, path::PathBuf};
 
@@ -23,7 +23,7 @@ pub fn base64_encode(data: &str) -> String {
 }
 
 /// base64 解码
-pub fn base64_decode(data: &str) -> Result<Vec<u8>, ApplicationServerError> {
+pub fn base64_decode(data: &str) -> Result<Vec<u8>> {
     let decoded = general_purpose::STANDARD.decode(data.as_bytes())?;
     Ok(decoded)
 }
@@ -39,7 +39,7 @@ const AES_128_IV: [u8; 16] = [
 /// 返回用户cookie文件(非windows系统)
 pub fn cookie_file(path: &str) -> PathBuf {
     let path_str: PathBuf = app_file()
-        .join(AConfig.get_user_data_location())
+        .join(get_config()?.get_user_data_location())
         .join(path)
         .join("Default")
         .join("Cookies");
@@ -50,7 +50,7 @@ pub fn cookie_file(path: &str) -> PathBuf {
 /// 检查cookie文件是否存在
 pub fn check_cookie_file(path: &str) -> bool {
     let path_str: PathBuf = app_file()
-        .join(AConfig.get_user_data_location())
+        .join(get_config()?.get_user_data_location())
         .join(path)
         .join("Default")
         .join("Cookies");
@@ -85,7 +85,7 @@ fn aes_cbc_decrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, ApplicationServer
 /// (非windows) 我们修改了浏览器的密钥读写方式 直接读取用户缓存目录的Breeze_key
 pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>, ApplicationServerError> {
     let path_str: PathBuf = app_file()
-        .join(AConfig.get_user_data_location())
+        .join(get_config()?.get_user_data_location())
         .join(path)
         .join("Breeze_Key");
     //读取文件内容
@@ -112,7 +112,7 @@ pub fn enc_cookie(cookie_str: &str, key: &[u8]) -> Result<Vec<u8>, ApplicationSe
 /// window methods
 #[cfg(windows)]
 /// aes-gcm 加密字符串(windows)
-fn aes_gcm_encrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, aes_gcm::Error> {
+fn aes_gcm_encrypt(key: &[u8], data: &[u8]) -> std::result::Result<Vec<u8>, aes_gcm::Error> {
     let keys: &Key<Aes256Gcm> = key.into();
     // 创建 AES-256-GCM 实例
     let cipher = Aes256Gcm::new(keys);
@@ -131,7 +131,7 @@ fn aes_gcm_encrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, aes_gcm::Error> {
 
 #[cfg(windows)]
 ///aes-gcm 解密字符串
-fn aes_gcm_decrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, aes_gcm::Error> {
+fn aes_gcm_decrypt(key: &[u8], data: &[u8]) -> std::result::Result<Vec<u8>, aes_gcm::Error> {
     let keys: &Key<Aes256Gcm> = key.into();
     // 创建 AES-256-GCM 实例
     let cipher = Aes256Gcm::new(keys);
@@ -148,39 +148,43 @@ fn aes_gcm_decrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, aes_gcm::Error> {
 
 #[cfg(windows)]
 ///返回用户cookie文件(windows系统)
-pub fn cookie_file(path: &str) -> PathBuf {
+pub fn cookie_file(path: &str) -> Result<PathBuf> {
     use super::common::app_localer;
+    use crate::config::get_config;
 
-    let path_str: PathBuf = app_localer::app_data_location()
-        .join(AConfig.get_user_data_location())
+    let path_str: PathBuf = app_localer::app_data_location()?
+        .join(get_config()?.get_user_data_location()?)
         .join(path)
         .join("Default")
         .join("Network")
         .join("Cookies");
-    path_str
+    Ok(path_str)
 }
 
 #[cfg(windows)]
 /// 检查cookie是否存在  
-pub fn check_cookie_file(path: &str) -> bool {
+pub fn check_cookie_file(path: &str) -> Result<bool> {
     use super::common::app_localer;
+    use crate::config::get_config;
 
-    let path_str: PathBuf = app_localer::app_data_location()
-        .join(AConfig.get_user_data_location())
+    let path_str: PathBuf = app_localer::app_data_location()?
+        .join(get_config()?.get_user_data_location()?)
         .join(path)
         .join("Default")
         .join("Network")
         .join("Cookies");
-    path_str.exists()
+    Ok(path_str.exists())
 }
 
 #[cfg(windows)]
 ///获取加密密钥(windows 直接读取 Local State 文件)
-pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>, ApplicationServerError> {
+pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>> {
+    use crate::config::get_config;
+
     use super::common::app_localer;
 
-    let path_str: PathBuf = app_localer::app_data_location()
-        .join(AConfig.get_user_data_location())
+    let path_str: PathBuf = app_localer::app_data_location()?
+        .join(get_config()?.get_user_data_location()?)
         .join(path)
         .join("Local State");
     //读取文件内容
@@ -208,7 +212,7 @@ pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>, ApplicationServerError> {
 
 #[cfg(windows)]
 ///调用系统win api
-fn decrypt_string_with_dpapi(encrypted_data: &[u8]) -> Result<Vec<u8>, DWORD> {
+fn decrypt_string_with_dpapi(encrypted_data: &[u8]) -> std::result::Result<Vec<u8>, DWORD> {
     unsafe {
         let mut in_blob = DATA_BLOB {
             cbData: encrypted_data.len() as DWORD,
@@ -243,14 +247,14 @@ fn decrypt_string_with_dpapi(encrypted_data: &[u8]) -> Result<Vec<u8>, DWORD> {
 
 #[cfg(windows)]
 ///解密cookie(windows)
-pub fn dec_cookie(en_cookie: &[u8], key: &[u8]) -> Result<String, ApplicationServerError> {
+pub fn dec_cookie(en_cookie: &[u8], key: &[u8]) -> Result<String> {
     let dec_str = aes_gcm_decrypt(&key, &en_cookie).unwrap();
     Ok(String::from_utf8(dec_str)?)
 }
 
 #[cfg(windows)]
 ///加密cookie(windows)
-pub fn enc_cookie(cookie_str: &str, key: &[u8]) -> Result<Vec<u8>, ApplicationServerError> {
+pub fn enc_cookie(cookie_str: &str, key: &[u8]) -> Result<Vec<u8>> {
     let enc_str = aes_gcm_encrypt(&key, cookie_str.as_bytes()).unwrap();
     Ok(enc_str)
 }

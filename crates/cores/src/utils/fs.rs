@@ -7,7 +7,7 @@ use super::common::app_localer;
 
 /// 删除应用中的指定数据文件
 pub async fn delete_data_file(base_path: &str, path: &str) -> Result<(), ApplicationServerError> {
-    let path_buf = app_localer::app_data_location().join(base_path).join(path);
+    let path_buf = app_localer::app_data_location()?.join(base_path).join(path);
 
     if let Ok(meta) = metadata(&path_buf) {
         if meta.is_file() {

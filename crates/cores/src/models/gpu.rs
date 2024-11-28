@@ -1,5 +1,5 @@
 /// gpu data models
-use crate::{config::AConfig, db::Db, errors::ApplicationServerError};
+use crate::{config::get_config, db::Db, errors::ApplicationServerError};
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ pub struct Gpu {
 impl Gpu {
     /// gpu表插入数据
     pub fn insert_gpu(gpu: Gpu) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "insert into gpu_table (gpu_ven, gpu_rend, os_name) values(?1, ?2, ?3)";
         let status = db.query_table(sql, params![gpu.gpu_ven, gpu.gpu_rend, gpu.os_name])?;
         if status == 1 {
@@ -26,7 +26,7 @@ impl Gpu {
     }
     /// gpu表删除数据
     pub fn delete_gpu(id: i8) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "delete from gpu_table where id = (?1)";
         let status = db.query_table(sql, params![id])?;
         if status == 1 {
@@ -38,7 +38,7 @@ impl Gpu {
 
     /// gpu表查询所有数据
     pub fn query_gpu() -> Result<Vec<Gpu>, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "select * from gpu_table";
         let mut stmt = db.query_map_table(sql)?;
         let gpu_iter = stmt.query_map(params![], |row| {
@@ -56,7 +56,7 @@ impl Gpu {
 
     /// gpu表更新数据
     pub fn update_gpu(gpu: Gpu, id: i8) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(AConfig.get_cache_location())?;
+        let db = Db::new(get_config()?.get_cache_location()?)?;
         let sql = "
         update gpu_table 
             set gpu_ven = ?1,

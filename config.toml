@@ -6,6 +6,9 @@ name = "ads-hubstudio"
 name = "ads-hubstudio.db"
 location = "cache"
 
+[log]
+path = "logs"
+
 [setting]
 data_location = "datas"
 user_data_location = "user_data"

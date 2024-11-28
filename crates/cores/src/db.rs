@@ -37,6 +37,14 @@ impl Db {
                 os_name TEXT NOT NULL
             )",
             "
+            CREATE TABLE IF NOT EXISTS groups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER
+            )",
+            "
             CREATE TABLE IF NOT EXISTS environments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 name TEXT,
@@ -67,7 +75,8 @@ impl Db {
                 is_tz INTEGER NOT NULL,
                 is_pos INTEGER NOT NULL,
                 user_data_file TEXT NOT NULL,
-                status INTEGER NOT NULL
+                status INTEGER NOT NULL,
+                lang TEXT NOT NULL
             )",
         ];
         if meta.len() == 0 {

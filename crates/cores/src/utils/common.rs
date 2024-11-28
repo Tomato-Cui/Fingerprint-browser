@@ -12,15 +12,16 @@ use super::fs::ApplicationServerError;
 
 pub mod app_localer {
     use crate::config;
+    use crate::Result;
     use std::{env, fs::canonicalize, path::PathBuf};
     use tauri::api::path::local_data_dir;
 
     ///返回软件数据目录
     /// examples: "C:\\Users\\cgy\\AppData\\Local\\com.ads-hubstudio.browser"
-    pub fn app_data_location() -> PathBuf {
-        local_data_dir()
+    pub fn app_data_location() -> Result<PathBuf> {
+        Ok(local_data_dir()
             .expect("failed to resolve home_dir")
-            .join(format!("{}", &config::AConfig.app.id))
+            .join(format!("{}", &config::get_config()?.app.id)))
     }
 
     ///返回软件目录
@@ -129,7 +130,10 @@ pub fn get_proxy_from_registry() -> Option<String> {
                 &mut value_len,
             ) == 0
             {
-                return Some(String::from_utf8_lossy(&value[..value_len as usize]).to_string());
+                let proxy_str = String::from_utf8_lossy(&value[..value_len as usize])
+                    .trim_end_matches('\0') // Remove trailing null bytes
+                    .to_string();
+                return Some(proxy_str);
             }
         }
     }

@@ -1,27 +1,31 @@
-#[test]
-fn test_init_db_structure() {
+#[tokio::test]
+async fn test_init_db_structure() {
     use super::load_db;
-    load_db().init_db_structure().unwrap()
+    use crate::cores::init_config;
+
+    init_config().await;
+    load_db().await.init_db_structure().unwrap()
 }
 
-#[test]
-fn test_query_table() {
+#[tokio::test]
+async fn test_query_table() {
     use super::load_db;
     use rusqlite::params;
 
     let sql = "insert into ua_table (os_name, os_ver, browser_ver) values(?1, ?2, ?3)";
     load_db()
+        .await
         .query_table(sql, params!["abc", "abc", "abc"])
         .unwrap();
 }
 
-#[test]
-fn test_query_map_table() {
+#[tokio::test]
+async fn test_query_map_table() {
     use super::load_db;
     use cores::models::ua::Ua;
     use rusqlite::params;
 
-    let db = load_db();
+    let db = load_db().await;
     let sql = "select * from ua_table";
     let mut stmt = db.query_map_table(sql).unwrap();
 

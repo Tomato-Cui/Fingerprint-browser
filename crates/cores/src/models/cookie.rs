@@ -49,7 +49,7 @@ impl PluginsCookie {
     /// cookie表中查询所有数据
     pub fn query_cookie(path: &str) -> Result<Vec<PluginsCookie>, ApplicationServerError> {
         let key = get_encrypt_key(path)?;
-        let db = Db::new(cookie_file(path))?;
+        let db = Db::new(cookie_file(path)?)?;
 
         let sql = "select creation_utc, host_key, name, encrypted_value, path, expires_utc, is_secure, is_httponly from cookies";
         let mut stmt = db.query_map_table(sql)?;
@@ -87,7 +87,7 @@ impl PluginsCookie {
         path: &str,
     ) -> Result<bool, ApplicationServerError> {
         let key = get_encrypt_key(path)?;
-        let db = Db::new(cookie_file(path))?;
+        let db = Db::new(cookie_file(path)?)?;
 
         let en_cookie_val: Vec<u8>;
 
@@ -135,7 +135,7 @@ impl PluginsCookie {
         cookie: PluginsCookie,
     ) -> Result<bool, ApplicationServerError> {
         let key = get_encrypt_key(path)?;
-        let db = Db::new(cookie_file(path))?;
+        let db = Db::new(cookie_file(path)?)?;
 
         let en_cookie_val: Vec<u8>;
 
@@ -193,7 +193,7 @@ impl PluginsCookie {
 
     /// cookie表删除数据
     pub fn delete_cookie(path: &str, creation: &str) -> Result<bool, ApplicationServerError> {
-        let db = Db::new(cookie_file(path))?;
+        let db = Db::new(cookie_file(path)?)?;
 
         let sql = "
         DELETE FROM cookies

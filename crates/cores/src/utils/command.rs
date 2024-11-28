@@ -15,7 +15,7 @@ use crate::{
     config,
     models::enviroment::Browser,
     utils::{
-        common::{app_localer, to_string},
+        common::{app_localer, get_proxy_from_registry, to_string},
         encryption,
     },
 };
@@ -43,22 +43,25 @@ impl BrowserChildInfo {
             "--breeze-fp={}",
             encryption::base64_encode(&to_string(&self.browser_info.fp_info)?)
         );
-        let user_agent = format!("--user-agent={}", self.browser_info.ua.to_string()?);
-        let accept_lang = format!("--accept-lang={}", self.browser_info.lang);
+        let user_agent = format!("--user-agent={}", self.browser_info.ua);
+        let accept_lang = format!(
+            "--accept-lang={}",
+            self.browser_info.lang.clone().unwrap_or_default()
+        );
         let no_first_run = "--no-first-run".to_string();
 
         let user_data_dir = format!(
             "--user-data-dir={}",
-            config::AConfig
-                .get_user_data_location()
-                .join(&self.browser_info.user_data_file)
+            config::get_config()?
+                .get_user_data_location()?
+                .join(config::get_config()?.get_user_data_location()?)
                 .to_str()
                 .unwrap()
         );
         let no_default_browser_check = "--no-default-browser-check".to_string();
         let browser_unique = format!(
             "--app-browser-unique = {}.{}",
-            config::AConfig.app.id,
+            config::get_config()?.app.id,
             format!(
                 "{}.{}",
                 self.browser_info.id.unwrap_or_default(),
@@ -81,25 +84,38 @@ impl BrowserChildInfo {
             debugger_address,
         ];
 
-        if let Some(urls) = &self.browser_info.open_urls {
-            urls.iter().for_each(|v| {
-                args.push(v.to_string());
-            });
-        }
-
         let proxy_str = self
             .browser_info
             .proxy
             .clone()
             .unwrap_or_else(|| "".to_string());
 
-        args.push(if proxy_str.is_empty() && self.browser_info.proxy_enable {
-            format!("--proxy-server=socks5:://{}", proxy_str)
-        } else {
-            "".to_string()
-        });
+        if self.browser_info.proxy_enable {
+            args.push(if proxy_str.is_empty() {
+                // format!("--proxy-server=socks5:://{}", proxy_str)
+                format!(
+                    "--proxy-server=socks5:://{}",
+                    get_proxy_from_registry().unwrap_or_default()
+                )
+            } else {
+                let proxy = get_proxy_from_registry().unwrap_or_default();
 
-        println!("{:?}", args);
+                if !proxy.is_empty() {
+                    format!(
+                        "--proxy-server=socks5:://{}",
+                        get_proxy_from_registry().unwrap_or_default()
+                    )
+                } else {
+                    "".to_string()
+                }
+            })
+        }
+        if let Some(urls) = &self.browser_info.open_urls {
+            urls.iter().for_each(|v| {
+                args.push(v.to_string());
+            });
+        }
+
         Ok(args)
     }
 }
@@ -134,6 +150,8 @@ impl Processer {
             .stderr(Stdio::null())
             .stdout(Stdio::null())
             .spawn()?;
+
+        println!("{:?}", child.id());
 
         let browser_id = payload.browser_info.id.unwrap_or_default();
         update_browser_status_handle(browser_id, true)?;

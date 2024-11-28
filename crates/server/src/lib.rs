@@ -1,5 +1,6 @@
-use axum::{http::StatusCode, routing::post, Router};
+use axum::{http::StatusCode, middleware, routing::get, Router};
 
+pub mod middlewares;
 pub mod response;
 pub mod routes;
 
@@ -17,13 +18,12 @@ pub fn build_root_router() -> Router {
                 .merge(routes::browser::build_browser_router())
                 .merge(routes::environment::build_environment_router())
                 .merge(routes::group::build_group_router())
-                .merge(Router::new().route(
-                    "/status",
-                    post(|| async { String::from("status: running") }),
-                )),
+                .merge(
+                    Router::new()
+                        .route("/status", get(|| async { String::from("status: running") })),
+                ),
         )
-        // .route_layer(middleware::from_fn(lc_middlewares::auth::auth))
-        // .layer(lc_middlewares::cors::cors())
+        .route_layer(middleware::from_fn(middlewares::logger))
         .fallback(not_found)
 }
 
