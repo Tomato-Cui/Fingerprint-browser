@@ -43,11 +43,17 @@ impl BrowserChildInfo {
             "--breeze-fp={}",
             encryption::base64_encode(&to_string(&self.browser_info.fp_info)?)
         );
-        let user_agent = format!("--user-agent={}", self.browser_info.ua);
-        let accept_lang = format!(
-            "--accept-lang={}",
-            self.browser_info.lang.clone().unwrap_or_default()
+        let new_window = "--new-window".to_string();
+        let window_size = format!(
+            "--window-size={},{}",
+            self.browser_info.fp_info.h, self.browser_info.fp_info.w
         );
+        let window_position = format!(
+            "--window-position={},{}",
+            self.browser_info.fp_info.la, self.browser_info.fp_info.lo
+        );
+        let user_agent = format!("--user-agent={}", self.browser_info.ua);
+        let accept_lang = format!("--accept-lang={}", self.browser_info.fp_info.lang);
         let no_first_run = "--no-first-run".to_string();
 
         let user_data_dir = format!(
@@ -55,12 +61,13 @@ impl BrowserChildInfo {
             config::get_config()?
                 .get_user_data_location()?
                 .join(config::get_config()?.get_user_data_location()?)
+                .join(&self.browser_info.user_data_file)
                 .to_str()
                 .unwrap()
         );
         let no_default_browser_check = "--no-default-browser-check".to_string();
         let browser_unique = format!(
-            "--app-browser-unique = {}.{}",
+            "--app-browser-unique={}.{}",
             config::get_config()?.app.id,
             format!(
                 "{}.{}",
@@ -76,6 +83,9 @@ impl BrowserChildInfo {
         let mut args: Vec<String> = vec![
             no_default_browser_check,
             no_first_run,
+            window_size,
+            window_position,
+            new_window,
             accept_lang,
             user_agent,
             user_data_dir,
@@ -92,9 +102,8 @@ impl BrowserChildInfo {
 
         if self.browser_info.proxy_enable {
             args.push(if proxy_str.is_empty() {
-                // format!("--proxy-server=socks5:://{}", proxy_str)
                 format!(
-                    "--proxy-server=socks5:://{}",
+                    "--proxy-server=socks5://{}",
                     get_proxy_from_registry().unwrap_or_default()
                 )
             } else {
@@ -102,7 +111,7 @@ impl BrowserChildInfo {
 
                 if !proxy.is_empty() {
                     format!(
-                        "--proxy-server=socks5:://{}",
+                        "--proxy-server=socks5://{}",
                         get_proxy_from_registry().unwrap_or_default()
                     )
                 } else {
@@ -142,7 +151,6 @@ impl Processer {
         let browser_path = app_localer::app_location()
             // TODO: WANR: 这里我随便写一个路径都能通过测试.join("test")
             // .join("BreezeBrowser")
-            // .join("test")
             .join(&payload.browser_exe_path);
 
         let child = Command::new(browser_path)
@@ -150,8 +158,6 @@ impl Processer {
             .stderr(Stdio::null())
             .stdout(Stdio::null())
             .spawn()?;
-
-        println!("{:?}", child.id());
 
         let browser_id = payload.browser_info.id.unwrap_or_default();
         update_browser_status_handle(browser_id, true)?;
@@ -209,9 +215,9 @@ impl Processer {
                 .ok_or(ApplicationServerError::ChildCloseError)?;
 
             match child.try_wait() {
-                Ok(Some(_)) => true,
-                Ok(None) => false,
-                _ => false,
+                Ok(Some(_)) => false,
+                Ok(None) => true,
+                Err(_) => false,
             }
         };
 
@@ -225,22 +231,12 @@ impl Processer {
     pub async fn all_status(&self) -> Result<AppResponse<HashMap<i8, bool>>> {
         let mut status = HashMap::new();
 
-        for (browser_id, child_id) in &self.index {
-            let current_status = {
-                let mut childs_lock = self.childs.lock().await;
+        for (browser_id, _) in &self.index {
+            let data = self.status(*browser_id).await?.data;
+            let data = data.unwrap_or_default();
 
-                let (child, _) = childs_lock
-                    .get_mut(child_id)
-                    .ok_or(ApplicationServerError::ChildCloseError)?;
-
-                match child.try_wait() {
-                    Ok(Some(_)) => true,
-                    Ok(None) => false,
-                    _ => false,
-                }
-            };
-            update_browser_status_handle(*browser_id, current_status)?;
-            status.insert(*browser_id, current_status);
+            update_browser_status_handle(*browser_id, data)?;
+            status.insert(*browser_id, data);
         }
 
         Ok(AppResponse::success(

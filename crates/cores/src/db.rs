@@ -75,8 +75,7 @@ impl Db {
                 is_tz INTEGER NOT NULL,
                 is_pos INTEGER NOT NULL,
                 user_data_file TEXT NOT NULL,
-                status INTEGER NOT NULL,
-                lang TEXT NOT NULL
+                status INTEGER NOT NULL
             )",
         ];
         if meta.len() == 0 {

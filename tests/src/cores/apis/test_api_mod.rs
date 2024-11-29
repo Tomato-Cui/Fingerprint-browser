@@ -2,8 +2,7 @@
 async fn test_get_browser_list_handle() {
     use cores::apis::enviroment;
 
-    use crate::cores::init_config;
-    init_config().await;
+    crate::cores::init_config().await;
 
     // use cores::apis::PageParam;
     // let page = PageParam {
@@ -38,8 +37,8 @@ async fn test_update_browser_handle() {
         cv_s: "a1b2c3".to_string(),       // Canvas 随机字符
         c_r: 1.0000002,                   // ClientRects 指纹
         css: 5,                           // CSS 字体随机值
-        h: 1080,                          // 屏幕高度
-        w: 1920,                          // 屏幕宽度
+        h: 1080.0,                        // 屏幕高度
+        w: 1920.0,                        // 屏幕宽度
         p: "80,22,443".to_string(),       // 端口扫描防护
         la: 37.7749,                      // 窗口位置纬度
         lo: -122.4194,                    // 窗口位置经度
@@ -85,7 +84,6 @@ async fn test_update_browser_handle() {
         is_pos: true,
         user_data_file: String::from("path/to/user_data_file"),
         status: true,
-        lang: Some("".to_string()),
     };
 
     let browsers = enviroment::update_browser_handle(browser);
@@ -124,8 +122,8 @@ async fn test_add_browser_handle() {
         cv_s: "a1b2c3".to_string(),       // Canvas 随机字符
         c_r: 1.0000002,                   // ClientRects 指纹
         css: 5,                           // CSS 字体随机值
-        h: 1080,                          // 屏幕高度
-        w: 1920,                          // 屏幕宽度
+        h: 1080.0,                        // 屏幕高度
+        w: 1920.0,                        // 屏幕宽度
         p: "80,22,443".to_string(),       // 端口扫描防护
         la: 37.7749,                      // 窗口位置纬度
         lo: -122.4194,                    // 窗口位置经度
@@ -171,7 +169,6 @@ async fn test_add_browser_handle() {
         is_pos: true,
         user_data_file: String::from("path/to/user_data_file"),
         status: true,
-        lang: Some("".to_string()),
     };
 
     let browsers = enviroment::add_browser_handle(browser);
@@ -182,4 +179,24 @@ async fn test_add_browser_handle() {
 async fn test_delete_cache() {
     use cores::apis::delete_cache;
     delete_cache().await.unwrap();
+}
+
+#[tokio::test]
+async fn test_view_active() {
+    use crate::cores::init_config;
+    use cores::apis::browser;
+    // use std::time::Duration;
+    // use tokio::time::sleep;
+
+    init_config().await;
+
+    browser::starts(vec![1, 2]).await.unwrap();
+    // browser::start(9).await.unwrap();
+    // browser::start(10).await.unwrap();
+    // browser::start(11).await.unwrap();
+
+    // sleep(Duration::from_secs(2)).await;
+
+    // let result = browser::view_active().await;
+    // println!("{:?}", result);
 }

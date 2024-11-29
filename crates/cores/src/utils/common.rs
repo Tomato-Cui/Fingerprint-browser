@@ -141,6 +141,43 @@ pub fn get_proxy_from_registry() -> Option<String> {
     None
 }
 
+#[cfg(windows)]
+pub fn get_chrome_install_path() -> Option<String> {
+    use winapi::um::winreg::HKEY_CLASSES_ROOT;
+    let key_path = CString::new("ChromeHTML\\shell\\open\\command").unwrap();
+    let mut hkey = ptr::null_mut();
+
+    unsafe {
+        if RegOpenKeyExA(HKEY_CLASSES_ROOT, key_path.as_ptr(), 0, KEY_READ, &mut hkey) == 0 {
+            let mut value = vec![0u8; 1024];
+            let mut value_len = value.len() as u32;
+            let value_name = CString::new("").unwrap();
+
+            if RegQueryValueExA(
+                hkey,
+                value_name.as_ptr(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+                value.as_mut_ptr(),
+                &mut value_len,
+            ) == 0
+            {
+                let command_str = String::from_utf8_lossy(&value[..value_len as usize]);
+
+                if let Some(first_quote_pos) = command_str.find('"') {
+                    if let Some(second_quote_pos) = command_str[first_quote_pos + 1..].find('"') {
+                        let chrome_path = &command_str
+                            [first_quote_pos + 1..first_quote_pos + second_quote_pos + 1];
+                        return Some(chrome_path.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    None
+}
+
 /// 获取随机的一个端口
 pub async fn get_debug_port() -> Result<u16, ApplicationServerError> {
     let loopback = Ipv4Addr::new(127, 0, 0, 1);

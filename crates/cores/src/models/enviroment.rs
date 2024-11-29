@@ -4,7 +4,10 @@ use crate::{
     config::get_config,
     db::Db,
     errors::ApplicationServerError,
-    utils::common::{option_vec_string_to_string, string_to_option_vec_string},
+    utils::common::{
+        app_timer::generate_nanosecond_timestamp, option_vec_string_to_string,
+        string_to_option_vec_string,
+    },
 };
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
@@ -23,11 +26,11 @@ pub struct BrowserFp {
     pub cv_s: String,    //canvas 随机 a-f 的字符
     pub c_r: f64,        //ClientRects 指纹  1.0000001 - 1.0000003
     pub css: i32,        //css 字体  随机 0-19
-    pub h: i32,          //屏幕高度
-    pub w: i32,          //屏幕宽度
-    pub p: String,       //端口扫描防护 例子: 0 或 80,22,443
+    pub h: f64,          //窗口高度
+    pub w: f64,          //窗口宽度
     pub la: f64,         //窗口位置纬度
     pub lo: f64,         //窗口位置经度
+    pub p: String,       //端口扫描防护 例子: 0 或 80,22,443
     pub tz: String,      //时区
     pub lang: String,    //语言
     pub v_l: String,     //SpeechVoices win: 0-74 随机3个 mac: 0-118 随机48个 linux: 空
@@ -69,7 +72,6 @@ pub struct Browser {
     pub is_pos: bool,
     pub user_data_file: String,
     pub status: bool, // 浏览器状态
-    pub lang: Option<String>,
 }
 
 impl Browser {
@@ -107,9 +109,8 @@ impl Browser {
             is_tz, 
             is_pos, 
             user_data_file, 
-            status,
-            lang 
-        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30)";
+            status
+        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29)";
 
         let status = db.query_table(
             sql,
@@ -141,9 +142,12 @@ impl Browser {
                 serde_json::to_string(&browser.fp_info)?,
                 browser.is_tz,  // Convert bool to integer (1 or 0)
                 browser.is_pos, // Convert bool to integer (1 or 0)
-                browser.user_data_file,
-                browser.status,
-                browser.lang.unwrap_or_default()
+                format!(
+                    "{}.{}",
+                    browser.user_data_file,
+                    generate_nanosecond_timestamp()
+                ),
+                browser.status
             ],
         )?;
         if status == 1 {
@@ -213,7 +217,6 @@ impl Browser {
                 is_pos: row.get(27)?,
                 user_data_file: row.get(28)?,
                 status: row.get(29)?,
-                lang: row.get(30)?,
             })
         })?;
 
@@ -229,7 +232,7 @@ impl Browser {
     pub fn query_browser(payload: PageParam) -> Result<Vec<Browser>, ApplicationServerError> {
         let db = Db::new(get_config()?.get_cache_location()?)?;
 
-        let page_num = payload.page_num.unwrap_or_else(|| 1);
+        let page_num = payload.page_num.unwrap_or_else(|| 0);
         let page_size = payload.page_size.unwrap_or_else(|| 10);
         let offset = page_num * page_size;
 
@@ -274,7 +277,6 @@ impl Browser {
                 is_pos: row.get(27)?,
                 user_data_file: row.get(28)?,
                 status: row.get(29)?,
-                lang: row.get(30)?,
             })
         })?;
 
@@ -317,9 +319,8 @@ impl Browser {
                 is_tz = ?26,
                 is_pos = ?27,
                 user_data_file = ?28,
-                status = ?29,
-                lang = ?30
-            WHERE id = ?31
+                status = ?29
+            WHERE id = ?30
         ";
 
         let status = db.query_table(
@@ -354,7 +355,6 @@ impl Browser {
                 browser.is_pos, // Convert bool to integer (1 or 0)
                 browser.user_data_file,
                 browser.status,
-                browser.lang.unwrap_or_default(),
                 browser.id
             ],
         )?;

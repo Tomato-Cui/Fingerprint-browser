@@ -52,7 +52,7 @@ impl Group {
     pub fn query_group(payload: PageParam) -> Result<Vec<Group>, ApplicationServerError> {
         let db = Db::new(get_config()?.get_cache_location()?)?;
 
-        let page_num = payload.page_num.unwrap_or_else(|| 1);
+        let page_num = payload.page_num.unwrap_or_else(|| 0);
         let page_size = payload.page_size.unwrap_or_else(|| 10);
         let offset = page_num * page_size;
 
@@ -68,7 +68,7 @@ impl Group {
                 name: row.get(1)?,        // 索引 1
                 description: row.get(2)?, // 索引 2
                 created_at: row.get(3)?,  // 索引 3
-                updated_at: row.get(4)?,  // 索引 4
+                updated_at: row.get(3)?,  // 索引 4
             })
         })?;
 

@@ -1,6 +1,8 @@
 mod apis;
+mod models;
 mod test_config;
 mod test_db;
+mod test_request;
 mod utils;
 
 use cores::config::{self, get_config};

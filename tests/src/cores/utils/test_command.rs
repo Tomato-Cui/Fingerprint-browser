@@ -26,8 +26,8 @@ async fn test_start_stop_browser() {
         cv_s: "a1b2c3".to_string(),       // Canvas 随机字符
         c_r: 1.0000002,                   // ClientRects 指纹
         css: 5,                           // CSS 字体随机值
-        h: 1080,                          // 屏幕高度
-        w: 1920,                          // 屏幕宽度
+        h: 1080.0,                          // 屏幕高度
+        w: 1920.0,                          // 屏幕宽度
         p: "80,22,443".to_string(),       // 端口扫描防护
         la: 37.7749,                      // 窗口位置纬度
         lo: -122.4194,                    // 窗口位置经度
@@ -73,7 +73,6 @@ async fn test_start_stop_browser() {
         is_pos: true,
         user_data_file: String::from("path/to/user_data_file"),
         status: true,
-        lang:Some("".to_string()),
     };
 
     let port = get_debug_port().await.unwrap();
@@ -88,6 +87,9 @@ async fn test_start_stop_browser() {
 
     tokio::time::sleep(Duration::from_secs(5)).await;
 
-    let status = processer.lock().await.status(1).await.unwrap();
-    println!("{:?}", status);
+    let _ = processer.lock().await.status(1).await.unwrap();
+    // for _ in 0..100 {
+    //     let status = processer.lock().await.status(1).await.unwrap();
+    //     println!("{:?}", status);
+    // }
 }

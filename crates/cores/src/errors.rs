@@ -43,6 +43,12 @@ pub enum ApplicationServerError {
     #[error("config load fail.")]
     ConfigLoadError,
 
+    #[error("server fetch load fail: {0}")]
+    ServerFetchFail(#[from] reqwest::Error),
+
+    #[error("url parse fail.")]
+    UrlParseFail,
+
     #[error("{0}")]
     Error(#[from] anyhow::Error),
 }

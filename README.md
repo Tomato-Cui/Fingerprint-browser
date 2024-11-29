@@ -124,3 +124,58 @@
   最后负责和前端对接、整个应用构建、不同系统兼容性处理等上线前要完成的内容。
 
 注意，上述项完成过程中可能会增加功能、完善功能、调整功能等所以时间会差个 1-2 天。且在步骤二完成后要取得前端代码。
+
+```
+4个浏览器
+
+C:\Users\cgy>tasklist | findStr chrome
+chrome.exe                    3272 Console                    1    124,736 K
+chrome.exe                   14888 Console                    1      8,792 K
+chrome.exe                    6828 Console                    1    123,772 K
+chrome.exe                    8276 Console                    1     30,756 K
+chrome.exe                   15732 Console                    1     18,908 K
+chrome.exe                   13440 Console                    1     48,132 K
+chrome.exe                   15292 Console                    1     48,044 K
+chrome.exe                   16968 Console                    1     47,260 K
+chrome.exe                    9964 Console                    1     47,488 K
+chrome.exe                   13652 Console                    1     55,104 K
+chrome.exe                   11140 Console                    1     26,828 K
+
+memory: 180(该数据来自任务管理器，并不精确)。
+```
+
+```
+4个浏览器
+
+C:\Users\cgy>tasklist | findStr chrome
+chrome.exe                   10804 Console                    1    106,428 K
+chrome.exe                    5656 Console                    1     96,496 K
+chrome.exe                   15112 Console                    1     96,408 K
+chrome.exe                    8080 Console                    1     96,188 K
+chrome.exe                    9244 Console                    1      8,864 K
+chrome.exe                   15376 Console                    1      8,888 K
+chrome.exe                    6588 Console                    1      8,740 K
+chrome.exe                    3548 Console                    1      8,904 K
+chrome.exe                   16532 Console                    1     90,648 K
+chrome.exe                   17328 Console                    1     28,884 K
+chrome.exe                   16804 Console                    1    100,616 K
+chrome.exe                   12332 Console                    1     28,732 K
+chrome.exe                   15832 Console                    1     96,608 K
+chrome.exe                    3204 Console                    1     18,256 K
+chrome.exe                   16216 Console                    1     28,828 K
+chrome.exe                    8304 Console                    1     86,248 K
+chrome.exe                   12776 Console                    1     18,224 K
+chrome.exe                   16484 Console                    1     18,248 K
+chrome.exe                     216 Console                    1     28,848 K
+chrome.exe                    5984 Console                    1     18,292 K
+chrome.exe                    6916 Console                    1     57,964 K
+chrome.exe                   13280 Console                    1     55,760 K
+chrome.exe                   13408 Console                    1     59,116 K
+chrome.exe                   18044 Console                    1     58,848 K
+chrome.exe                   18984 Console                    1     28,820 K
+chrome.exe                   19028 Console                    1     26,644 K
+chrome.exe                   19048 Console                    1     28,812 K
+chrome.exe                   19092 Console                    1     26,640 K
+
+memory: 400(该数据来自任务管理器，并不精确)。
+```

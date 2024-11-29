@@ -9,6 +9,7 @@ pub mod db;
 pub mod errors;
 pub mod models;
 pub mod public;
+pub mod request;
 pub mod utils;
 
 #[cfg(not(windows))]

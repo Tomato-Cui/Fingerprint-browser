@@ -246,46 +246,58 @@ pub mod cookie {
 
 /// 操作浏览器的mod
 pub mod browser {
-    use std::{collections::HashMap, process::ExitStatus};
+    use std::collections::HashMap;
 
     use super::*;
     use crate::{
         models::enviroment,
-        utils::{command::BrowserChildInfo, common::get_debug_port},
+        utils::{
+            command::BrowserChildInfo,
+            common::{get_chrome_install_path, get_debug_port},
+        },
     };
 
     /// start browser
     /// get_proxy_from_registry
     /// TODO:
-    pub async fn start(id: i8) -> Result<AppResponse<bool>> {
-        if let Some(browser) = enviroment::Browser::query_browser_by_id(id)? {
-            let port = get_debug_port().await?;
+    pub async fn starts(ids: Vec<i8>) -> Result<AppResponse<HashMap<i8, bool>>> {
+        let mut data = HashMap::new();
+        for id in ids {
+            if let Some(browser) = enviroment::Browser::query_browser_by_id(id)? {
+                let port = get_debug_port().await?;
 
-            let browser_child_info = BrowserChildInfo::new(
-                browser,
-                port,
-                r#"C:\Program Files\Google\Chrome\Application\chrome.exe"#,
-            );
+                let browser_child_info = BrowserChildInfo::new(
+                    browser,
+                    port,
+                    &get_chrome_install_path().ok_or(ApplicationServerError::Error(
+                        anyhow::anyhow!("chrome location get fail !"),
+                    ))?,
+                );
 
-            let ok = ACTUATOR
-                .lock()
-                .await
-                .start_browser(browser_child_info)
-                .await
-                .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
+                let ok = ACTUATOR
+                    .lock()
+                    .await
+                    .start_browser(browser_child_info)
+                    .await
+                    .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
 
-            Ok(AppResponse::success(
-                None,
-                Some(ok.data.unwrap_or_default()),
-            ))
-        } else {
-            Ok(AppResponse::success(None, Some(false)))
+                data.insert(id, ok.data.unwrap_or_default());
+            } else {
+                data.insert(id, false);
+            }
         }
+        Ok(AppResponse::success(None, Some(data)))
     }
 
     // stop browser
-    pub async fn stop(id: i8) -> Result<AppResponse<ExitStatus>> {
-        Ok(ACTUATOR.lock().await.stop_browser(id).await?)
+    pub async fn stop(ids: Vec<i8>) -> Result<AppResponse<HashMap<i8, i32>>> {
+        let mut data = HashMap::new();
+        for id in ids {
+            let statu = ACTUATOR.lock().await.stop_browser(id).await?.data;
+            let code = statu.unwrap_or_default().code();
+            data.insert(id, code.unwrap_or_default());
+        }
+        Ok(AppResponse::success(None, Some(data)))
     }
 
     // is active browser
