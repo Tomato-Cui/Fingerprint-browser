@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 tokio = { workspace = true }
-rusqlite = { workspace = true }
 
 # internal crate dependencies
 cores = { workspace = true }

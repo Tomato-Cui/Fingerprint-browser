@@ -1,5 +1,6 @@
-pub mod cookie;
 pub mod enviroment;
-pub mod gpu;
+pub mod fingerprint;
 pub mod group;
-pub mod ua;
+// pub mod cookie;
+// pub mod gpu;
+// pub mod ua;

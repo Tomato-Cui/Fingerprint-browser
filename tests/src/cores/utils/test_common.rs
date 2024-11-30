@@ -60,6 +60,5 @@ fn test_get_proxy_from_registry() {
 #[test]
 fn test_get_chrome_install_path() {
     use cores::utils::common;
-
     println!("{:?}", common::get_chrome_install_path());
 }

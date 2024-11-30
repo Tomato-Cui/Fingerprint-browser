@@ -28,6 +28,7 @@ mod create_group {
     /// 建环境分组，用于创建环境时将环境进行分组，名称不能重复。创建成功后将返回group_id分组ID，分组ID为0是系统创建的默认分组。
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
         group::add_group_handle(&payload.group_name, payload.group_description)
+            .await
             .unwrap_or_else(|e| e.into())
     }
 }
@@ -51,6 +52,7 @@ mod update_group {
             payload.group_description,
             payload.group_id,
         )
+        .await
         .unwrap_or_else(|e| e.into())
     }
 }
@@ -71,6 +73,8 @@ mod list_group {
     ///
     /// 查询分组信息，分组信息包括分组ID和分组名称，其中分组ID用于创建环境时将环境进行分组，分组ID为0是系统创建的默认分组。
     pub async fn handle(Json(payload): Json<PageParam>) -> impl IntoResponse {
-        group::list_group_handle(payload).unwrap_or_else(|e| e.into())
+        group::list_group_handle(payload)
+            .await
+            .unwrap_or_else(|e| e.into())
     }
 }

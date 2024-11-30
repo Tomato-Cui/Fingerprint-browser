@@ -16,7 +16,6 @@ chrono = { workspace = true }
 aes-gcm = { workspace = true }
 rand = { workspace = true }
 winapi = { workspace = true }
-rusqlite = { workspace = true }
 lazy_static = { workspace = true }
 tokio = { workspace = true }
 tauri = { workspace = true }
@@ -25,3 +24,4 @@ config = { workspace = true }
 axum = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true }
+sqlx = { workspace = true }

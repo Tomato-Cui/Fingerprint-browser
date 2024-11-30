@@ -5,19 +5,23 @@ mod test_db;
 mod test_request;
 mod utils;
 
-use cores::config::{self, get_config};
-
 pub async fn init_config() {
+    use cores::config;
+
     config::init_config(r#"..\config.toml"#).await;
 }
 
-pub async fn load_db() -> cores::db::Db {
+pub async fn load_db() {
+    use cores::database::init_database;
+
     init_config().await;
-    cores::db::Db::new(get_config().unwrap().get_cache_location().unwrap()).unwrap()
+    // init_database(&get_config().unwrap().cache.name)
+    init_database("sqlite::memory:").await.unwrap();
 }
 
 #[tokio::test]
 async fn test_init_location() {
+    use cores::config::get_config;
     use cores::init_location;
 
     init_config().await;
@@ -28,4 +32,9 @@ async fn test_init_location() {
 #[tokio::test]
 async fn test_init_config() {
     init_config().await;
+}
+
+#[tokio::test]
+async fn test_load_db() {
+    load_db().await;
 }

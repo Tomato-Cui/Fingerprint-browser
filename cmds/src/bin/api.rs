@@ -1,5 +1,7 @@
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use cores::database::Database;
+
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .with_target(false)
@@ -12,8 +14,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // init location before db
     cores::init_location(cores::config::get_config()?.get_locations()?)?;
 
-    // init db
-    cores::db::Db::new(cores::config::get_config()?.get_cache_location()?)?.init_db_structure()?;
+    // migrates
+    Database::migrator(cores::config::get_config()?.cache.migrate_location.clone()).await?;
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:5678").await?;
     let routes = server::build_root_router();

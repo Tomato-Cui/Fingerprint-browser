@@ -1,3 +1,4 @@
+use sqlx::sqlite;
 use thiserror::Error;
 
 use crate::utils::response::AppResponse;
@@ -5,7 +6,13 @@ use crate::utils::response::AppResponse;
 #[derive(Error, Debug)]
 pub enum ApplicationServerError {
     #[error("Database error: {0}")]
-    DatabaseError(#[from] rusqlite::Error),
+    DatabaseError(#[from] sqlite::SqliteError),
+
+    #[error("Database execute error: {0}.")]
+    DatabaseExecuteError(#[from] sqlx::Error),
+
+    #[error("Database get error.")]
+    DatabaseGetError,
 
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),

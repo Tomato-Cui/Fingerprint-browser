@@ -13,7 +13,7 @@ pub use crate::errors::ApplicationServerError;
 use crate::{
     apis::{enviroment::update_browser_status_handle, Result},
     config,
-    models::enviroment::Browser,
+    models::{enviroment::Environment, fingerprint::Fingerprint},
     utils::{
         common::{app_localer, to_string},
         encryption,
@@ -28,14 +28,21 @@ use std::time::UNIX_EPOCH;
 use super::response::AppResponse;
 
 pub struct BrowserChildInfo {
-    browser_info: Browser,
+    environemnt_info: Environment,
+    fingerprint_info: Fingerprint,
     pub port: u16,
     pub browser_exe_path: String,
 }
 impl BrowserChildInfo {
-    pub fn new(browser_info: Browser, port: u16, browser_exe_path: &str) -> Self {
+    pub fn new(
+        environemnt_info: Environment,
+        fingerprint_info: Fingerprint,
+        port: u16,
+        browser_exe_path: &str,
+    ) -> Self {
         BrowserChildInfo {
-            browser_info,
+            environemnt_info,
+            fingerprint_info,
             port,
             browser_exe_path: browser_exe_path.to_string(),
         }
@@ -44,19 +51,21 @@ impl BrowserChildInfo {
     pub fn format(&self) -> Result<Vec<String>> {
         let breeze_fp = format!(
             "--breeze-fp={}",
-            encryption::base64_encode(&to_string(&self.browser_info.fp_info)?)
+            encryption::base64_encode(&to_string(&self.fingerprint_info)?)
         );
         let new_window = "--new-window".to_string();
         let window_size = format!(
             "--window-size={},{}",
-            self.browser_info.fp_info.h, self.browser_info.fp_info.w
+            self.fingerprint_info.width.unwrap_or_default(),
+            self.fingerprint_info.height.unwrap_or_default()
         );
         let window_position = format!(
             "--window-position={},{}",
-            self.browser_info.fp_info.la, self.browser_info.fp_info.lo
+            self.fingerprint_info.longitude.clone().unwrap_or_default(),
+            self.fingerprint_info.latitude.clone().unwrap_or_default(),
         );
-        let user_agent = format!("--user-agent={}", self.browser_info.ua);
-        let accept_lang = format!("--accept-lang={}", self.browser_info.fp_info.lang);
+        let user_agent = format!("--user-agent={}", self.environemnt_info.ua);
+        let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);
         let no_first_run = "--no-first-run".to_string();
 
         let user_data_dir = format!(
@@ -64,7 +73,14 @@ impl BrowserChildInfo {
             config::get_config()?
                 .get_user_data_location()?
                 .join(config::get_config()?.get_user_data_location()?)
-                .join(&self.browser_info.user_data_file)
+                .join(&self.environemnt_info.user_data_file)
+                .join(
+                    SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_micros()
+                        .to_string()
+                )
                 .to_str()
                 .unwrap()
         );
@@ -74,7 +90,7 @@ impl BrowserChildInfo {
             config::get_config()?.app.id,
             format!(
                 "{}.{}",
-                self.browser_info.id.unwrap_or_default(),
+                self.environemnt_info.id.unwrap_or_default(),
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
@@ -98,12 +114,12 @@ impl BrowserChildInfo {
         ];
 
         let proxy_str = self
-            .browser_info
+            .environemnt_info
             .proxy
             .clone()
             .unwrap_or_else(|| "".to_string());
 
-        if self.browser_info.proxy_enable {
+        if self.environemnt_info.proxy_enable {
             args.push(if proxy_str.is_empty() {
                 format!(
                     "--proxy-server=socks5://{}",
@@ -122,10 +138,15 @@ impl BrowserChildInfo {
                 }
             })
         }
-        if let Some(urls) = &self.browser_info.open_urls {
-            urls.iter().for_each(|v| {
-                args.push(v.to_string());
-            });
+
+        for url in self
+            .environemnt_info
+            .open_urls
+            .clone()
+            .unwrap_or_default()
+            .split(",")
+        {
+            args.push(url.to_string());
         }
 
         Ok(args)
@@ -162,8 +183,8 @@ impl Processer {
             .stdout(Stdio::null())
             .spawn()?;
 
-        let browser_id = payload.browser_info.id.unwrap_or_default();
-        update_browser_status_handle(browser_id, true)?;
+        let browser_id = payload.environemnt_info.id.unwrap_or_default();
+        update_browser_status_handle(browser_id, true).await?;
         let child_pid = child
             .id()
             .ok_or(ApplicationServerError::ChildRunningError)?;
@@ -197,7 +218,7 @@ impl Processer {
             child.wait().await?
         };
 
-        update_browser_status_handle(browser_id, false)?;
+        update_browser_status_handle(browser_id, false).await?;
         Ok(AppResponse::success(
             Some("close browser finally !".to_string()),
             Some(exit_status),
@@ -224,7 +245,7 @@ impl Processer {
             }
         };
 
-        update_browser_status_handle(browser_id, status)?;
+        update_browser_status_handle(browser_id, status).await?;
         Ok(AppResponse::success(
             Some("select browser status !".to_string()),
             Some(status),
@@ -238,7 +259,7 @@ impl Processer {
             let data = self.status(*browser_id).await?.data;
             let data = data.unwrap_or_default();
 
-            update_browser_status_handle(*browser_id, data)?;
+            update_browser_status_handle(*browser_id, data).await?;
             status.insert(*browser_id, data);
         }
 

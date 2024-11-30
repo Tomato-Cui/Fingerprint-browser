@@ -1,18 +1,11 @@
 use crate::apis::Result;
 use config::{Config, ConfigError};
-use lazy_static::lazy_static;
 use serde::Deserialize;
 use std::path::PathBuf;
 use tokio::sync::OnceCell;
 
 use crate::{errors::ApplicationServerError, utils::common::app_localer};
 
-lazy_static! {
-    // pub static ref get_config()?: AppConfig = AppConfig::new("config.toml").unwrap();
-    // pub static ref get_config()?: AppConfig = AppConfig::new(r#"..\config.toml"#).unwrap();
-}
-
-// pub static get_config()?: Lazy<AppConfig> = Lazy::new(|| AppConfig::new(r#"..\config.toml"#).unwrap());
 pub static ACONFIG: OnceCell<AppConfig> = OnceCell::const_new();
 pub async fn init_config(path: &str) -> &'static AppConfig {
     ACONFIG
@@ -54,6 +47,7 @@ pub struct App {
 pub struct Cache {
     pub name: String,
     pub location: String,
+    pub migrate_location: PathBuf,
 }
 
 #[derive(Deserialize, Debug)]

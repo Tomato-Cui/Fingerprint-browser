@@ -10,9 +10,9 @@ const TIMEOUT_DURATION_SECS: u64 = 10;
 
 #[derive(Deserialize, Debug)]
 pub struct JsonRespnse<T> {
-    pub code: i32,
-    pub message: String,
-    pub data: T,
+    pub code: Option<i32>,
+    pub message: Option<String>,
+    pub data: Option<T>,
 }
 
 static REQUEST: Lazy<Client> = Lazy::new(|| {
@@ -32,37 +32,71 @@ fn build_url(resource: &str) -> Result<Url> {
         .join(resource)
         .map_err(|_| ApplicationServerError::UrlParseFail)?)
 }
+pub mod auth {
+    use serde_json::json;
 
-pub async fn login(username: &str, password: &str) -> Result<()> {
-    let mut map = HashMap::new();
-    map.insert("username", username);
-    map.insert("password", password);
+    use super::*;
 
-    let response = REQUEST
-        .post(build_url("/api/auth/login")?)
-        .json(&map)
-        .send()
-        .await?;
+    pub async fn login(username: &str, password: &str) -> Result<()> {
+        let data = json!({
+                "username": username,
+                "password": password
+        });
 
-    let json_response: JsonRespnse<String> = response.json().await?;
-    println!("resutl:{:?}", json_response);
+        let response = REQUEST
+            .post(build_url("/api/auth/login")?)
+            .json(&data)
+            .send()
+            .await?;
 
-    Ok(())
+        let json_response: JsonRespnse<String> = response.json().await?;
+        println!("resutl:{:?}", json_response);
+
+        Ok(())
+    }
+
+    pub async fn register(
+        username: &str,
+        password: &str,
+        email: &str,
+        captcha: &str,
+    ) -> Result<()> {
+        let data = json!({
+            "account": {
+                "email": email,
+                "username": username,
+                "password": password
+            },
+            "captcha": captcha
+        });
+
+        let response = REQUEST
+            .post(build_url("/api/auth/register")?)
+            .json(&data)
+            .send()
+            .await?;
+
+        let json_response: JsonRespnse<String> = response.json().await?;
+        println!("resutl:{:?}", json_response);
+
+        Ok(())
+    }
+
+    pub async fn send(email: &str) -> Result<()> {
+        // pub async fn register(password: &str, password: &str) -> Result<()> {
+        let data = json!({
+                "email": email,
+        });
+
+        let response = REQUEST
+            .post(build_url("/api/auth/send")?)
+            .json(&data)
+            .send()
+            .await?;
+
+        let json_response: JsonRespnse<String> = response.json().await?;
+        println!("resutl:{:?}", json_response);
+
+        Ok(())
+    }
 }
-
-// pub async fn register(password: &str, password: &str) -> Result<()> {
-//     let mut map = HashMap::new();
-//     map.insert("username", username);
-//     map.insert("password", password);
-
-//     let response = REQUEST
-//         .post(build_url("/api/auth/login")?)
-//         .json(&map)
-//         .send()
-//         .await?;
-
-//     let json_response: JsonRespnse<String> = response.json().await?;
-//     println!("resutl:{:?}", json_response);
-
-//     Ok(())
-// }

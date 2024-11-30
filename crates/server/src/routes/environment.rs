@@ -1,6 +1,6 @@
 use axum::{extract::Json, response::IntoResponse};
 use axum::{routing::get, routing::post, Router};
-use cores::{apis, models::enviroment::Browser};
+use cores::{apis, models::enviroment::Environment};
 use serde::{Deserialize, Serialize};
 
 pub fn build_environment_router() -> Router {
@@ -21,8 +21,10 @@ mod create_environment {
     use super::*;
 
     /// 新建环境
-    pub async fn handle(Json(payload): Json<Browser>) -> impl IntoResponse {
-        apis::enviroment::add_browser_handle(payload).unwrap_or_else(|e| e.into())
+    pub async fn handle(Json(payload): Json<Environment>) -> impl IntoResponse {
+        apis::enviroment::add_browser_handle(payload)
+            .await
+            .unwrap_or_else(|e| e.into())
     }
 }
 
@@ -31,8 +33,10 @@ mod update_environment {
     use super::*;
 
     /// 更新环境
-    pub async fn handle(Json(payload): Json<Browser>) -> impl IntoResponse {
-        apis::enviroment::update_browser_handle(payload).unwrap_or_else(|e| e.into())
+    pub async fn handle(Json(payload): Json<Environment>) -> impl IntoResponse {
+        apis::enviroment::update_browser_handle(payload)
+            .await
+            .unwrap_or_else(|e| e.into())
     }
 }
 
@@ -42,7 +46,9 @@ mod list_environment {
     use apis::PageParam;
 
     pub async fn handle(Json(payload): Json<PageParam>) -> impl IntoResponse {
-        apis::enviroment::get_browser_list_handle(payload).unwrap_or_else(|e| e.into())
+        apis::enviroment::get_browser_list_handle(payload)
+            .await
+            .unwrap_or_else(|e| e.into())
     }
 }
 
@@ -55,7 +61,9 @@ mod delete_environment {
     }
 
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
-        apis::enviroment::delete_browser_handle(payload.browser_ids).unwrap_or_else(|e| e.into())
+        apis::enviroment::delete_browser_handle(payload.browser_ids)
+            .await
+            .unwrap_or_else(|e| e.into())
     }
 }
 
@@ -70,6 +78,7 @@ mod regroup_environment {
 
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
         apis::enviroment::update_browser_group_handle(payload.browser_id, payload.group_id)
+            .await
             .unwrap_or_else(|e| e.into())
     }
 }

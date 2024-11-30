@@ -107,7 +107,14 @@ use winapi::um::{
 
 #[cfg(not(windows))]
 pub fn get_proxy_from_registry() -> Option<String> {
-    None
+    use std::env;
+    match env::var("HTTP_PROXY")
+        .or_else(|_| env::var("HTTPS_PROXY"))
+        .or_else(|_| env::var("ALL_PROXY"))
+    {
+        Ok(v) => Some(v),
+        _ => None,
+    }
 }
 
 /// TODO: 未做其他系统的兼容。

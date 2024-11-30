@@ -25,59 +25,64 @@ pub struct PageParam {
 pub mod enviroment {
     use super::*;
     use crate::utils::common::to_string;
-    use models::{enviroment::Browser, ua::Ua};
+    use models::enviroment::Environment;
 
     /// 获取浏览器列表
-    pub fn get_browser_list_handle(payload: PageParam) -> Result<AppResponse<Vec<Browser>>> {
-        let browsers = Browser::query_browser(payload)?;
+    pub async fn get_browser_list_handle(
+        payload: PageParam,
+    ) -> Result<AppResponse<Vec<Environment>>> {
+        let browsers = Environment::query_envirionment(payload).await?;
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
         Ok(AppResponse::success(None, Some(browsers)))
     }
 
     /// 获取浏览器列表
-    pub fn get_browser_by_id_handle(id: i8) -> Result<AppResponse<Option<Browser>>> {
-        let browser = Browser::query_browser_by_id(id)?;
+    pub async fn get_browser_by_id_handle(id: i8) -> Result<AppResponse<Environment>> {
+        let browser = Environment::query_envirionment_by_id(id).await?;
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
         Ok(AppResponse::success(None, Some(browser)))
     }
 
     /// 更新浏览器环境
-    pub fn update_browser_handle(browser: Browser) -> Result<AppResponse<bool>> {
+    pub async fn update_browser_handle(browser: Environment) -> Result<AppResponse<bool>> {
         // TODO: 先更新到服务器，等服务器成功后再同步到本地
         // let browser_info: Browser = serde_json::from_str(browser)?;
-        let ok = Browser::update_browser(browser)?;
+        let ok = Environment::update_environment(browser).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 删除浏览器环境
-    pub fn delete_browser_handle(ids: Vec<u8>) -> Result<AppResponse<bool>> {
+    pub async fn delete_browser_handle(ids: Vec<u8>) -> Result<AppResponse<bool>> {
         // TODO: 先删除服务器中的，等服务器成功后再同步到本地
-        let ok = Browser::delete_browser(ids)?;
+        let ok = Environment::delete_envirionment(ids).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 添加浏览器环境
-    pub fn add_browser_handle(browser: Browser) -> Result<AppResponse<bool>> {
+    pub async fn add_browser_handle(browser: Environment) -> Result<AppResponse<bool>> {
         // TODO: 先添加到服务器，等服务器成功后再同步到本地
         // let browser_info: Browser = serde_json::from_str(browser)?;
-        let ok = Browser::insert_browser(browser)?;
+        let ok = Environment::insert(browser).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 更新浏览器状态
-    pub fn update_browser_status_handle(id: i8, status: bool) -> Result<AppResponse<bool>> {
-        let ok = models::enviroment::Browser::update_browser_status(id, status)?;
+    pub async fn update_browser_status_handle(id: i8, status: bool) -> Result<AppResponse<bool>> {
+        let ok = Environment::update_envirionment_status(id, status).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 更新浏览器状态
-    pub fn update_browser_proxy_handle(id: i8, proxy: Option<&str>) -> Result<AppResponse<bool>> {
-        let ok = models::enviroment::Browser::update_browser_proxy(id, proxy)?;
+    pub async fn update_browser_proxy_handle(
+        id: i8,
+        proxy: Option<&str>,
+    ) -> Result<AppResponse<bool>> {
+        let ok = Environment::update_envirionment_proxy(id, proxy).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 更新浏览器状态
-    pub fn update_browser_ua_handle(id: i8, ua: Option<Ua>) -> Result<AppResponse<bool>> {
+    pub async fn update_browser_ua_handle(id: i8, ua: &str) -> Result<AppResponse<bool>> {
         let ua_str = to_string(ua)?;
         if ua_str.is_empty() {
             return Ok(AppResponse::success(
@@ -86,50 +91,50 @@ pub mod enviroment {
             ));
         }
 
-        let ok = models::enviroment::Browser::update_browser_ua(id, Some(&ua_str))?;
+        let ok = Environment::update_envirionment_ua(id, &ua_str).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 更新浏览器分组
-    pub fn update_browser_group_handle(id: u8, group_id: u8) -> Result<AppResponse<bool>> {
-        let ok = models::enviroment::Browser::update_browser_group(id, group_id)?;
+    pub async fn update_browser_group_handle(id: u8, group_id: u8) -> Result<AppResponse<bool>> {
+        let ok = Environment::update_envirionment_group(id, group_id).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 }
 
-pub mod ua {
-    use models::ua::Ua;
+// pub mod ua {
+//     use models::ua::Ua;
 
-    use super::*;
+//     use super::*;
 
-    /// 查询ua信息
-    pub fn list_ua_handle() -> Result<AppResponse<Vec<Ua>>> {
-        // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
-        let ok = Ua::query_ua()?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 查询ua信息
+//     pub fn list_ua_handle() -> Result<AppResponse<Vec<Ua>>> {
+//         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
+//         let ok = Ua::query_ua()?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 更新ua信息
-    pub fn update_ua_handle(ua: Ua, id: i8) -> Result<AppResponse<bool>> {
-        // TODO: 先更新到服务器，等服务器成功后再同步到本地
-        let ok = Ua::update_ua(ua, id)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 更新ua信息
+//     pub fn update_ua_handle(ua: Ua, id: i8) -> Result<AppResponse<bool>> {
+//         // TODO: 先更新到服务器，等服务器成功后再同步到本地
+//         let ok = Ua::update_ua(ua, id)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 删除ua信息
-    pub fn delete_ua_handle(id: i8) -> Result<AppResponse<bool>> {
-        // TODO: 先删除服务器中的，等服务器成功后再同步到本地
-        let ok = Ua::delete_ua(id)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 删除ua信息
+//     pub fn delete_ua_handle(id: i8) -> Result<AppResponse<bool>> {
+//         // TODO: 先删除服务器中的，等服务器成功后再同步到本地
+//         let ok = Ua::delete_ua(id)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 添加ua信息
-    pub fn add_ua_handle(ua: Ua) -> Result<AppResponse<bool>> {
-        // TODO: 先添加到服务器，等服务器成功后再同步到本地
-        let ok = Ua::insert_ua(ua)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
-}
+//     /// 添加ua信息
+//     pub fn add_ua_handle(ua: Ua) -> Result<AppResponse<bool>> {
+//         // TODO: 先添加到服务器，等服务器成功后再同步到本地
+//         let ok = Ua::insert_ua(ua)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
+// }
 
 pub mod group {
 
@@ -138,123 +143,122 @@ pub mod group {
     use super::*;
 
     /// 查询group信息
-    pub fn list_group_handle(payload: PageParam) -> Result<AppResponse<Vec<Group>>> {
+    pub async fn list_group_handle(payload: PageParam) -> Result<AppResponse<Vec<Group>>> {
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
-        let groups = Group::query_group(payload)?;
+        let groups = Group::query_group(payload).await?;
         Ok(AppResponse::success(None, Some(groups)))
     }
 
     /// 更新group信息
-    pub fn update_group_handle(
+    pub async fn update_group_handle(
         group_name: &str,
         group_description: Option<String>,
         id: i8,
     ) -> Result<AppResponse<bool>> {
         // TODO: 先添加到服务器，等服务器成功后再同步到本地
-        let ok = Group::update_group(group_name, group_description, id)?;
+        let ok = Group::update_group(group_name, group_description, id).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 删除group信息
-    pub fn delete_group_handle(id: i8) -> Result<AppResponse<bool>> {
+    pub async fn delete_group_handle(id: i8) -> Result<AppResponse<bool>> {
         // TODO: 先删除服务器中的，等服务器成功后再同步到本地
-        let ok = Group::delete_group(id)?;
+        let ok = Group::delete_group(id).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 
     /// 添加group信息
-    pub fn add_group_handle(
+    pub async fn add_group_handle(
         group_name: &str,
         group_description: Option<String>,
     ) -> Result<AppResponse<bool>> {
         // TODO: 先添加到服务器，等服务器成功后再同步到本地
-        let ok = Group::insert_group(group_name, group_description)?;
+        let ok = Group::insert_group(group_name, group_description).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
 }
 
-pub mod gpu {
-    use models::gpu::Gpu;
+// pub mod gpu {
+//     use models::gpu::Gpu;
 
-    use super::*;
+//     use super::*;
 
-    /// 查询gpu信息
-    pub fn list_gpu_handle() -> Result<AppResponse<Vec<Gpu>>> {
-        // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
-        let gpus = Gpu::query_gpu()?;
-        Ok(AppResponse::success(None, Some(gpus)))
-    }
+//     /// 查询gpu信息
+//     pub fn list_gpu_handle() -> Result<AppResponse<Vec<Gpu>>> {
+//         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
+//         let gpus = Gpu::query_gpu()?;
+//         Ok(AppResponse::success(None, Some(gpus)))
+//     }
 
-    /// 更新gpu信息
-    pub fn update_gpu_handle(gpu: Gpu, id: i8) -> Result<AppResponse<bool>> {
-        // TODO: 先更新到服务器，等服务器成功后再同步到本地
-        let ok = Gpu::update_gpu(gpu, id)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 更新gpu信息
+//     pub fn update_gpu_handle(gpu: Gpu, id: i8) -> Result<AppResponse<bool>> {
+//         // TODO: 先更新到服务器，等服务器成功后再同步到本地
+//         let ok = Gpu::update_gpu(gpu, id)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 删除gpu信息
-    pub fn delete_gpu_handle(id: i8) -> Result<AppResponse<bool>> {
-        // TODO: 先删除服务器中的，等服务器成功后再同步到本地
-        let ok = Gpu::delete_gpu(id)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 删除gpu信息
+//     pub fn delete_gpu_handle(id: i8) -> Result<AppResponse<bool>> {
+//         // TODO: 先删除服务器中的，等服务器成功后再同步到本地
+//         let ok = Gpu::delete_gpu(id)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 添加gpu信息
-    pub fn add_gpu_handle(gpu: Gpu) -> Result<AppResponse<bool>> {
-        // TODO: 先添加到服务器，等服务器成功后再同步到本地
-        let ok = Gpu::insert_gpu(gpu)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
-}
+//     /// 添加gpu信息
+//     pub fn add_gpu_handle(gpu: Gpu) -> Result<AppResponse<bool>> {
+//         // TODO: 先添加到服务器，等服务器成功后再同步到本地
+//         let ok = Gpu::insert_gpu(gpu)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
+// }
 
-pub mod cookie {
-    use models::cookie::PluginsCookie;
+// pub mod cookie {
+//     use models::cookie::PluginsCookie;
 
-    use super::*;
+//     use super::*;
 
-    /// 查询cookie信息
-    pub fn list_gpu_handle(path: &str) -> Result<AppResponse<Vec<PluginsCookie>>> {
-        // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
-        let cookies = PluginsCookie::query_cookie(path)?;
-        Ok(AppResponse::success(None, Some(cookies)))
-    }
+//     /// 查询cookie信息
+//     pub fn list_gpu_handle(path: &str) -> Result<AppResponse<Vec<PluginsCookie>>> {
+//         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
+//         let cookies = PluginsCookie::query_cookie(path)?;
+//         Ok(AppResponse::success(None, Some(cookies)))
+//     }
 
-    /// 更新cookie信息
-    pub fn update_cookie_handle(cookie: PluginsCookie, path: &str) -> Result<AppResponse<bool>> {
-        // TODO: 先更新到服务器，等服务器成功后再同步到本地
-        let ok = PluginsCookie::update_cookie(cookie, path)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 更新cookie信息
+//     pub fn update_cookie_handle(cookie: PluginsCookie, path: &str) -> Result<AppResponse<bool>> {
+//         // TODO: 先更新到服务器，等服务器成功后再同步到本地
+//         let ok = PluginsCookie::update_cookie(cookie, path)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 删除cookie信息
-    pub fn delete_cookie_handle(path: &str, creation: &str) -> Result<AppResponse<bool>> {
-        // TODO: 先删除服务器中的，等服务器成功后再同步到本地
-        let ok = PluginsCookie::delete_cookie(path, creation)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
+//     /// 删除cookie信息
+//     pub fn delete_cookie_handle(path: &str, creation: &str) -> Result<AppResponse<bool>> {
+//         // TODO: 先删除服务器中的，等服务器成功后再同步到本地
+//         let ok = PluginsCookie::delete_cookie(path, creation)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
 
-    /// 添加cookie信息
-    pub fn add_cookie_handle(
-        cookie_path: &str,
-        cookie: PluginsCookie,
-    ) -> Result<AppResponse<bool>> {
-        // TODO: 先添加到服务器，等服务器成功后再同步到本地
-        let ok = PluginsCookie::insert_cookie(cookie_path, cookie)?;
-        Ok(AppResponse::success(None, Some(ok)))
-    }
-}
+//     /// 添加cookie信息
+//     pub fn add_cookie_handle(
+//         cookie_path: &str,
+//         cookie: PluginsCookie,
+//     ) -> Result<AppResponse<bool>> {
+//         // TODO: 先添加到服务器，等服务器成功后再同步到本地
+//         let ok = PluginsCookie::insert_cookie(cookie_path, cookie)?;
+//         Ok(AppResponse::success(None, Some(ok)))
+//     }
+// }
 
 /// 操作浏览器的mod
 pub mod browser {
     use std::collections::HashMap;
 
+    use models::{enviroment::Environment, fingerprint::Fingerprint};
+
     use super::*;
-    use crate::{
-        models::enviroment,
-        utils::{
-            command::BrowserChildInfo,
-            common::{get_chrome_install_path, get_debug_port},
-        },
+    use crate::utils::{
+        command::BrowserChildInfo,
+        common::{get_chrome_install_path, get_debug_port},
     };
 
     /// start browser
@@ -263,11 +267,18 @@ pub mod browser {
     pub async fn starts(ids: Vec<i8>) -> Result<AppResponse<HashMap<i8, bool>>> {
         let mut data = HashMap::new();
         for id in ids {
-            if let Some(browser) = enviroment::Browser::query_browser_by_id(id)? {
+            if let Ok(enviroment) = Environment::query_envirionment_by_id(id).await {
                 let port = get_debug_port().await?;
+                let fingerprint_id = enviroment.fp_info_id.unwrap_or_default();
+                let fingerprint = if fingerprint_id == 0 {
+                    Fingerprint::default_fingerprint().await
+                } else {
+                    Fingerprint::query_fingerprint_by_id(fingerprint_id).await
+                };
 
                 let browser_child_info = BrowserChildInfo::new(
-                    browser,
+                    enviroment,
+                    fingerprint.unwrap_or_default(),
                     port,
                     &get_chrome_install_path().ok_or(ApplicationServerError::Error(
                         anyhow::anyhow!("chrome location get fail !"),

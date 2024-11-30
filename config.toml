@@ -3,8 +3,10 @@ id = "com.ads-hubstudio.browser"
 name = "ads-hubstudio"
 
 [cache]
-name = "ads-hubstudio.db"
+# name = "ads-hubstudio.db"
+name = "sqlite::memory"
 location = "cache"
+migrate_location = "migrations"
 
 [log]
 path = "logs"

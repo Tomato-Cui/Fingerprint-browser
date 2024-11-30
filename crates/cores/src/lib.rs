@@ -5,10 +5,9 @@ use utils::common::app_localer;
 
 pub mod apis;
 pub mod config;
-pub mod db;
+pub mod database;
 pub mod errors;
 pub mod models;
-pub mod public;
 pub mod request;
 pub mod utils;
 
