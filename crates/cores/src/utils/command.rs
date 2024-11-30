@@ -15,10 +15,13 @@ use crate::{
     config,
     models::enviroment::Browser,
     utils::{
-        common::{app_localer, get_proxy_from_registry, to_string},
+        common::{app_localer, to_string},
         encryption,
     },
 };
+
+use crate::utils::common::get_proxy_from_registry;
+
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 

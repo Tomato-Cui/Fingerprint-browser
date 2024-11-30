@@ -1,14 +1,15 @@
 use std::{
-    ffi::CString,
     fmt::Debug,
     net::{Ipv4Addr, SocketAddrV4},
-    ptr,
 };
 
 use serde::Serialize;
 use tokio::net::TcpListener;
 
 use super::fs::ApplicationServerError;
+
+#[cfg(windows)]
+use std::{ffi::CString, ptr};
 
 pub mod app_localer {
     use crate::config;
@@ -104,6 +105,11 @@ use winapi::um::{
     winreg::{RegOpenKeyExA, RegQueryValueExA, HKEY_CURRENT_USER},
 };
 
+#[cfg(not(windows))]
+pub fn get_proxy_from_registry() -> Option<String> {
+    None
+}
+
 /// TODO: 未做其他系统的兼容。
 /// 获取系统代理
 #[cfg(windows)]
@@ -138,6 +144,11 @@ pub fn get_proxy_from_registry() -> Option<String> {
         }
     }
 
+    None
+}
+
+#[cfg(not(windows))]
+pub fn get_chrome_install_path() -> Option<String> {
     None
 }
 
