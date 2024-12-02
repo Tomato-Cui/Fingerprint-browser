@@ -1,8 +1,8 @@
 mod apis;
 mod models;
+mod requests;
 mod test_config;
 mod test_db;
-mod test_request;
 mod utils;
 
 pub async fn init_config() {

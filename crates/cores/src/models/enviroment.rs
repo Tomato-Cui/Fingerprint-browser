@@ -35,6 +35,7 @@ pub struct Environment {
     pub is_tz: bool,                       // 是否启用时区
     pub is_pos: bool,                      // 是否启用地理位置
     pub user_data_file: String,            // 用户数据文件路径
+    pub driver_location: Option<String>,   // 浏览器驱动位置
     pub status: bool,                      // 浏览器状态
     pub created_at: Option<String>,        // 创建时间
     pub updated_at: Option<String>,        // 更新时间
@@ -71,8 +72,9 @@ impl Environment {
         is_tz, 
         is_pos, 
         user_data_file, 
+        driver_location,
         status
-    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26)";
+    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27)";
 
         let row = sqlx::query(sql)
             .bind(&environment.name) // name
@@ -100,6 +102,7 @@ impl Environment {
             .bind(environment.is_tz as i32) // is_tz (bool -> i32)
             .bind(environment.is_pos as i32) // is_pos (bool -> i32)
             .bind(&environment.user_data_file) // user_data_file
+            .bind(environment.driver_location.unwrap_or_default()) // driver_location
             .bind(environment.status as i32) // status (bool -> i32)
             .bind(environment.created_at.unwrap_or_default()) // created_at
             .bind(environment.updated_at.unwrap_or_default()) // updated_at
@@ -185,9 +188,10 @@ impl Environment {
         is_tz = ?24,
         is_pos = ?25,
         user_data_file = ?26,
-        status = ?27,
+        driver_location = ?27,
+        status = ?28,
         updated_at = now()
-    WHERE id = ?28
+    WHERE id = ?29
 ";
 
         let row = sqlx::query(sql)
@@ -220,6 +224,7 @@ impl Environment {
                 &environment.user_data_file,
                 generate_nanosecond_timestamp() // Ensure timestamp is added
             )) // user_data_file
+            .bind(environment.driver_location.unwrap_or_default()) // driver_location
             .bind(environment.status as i32) // status (bool -> i32)
             .bind(environment.updated_at) //
             .bind(&environment.id) // id
@@ -288,5 +293,18 @@ impl Environment {
             self.is_pos,
             self.os,
         )
+    }
+
+    /// 更新当前环境的的浏览器驱动位置
+    pub async fn update_envirionment_driver_location(
+        id: u8,
+        location: &str,
+    ) -> Result<bool, ApplicationServerError> {
+        let row = sqlx::query("UPDATE environments SET driver_location = ?1 WHERE id = ?2")
+            .bind(location)
+            .bind(id)
+            .execute(get_db()?)
+            .await?;
+        Ok(row.rows_affected() == 1)
     }
 }

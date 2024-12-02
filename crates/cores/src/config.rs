@@ -58,9 +58,9 @@ pub struct Log {
 #[derive(Deserialize, Debug)]
 pub struct Setting {
     pub data_location: String,
+    pub driver_location: String,
     pub user_data_location: String,
     pub user_proxy_location: String,
-    pub all_locations: Vec<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -108,6 +108,12 @@ impl AppConfig {
         Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
     }
 
+    /// 获取浏览器驱动存放位置
+    pub fn get_brower_driver_location(&self) -> Result<PathBuf> {
+        let locations = vec![&self.setting.data_location, &self.setting.driver_location];
+        Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
+    }
+
     /// 获取所有相关的路径
     pub fn get_locations(&self) -> Result<Vec<PathBuf>> {
         Ok(vec![
@@ -115,6 +121,7 @@ impl AppConfig {
             self.get_user_data_location()?,
             self.get_user_proxy_location()?,
             self.get_log_location()?,
+            self.get_brower_driver_location()?,
         ])
     }
 

@@ -4,11 +4,12 @@ use errors::ApplicationServerError;
 use utils::common::app_localer;
 
 pub mod apis;
+pub mod auth;
 pub mod config;
 pub mod database;
 pub mod errors;
 pub mod models;
-pub mod request;
+pub mod requests;
 pub mod utils;
 
 #[cfg(not(windows))]

@@ -27,6 +27,7 @@ CREATE TABLE
         is_tz INTEGER NOT NULL DEFAULT 0, -- 是否启用时区
         is_pos INTEGER NOT NULL DEFAULT 0, -- 是否启用地理位置
         user_data_file TEXT NOT NULL, -- 用户数据文件路径
+        driver_location TEXT, -- 浏览器驱动位置
         status INTEGER NOT NULL DEFAULT 1, -- 浏览器状态（1为启用，0为禁用）
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 创建时间
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 更新时间

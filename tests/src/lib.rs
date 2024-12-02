@@ -1,7 +1,7 @@
 pub mod cores;
 
 #[test]
-fn test_get_process_list() {
+fn test_get_process_list_log() {
     use std::{
         process::Command,
         time::{SystemTime, UNIX_EPOCH},
@@ -35,4 +35,9 @@ fn test_get_process_list() {
     let result = run_powershell_command();
 
     println!("{:?}", result)
+}
+
+
+#[test]
+pub fn test_webdriver()->(){
 }

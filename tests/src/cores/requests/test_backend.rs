@@ -1,12 +1,13 @@
 #[tokio::test]
 async fn test_login() {
+    use cores::auth::get_token;
     use tokio::time::Instant;
     let now = Instant::now();
 
-    tokio::spawn(async { cores::request::auth::login("lius", "lius").await.unwrap() })
+    cores::requests::backend::auth::login("lius", "lius")
         .await
         .unwrap();
-
+    println!("{}", get_token().await.unwrap());
     println!("{:?}", now.elapsed())
 }
 
@@ -15,14 +16,12 @@ async fn test_register() {
     use tokio::time::Instant;
     let now = Instant::now();
 
-    tokio::spawn(async {
-        cores::request::auth::register("lius", "lius", "liushuinew@163.com", "681397")
+    let msg =
+        cores::requests::backend::auth::register("lius", "lius", "liushuinew@163.com", "681397")
             .await
-            .unwrap()
-    })
-    .await
-    .unwrap();
+            .unwrap();
 
+    println!("{}", msg.unwrap());
     println!("{:?}", now.elapsed())
 }
 
@@ -31,13 +30,10 @@ async fn test_send() {
     use tokio::time::Instant;
     let now = Instant::now();
 
-    tokio::spawn(async {
-        cores::request::auth::send("liushuinew@163.com")
-            .await
-            .unwrap()
-    })
-    .await
-    .unwrap();
+    let msg = cores::requests::backend::auth::send("lius@163.com")
+        .await
+        .unwrap();
 
+    println!("{}", msg.unwrap());
     println!("{:?}", now.elapsed())
 }

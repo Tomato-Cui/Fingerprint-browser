@@ -50,14 +50,26 @@ pub enum ApplicationServerError {
     #[error("config load fail.")]
     ConfigLoadError,
 
-    #[error("server fetch load fail: {0}")]
-    ServerFetchFail(#[from] reqwest::Error),
+    #[error("fetch error: {0}")]
+    FetchFail(#[from] reqwest::Error),
 
-    #[error("url parse fail.")]
-    UrlParseFail,
+    #[error("server fetch error: {0}")]
+    ServerFetchFail(#[from] ServerFetchError),
+
+    #[error("browser driver version info load fail.")]
+    BrowserDriverVersionInfoLoadFail,
 
     #[error("{0}")]
     Error(#[from] anyhow::Error),
+}
+
+#[derive(Error, Debug)]
+pub enum ServerFetchError {
+    #[error("server connect fail.")]
+    ServerRequestConnectFail,
+
+    #[error("server response parse fail.")]
+    ServerResponseParseFail,
 }
 
 impl<T> Into<AppResponse<T>> for ApplicationServerError {

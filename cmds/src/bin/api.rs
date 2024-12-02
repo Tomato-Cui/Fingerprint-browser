@@ -13,6 +13,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // init location before db
     cores::init_location(cores::config::get_config()?.get_locations()?)?;
+    // init browser version info, WARN: move other where
+    // cores::requests::browser_resources::chrome::init_action_client(url);
 
     // migrates
     Database::migrator(cores::config::get_config()?.cache.migrate_location.clone()).await?;

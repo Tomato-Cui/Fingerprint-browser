@@ -100,6 +100,15 @@ pub mod enviroment {
         let ok = Environment::update_envirionment_group(id, group_id).await?;
         Ok(AppResponse::success(None, Some(ok)))
     }
+
+    /// 更新浏览器驱动位置
+    pub async fn update_browser_driver_location_handle(
+        id: u8,
+        location: &str,
+    ) -> Result<AppResponse<bool>> {
+        let ok = Environment::update_envirionment_driver_location(id, location).await?;
+        Ok(AppResponse::success(None, Some(ok)))
+    }
 }
 
 // pub mod ua {
@@ -330,4 +339,51 @@ pub async fn delete_cache() -> Result<AppResponse<()>> {
     delete_data_file(&user_data_cache_location, "").await?;
 
     Ok(AppResponse::success(None, None))
+}
+
+pub mod browser_driver {
+    use crate::Result;
+    use std::{collections::HashMap, path::PathBuf};
+
+    use crate::{config::get_config, requests};
+
+    pub enum BrowserTye {
+        Chrome,
+        Firefox,
+        Edge,
+        Safi,
+    }
+
+    pub async fn get_all_version(t: BrowserTye) -> Option<Vec<String>> {
+        match t {
+            BrowserTye::Chrome => Some(
+                requests::browser_resources::chrome::Action::new("")
+                    .await
+                    .ok()?
+                    .get_all_version(),
+            ),
+            _ => None,
+        }
+    }
+
+    pub async fn get_current_platform(
+        t: BrowserTye,
+        version: &str,
+    ) -> Option<Vec<HashMap<String, String>>> {
+        match t {
+            BrowserTye::Chrome => requests::browser_resources::chrome::Action::new("")
+                .await
+                .ok()?
+                .get_platform(version),
+            _ => None,
+        }
+    }
+
+    pub fn get_driver_download_where_location(t: &str, v: &str) -> Result<Option<String>> {
+        let dirver_dir_location = get_config()?.get_brower_driver_location()?;
+        dirver_dir_location
+            .join(PathBuf::from_iter(vec![t, v]))
+            .to_str()
+            .map_or(Ok(None), |v| Ok(Some(v.to_string())))
+    }
 }
