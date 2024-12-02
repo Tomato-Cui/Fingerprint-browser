@@ -1,7 +1,7 @@
 [workspace]
 resolver = "1"
 # members = ["cmds", "crates/cores", "crates/server", "crates/views", "tests"]
-members = ["cmds", "crates/cores", "crates/server", "crates/views", "tests"]
+members = ["clients", "crates/cores", "crates/server", "crates/views", "tests"]
 
 [workspace.dependencies]
 axum = { version = "0.7", features = ["macros", "multipart"] }
