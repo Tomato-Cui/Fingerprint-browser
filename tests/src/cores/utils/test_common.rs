@@ -1,8 +1,8 @@
-#[test]
-fn test_app_data_location() {
-    use cores::utils::common;
+#[tokio::test]
+async fn test_app_data_location() {
+    use cores::state::get_app_cache_location;
 
-    println!("{:?}", common::app_localer::app_data_location());
+    println!("{:?}", get_app_cache_location().await);
 }
 
 #[test]

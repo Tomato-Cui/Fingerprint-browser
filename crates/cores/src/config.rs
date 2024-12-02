@@ -1,10 +1,10 @@
-use crate::apis::Result;
+use crate::{apis::Result, state::get_app_cache_location};
 use config::{Config, ConfigError};
 use serde::Deserialize;
 use std::path::PathBuf;
 use tokio::sync::OnceCell;
 
-use crate::{errors::ApplicationServerError, utils::common::app_localer};
+use crate::errors::ApplicationServerError;
 
 pub static ACONFIG: OnceCell<AppConfig> = OnceCell::const_new();
 pub async fn init_config(path: &str) -> &'static AppConfig {
@@ -29,10 +29,10 @@ mod tests {
 
     use crate::config::get_config;
 
-    #[test]
-    fn test_get_cache_location() {
+    #[tokio::test]
+    async fn atest_get_cache_location() {
         println!("{:?}", env::current_dir());
-        let location = get_config().unwrap().get_cache_location();
+        let location = get_config().unwrap().get_cache_location().await;
         println!("{:?}", location)
     }
 }
@@ -85,49 +85,61 @@ impl AppConfig {
     }
 
     /// 获取缓存存放位置
-    pub fn get_cache_location(&self) -> Result<PathBuf> {
+    pub async fn get_cache_location(&self) -> Result<PathBuf> {
         let locations = vec![&self.cache.location, &self.cache.name];
-        Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
+        Ok(get_app_cache_location()
+            .await?
+            .join(PathBuf::from_iter(locations)))
     }
 
     /// 获取用户数据存放位置
-    pub fn get_user_data_location(&self) -> Result<PathBuf> {
+    pub async fn get_user_data_location(&self) -> Result<PathBuf> {
         let locations = vec![
             &self.setting.data_location,
             &self.setting.user_data_location,
         ];
-        Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
+        Ok(get_app_cache_location()
+            .await?
+            .join(PathBuf::from_iter(locations)))
     }
 
     /// 获取用户代理存放位置
-    pub fn get_user_proxy_location(&self) -> Result<PathBuf> {
+    pub async fn get_user_proxy_location(&self) -> Result<PathBuf> {
         let locations = vec![
             &self.setting.data_location,
             &self.setting.user_proxy_location,
         ];
-        Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
+        Ok(get_app_cache_location()
+            .await?
+            .join(PathBuf::from_iter(locations)))
     }
 
     /// 获取浏览器驱动存放位置
-    pub fn get_brower_driver_location(&self) -> Result<PathBuf> {
+    pub async fn get_brower_driver_location(&self) -> Result<PathBuf> {
         let locations = vec![&self.setting.data_location, &self.setting.driver_location];
-        Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
+        Ok(get_app_cache_location()
+            .await?
+            .join(PathBuf::from_iter(locations)))
     }
 
     /// 获取所有相关的路径
-    pub fn get_locations(&self) -> Result<Vec<PathBuf>> {
+    pub async fn get_locations(&self) -> Result<Vec<PathBuf>> {
         Ok(vec![
-            app_localer::app_data_location()?.join(PathBuf::from_iter(vec![&self.cache.location])),
-            self.get_user_data_location()?,
-            self.get_user_proxy_location()?,
-            self.get_log_location()?,
-            self.get_brower_driver_location()?,
+            get_app_cache_location()
+                .await?
+                .join(PathBuf::from_iter(vec![&self.cache.location])),
+            self.get_user_data_location().await?,
+            self.get_user_proxy_location().await?,
+            self.get_log_location().await?,
+            self.get_brower_driver_location().await?,
         ])
     }
 
     /// 获取日志文件的存放位置
-    pub fn get_log_location(&self) -> Result<PathBuf> {
+    pub async fn get_log_location(&self) -> Result<PathBuf> {
         let locations = vec![&self.log.path];
-        Ok(app_localer::app_data_location()?.join(PathBuf::from_iter(locations)))
+        Ok(get_app_cache_location()
+            .await?
+            .join(PathBuf::from_iter(locations)))
     }
 }

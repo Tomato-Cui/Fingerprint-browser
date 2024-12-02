@@ -12,18 +12,8 @@ use super::fs::ApplicationServerError;
 use std::{ffi::CString, ptr};
 
 pub mod app_localer {
-    use crate::config;
-    use crate::Result;
     use std::{env, fs::canonicalize, path::PathBuf};
-    use tauri::api::path::local_data_dir;
-
-    ///返回软件数据目录
-    /// examples: "C:\\Users\\cgy\\AppData\\Local\\com.ads-hubstudio.browser"
-    pub fn app_data_location() -> Result<PathBuf> {
-        Ok(local_data_dir()
-            .expect("failed to resolve home_dir")
-            .join(format!("{}", &config::get_config()?.app.id)))
-    }
+    // use tauri::api::path::local_data_dir;
 
     ///返回软件目录
     pub fn app_location() -> PathBuf {

@@ -48,7 +48,7 @@ impl BrowserChildInfo {
         }
     }
 
-    pub fn format(&self) -> Result<Vec<String>> {
+    pub async fn format(&self) -> Result<Vec<String>> {
         let breeze_fp = format!(
             "--breeze-fp={}",
             encryption::base64_encode(&to_string(&self.fingerprint_info)?)
@@ -71,8 +71,9 @@ impl BrowserChildInfo {
         let user_data_dir = format!(
             "--user-data-dir={}",
             config::get_config()?
-                .get_user_data_location()?
-                .join(config::get_config()?.get_user_data_location()?)
+                .get_user_data_location()
+                .await?
+                .join(config::get_config()?.get_user_data_location().await?)
                 .join(&self.environemnt_info.user_data_file)
                 .join(
                     SystemTime::now()
@@ -178,7 +179,7 @@ impl Processer {
             .join(&payload.browser_exe_path);
 
         let child = Command::new(browser_path)
-            .args(&payload.format()?)
+            .args(&payload.format().await?)
             .stderr(Stdio::null())
             .stdout(Stdio::null())
             .spawn()?;

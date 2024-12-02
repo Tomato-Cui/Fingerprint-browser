@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use errors::ApplicationServerError;
-use utils::common::app_localer;
+use state::get_app_cache_location;
 
 pub mod apis;
 pub mod auth;
@@ -10,6 +10,7 @@ pub mod database;
 pub mod errors;
 pub mod models;
 pub mod requests;
+pub mod state;
 pub mod utils;
 
 #[cfg(not(windows))]
@@ -38,16 +39,14 @@ mod win_imports {
 /// 初始化应用的配置文件目录
 ///
 /// 先判断是否存在，不存在就创建
-pub fn init_location(locations: Vec<PathBuf>) -> Result<()> {
-    locations.iter().try_for_each(|v| {
-        let setting_file_location = app_localer::app_data_location()?.join(&v);
+pub async fn init_location(locations: Vec<PathBuf>) -> Result<()> {
+    for location in locations {
+        let setting_file_location = get_app_cache_location().await?.join(location);
 
         if !setting_file_location.exists() {
             std::fs::create_dir_all(setting_file_location)?;
         }
-
-        Ok::<(), ApplicationServerError>(())
-    })?;
+    }
 
     Ok(())
 }

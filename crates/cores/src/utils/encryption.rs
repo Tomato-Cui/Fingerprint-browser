@@ -12,7 +12,7 @@ use crate::win_imports::*;
 
 #[cfg(any(target_os = "windows", target_os = "macos"))]
 const ENCRYPTION_VERSION_PREFIX: &[u8] = b"v10"; // cookie前缀(Windows 和 Mac)
-                                                 
+
 #[cfg(not(any(target_os = "windows", target_os = "macos")))]
 const ENCRYPTION_VERSION_PREFIX: &[u8] = b"v11"; // cookie前缀(Linux)
 #[cfg(not(windows))]
@@ -160,12 +160,12 @@ fn aes_gcm_decrypt(key: &[u8], data: &[u8]) -> std::result::Result<Vec<u8>, aes_
 
 #[cfg(windows)]
 ///返回用户cookie文件(windows系统)
-pub fn cookie_file(path: &str) -> Result<PathBuf> {
-    use super::common::app_localer;
-    use crate::config::get_config;
+pub async fn cookie_file(path: &str) -> Result<PathBuf> {
+    use crate::{config::get_config, state::get_app_cache_location};
 
-    let path_str: PathBuf = app_localer::app_data_location()?
-        .join(get_config()?.get_user_data_location()?)
+    let path_str: PathBuf = get_app_cache_location()
+        .await?
+        .join(get_config()?.get_user_data_location().await?)
         .join(path)
         .join("Default")
         .join("Network")
@@ -175,12 +175,13 @@ pub fn cookie_file(path: &str) -> Result<PathBuf> {
 
 #[cfg(windows)]
 /// 检查cookie是否存在  
-pub fn check_cookie_file(path: &str) -> Result<bool> {
-    use super::common::app_localer;
+pub async fn check_cookie_file(path: &str) -> Result<bool> {
     use crate::config::get_config;
+    use crate::state::get_app_cache_location;
 
-    let path_str: PathBuf = app_localer::app_data_location()?
-        .join(get_config()?.get_user_data_location()?)
+    let path_str: PathBuf = get_app_cache_location()
+        .await?
+        .join(get_config()?.get_user_data_location().await?)
         .join(path)
         .join("Default")
         .join("Network")
@@ -190,13 +191,13 @@ pub fn check_cookie_file(path: &str) -> Result<bool> {
 
 #[cfg(windows)]
 ///获取加密密钥(windows 直接读取 Local State 文件)
-pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>> {
+pub async fn get_encrypt_key(path: &str) -> Result<Vec<u8>> {
     use crate::config::get_config;
+    use crate::state::get_app_cache_location;
 
-    use super::common::app_localer;
-
-    let path_str: PathBuf = app_localer::app_data_location()?
-        .join(get_config()?.get_user_data_location()?)
+    let path_str: PathBuf = get_app_cache_location()
+        .await?
+        .join(get_config()?.get_user_data_location().await?)
         .join(path)
         .join("Local State");
     //读取文件内容

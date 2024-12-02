@@ -26,7 +26,9 @@ async fn test_init_location() {
 
     init_config().await;
 
-    init_location(get_config().unwrap().get_locations().unwrap()).unwrap();
+    init_location(get_config().unwrap().get_locations().await.unwrap())
+        .await
+        .unwrap();
 }
 
 #[tokio::test]

@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     cores::config::init_config(r#"config.toml"#).await;
 
     // init location before db
-    cores::init_location(cores::config::get_config()?.get_locations()?)?;
+    cores::init_location(cores::config::get_config()?.get_locations().await?).await?;
     // init browser version info, WARN: move other where
     // cores::requests::browser_resources::chrome::init_action_client(url);
 

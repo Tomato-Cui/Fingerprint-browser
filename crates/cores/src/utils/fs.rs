@@ -1,13 +1,12 @@
 use tokio::fs::{remove_dir_all, remove_file};
 
 pub use crate::errors::ApplicationServerError;
+use crate::state::get_app_cache_location;
 use std::fs::metadata;
-
-use super::common::app_localer;
 
 /// 删除应用中的指定数据文件
 pub async fn delete_data_file(base_path: &str, path: &str) -> Result<(), ApplicationServerError> {
-    let path_buf = app_localer::app_data_location()?.join(base_path).join(path);
+    let path_buf = get_app_cache_location().await?.join(base_path).join(path);
 
     if let Ok(meta) = metadata(&path_buf) {
         if meta.is_file() {

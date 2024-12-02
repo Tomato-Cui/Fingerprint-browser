@@ -379,8 +379,8 @@ pub mod browser_driver {
         }
     }
 
-    pub fn get_driver_download_where_location(t: &str, v: &str) -> Result<Option<String>> {
-        let dirver_dir_location = get_config()?.get_brower_driver_location()?;
+    pub async fn get_driver_download_where_location(t: &str, v: &str) -> Result<Option<String>> {
+        let dirver_dir_location = get_config()?.get_brower_driver_location().await?;
         dirver_dir_location
             .join(PathBuf::from_iter(vec![t, v]))
             .to_str()

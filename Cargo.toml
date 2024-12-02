@@ -1,12 +1,12 @@
 [workspace]
 resolver = "1"
+# members = ["cmds", "crates/cores", "crates/server", "crates/views", "tests"]
 members = ["cmds", "crates/cores", "crates/server", "crates/views", "tests"]
 
 [workspace.dependencies]
 axum = { version = "0.7", features = ["macros", "multipart"] }
 tower-http = { version = "0.6", features = ["cors"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "process"] }
-tauri = { version = "1", features = ["http-all", "system-tray", "shell-open"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 base64 = "0.22.1"
@@ -33,7 +33,11 @@ sqlx = { version = "0.8", features = [
   "tls-native-tls",
 ] }
 thirtyfour = "0.35.0"
+log = "0.4"
+tauri = { version = "2.1.0" }
+tauri-plugin-log = { version = "2.0.0-rc" }
 
 # internal crate dependencies
 cores = { path = "./crates/cores" }
 server = { path = "./crates/server" }
+views = { path = "./crates/views" }
