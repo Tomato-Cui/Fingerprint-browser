@@ -1,5 +1,6 @@
 use crate::{errors::ServerFetchError, Result};
 use serde::Deserialize;
+use serde_json::json;
 use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
@@ -142,7 +143,6 @@ pub mod client {
 }
 
 pub mod auth {
-    use serde_json::{json, Value};
 
     use crate::auth::{init_auth_state, set_token};
 
@@ -222,4 +222,9 @@ pub mod auth {
 
         Ok(json_response.message)
     }
+}
+
+pub mod group {
+    // use super::*;
+    // use crate::{errors::ServerFetchError, Result};
 }

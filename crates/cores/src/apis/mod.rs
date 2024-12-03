@@ -155,6 +155,8 @@ pub mod group {
     pub async fn list_group_handle(payload: PageParam) -> Result<AppResponse<Vec<Group>>> {
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
         let groups = Group::query_group(payload).await?;
+
+
         Ok(AppResponse::success(None, Some(groups)))
     }
 
