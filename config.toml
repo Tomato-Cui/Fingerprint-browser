@@ -16,3 +16,6 @@ data_location = "datas"
 driver_location = "drivers"
 user_data_location = "user-data"
 user_proxy_location = "user-proxy"
+
+[browser.chrome]
+resource_url = "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { workspace = true }
+thirtyfour = { workspace =true }
 
 # internal crate dependencies
 cores = { workspace = true }

@@ -23,8 +23,8 @@ pub mod browser_resources {
         }
 
         #[derive(Deserialize, Debug)]
-        pub struct Milestone {
-            pub milestone: String,
+        pub struct Version {
+            // pub milestone: String,
             pub version: String,
             pub revision: String,
             pub downloads: Downloads,
@@ -33,17 +33,21 @@ pub mod browser_resources {
         #[derive(Deserialize, Debug, Clone)]
         pub struct Downloads {
             pub chrome: Vec<ChromeVersion>,
+            pub chromedriver: Option<Vec<ChromeVersion>>,
+            #[serde(rename = "chrome-headless-shell")]
+            pub chrome_headless_shell: Option<Vec<ChromeVersion>>,
         }
 
         #[derive(Deserialize, Debug)]
         pub struct ApiResponse {
             pub timestamp: String,
-            pub milestones: HashMap<String, Milestone>,
+            pub versions: Vec<Version>,
         }
 
         pub struct Action {
             pub timestamp: String,
             pub platforms: HashMap<String, Vec<ChromeVersion>>,
+            pub platform_drivers: HashMap<String, Option<Vec<ChromeVersion>>>,
             pub milestones: HashMap<String, String>,
         }
 
@@ -63,19 +67,21 @@ pub mod browser_resources {
                 if response.status().is_success() {
                     let response_json: ApiResponse = response.json().await?;
                     let mut platforms = HashMap::new();
+                    let mut platform_drivers = HashMap::new();
                     let mut milestones = HashMap::new();
                     let timestamp = response_json.timestamp;
 
-                    for key in response_json.milestones.keys() {
-                        if let Some(chrome_version) = response_json.milestones.get(key) {
-                            platforms
-                                .insert(key.to_string(), chrome_version.downloads.chrome.clone());
-                            milestones.insert(key.to_string(), chrome_version.version.to_string());
-                        }
+                    for version in response_json.versions {
+                        let key = &version.version;
+                        platforms.insert(key.to_string(), version.downloads.chrome.clone());
+                        platform_drivers
+                            .insert(key.to_string(), version.downloads.chromedriver.clone());
+                        milestones.insert(key.to_string(), version.version.to_string());
                     }
                     return Ok(Action {
                         timestamp,
                         platforms,
+                        platform_drivers,
                         milestones,
                     });
                 }
@@ -84,6 +90,7 @@ pub mod browser_resources {
 
             pub fn get_all_version(&self) -> Vec<String> {
                 let mut versions = Vec::new();
+
                 for key in self.platforms.keys() {
                     versions.push(key.to_string());
                 }
@@ -94,11 +101,26 @@ pub mod browser_resources {
                 self.milestones.get(version)
             }
 
-            pub fn get_platform(&self, version: &str) -> Option<Vec<HashMap<String, String>>> {
+            pub fn get_platform(
+                &self,
+                version: &str,
+            ) -> Option<HashMap<String, Vec<HashMap<String, String>>>> {
                 let current_platform = self.platforms.get(version)?;
+                let current_platform_driver = self.platform_drivers.get(version)?;
 
-                Some(
-                    current_platform
+                let current_platform: Vec<HashMap<String, String>> = current_platform
+                    .iter()
+                    .map(|v| {
+                        let mut map = HashMap::new();
+
+                        map.insert("platform".to_string(), v.platform.to_string());
+                        map.insert("url".to_string(), v.url.to_string());
+                        map
+                    })
+                    .collect();
+
+                let current_platform_driver = if let Some(drivers) = current_platform_driver {
+                    drivers
                         .iter()
                         .map(|v| {
                             let mut map = HashMap::new();
@@ -106,8 +128,16 @@ pub mod browser_resources {
                             map.insert("url".to_string(), v.url.to_string());
                             map
                         })
-                        .collect(),
-                )
+                        .collect()
+                } else {
+                    Vec::new()
+                };
+
+                let mut map = HashMap::new();
+                map.insert("chrome".to_string(), current_platform);
+                map.insert("chrome-driver".to_string(), current_platform_driver);
+
+                Some(map)
             }
         }
     }

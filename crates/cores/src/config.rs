@@ -64,11 +64,22 @@ pub struct Setting {
 }
 
 #[derive(Deserialize, Debug)]
+pub struct Browser {
+    pub chrome: Chrome,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Chrome {
+    pub resource_url: String,
+}
+
+#[derive(Deserialize, Debug)]
 pub struct AppConfig {
     pub app: App,
     pub cache: Cache,
     pub setting: Setting,
     pub log: Log,
+    pub browser: Browser,
 }
 
 impl AppConfig {

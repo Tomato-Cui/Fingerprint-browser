@@ -156,7 +156,6 @@ pub mod group {
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
         let groups = Group::query_group(payload).await?;
 
-
         Ok(AppResponse::success(None, Some(groups)))
     }
 
@@ -356,28 +355,30 @@ pub mod browser_driver {
         Safi,
     }
 
-    pub async fn get_all_version(t: BrowserTye) -> Option<Vec<String>> {
+    pub async fn get_all_version(t: BrowserTye) -> Result<Option<Vec<String>>> {
         match t {
-            BrowserTye::Chrome => Some(
-                requests::browser_resources::chrome::Action::new("")
-                    .await
-                    .ok()?
-                    .get_all_version(),
-            ),
-            _ => None,
+            BrowserTye::Chrome => Ok(Some(
+                requests::browser_resources::chrome::Action::new(
+                    &get_config()?.browser.chrome.resource_url,
+                )
+                .await?
+                .get_all_version(),
+            )),
+            _ => Ok(None),
         }
     }
 
     pub async fn get_current_platform(
         t: BrowserTye,
         version: &str,
-    ) -> Option<Vec<HashMap<String, String>>> {
+    ) -> Result<Option<HashMap<String, Vec<HashMap<String, String>>>>> {
         match t {
-            BrowserTye::Chrome => requests::browser_resources::chrome::Action::new("")
-                .await
-                .ok()?
-                .get_platform(version),
-            _ => None,
+            BrowserTye::Chrome => Ok(requests::browser_resources::chrome::Action::new(
+                &get_config()?.browser.chrome.resource_url,
+            )
+            .await?
+            .get_platform(version)),
+            _ => Ok(None),
         }
     }
 
