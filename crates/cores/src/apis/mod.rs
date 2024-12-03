@@ -27,17 +27,27 @@ pub mod enviroment {
     use crate::utils::common::to_string;
     use models::enviroment::Environment;
 
-    /// 获取浏览器列表
+    /// 从缓存中获取浏览器列表
     pub async fn get_browser_list_handle(
         payload: PageParam,
-    ) -> Result<AppResponse<Vec<Environment>>> {
-        let browsers = Environment::query_envirionment(payload).await?;
-        // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
+    ) -> Result<AppResponse<(i64, Vec<Environment>)>> {
+        let browsers = Environment::query_envirionment(&payload).await?;
+        Ok(AppResponse::success(None, Some(browsers)))
+    }
+
+    /// 从缓存中获取浏览器列表
+    pub async fn get_browser_list_by_group_handle(
+        page_num: Option<i32>,
+        page_size: Option<i32>,
+        group_id: i32,
+    ) -> Result<AppResponse<(i64, Vec<Environment>)>> {
+        let browsers =
+            Environment::query_envirionment_by_group_id(page_num, page_size, group_id).await?;
         Ok(AppResponse::success(None, Some(browsers)))
     }
 
     /// 获取浏览器列表
-    pub async fn get_browser_by_id_handle(id: i8) -> Result<AppResponse<Environment>> {
+    pub async fn get_browser_by_id_handle(id: i64) -> Result<AppResponse<Environment>> {
         let browser = Environment::query_envirionment_by_id(id).await?;
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
         Ok(AppResponse::success(None, Some(browser)))
@@ -152,9 +162,9 @@ pub mod group {
     use super::*;
 
     /// 查询group信息
-    pub async fn list_group_handle(payload: PageParam) -> Result<AppResponse<Vec<Group>>> {
+    pub async fn list_group_handle(payload: PageParam) -> Result<AppResponse<(i64, Vec<Group>)>> {
         // TODO: 判断本地数据库是否存在，本地没有再尝试获取服务器
-        let groups = Group::query_group(payload).await?;
+        let groups = Group::query_group(&payload).await?;
 
         Ok(AppResponse::success(None, Some(groups)))
     }
@@ -274,38 +284,76 @@ pub mod browser {
     /// start browser
     /// get_proxy_from_registry
     /// TODO:
-    pub async fn starts(ids: Vec<i8>) -> Result<AppResponse<HashMap<i8, bool>>> {
+    // pub async fn starts(ids: Vec<i8>) -> Result<AppResponse<HashMap<i8, bool>>> {
+    //     let mut data = HashMap::new();
+    //     for id in ids {
+    //         if let Ok(enviroment) = Environment::query_envirionment_by_id(id).await {
+    //             let port = get_debug_port().await?;
+    //             let fingerprint_id = enviroment.fp_info_id.unwrap_or_default();
+    //             let fingerprint = if fingerprint_id == 0 {
+    //                 Fingerprint::default_fingerprint().await
+    //             } else {
+    //                 Fingerprint::query_fingerprint_by_id(fingerprint_id).await
+    //             };
+
+    //             let browser_child_info = BrowserChildInfo::new(
+    //                 enviroment,
+    //                 fingerprint.unwrap_or_default(),
+    //                 port,
+    //                 &get_chrome_install_path().ok_or(ApplicationServerError::Error(
+    //                     anyhow::anyhow!("chrome location get fail !"),
+    //                 ))?,
+    //             );
+
+    //             let ok = ACTUATOR
+    //                 .lock()
+    //                 .await
+    //                 .start_browser(browser_child_info)
+    //                 .await
+    //                 .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
+
+    //             data.insert(id, ok.data.unwrap_or_default());
+    //         } else {
+    //             data.insert(id, false);
+    //         }
+    //     }
+    //     Ok(AppResponse::success(None, Some(data)))
+    // }
+
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct StartEnvironmentParams {
+        environment: Environment,
+        fingerprint: Fingerprint,
+    }
+
+    /// start browser
+    /// get_proxy_from_registry
+    /// TODO:
+    pub async fn starts(
+        payloads: Vec<StartEnvironmentParams>,
+    ) -> Result<AppResponse<HashMap<i8, bool>>> {
         let mut data = HashMap::new();
-        for id in ids {
-            if let Ok(enviroment) = Environment::query_envirionment_by_id(id).await {
-                let port = get_debug_port().await?;
-                let fingerprint_id = enviroment.fp_info_id.unwrap_or_default();
-                let fingerprint = if fingerprint_id == 0 {
-                    Fingerprint::default_fingerprint().await
-                } else {
-                    Fingerprint::query_fingerprint_by_id(fingerprint_id).await
-                };
+        for payload in payloads {
+            let port = get_debug_port().await?;
 
-                let browser_child_info = BrowserChildInfo::new(
-                    enviroment,
-                    fingerprint.unwrap_or_default(),
-                    port,
-                    &get_chrome_install_path().ok_or(ApplicationServerError::Error(
-                        anyhow::anyhow!("chrome location get fail !"),
-                    ))?,
-                );
+            let id = payload.environment.id.clone().unwrap_or_default();
+            let browser_child_info = BrowserChildInfo::new(
+                payload.environment,
+                payload.fingerprint,
+                port,
+                &get_chrome_install_path().ok_or(ApplicationServerError::Error(
+                    anyhow::anyhow!("chrome location get fail !"),
+                ))?,
+            );
 
-                let ok = ACTUATOR
-                    .lock()
-                    .await
-                    .start_browser(browser_child_info)
-                    .await
-                    .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
+            let ok = ACTUATOR
+                .lock()
+                .await
+                .start_browser(browser_child_info)
+                .await
+                .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
 
-                data.insert(id, ok.data.unwrap_or_default());
-            } else {
-                data.insert(id, false);
-            }
+            data.insert(id, ok.data.unwrap_or_default());
         }
         Ok(AppResponse::success(None, Some(data)))
     }

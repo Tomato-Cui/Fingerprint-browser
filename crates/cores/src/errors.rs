@@ -1,4 +1,4 @@
-use sqlx::sqlite;
+use sqlx::{migrate, sqlite};
 use thiserror::Error;
 
 use crate::utils::response::AppResponse;
@@ -10,6 +10,9 @@ pub enum ApplicationServerError {
 
     #[error("Database execute error: {0}.")]
     DatabaseExecuteError(#[from] sqlx::Error),
+
+    #[error("database migrate: {0}")]
+    DatabaseMigrateError(#[from] migrate::MigrateError),
 
     #[error("Database get error.")]
     DatabaseGetError,
@@ -68,8 +71,8 @@ pub enum ServerFetchError {
     #[error("server connect fail.")]
     ServerRequestConnectFail,
 
-    #[error("server response parse fail.")]
-    ServerResponseParseFail,
+    #[error("server response parse fail: {0}.")]
+    ServerResponseParseFail(#[from] reqwest::Error),
 }
 
 impl<T> Into<AppResponse<T>> for ApplicationServerError {

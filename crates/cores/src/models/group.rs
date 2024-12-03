@@ -9,8 +9,9 @@ pub struct Group {
     pub id: i32,
     pub name: String,
     pub description: Option<String>,
-    pub created_at: u64,
-    pub updated_at: u64,
+    pub created_at: Option<String>, // 创建时间
+    pub updated_at: Option<String>, // 更新时间
+    pub deleted_at: Option<String>, // 删除时间
 }
 
 impl Group {
@@ -19,12 +20,11 @@ impl Group {
         name: &str,
         description: Option<String>,
     ) -> Result<bool, ApplicationServerError> {
-        let row =
-            sqlx::query("insert into groups (name, description, created_at) values(?1, ?2, ?3)")
-                .bind(name)
-                .bind(description)
-                .execute(get_db()?)
-                .await?;
+        let row = sqlx::query("insert into groups (name, description) values(?1, ?2)")
+            .bind(name)
+            .bind(description.unwrap_or_default())
+            .execute(get_db()?)
+            .await?;
 
         Ok(row.rows_affected() == 1)
     }
@@ -40,9 +40,18 @@ impl Group {
     }
 
     /// 查询所有group表数据
-    pub async fn query_group(payload: PageParam) -> Result<Vec<Group>, ApplicationServerError> {
-        let page_num = payload.page_num.unwrap_or_else(|| 0);
+    pub async fn query_group(
+        payload: &PageParam,
+    ) -> Result<(i64, Vec<Group>), ApplicationServerError> {
+        let db = get_db()?;
+        let mut page_num = payload.page_num.unwrap_or_else(|| 0);
         let page_size = payload.page_size.unwrap_or_else(|| 10);
+        let (total,): (i64,) = sqlx::query_as("select count(1) from groups")
+            .fetch_one(db)
+            .await?;
+        if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            page_num = 0
+        }
         let offset = page_num * page_size;
 
         let rows: Vec<Group> = sqlx::query_as("select * from groups limit ?1 offset ?2")
@@ -51,7 +60,7 @@ impl Group {
             .fetch_all(get_db()?)
             .await?;
 
-        Ok(rows)
+        Ok((total, rows))
     }
 
     /// 更新group表数据
@@ -61,7 +70,7 @@ impl Group {
         id: i8,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query(
-            "update groups set name = ?1, description = ?2, updated_at = now() where id = ?3",
+            "update groups set name = ?1, description = ?2, updated_at = DATETIME('now') where id = ?3",
         )
         .bind(name)
         .bind(description)

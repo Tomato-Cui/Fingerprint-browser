@@ -37,3 +37,22 @@ async fn test_send() {
     println!("{}", msg.unwrap());
     println!("{:?}", now.elapsed())
 }
+
+#[tokio::test]
+async fn test_get_environment_list() {
+    use cores::apis::PageParam;
+    let payload = PageParam {
+        page_num: Some(1),
+        page_size: Some(10),
+    };
+
+    cores::requests::backend::auth::login("lius", "lius")
+        .await
+        .unwrap();
+
+    let data = cores::requests::backend::environment::get_environment_list(&payload)
+        .await
+        .unwrap();
+
+    println!("{:?}", data);
+}

@@ -25,6 +25,7 @@
   "devDependencies": {
     "@tauri-apps/api": "^2.0.3",
     "@tauri-apps/cli": "^2.0.4",
+    "@tauri-apps/plugin-os": "^2.0.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.16.11",
     "@types/vue": "^1.0.31",

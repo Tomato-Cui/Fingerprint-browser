@@ -84,17 +84,14 @@ const router = createRouter({
   // 路由配置
 });
 
-// router.beforeEach(async (to, from) => {
-//   if (
-//     // 检查用户是否已登录
-//     // !Authorization &&
-//     // ❗️ 避免无限重定向
-//     to.name !== 'login'
-//   ) {
-//     // 将用户重定向到登录页面
-//     return { name: 'login' }
-//   }
-// })
+router.beforeEach(async (to, from) => {
+  let token = localStorage.getItem('token');
+  if (
+    !token && to.name !== 'login'
+  ) {
+    return { name: 'login' }
+  }
+})
 
 
 // 导出路由实例

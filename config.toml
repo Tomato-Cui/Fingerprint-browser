@@ -4,7 +4,7 @@ name = "ads-hubstudio"
 
 [cache]
 # name = "ads-hubstudio.db"
-name = "sqlite::memory"
+name = "sqlite::memory:"
 location = "cache"
 migrate_location = "migrations"
 

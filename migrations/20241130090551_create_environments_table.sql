@@ -1,8 +1,9 @@
--- Environments Table
+-- -- Environments Table
 CREATE TABLE
     environments (
         id INTEGER PRIMARY KEY AUTOINCREMENT, -- 自增ID
-        name TEXT NOT NULL, -- 环境名称
+        owner_id TEXT NOT NULL,
+        name TEXT NOT NULL UNIQUE, -- 环境名称
         domain_name TEXT NOT NULL, -- 域名
         open_urls TEXT NOT NULL, -- 其他URL
         repeat_config TEXT NOT NULL, -- 去重配置
@@ -12,7 +13,7 @@ CREATE TABLE
         cookie TEXT NOT NULL, -- Cookie
         ignore_cookie_error INTEGER NOT NULL DEFAULT 0, -- 校验Cookie失败时的行为
         group_id INTEGER NOT NULL DEFAULT 0, -- 分组ID
-        fp_info_id INTEGER NOT NULL, -- 指纹信息ID
+        fp_info_id INTEGER NOT NULL DEFAULT 0, -- 指纹信息ID
         ua TEXT NOT NULL, -- 用户代理
         os TEXT NOT NULL, -- 操作系统
         country TEXT, -- 国家/地区
@@ -31,6 +32,7 @@ CREATE TABLE
         status INTEGER NOT NULL DEFAULT 1, -- 浏览器状态（1为启用，0为禁用）
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 创建时间
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 更新时间
-        deleted_at DATETIME, -- 删除时间
-        FOREIGN KEY (group_id) REFERENCES groups (id) -- 外键关联group表
+        deleted_at DATETIME -- 删除时间
+        -- FOREIGN KEY (group_id) REFERENCES groups (id) -- 外键关联group表
+        -- FOREIGN KEY (fp_info_id) REFERENCES fingerprints (id) -- 外键关联group表
     );

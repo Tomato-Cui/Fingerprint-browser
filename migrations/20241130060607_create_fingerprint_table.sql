@@ -35,8 +35,7 @@ CREATE TABLE
         white_list TEXT, -- 端口白名单
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 创建时间
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 更新时间
-        deleted_at DATETIME, -- 删除时间
-        FOREIGN KEY (fingerprint_config) REFERENCES environments (id)
+        deleted_at DATETIME -- 删除时间
     );
 
 -- 插入一条指纹数据

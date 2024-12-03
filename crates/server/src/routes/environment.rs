@@ -10,6 +10,7 @@ pub fn build_environment_router() -> Router {
             .route("/create", post(create_environment::handle))
             .route("/update", post(update_environment::handle))
             .route("/list", post(list_environment::handle))
+            .route("/list-by-group", post(list_environment_by_group::handle))
             .route("/delete", post(delete_environment::handle))
             .route("/regroup", post(regroup_environment::handle))
             .route("/delete-cache", get(delete_cache_environment::handle)),
@@ -49,6 +50,27 @@ mod list_environment {
         apis::enviroment::get_browser_list_handle(payload)
             .await
             .unwrap_or_else(|e| e.into())
+    }
+}
+
+mod list_environment_by_group {
+    use super::*;
+
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct Param {
+        pub page_num: Option<i32>,  // 页码，默认1，数量多需要翻页时用（可选）
+        pub page_size: Option<i32>, // 每页大小，默认每页1 ，最大100（可选）
+        pub group_id: i32,          // 每页大小，默认每页1 ，最大100（可选）
+    }
+
+    pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
+        apis::enviroment::get_browser_list_by_group_handle(
+            payload.page_num,
+            payload.page_size,
+            payload.group_id,
+        )
+        .await
+        .unwrap_or_else(|e| e.into())
     }
 }
 

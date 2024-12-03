@@ -1,5 +1,4 @@
 use std::{path::PathBuf, sync::Arc};
-
 use tokio::sync::{Mutex, OnceCell};
 
 pub struct State {
@@ -14,11 +13,18 @@ pub async fn init_state(state: State) -> &'static Arc<Mutex<State>> {
         .await
 }
 
+#[cfg(windows)]
 pub async fn get_app_cache_location() -> crate::Result<PathBuf> {
+    use std::str::FromStr;
+
     match STATE.get() {
         Some(s) => Ok(s.lock().await.app_cache_location.clone()),
-        None => Err(crate::errors::ApplicationServerError::Error(
-            anyhow::anyhow!("get app cache locaton fail"),
-        )),
+        None => {
+            if let Some(app_data) = std::env::var("LOCALAPPDATA").ok() {
+                Ok(PathBuf::from_str(&app_data).unwrap())
+            } else {
+                Ok(PathBuf::from_str(".").unwrap())
+            }
+        }
     }
 }

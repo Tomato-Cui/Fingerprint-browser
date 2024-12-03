@@ -13,7 +13,7 @@ pub struct JsonRespnse {
 pub mod client {
     use crate::{
         auth::{clear_token, get_token},
-        errors::ServerFetchError,
+        errors::ApplicationServerError,
         Result,
     };
     use axum::http::HeaderValue;
@@ -22,7 +22,6 @@ pub mod client {
         header::{self, AUTHORIZATION},
         Response, StatusCode, Url,
     };
-    use serde_json::Value;
     use std::{future::Future, pin::Pin, time::Duration};
 
     const SERVER_URL: &'static str = "http://192.168.6.116:8080";
@@ -62,16 +61,19 @@ pub mod client {
 
         pub fn build_url(resource: &str) -> Result<Url> {
             Ok(Url::parse(SERVER_URL)
-                .map_err(|_| ServerFetchError::ServerResponseParseFail)?
+                .map_err(|e| ApplicationServerError::Error(anyhow::anyhow!("{:?}", e)))?
                 .join(resource)
-                .map_err(|_| ServerFetchError::ServerResponseParseFail)?)
+                .map_err(|e| ApplicationServerError::Error(anyhow::anyhow!("{:?}", e)))?)
         }
 
-        pub async fn post(
+        pub async fn post<T>(
             &self,
             url: reqwest::Url,
-            json: &Value,
-        ) -> core::result::Result<Response, reqwest::Error> {
+            json: &T,
+        ) -> core::result::Result<Response, reqwest::Error>
+        where
+            T: serde::Serialize,
+        {
             let mut request_builder = self.client.post(url);
             for call in &self.before {
                 request_builder = call(request_builder).await?;
@@ -88,7 +90,7 @@ pub mod client {
             &self,
             url: reqwest::Url,
         ) -> core::result::Result<Response, reqwest::Error> {
-            let mut request_builder = self.client.post(url);
+            let mut request_builder = self.client.get(url);
             for call in &self.before {
                 request_builder = call(request_builder).await?;
             }
@@ -116,7 +118,7 @@ pub mod client {
     ) -> core::result::Result<reqwest::RequestBuilder, reqwest::Error> {
         let mut headers = reqwest::header::HeaderMap::new();
         if let Some(token) = get_token().await {
-            if let Ok(header_value) = HeaderValue::from_str(&format!("Bearer {}", token)) {
+            if let Ok(header_value) = HeaderValue::from_str(&format!("{}", token)) {
                 headers.insert(AUTHORIZATION, header_value);
             }
         }
@@ -143,7 +145,6 @@ pub mod client {
 }
 
 pub mod auth {
-
     use crate::auth::{init_auth_state, set_token};
 
     use super::*;
@@ -163,7 +164,7 @@ pub mod auth {
             if e.is_connect() {
                 ServerFetchError::ServerRequestConnectFail
             } else {
-                ServerFetchError::ServerResponseParseFail
+                ServerFetchError::ServerResponseParseFail(e)
             }
         })?;
 
@@ -200,7 +201,7 @@ pub mod auth {
         let json_response: JsonRespnse = response
             .json()
             .await
-            .map_err(|_| ServerFetchError::ServerResponseParseFail)?;
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
 
         Ok(json_response.message)
     }
@@ -218,13 +219,39 @@ pub mod auth {
         let json_response: JsonRespnse = response
             .json()
             .await
-            .map_err(|_| ServerFetchError::ServerResponseParseFail)?;
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
 
         Ok(json_response.message)
     }
 }
 
-pub mod group {
-    // use super::*;
-    // use crate::{errors::ServerFetchError, Result};
+pub mod environment {
+    use super::{client, JsonRespnse};
+    use crate::errors::ServerFetchError;
+    use crate::Result;
+    use crate::{apis::PageParam, models::enviroment::Environment};
+
+    pub async fn get_environment_list(payload: &PageParam) -> Result<Vec<Environment>> {
+        let response = client::REQUEST
+            .get(client::Client::build_url(&format!(
+                "/api/environments/getbypage?page={}&limit={}",
+                payload.page_num.unwrap_or_default(),
+                payload.page_size.unwrap_or_default()
+            ))?)
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        println!("{:?}", json_response);
+        if let Some(d1) = json_response.data {
+            if let Some(d2) = d1.get("data") {
+                return Ok(serde_json::from_value(d2.clone())?);
+            }
+        }
+        Ok(vec![])
+    }
 }

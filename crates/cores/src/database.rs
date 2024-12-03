@@ -1,4 +1,3 @@
-use sqlx::migrate::MigrateError;
 use sqlx::{migrate::Migrator, Pool, Sqlite};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -16,10 +15,11 @@ impl Database {
         Ok(Database(sqlx::sqlite::SqlitePool::connect(url).await?))
     }
 
-    pub async fn migrator(
-        migration_location: PathBuf,
-    ) -> core::result::Result<Migrator, MigrateError> {
-        Ok(Migrator::new(migration_location).await?)
+    pub async fn migrator(migration_location: PathBuf) -> Result<()> {
+        Ok(Migrator::new(migration_location)
+            .await?
+            .run(get_db()?)
+            .await?)
     }
 
     pub fn get(&self) -> &Pool<Sqlite> {

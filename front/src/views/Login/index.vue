@@ -8,15 +8,21 @@
         </div>
         <div class="feature-list">
           <div class="feature-item">
-            <el-icon><Monitor /></el-icon>
+            <el-icon>
+              <Monitor />
+            </el-icon>
             <span>多浏览器管理</span>
           </div>
           <div class="feature-item">
-            <el-icon><Lock /></el-icon>
+            <el-icon>
+              <Lock />
+            </el-icon>
             <span>安全防护</span>
           </div>
           <div class="feature-item">
-            <el-icon><DataAnalysis /></el-icon>
+            <el-icon>
+              <DataAnalysis />
+            </el-icon>
             <span>数据分析</span>
           </div>
         </div>
@@ -25,47 +31,25 @@
       <div class="login-right">
         <el-tabs v-model="activeTab" class="login-tabs">
           <el-tab-pane label="登录" name="login">
-            <el-form
-              :model="loginForm"
-              :rules="loginRules"
-              ref="loginFormRef"
-              class="login-form"
-            >
+            <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
               <h3 class="form-title">账号登录</h3>
 
               <el-form-item prop="username">
-                <el-input
-                  v-model="loginForm.username"
-                  placeholder="请输入账号"
-                  prefix-icon="el-icon-user"
-                  class="custom-input"
-                />
+                <el-input v-model="loginForm.username" placeholder="请输入账号" prefix-icon="el-icon-user"
+                  class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="password">
-                <el-input
-                  v-model="loginForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  prefix-icon="el-icon-lock"
-                  show-password
-                  class="custom-input"
-                />
+                <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" prefix-icon="el-icon-lock"
+                  show-password class="custom-input" />
               </el-form-item>
 
               <div class="remember-forgot">
                 <el-checkbox v-model="loginForm.rememberMe">记住我</el-checkbox>
-                <el-button type="text" @click="forgotPassword"
-                  >忘记密码？</el-button
-                >
+                <el-button type="text" @click="forgotPassword">忘记密码？</el-button>
               </div>
 
-              <el-button
-                type="primary"
-                class="submit-btn"
-                :loading="loading"
-                @click="handleLogin"
-              >
+              <el-button type="primary" class="submit-btn" :loading="loading" @click="handleLogin">
                 登录
               </el-button>
 
@@ -75,13 +59,19 @@
                 </div>
                 <div class="social-login">
                   <el-button circle>
-                    <el-icon><Platform /></el-icon>
+                    <el-icon>
+                      <Platform />
+                    </el-icon>
                   </el-button>
                   <el-button circle>
-                    <el-icon><ChatDotRound /></el-icon>
+                    <el-icon>
+                      <ChatDotRound />
+                    </el-icon>
                   </el-button>
                   <el-button circle>
-                    <el-icon><Iphone /></el-icon>
+                    <el-icon>
+                      <Iphone />
+                    </el-icon>
                   </el-button>
                 </div>
               </div>
@@ -89,67 +79,34 @@
           </el-tab-pane>
 
           <el-tab-pane label="注册" name="register">
-            <el-form
-              :model="registerForm"
-              :rules="registerRules"
-              ref="registerFormRef"
-              class="login-form"
-            >
+            <el-form :model="registerForm" :rules="registerRules" ref="registerFormRef" class="login-form">
               <h3 class="form-title">新用户注册</h3>
 
               <el-form-item prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  placeholder="请输入账号"
-                  prefix-icon="el-icon-user"
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.username" placeholder="请输入账号" prefix-icon="el-icon-user"
+                  class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  prefix-icon="el-icon-lock"
-                  show-password
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" prefix-icon="el-icon-lock"
+                  show-password class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="confirmPassword">
-                <el-input
-                  v-model="registerForm.confirmPassword"
-                  type="password"
-                  placeholder="请确认密码"
-                  prefix-icon="el-icon-lock"
-                  show-password
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请确认密码"
+                  prefix-icon="el-icon-lock" show-password class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="email">
-                <el-input
-                  v-model="registerForm.email"
-                  placeholder="请输入邮箱"
-                  prefix-icon="el-icon-mail"
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.email" placeholder="请输入邮箱" prefix-icon="el-icon-mail"
+                  class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="verificationCode">
                 <div class="verification-code-input">
-                  <el-input
-                    v-model="registerForm.verificationCode"
-                    placeholder="请输入验证码"
-                    prefix-icon="el-icon-key"
-                    class="custom-input"
-                  />
-                  <el-button
-                    type="primary"
-                    :disabled="isCodeSending"
-                    @click="sendVerificationCode"
-                  >
+                  <el-input v-model="registerForm.verificationCode" placeholder="请输入验证码" prefix-icon="el-icon-key"
+                    class="custom-input" />
+                  <el-button type="primary" :disabled="isCodeSending" @click="sendVerificationCode">
                     {{ codeButtonText }}
                   </el-button>
                 </div>
@@ -164,13 +121,8 @@
                 </el-checkbox>
               </el-form-item>
 
-              <el-button
-                type="primary"
-                class="submit-btn"
-                :loading="loading"
-                :disabled="!registerForm.agreeTerms"
-                @click="handleRegister"
-              >
+              <el-button type="primary" class="submit-btn" :loading="loading" :disabled="!registerForm.agreeTerms"
+                @click="handleRegister">
                 注册
               </el-button>
             </el-form>
@@ -204,6 +156,7 @@ import {
 } from "@element-plus/icons-vue"; // 导入你需要的图标
 
 import { login, register, sendCode } from "@/api/loginService";
+import { login as loginCommand } from '@/command/auth'
 
 // 登录操作
 const handleLogin = async () => {
@@ -211,15 +164,17 @@ const handleLogin = async () => {
   try {
     // 调用登录服务
     const response = await login(loginForm.value);
-    console.log(response);
+    let token = response.data.token;
     // 登录成功后，检查返回的数据中是否包含 token
-    if (response.token) {
+    if (token) {
+      await loginCommand(token);
+
       // 保存 token 到 localStorage
-      localStorage.setItem("token", response.token);
+      localStorage.setItem("token", token);
       ElMessage.success("登录成功");
 
       // 跳转到首页
-      router.push("/home");
+      // router.push("/home");
     } else {
       // 如果没有 token，则提示用户登录失败
       throw new Error("登录失败，未返回 token");
@@ -286,7 +241,7 @@ const registerRules = {
   email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
 };
 
-const activeTab = ref("register");
+const activeTab = ref("login");
 const loading = ref(false);
 const isCodeSending = ref(false);
 const codeButtonText = ref("获取验证码");
@@ -356,6 +311,7 @@ const sendVerificationCode = async () => {
   align-items: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
+
 /* 去掉浏览器默认的间距和填充 */
 
 .login-box {

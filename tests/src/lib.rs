@@ -1,3 +1,4 @@
+
 pub mod cores;
 
 #[test]
@@ -40,4 +41,13 @@ fn test_get_process_list_log() {
 
 #[test]
 pub fn test_webdriver()->(){
+}
+
+
+#[test]
+pub fn test_get_appdata_dir()->(){
+    use std::env;
+
+    let t = env::var("LOCALAPPDATA").ok();
+    println!("{:?}", t);
 }

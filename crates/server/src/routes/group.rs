@@ -7,9 +7,9 @@ pub fn build_group_router() -> Router {
     Router::new().nest(
         "/group",
         Router::new()
-            .route("/create", post(create_group::handle)) // 浏览器启动
-            .route("/update", post(update_group::handle)) // 关闭浏览器
-            .route("/list", post(list_group::handle)), // 检查浏览器状态
+            .route("/create", post(create_group::handle))
+            .route("/update", post(update_group::handle))
+            .route("/list", post(list_group::handle)),
     )
 }
 

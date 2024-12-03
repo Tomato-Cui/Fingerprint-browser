@@ -1,3 +1,5 @@
+use cores::database;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     use cores::database::Database;
@@ -17,6 +19,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // cores::requests::browser_resources::chrome::init_action_client(url);
 
     // migrates
+    database::init_database(&cores::config::get_config()?.cache.name)
+        .await
+        .unwrap();
     Database::migrator(cores::config::get_config()?.cache.migrate_location.clone()).await?;
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:5678").await?;

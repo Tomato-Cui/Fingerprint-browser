@@ -78,7 +78,7 @@ impl Fingerprint {
                 port_scan,
                 white_list
             ) VALUES (
-                ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30
+                ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30, ?31
             )";
 
         let row = sqlx::query(sql)
@@ -120,7 +120,7 @@ impl Fingerprint {
     }
 
     /// fingerprints表删除数据
-    pub async fn delete(id: u8) -> Result<bool, ApplicationServerError> {
+    pub async fn delete(id: i64) -> Result<bool, ApplicationServerError> {
         let sql = "DELETE FROM fingerprints WHERE id = ?1";
 
         let row = sqlx::query(sql)
@@ -132,7 +132,7 @@ impl Fingerprint {
     }
 
     /// fingerprints表查询指定id数据
-    pub async fn query_fingerprint_by_id(id: i8) -> Result<Fingerprint, ApplicationServerError> {
+    pub async fn query_fingerprint_by_id(id: i64) -> Result<Fingerprint, ApplicationServerError> {
         let pool = get_db()?;
         let fingerprint: Fingerprint = sqlx::query_as("select * from fingerprints where id = $1")
             .bind(id)
@@ -154,10 +154,17 @@ impl Fingerprint {
 
     /// fingerprints表查询所有数据
     pub async fn query_fingerprints(
-        payload: PageParam,
-    ) -> Result<Vec<Fingerprint>, ApplicationServerError> {
-        let page_num = payload.page_num.unwrap_or_else(|| 0);
+        payload: &PageParam,
+    ) -> Result<(i64, Vec<Fingerprint>), ApplicationServerError> {
+        let db = get_db()?;
+        let mut page_num = payload.page_num.unwrap_or_else(|| 0);
         let page_size = payload.page_size.unwrap_or_else(|| 10);
+        let (total,): (i64,) = sqlx::query_as("select count(1) from fingerprints")
+            .fetch_one(db)
+            .await?;
+        if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            page_num = 0
+        }
         let offset = page_num * page_size;
 
         let fingerprints: Vec<Fingerprint> =
@@ -167,7 +174,7 @@ impl Fingerprint {
                 .fetch_all(get_db()?)
                 .await?;
 
-        Ok(fingerprints)
+        Ok((total, fingerprints))
     }
 
     /// fingerprints表查询所有数据
