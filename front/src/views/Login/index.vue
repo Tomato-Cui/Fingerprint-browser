@@ -167,14 +167,14 @@ const handleLogin = async () => {
     let token = response.data.token;
     // 登录成功后，检查返回的数据中是否包含 token
     if (token) {
-      await loginCommand(token);
+      //await loginCommand(token);
 
       // 保存 token 到 localStorage
       localStorage.setItem("token", token);
       ElMessage.success("登录成功");
 
       // 跳转到首页
-      // router.push("/home");
+      router.push("/home");
     } else {
       // 如果没有 token，则提示用户登录失败
       throw new Error("登录失败，未返回 token");

@@ -1,150 +1,125 @@
-<!-- 团队管理 -->
 <template>
   <Layout>
-    <el-container style="height: 100vh">
-      <el-aside width="200px" style="display: flex; flex-direction: column">
-        <div class="sticky-button">
-          <el-button type="primary" icon="el-icon-plus" @click="addGroup"
-            >添加分组</el-button
-          >
-        </div>
-        <el-menu
-          class="el-menu-vertical-demo"
-          @select="handleGroupSelect"
-          style="flex-grow: 1; overflow: auto"
-          unique-opened
-        >
-          <el-menu-item
-            v-for="group in groups"
-            :key="group.id"
-            :index="group.id.toString()"
-            @click="navigateToGroup(group.id)"
-            class="menu-item-group"
-          >
-            <template #title>
-              <div class="group-title">
-                {{ group.name }}
-                <el-button
-                  type="text"
-                  icon="el-icon-delete"
-                  @click.stop="removeGroup(group.id)"
-                  class="delete-button"
-                ></el-button>
-              </div>
-            </template>
+    <div class="group-management">
+      <!-- <Group /> -->
+      <el-container>
+        <!-- Sidebar Menu -->
+        <!-- <el-aside width="200px" class="sidebar">
+        <el-menu :default-active="defaultActive" class="el-menu-vertical" @select="handleSelect">
+          <el-menu-item index="/team/group">
+            <i class="el-icon-s-management"></i>
+            <span><el-icon>
+                <Grid />
+              </el-icon>分组管理</span>
+          </el-menu-item>
+          <el-menu-item index="/team/member">
+            <i class="el-icon-user"></i>
+            <span><el-icon>
+                <UserFilled />
+              </el-icon>所有成员</span>
+          </el-menu-item>
+          <el-menu-item index="/team/forbid">
+            <i class="el-icon-message"></i>
+            <span><el-icon>
+                <CircleCloseFilled />
+              </el-icon>已禁用</span>
+          </el-menu-item>
+          <el-menu-item index="/team/apply">
+            <i class="el-icon-document"></i>
+            <span><el-icon>
+                <Avatar />
+              </el-icon>成员申请</span>
           </el-menu-item>
         </el-menu>
-      </el-aside>
+      </el-aside> -->
 
-      <el-container>
-        <el-main>
-          <el-table :data="selectedGroupData" style="width: 100%">
-            <el-table-column prop="name" label="姓名"></el-table-column>
-            <el-table-column prop="email" label="邮箱"></el-table-column>
-            <el-table-column prop="phone" label="手机号"></el-table-column>
-            <el-table-column prop="status" label="状态"></el-table-column>
-            <el-table-column label="操作">
-              <template #default="scope">
-                <el-button size="mini">编辑</el-button>
-                <el-button size="mini" type="danger">删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-main>
+        <!-- Main Content -->
+        <el-container>
+          <!-- {{ router.currentRoute.value.path }}
+        {{ res }} -->
+          <Group v-if="router.currentRoute.value.path === '/team/group'" />
+          <Member v-if="router.currentRoute.value.path === '/team/member'" />
+          <Forbid v-if="router.currentRoute.value.path === '/team/forbid'" />
+          <Apply v-if="router.currentRoute.value.path === '/team/apply'" />
+        </el-container>
       </el-container>
-    </el-container>
+    </div>
   </Layout>
 </template>
 
-<script setup>
-import { ref } from "vue";
+<script setup lang="ts">
+import Group from './group/index.vue';
+import Member from './member/index.vue';
+import Forbid from './forbid/index.vue';
+import Apply from './apply/index.vue';
+import { onMounted } from 'vue';
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-import Layout from "@/layouts/index.vue";
-
-const groups = ref([
-  // 示例数据
-  // { id: 1, name: '分组1', data: [{ name: '张三', email: 'zhangsan@example.com', phone: '12345678901', status: '在线' }] },
-  // { id: 2, name: '分组2', data: [{ name: '李四', email: 'lisi@example.com', phone: '09876543211', status: '离线' }] },
-  // { id: 3, name: '分组3', data: [{ name: '王五', email: 'wangwu@example.com', phone: '11223344556', status: '忙碌' }] }
-]);
-const selectedGroupData = ref([]);
-
+import { ref, watch } from "vue";
+import Layout from "@/layouts/index.vue"
+import {
+  Grid,
+  UserFilled,
+  CircleCloseFilled,
+  Avatar,
+} from "@element-plus/icons-vue";
 const router = useRouter();
+import { ElMessage } from 'element-plus';
+console.log("router", router.currentRoute.value.path);
 
-function handleGroupSelect(index) {
-  const group = groups.value.find((g) => g.id.toString() === index);
-  selectedGroupData.value = group ? group.data : [];
-}
+onMounted(() => {
+  //   if (router.currentRoute.value.path === '/team') {
+  //     router.push('/team/group')
+  //   }
+  //   defaultActive.value = router.currentRoute.value.path;
+})
 
-function navigateToGroup(groupId) {
-  console.log(`Navigating to group with ID: ${groupId}`); // 调试输出
-  router.push({ name: "team", params: { id: groupId } });
-}
+const defaultActive = ref(router.currentRoute.value.path);
 
-function removeGroup(groupId) {
-  groups.value = groups.value.filter((group) => group.id !== groupId);
-  selectedGroupData.value = [];
-  ElMessage({
-    message: "分组已删除",
-    type: "error",
-  });
-}
+const res = ref()
+const handleSelect = (key: string, keyPath: string[]) => {
+  // console.log(key, keyPath);
+  defaultActive.value = router.currentRoute.value.path;
+  // res.value = keyPath[0]
+  router.push(keyPath[0])
+  router.currentRoute.value.path = keyPath[0];
+  // console.log("de------------:", typeof defaultActive.value);
 
-function addGroup() {
-  const newGroupId = groups.value.length + 1;
-  groups.value.push({
-    id: newGroupId,
-    name: `分组${newGroupId}`,
-    data: [
-      {
-        name: `新成员`,
-        email: `${newGroupId}newmember@example.com`,
-        phone: "1234567890",
-        status: "新加入",
-      },
-    ],
-  });
-  ElMessage({
-    message: "分组已添加",
-    type: "success",
-  });
-}
+};
+
+
+// 邀请成员
+// 控制弹出框是否显示
+const invDialogVisible = ref(false);
+// 打开弹出框
+const openDialog = () => {
+  invDialogVisible.value = true;
+};
+// 弹出框确认按钮的回调
+const confirmDialog = () => {
+  console.log('确认按钮被点击');
+  invDialogVisible.value = false;
+};
+
+watch(() => router.currentRoute.value.path, (newPath) => {
+  // ElMessage.success("newPath:" + newPath)
+  // if (newPath === '/team') {
+  //   router.push('/team/group')
+  // }
+  defaultActive.value = newPath;
+});
 </script>
 
-<style scoped>
-.header {
+<style scoped lang="less">
+.group-management {
+  height: calc(100vh - 90px);
+  background-color: #f5f5f5;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  flex-direction: row;
 
-.search-input {
-  width: 300px;
-}
-
-.el-header {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-}
-.sticky-button {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: #fff;
-  padding: 10px 0;
-  width: 100%;
-}
-.group-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.delete-button {
-  margin-left: auto; /* Push the button to the right */
-  background-color: rgb(255, 0, 0);
+  .sidebar {
+    // height: 100vh;
+    border-right: 1px solid #dcdfe6;
+    background-color: #fff;
+  }
 }
 </style>

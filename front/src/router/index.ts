@@ -13,6 +13,16 @@ import api from '@/views/Api/index.vue';              // API页面
 import team from '@/views/team/index.vue';             // 团队管理页面
 import login from '@/views/login/index.vue';
 // 登录页面
+// 团队管理子页面
+import group from '@/views/Team/Group/index.vue';      // 分组管理页面
+import member from '@/views/Team/Member/index.vue';    // 所有成员页面
+import forbid from '@/views/Team/Forbid/index.vue';    // 已禁止页面
+import apply from '@/views/Team/Apply/index.vue';      // 成员申请页面
+// 个人中心页面
+import personalCenter from '@/views/personalCenter/index.vue'; // 个人中心页面
+import account from '@/views/personalCenter/Account/index.vue'; // 我的账户
+import preference from '@/views/personalCenter/Preference/index.vue'; // 偏好设置
+import local from '@/views/personalCenter/Local/index.vue'; // 本地设置
 
 
 
@@ -72,7 +82,52 @@ const routes: Array<RouteRecordRaw> = [
     path: '/team',
     name: 'team',
     component: team,
-
+    children: [
+      {
+        path: 'group',    // 动态路由参数
+        name: 'group',
+        component: group,
+      },
+      {
+        path: 'member',
+        name: 'member',
+        component: member,
+      },
+      {
+        path: 'forbid',
+        name: 'forbid',
+        component: forbid,
+      },
+      {
+        path: 'apply',
+        name: 'apply',
+        component: apply,
+      },
+    ],
+  },
+  // 个人中心路由
+  {
+    path: '/personalCenter',
+    name: 'personalCenter',
+    component: personalCenter,
+    redirect: { name: 'account' },
+    children: [
+      {
+        path: 'account',
+        name: 'account',
+        component: account,
+      },
+      {
+        path: 'preference',
+        name: 'preference',
+        component: preference,
+      },
+      {
+        path: 'local',
+        name: 'local',
+        component: local,
+      },
+    ],
   },
 ];
 
