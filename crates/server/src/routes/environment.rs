@@ -11,6 +11,7 @@ pub fn build_environment_router() -> Router {
             .route("/update", post(update_environment::handle))
             .route("/list", post(list_environment::handle))
             .route("/list-by-group", post(list_environment_by_group::handle))
+            .route("/:id", get(find_by_id_environment::handle))
             .route("/delete", post(delete_environment::handle))
             .route("/regroup", post(regroup_environment::handle))
             .route("/delete-cache", get(delete_cache_environment::handle)),
@@ -41,13 +42,25 @@ mod update_environment {
     }
 }
 
-/// TODO:
 mod list_environment {
     use super::*;
     use apis::PageParam;
 
+    #[axum::debug_handler]
     pub async fn handle(Json(payload): Json<PageParam>) -> impl IntoResponse {
         apis::enviroment::get_browser_list_handle(payload)
+            .await
+            .unwrap_or_else(|e| e.into())
+    }
+}
+
+mod find_by_id_environment {
+    use axum::extract::Path;
+
+    use super::*;
+    #[axum::debug_handler]
+    pub async fn handle(Path(id): Path<i32>) -> impl IntoResponse {
+        apis::enviroment::get_browser_by_id_handle(id)
             .await
             .unwrap_or_else(|e| e.into())
     }
@@ -58,16 +71,17 @@ mod list_environment_by_group {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Param {
+        pub group_id: i32,        // 每页大小，默认每页1 ，最大100（可选）
         pub page_num: Option<i32>,  // 页码，默认1，数量多需要翻页时用（可选）
         pub page_size: Option<i32>, // 每页大小，默认每页1 ，最大100（可选）
-        pub group_id: i32,          // 每页大小，默认每页1 ，最大100（可选）
     }
 
+    #[axum::debug_handler]
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
         apis::enviroment::get_browser_list_by_group_handle(
+            payload.group_id,
             payload.page_num,
             payload.page_size,
-            payload.group_id,
         )
         .await
         .unwrap_or_else(|e| e.into())
@@ -79,11 +93,11 @@ mod delete_environment {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Param {
-        pub browser_ids: Vec<u8>, // 需要删除的环境ID，数组格式
+        pub browser_id: i32, // 需要删除的环境ID，数组格式
     }
 
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {
-        apis::enviroment::delete_browser_handle(payload.browser_ids)
+        apis::enviroment::delete_browser_handle(payload.browser_id)
             .await
             .unwrap_or_else(|e| e.into())
     }
@@ -94,8 +108,8 @@ mod regroup_environment {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Param {
-        pub browser_id: u8, // 需要分组的环境ID，数组格式
-        pub group_id: u8,   // 对应的分组ID
+        pub browser_id: i32, // 需要分组的环境ID，数组格式
+        pub group_id: i32,   // 对应的分组ID
     }
 
     pub async fn handle(Json(payload): Json<Param>) -> impl IntoResponse {

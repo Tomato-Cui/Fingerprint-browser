@@ -30,12 +30,15 @@ pub mod client {
     type BeforeCallFunction = fn(
         rb: reqwest::RequestBuilder,
     ) -> Pin<
-        Box<dyn Future<Output = std::result::Result<reqwest::RequestBuilder, reqwest::Error>>>,
+        Box<
+            dyn Future<Output = std::result::Result<reqwest::RequestBuilder, reqwest::Error>>
+                + Send,
+        >,
     >;
     type AfterCallFunction = fn(
         response: reqwest::Response,
     ) -> Pin<
-        Box<dyn Future<Output = std::result::Result<reqwest::Response, reqwest::Error>>>,
+        Box<dyn Future<Output = std::result::Result<reqwest::Response, reqwest::Error>> + Send>,
     >;
 
     pub struct Client {
@@ -91,6 +94,40 @@ pub mod client {
             url: reqwest::Url,
         ) -> core::result::Result<Response, reqwest::Error> {
             let mut request_builder = self.client.get(url);
+            for call in &self.before {
+                request_builder = call(request_builder).await?;
+            }
+            let mut response = request_builder.send().await?;
+            for call in &self.after {
+                response = call(response).await?;
+            }
+            Ok(response)
+        }
+
+        pub async fn put<T>(
+            &self,
+            url: reqwest::Url,
+            json: &T,
+        ) -> core::result::Result<Response, reqwest::Error>
+        where
+            T: serde::Serialize,
+        {
+            let mut request_builder = self.client.put(url);
+            for call in &self.before {
+                request_builder = call(request_builder).await?;
+            }
+            let mut response = request_builder.json(json).send().await?;
+            for call in &self.after {
+                response = call(response).await?;
+            }
+            Ok(response)
+        }
+
+        pub async fn delete(
+            &self,
+            url: reqwest::Url,
+        ) -> core::result::Result<Response, reqwest::Error> {
+            let mut request_builder = self.client.delete(url);
             for call in &self.before {
                 request_builder = call(request_builder).await?;
             }
@@ -226,12 +263,68 @@ pub mod auth {
 }
 
 pub mod environment {
+
     use super::{client, JsonRespnse};
     use crate::errors::ServerFetchError;
     use crate::Result;
     use crate::{apis::PageParam, models::enviroment::Environment};
 
-    pub async fn get_environment_list(payload: &PageParam) -> Result<Vec<Environment>> {
+    pub async fn get_environment_by_group_id(
+        id: i32,
+        payload: &PageParam,
+    ) -> Result<(i64, Vec<Environment>)> {
+        let response = client::REQUEST
+            .get(client::Client::build_url(&format!(
+                "/api/environments/GetEnvironmentGroup/{}?page={}&limit={}",
+                id,
+                payload.page_num.unwrap_or_default(),
+                payload.page_size.unwrap_or_default(),
+            ))?)
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if let Some(d1) = json_response.data {
+            if let Some(d2) = d1.get("data") {
+                let total = d1
+                    .get("total_count")
+                    .unwrap_or(&serde_json::Value::Number(0.into()))
+                    .as_i64()
+                    .unwrap_or(0) as i64;
+
+                return Ok((total, serde_json::from_value(d2.clone())?));
+            }
+        }
+
+        Ok((0, vec![]))
+    }
+
+    pub async fn get_environment_by_id(id: i32) -> Result<Option<Environment>> {
+        let response = client::REQUEST
+            .get(client::Client::build_url(&format!(
+                "/api/environments/GetEnvironment/{}",
+                id
+            ))?)
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if let Some(data) = json_response.data {
+            return Ok(Some(serde_json::from_value(data.clone())?));
+        }
+
+        Ok(None)
+    }
+
+    pub async fn get_environment_list(payload: &PageParam) -> Result<(i64, Vec<Environment>)> {
         let response = client::REQUEST
             .get(client::Client::build_url(&format!(
                 "/api/environments/getbypage?page={}&limit={}",
@@ -246,12 +339,220 @@ pub mod environment {
             .await
             .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
 
-        println!("{:?}", json_response);
         if let Some(d1) = json_response.data {
             if let Some(d2) = d1.get("data") {
-                return Ok(serde_json::from_value(d2.clone())?);
+                let total = d1
+                    .get("total_count")
+                    .unwrap_or(&serde_json::Value::Number(0.into()))
+                    .as_i64()
+                    .unwrap_or(0) as i64;
+
+                return Ok((total, serde_json::from_value(d2.clone())?));
             }
         }
-        Ok(vec![])
+        Ok((0, vec![]))
+    }
+
+    pub async fn create_environment(payload: Environment) -> Result<bool> {
+        let response = client::REQUEST
+            .post(
+                client::Client::build_url("/api/environments/CreateEnvironment")?,
+                &payload,
+            )
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    pub async fn update_environment(id: i32, payload: Environment) -> Result<bool> {
+        if id == 0 {
+            return Ok(false);
+        }
+
+        let response = client::REQUEST
+            .put(
+                client::Client::build_url(&format!("/api/environments/{}", id,))?,
+                &payload,
+            )
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    pub async fn delete_environment(id: i32) -> Result<bool> {
+        if id == 0 {
+            return Ok(false);
+        }
+        let response = client::REQUEST
+            .delete(client::Client::build_url(&format!(
+                "/api/environments/{}",
+                id,
+            ))?)
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    pub async fn update_environment_by_json(id: i32, payload: serde_json::Value) -> Result<bool> {
+        let response = client::REQUEST
+            .put(
+                client::Client::build_url(&format!("/api/environments/{}", id,))?,
+                &payload,
+            )
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+}
+
+pub mod group {
+
+    use serde_json::json;
+
+    use super::{client, JsonRespnse};
+    use crate::apis::PageParam;
+    use crate::errors::ServerFetchError;
+    use crate::models::group::Group;
+    use crate::Result;
+
+    pub async fn get_group_list(payload: &PageParam) -> Result<(i64, Vec<Group>)> {
+        let response = client::REQUEST
+            .get(client::Client::build_url(&format!(
+                "/api/environments/GetEnvironmentGroupBypage?page={}&limit={}",
+                payload.page_num.unwrap_or_default(),
+                payload.page_size.unwrap_or_default()
+            ))?)
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if let Some(d1) = json_response.data {
+            if let Some(d2) = d1.get("data") {
+                let total = d1
+                    .get("total_count")
+                    .unwrap_or(&serde_json::Value::Number(0.into()))
+                    .as_i64()
+                    .unwrap_or(0) as i64;
+
+                return Ok((total, serde_json::from_value(d2.clone())?));
+            }
+        }
+        Ok((0, vec![]))
+    }
+
+    pub async fn update_group(id: i32, name: &str, description: &str) -> Result<bool> {
+        let payload = json!({
+            "name":name,
+            "description":description,
+        });
+        let response = client::REQUEST
+            .put(
+                client::Client::build_url(&format!("/api/environments/groups/{}", id))?,
+                &payload,
+            )
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    pub async fn delete_group(id: i32) -> Result<bool> {
+        let response = client::REQUEST
+            .delete(client::Client::build_url(&format!(
+                "/api/environments/groups/{}",
+                id
+            ))?)
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
+    }
+
+    pub async fn create_group(name: &str, description: &str) -> Result<bool> {
+        let payload = json!({
+            "name":name,
+            "description":description,
+        });
+
+        let response = client::REQUEST
+            .post(
+                client::Client::build_url(&format!("/api/environments/groups/create",))?,
+                &payload,
+            )
+            .await
+            .map_err(|_| ServerFetchError::ServerRequestConnectFail)?;
+
+        let json_response: JsonRespnse = response
+            .json()
+            .await
+            .map_err(|e| ServerFetchError::ServerResponseParseFail(e))?;
+
+        if json_response.code.unwrap_or_default() == 1 {
+            return Ok(true);
+        }
+
+        Ok(false)
     }
 }
