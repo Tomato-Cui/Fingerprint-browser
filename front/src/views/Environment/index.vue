@@ -413,7 +413,7 @@
                 "
               >
                 <span>{{ scope.row.name }}</span>
-                <el-button type="text" @click="openCountDialog(scope.row)"
+                <el-button type="text" @click="openNameDialog(scope.row)"
                   >修改名称</el-button
                 >
               </div>
@@ -436,6 +436,11 @@
             </template>
           </el-table-column>
           <el-table-column
+            prop="last_opened"
+            label="最近打开"
+            width="auto"
+          ></el-table-column>
+          <el-table-column
             prop="account_platform"
             label="账号平台"
             width="auto"
@@ -457,11 +462,50 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="last_opened"
-            label="最近打开"
-            width="auto"
-          ></el-table-column>
+
+          <el-table-column label="备注" width="auto" prop="remarks">
+            <template #default="scope">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <span>{{ scope.row.remarks }}</span>
+                <el-button type="text" @click="openRemarksDialog(scope.row)"
+                  >修改备注</el-button
+                >
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="创建时间" width="auto" prop="creation_time">
+            <template #default="scope">
+              <span>{{
+                scope.row.creation_time
+                  ? new Date(scope.row.creation_time).toLocaleString()
+                  : "N/A"
+              }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="浏览器" width="auto">
+            <template #default="scope">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <!-- <span>浏览器</span> -->
+                <el-button type="text" @click="openBrowser(scope.row)"
+                  >打开浏览器</el-button
+                >
+              </div>
+            </template>
+          </el-table-column>
+
           <el-table-column label="操作" width="auto">
             <template #default="scope">
               <el-dropdown>
@@ -677,14 +721,18 @@ const handleCurrentChange = (newPage: number) => {
   });
 };
 
-// 页面加载时调用
 onMounted(async () => {
   const obj = await loadData(currentPage.value, pageSize.value);
+
   console.log("?????????????:", obj);
+
+  // 验证 obj 是否含有正确的值
+  console.log("tableData:", obj.tableData);
+  console.log("total:", obj.total);
+
+  // 确保更新响应式数据
   tableData.value = obj.tableData;
   total.value = Number(obj.total);
-  // tableData.value = obj.value.tableData;
-  // total.value = obj.value.total;
 });
 
 // 表单数据
@@ -760,14 +808,27 @@ const refreshData = async () => {
   }
 };
 
-const openCountDialog = (row: any) => {
+const openNameDialog = (row: any) => {
+  // 非空和长度限制验证
+  if (!row.name || row.name.length === 0) {
+    ElMessage.error("名称不能为空");
+    return; // 退出函数，不继续执行
+  }
+
+  if (row.name.length > 50) {
+    // 假设名称长度最大为 50
+    ElMessage.error("名称不能超过 50 个字符");
+    return; // 退出函数，不继续执行
+  }
+
+  // 如果名称通过验证，则继续执行以下逻辑
   selectedRow.value = row;
-  currentRow.value.id = row.id; //需要修改的哪一行的id
+  currentRow.value.id = row.id; // 需要修改的哪一行的id
   console.log("------:", currentRow.value.id);
 
+  // 显示 countDialogVisible 对话框
   countForm.value.count = row.count;
   countDialogVisible.value = true;
-  // updateEnvironmentName(row.id, row.name);
 };
 
 const openProxyDialog = (row: any) => {
@@ -826,23 +887,8 @@ const isValidIPv4 = (ip: string): boolean => {
 };
 
 // 确认修改 IP
-// const handleIpConfirm = async () => {
-//   try {
-//     if (!isValidIPv4(ipForm.value.ip)) {
-//       ElMessage.error("请输入有效的 IPv4 地址");
-//       return;
-//     }
-//     await updateEnvironmentIP(selectedRow.value.id, ipForm.value.ip);
-//     ElMessage.success("IP 更新成功");
-//     ipDialogVisible.value = false;
-//     loadData(currentPage.value, pageSize.value); // 重新加载数据
-//   } catch (error) {
-//     ElMessage.error("IP 更新失败");
-//   }
-// };
-
-// 确认修改 IP
 const handleIpConfirm = async () => {
+  console.log("ipForm.value.ip:", ipForm.value.ip);
   try {
     if (!isValidIPv4(ipForm.value.ip)) {
       ElMessage.error("请输入有效的 IPv4 地址");

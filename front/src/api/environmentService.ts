@@ -1,6 +1,6 @@
 // src/api/environmentService.js
 import axiosInstance from './axiosConfig';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox, linkEmits } from 'element-plus';
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 
@@ -46,105 +46,154 @@ export const updateEnvironment = async (id: number, data: any) => {
   return response.data;
 };
 
-/**
- * 删除环境记录
- * @param {number} id 要删除的记录 ID
- * @returns {Promise} 返回删除成功的消息
- */
 
 
-/**
- * 加载表格数据
- * @param {...any} params 分页参数
- * @returns {Object} 返回表格数据和总条数
- */
+interface TableDataItem {
+  id: number;
+  id_code: number;
+  group_name: number;
+  name: string;
+  ip: string;
+  last_opened: string;
+  account_platform: string;
+  actions: string | null; // 假设 actions 是可选字段
+  creation_time: string;
+  remarks: string;
+  label: string | null; // 假设 label 是可选字段
+}
+
 export const loadData = async (...params: any) => {
-  console.log("修改ip后重新加载数据")
-  // 定义返回数据对象
-  const obj = ref({
-    tableData: '', // 表格数据
-    total: '', // 总条数
-  })
+  // 使用泛型来显式指定 tableData 的类型
+  const obj = ref<{
+    tableData: TableDataItem[]; // 这里指定 tableData 为 TableDataItem 类型数组
+    total: number;
+  }>({
+    tableData: [], // 表格数据
+    total: 0, // 总条数
+  });
+
   try {
-    // 发送GET请求获取数据
+    // 发送 GET 请求获取数据
     const response = await axiosInstance.get("/environments/getbypage", {
       params: {
         page: params[0], // 当前页码
-        page_size: params[1], // 每页大小
+        limit: params[1], // 每页大小
       },
     });
 
-    // 处理返回的数据
-    if (response.data && response.data.data) {
-      // 格式化表格数据
-      obj.value.tableData = response.data.data.map((item: any, index: number) => ({
-        id: item.ID,
-        id_code: (params[0] - 1) * 10 + index + 1,
-        group_name: item.group_id,
-        name: item.name,
-        ip: item.ip,
-        last_opened: new Date(item.last_opened).toLocaleString(), // 格式化时间
-        // account_platform: item.account_platform,
-        account_platform: item.domain_name,
+    // 检查返回数据的结构
+    if (response.data && response.data.code === 1) {
+      // 获取数据和分页信息
+      const responseData = response.data.data.data; // 获取实际数据数组
+      const pagination = response.data.data; // 获取分页信息（在 data 中）
 
-        actions: item.actions,
-      }));
+      // 确保返回的数据是一个数组，并且分页信息存在
+      if (Array.isArray(responseData) && pagination) {
+        // 格式化表格数据
+        obj.value.tableData = responseData.map((item: any, index: number) => ({
+          id: item.ID,
+          id_code: (params[0] - 1) * params[1] + index + 1, // 当前页码的显示 ID
+          group_name: item.group_id,
+          name: item.name,
+          ip: item.proxy,
+          last_opened: item.lasted_at ? new Date(item.lasted_at).toLocaleString() : "N/A", // 格式化时间
+          account_platform: item.domain_name,
+          actions: item.actions || null, // 确保 actions 字段可以为空
+          creation_time: item.CreatedAt,
+          remarks: item.remark || "", // 确保 remarks 字段为空时给一个空字符串
+          label: item.label || null, // 确保 label 字段可以为空
+        }));
 
-
-      // 更新总条数
-      obj.value.total = response.data.pagination.total;
+        // 更新总条数
+        obj.value.total = pagination.total_count || 0; // 确保 pagination.total_count 存在
+      } else {
+        console.error("返回的数据格式不正确：数据或分页信息缺失", response.data);
+        ElMessage.error("数据加载失败：返回的数据格式不正确");
+      }
     } else {
-      console.error("后端返回的数据格式不正确:", response.data);
-      ElMessage.error("数据加载失败：服务器返回格式异常");
+      console.error("后端返回的状态码不是 1，错误信息：", response.data.message);
+      ElMessage.error("数据加载失败：服务器返回异常");
     }
   } catch (error) {
     console.error("加载数据失败:", error);
     ElMessage.error("数据加载失败，请稍后重试");
   }
+
   return obj.value;
 };
 
 
-/**
- * 处理删除操作
- * @param {Object} row 要删除的行数据
- * @returns {Promise} 返回删除操作的结果
- */
+
 export const handleDeleteClick = async (row: any) => {
-  console.log(row.id);
+  console.log("loadData 类型: ", typeof loadData); // 打印 loadData 的类型
+
   try {
-    // 显示删除确认对话框
+    // 删除确认对话框
     await ElMessageBox.confirm("确定要删除这条数据吗？", "警告", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",
     });
 
-    // 发送删除请求
-    const response = await axiosInstance.delete(`/environments/${row.id}`);
-    console.log("----------:", response);
+    const id = row.id;
+    if (!id) {
+      throw new Error("删除失败：无效的 ID");
+    }
 
+    const deleteUrl = `/environments/${id}`;
+    const response = await axiosInstance.delete(deleteUrl);
     ElMessage.success("删除成功");
 
-    // 刷新页面
+    // 检查 loadData 是否是函数
+    if (typeof loadData !== "function") {
+      throw new Error("loadData is not a valid function");
+    }
+
+
+    console.log("调用 loadData");
+    loadData(1, 10); // 调用 loadData
+    console.log("loadData 调用完成");
+
+
     window.location.reload();
-    return response.data;
   } catch (error) {
-    ElMessage.error("删除失败，请稍后重试");
+    if (error.isAxiosError) {
+      console.error("请求失败:", error.response);
+      ElMessage.error(`删除失败：服务器错误(${error.response.status})`);
+    } else {
+      console.error("删除失败:", error);
+      ElMessage.error(error.message || "删除失败，请稍后重试");
+    }
   }
 };
 
-/**
- * 更新环境IP地址
- * @param {number} id 环境ID
- * @param {string} ip 新的IP地址
- * @returns {Promise} 返回更新结果
- */
+
+
+
+
 export const updateEnvironmentIP = async (id: number, ip: string) => {
+  console.log("调用updateEnvironmentIP，传递的ID:", id, "IP:", ip);
+
+  if (!id || !ip) {
+    throw new Error('ID 或 IP 参数缺失');
+  }
+
   try {
-    // 发送更新IP请求
-    const response = await axiosInstance.put(`/environments/${id}/ip`, { ip });
+    // 发送更新IP请求，确保 IP 以 JSON 格式传送
+    const requestData = {
+      "proxy": ip
+    }; // 这里将 ip 包装在一个 JSON 对象中
+
+    // 配置请求头，确保发送 JSON 格式
+    const response = await axiosInstance.put(`/environments/${id}`, requestData, {
+
+    });
+
+    // 打印响应内容，确保接收到的数据是你期望的
+    console.log('更新成功，返回的数据:', response.data);
     window.location.reload();
+    // loadData(1, 10);
+
     return response.data;
   } catch (error) {
     console.error('更新 IP 失败:', error);
@@ -152,19 +201,21 @@ export const updateEnvironmentIP = async (id: number, ip: string) => {
   }
 };
 
-/**
- * 更新环境名称
- * @param {number} id 环境ID
- * @param {string} name 新的名称
- * @returns {Promise} 返回更新结果
- */
+
 export const updateEnvironmentName = async (id: number, name: string) => {
   console.log("调用updateEnvironmentName");
   try {
     // 发送更新名称请求
-    const response = await axiosInstance.put(`/environments/${id}/name`, { name });
-    ElMessage.success('名称更新成功');
-    return response.data;
+    const response = await axiosInstance.put(`/environments/${id}`, { name });
+
+    // 判断响应状态码
+    if (response.status === 200) {
+      ElMessage.success('名称更新成功');
+      return response.data;  // 返回更新后的数据
+    } else {
+      ElMessage.error('名称更新失败，请稍后重试');
+      throw new Error('更新失败，状态码：' + response.status);
+    }
   } catch (error) {
     console.error('更新名称失败:', error);
     ElMessage.error('更新名称失败，请稍后重试');
@@ -178,23 +229,50 @@ export const updateEnvironmentName = async (id: number, name: string) => {
  * @param {string} accountPlatform 新的账号平台
  * @returns {Promise} 返回更新结果
  */
+// export const updateEnvironmentAccountPlatform = async (id: number, accountPlatform: string) => {
+//   console.log("调用updateEnvironmentAccountPlatform");
+
+//   try {
+//     // 发送更新账号平台请求
+//     const response = await axiosInstance.put(`/environments/${id}`, {
+
+
+//       account_platform: accountPlatform,
+//     });
+//     ElMessage.success("账号平台更新成功！");
+//     return response.data;
+//   } catch (error) {
+//     console.error("更新账号平台失败:", error);
+//     ElMessage.error("更新账号平台失败，请稍后重试！");
+//     throw error;
+//   }
+// };
+
+
 export const updateEnvironmentAccountPlatform = async (id: number, accountPlatform: string) => {
+  console.log("调用updateEnvironmentAccountPlatform");
 
   try {
     // 发送更新账号平台请求
-    const response = await axiosInstance.put(`/environments/${id}/account_platform`, {
+    const response = await axiosInstance.put(`/environments/${id}`, { domain_name: accountPlatform });
 
-
-      account_platform: accountPlatform,
-    });
-    ElMessage.success("账号平台更新成功！");
-    return response.data;
+    // 判断响应状态码
+    if (response.status === 200) {
+      ElMessage.success('账号平台更新成功');
+      return response.data; // 返回更新后的数据
+      // window.location.reload();
+    } else {
+      ElMessage.error('账号平台更新失败，请稍后重试');
+      throw new Error('更新失败，状态码：' + response.status);
+    }
   } catch (error) {
-    console.error("更新账号平台失败:", error);
-    ElMessage.error("更新账号平台失败，请稍后重试！");
+    console.error('更新账号平台失败:', error);
+    ElMessage.error('更新账号平台失败，请稍后重试');
     throw error;
   }
 };
+
+
 
 // 导出所有方法
 export default {
