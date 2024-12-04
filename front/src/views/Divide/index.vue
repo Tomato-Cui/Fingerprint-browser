@@ -55,7 +55,7 @@
           <el-table-column prop="id" label="ID/编码"></el-table-column>
           <el-table-column prop="name" label="分组名称" width="180"
             ><template #default="{ row }">
-              <el-button @click="goToEnvironmentPage(row.name)" type="text">{{
+              <el-button @click="goToEnvironmentPage(row.id)" type="text">{{
                 row.name
               }}</el-button>
             </template></el-table-column

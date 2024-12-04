@@ -393,13 +393,13 @@
           <el-table-column type="selection" width="55"></el-table-column>
 
           <el-table-column
-            prop="id_code"
+            prop="ID"
             label="ID/编码"
             width="auto"
           ></el-table-column>
 
           <el-table-column
-            prop="group_name"
+            prop="name"
             label="分组"
             width="auto"
           ></el-table-column>
@@ -428,7 +428,7 @@
                   align-items: center;
                 "
               >
-                <span>{{ scope.row.ip }}</span>
+                <span>{{ scope.row.proxy }}</span>
                 <el-button type="text" @click="openIpDialog(scope.row)"
                   >修改IP</el-button
                 >
@@ -436,15 +436,11 @@
             </template>
           </el-table-column>
           <el-table-column
-            prop="last_opened"
+            prop="lasted_at"
             label="最近打开"
             width="auto"
           ></el-table-column>
-          <el-table-column
-            prop="account_platform"
-            label="账号平台"
-            width="auto"
-          >
+          <el-table-column prop="domain_name" label="账号平台" width="auto">
             <template #default="scope">
               <div
                 style="
@@ -520,7 +516,8 @@
                     <el-dropdown-item @click="handleCopy(scope.row)"
                       >复制</el-dropdown-item
                     >
-                    <el-dropdown-item @click="handleDeleteClick(scope.row)"
+                    <el-dropdown-item
+                      @click="handleDeleteClickWrapper(scope.row)"
                       >删除</el-dropdown-item
                     >
                     <el-dropdown-item @click="handleClearCache(scope.row)"
@@ -637,9 +634,12 @@ import {
   updateEnvironmentIP,
   updateEnvironmentName,
   updateEnvironmentAccountPlatform,
+  getEnvironmentGroup,
 } from "@/api/environmentService";
 
 import { ElMessageBox, ElMessage } from "element-plus";
+import router from "@/router";
+import { useRoute } from "vue-router";
 
 const input3 = ref("");
 const select = ref("");
@@ -720,20 +720,6 @@ const handleCurrentChange = (newPage: number) => {
     total.value = Number(res.total);
   });
 };
-
-onMounted(async () => {
-  const obj = await loadData(currentPage.value, pageSize.value);
-
-  console.log("?????????????:", obj);
-
-  // 验证 obj 是否含有正确的值
-  console.log("tableData:", obj.tableData);
-  console.log("total:", obj.total);
-
-  // 确保更新响应式数据
-  tableData.value = obj.tableData;
-  total.value = Number(obj.total);
-});
 
 // 表单数据
 const moveForm = ref({
@@ -1005,6 +991,48 @@ const confirmUpdateAccountPlatform = async () => {
   } catch (error) {
     console.error("更新账号平台失败:", error);
     ElMessage.error("账号平台修改失败，请稍后重试！");
+  }
+};
+
+onMounted(async () => {
+  const route = useRoute();
+  let group_id = route.query.group;
+
+  try {
+    if (group_id) {
+      let data = await getEnvironmentGroup(group_id as any, [
+        currentPage.value,
+        pageSize.value,
+      ]);
+      tableData.value = data.data.data;
+      console.log(data.data.data);
+      total.value = Number(data.data.total_count);
+    } else {
+      const data = await loadData(currentPage.value, pageSize.value);
+
+      // console.log("?????????????:", obj);
+
+      // // 验证 obj 是否含有正确的值
+      // console.log("tableData:", obj.data);
+      // console.log("total:", obj.total);
+
+      // // 确保更新响应式数据
+      // tableData.value = obj.total_count;
+
+      tableData.value = data.data.data;
+      console.log(data.data.data);
+      total.value = Number(data.data.total_count);
+    }
+  } catch (error) {
+    console.error("更新账号平台失败:", error);
+    ElMessage.error("账号平台修改失败，请稍后重试！");
+  }
+});
+
+const handleDeleteClickWrapper = async (row: any) => {
+  let ok = await handleDeleteClick(row);
+  if (ok) {
+    tableData.value = tableData.value.filter((item: any) => item.ID != row.ID);
   }
 };
 </script>
