@@ -8,7 +8,12 @@ pub mod components;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![command::auth::login])
+        .invoke_handler(tauri::generate_handler![
+            command::auth::login,
+            command::browser::starts,
+            command::browser::stops,
+            command::browser::status,
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 

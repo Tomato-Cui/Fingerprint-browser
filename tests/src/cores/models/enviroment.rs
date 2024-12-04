@@ -7,6 +7,7 @@ async fn test_environment_insert() {
     let environ = Environment {
           id: Some(2),
         name: String::from("development Environment"),
+        description:None,
         owner_id: String::from("abc123"),
         domain_name: String::from("dev.example.com"),
         open_urls: Some(String::from("http://dev.example.com, http://test.example.com")),
@@ -28,14 +29,15 @@ async fn test_environment_insert() {
         sys_app_cate_id: String::from("devcat_001"),
         user_proxy_config: Some(String::from("{\"proxy_type\":\"http\",\"proxy_host\":\"proxy.dev.example.com\",\"proxy_port\":8080}")),
         proxy: Some(String::from("192.168.1.101:8080")),
-        proxy_enable: true,
-        is_tz: true,
-        is_pos: true,
+        proxy_enable: 1,
+        is_tz: 1,
+        is_pos: 1,
         user_data_file: String::from("/path/to/dev/user/data/file"),
         driver_location: Some(String::from("/path/to/dev/driver")),
-        status: true,
+        status: 0,
         created_at: Some(String::from("2024-02-01T10:00:00Z")),
         updated_at: Some(String::from("2024-02-01T10:30:00Z")),
+        lasted_at: Some(String::from("2024-02-01T10:30:00Z")),
         deleted_at: None,
     };
     enviroment::Environment::insert(environ).await.unwrap();
@@ -47,12 +49,10 @@ async fn test_environment_query() {
     use cores::models::enviroment::{self};
 
     crate::cores::models::load_db().await;
-    let result = enviroment::Environment::query_envirionment(&
-        PageParam {
+    let result = enviroment::Environment::query_envirionment(&PageParam {
         page_num: Some(1),
         page_size: Some(10),
-    }
-)
+    })
     .await;
 
     println!("{:?}", result);
@@ -63,7 +63,7 @@ async fn test_environment_query_by_id() {
     use cores::models::enviroment::{self};
 
     crate::cores::models::load_db().await;
-    let result = enviroment::Environment::query_envirionment_by_id(1).await;
+    let result = enviroment::Environment::query_envirionment_by_id(1000).await;
 
     println!("{:?}", result);
 }
@@ -77,6 +77,7 @@ async fn test_environment_update() {
     let environ = Environment {
         id: Some(2),
         name: String::from("PRODUCTION Environment"),
+        description: None,
         owner_id: String::from("abc123"),
         domain_name: String::from("dev.example.com"),
         open_urls: Some(String::from("http://dev.example.com, http://test.example.com")),
@@ -98,14 +99,15 @@ async fn test_environment_update() {
         sys_app_cate_id: String::from("devcat_001"),
         user_proxy_config: Some(String::from("{\"proxy_type\":\"http\",\"proxy_host\":\"proxy.dev.example.com\",\"proxy_port\":8080}")),
         proxy: Some(String::from("192.168.1.101:8080")),
-        proxy_enable: true,
-        is_tz: true,
-        is_pos: true,
+        proxy_enable: 1,
+        is_tz: 1,
+        is_pos: 1,
         user_data_file: String::from("/path/to/dev/user/data/file"),
         driver_location: Some(String::from("/path/to/dev/driver")),
-        status: true,
+        status: 0,
         created_at: Some(String::from("2024-02-01T10:00:00Z")),
         updated_at: Some(String::from("2024-02-01T10:30:00Z")),
+        lasted_at: Some(String::from("2024-02-01T10:30:00Z")),
         deleted_at: None,
     };
 
@@ -119,7 +121,7 @@ async fn test_environment_update_status() {
     use cores::models::enviroment::{self};
 
     crate::cores::models::load_db().await;
-    let result = enviroment::Environment::update_envirionment_status(2, true).await;
+    let result = enviroment::Environment::update_envirionment_status(2, 0).await;
 
     println!("{:?}", result);
 }
@@ -129,7 +131,7 @@ async fn test_environment_update_proxy() {
     use cores::models::enviroment::{self};
 
     crate::cores::models::load_db().await;
-    let result = enviroment::Environment::update_envirionment_proxy(2, Some("abc")).await;
+    let result = enviroment::Environment::update_envirionment_proxy(2, "").await;
 
     println!("{:?}", result);
 }
@@ -169,7 +171,6 @@ async fn test_environment_delete() {
     use cores::models::enviroment::{self};
 
     crate::cores::models::load_db().await;
-    let result = enviroment::Environment::delete_envirionment(vec![2]).await;
-
+    let result = enviroment::Environment::delete_envirionment(2).await;
     println!("{:?}", result);
 }

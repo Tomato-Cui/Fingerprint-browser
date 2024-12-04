@@ -227,7 +227,7 @@ const handleLogin = async () => {
     let token = response.data.token;
     // 登录成功后，检查返回的数据中是否包含 token
     if (token) {
-      await loginCommand(token);
+      //await loginCommand(token);
 
       // 保存 token 到 localStorage
       localStorage.setItem("token", token);

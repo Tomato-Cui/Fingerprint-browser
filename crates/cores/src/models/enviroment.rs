@@ -7,41 +7,44 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 //定义浏览器环境数据结构
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Deserialize, Serialize, FromRow, Clone)]
 pub struct Environment {
-    pub id: Option<i8>, // 自增ID
-    pub name: String,   // 环境名称
+    #[serde(rename = "ID")]
+    pub id: Option<i32>, // 自增ID
+    pub name: String,                // 环境名称
+    pub description: Option<String>, // 环境名称
     #[serde(skip)]
     pub owner_id: String, // 所有者ID
-    pub domain_name: String, // 账号平台的域名
-    pub open_urls: Option<String>, // 其他URL
+    pub domain_name: String,         // 账号平台的域名
+    pub open_urls: Option<String>,   // 其他URL
     pub repeat_config: Option<String>, // 去重配置
-    pub username: String, // 账号
-    pub password: String, // 密码
-    pub fakey: String,  // 2FA密钥
-    pub cookie: Option<String>, // Cookie
+    pub username: String,            // 账号
+    pub password: String,            // 密码
+    pub fakey: String,               // 2FA密钥
+    pub cookie: Option<String>,      // Cookie
     pub ignore_cookie_error: Option<i8>, // 校验Cookie失败时的行为
-    pub group_id: Option<i32>, // 分组ID
-    pub fp_info_id: Option<i32>, // 指纹信息ID
-    pub ua: String,     // 用户代理
-    pub os: String,     // 操作系统
-    pub country: Option<String>, // 国家/地区
-    pub region: Option<String>, // 省/州
-    pub city: Option<String>, // 城市
-    pub remark: Option<String>, // 备注
-    pub ipchecker: String, // IP查询渠道
-    pub sys_app_cate_id: String, // 应用分类ID
+    pub group_id: Option<i32>,       // 分组ID
+    pub fp_info_id: Option<i32>,     // 指纹信息ID
+    pub ua: String,                  // 用户代理
+    pub os: String,                  // 操作系统
+    pub country: Option<String>,     // 国家/地区
+    pub region: Option<String>,      // 省/州
+    pub city: Option<String>,        // 城市
+    pub remark: Option<String>,      // 备注
+    pub ipchecker: String,           // IP查询渠道
+    pub sys_app_cate_id: String,     // 应用分类ID
     pub user_proxy_config: Option<String>, // 环境代理配置
-    pub proxy: Option<String>, // 代理IP
-    pub proxy_enable: bool, // 代理启用
-    pub is_tz: bool,    // 是否启用时区
-    pub is_pos: bool,   // 是否启用地理位置
-    pub user_data_file: String, // 用户数据文件路径
+    pub proxy: Option<String>,       // 代理IP
+    pub proxy_enable: i8,            // 代理启用
+    pub is_tz: i8,                   // 是否启用时区
+    pub is_pos: i8,                  // 是否启用地理位置
+    pub user_data_file: String,      // 用户数据文件路径
     pub driver_location: Option<String>, // 浏览器驱动位置
-    pub status: bool,   // 浏览器状态
-    pub created_at: Option<String>, // 创建时间
-    pub updated_at: Option<String>, // 更新时间
-    pub deleted_at: Option<String>, // 删除时间
+    pub status: i8,                  // 浏览器状态
+    pub created_at: Option<String>,  // 创建时间
+    pub updated_at: Option<String>,  // 更新时间
+    pub lasted_at: Option<String>,   // 最近时间
+    pub deleted_at: Option<String>,  // 删除时间
 }
 
 impl Environment {
@@ -49,7 +52,7 @@ impl Environment {
     pub async fn insert(environment: Environment) -> Result<bool, ApplicationServerError> {
         let sql = "
     INSERT INTO environments (
-        name, owner_id, 
+        name, owner_id, description,
         domain_name, 
         open_urls, 
         repeat_config, 
@@ -76,10 +79,11 @@ impl Environment {
         user_data_file, 
         driver_location,
         status
-    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28)";
+    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29)";
         let row = sqlx::query(sql)
             .bind(&environment.name) // name
             .bind(&environment.owner_id) // name
+            .bind(&environment.description.unwrap_or_default()) // name
             .bind(&environment.domain_name) // domain_name
             .bind(&environment.open_urls.unwrap_or_default()) // open_urls
             .bind(&environment.repeat_config.unwrap_or_default()) // repeat_config
@@ -116,20 +120,20 @@ impl Environment {
     }
 
     /// envirionment表删除数据
-    pub async fn delete_envirionment(ids: Vec<u8>) -> Result<bool, ApplicationServerError> {
-        let delete_ids = ids
-            .iter()
-            .map(|v| format!("{}", v))
-            .collect::<Vec<String>>()
-            .join(",");
+    pub async fn delete_envirionment(id: i32) -> Result<bool, ApplicationServerError> {
+        // let delete_ids = ids
+        //     .iter()
+        //     .map(|v| format!("{}", v))
+        //     .collect::<Vec<String>>()
+        //     .join(",");
 
-        let sql = format!("delete from environments where id in ({})", delete_ids);
-        let row = sqlx::query(&sql).execute(get_db()?).await?;
+        let sql = "delete from environments where id = $1";
+        let row = sqlx::query(&sql).bind(id).execute(get_db()?).await?;
         Ok(row.rows_affected() == 1)
     }
 
     /// envirionment表查询指定id数据
-    pub async fn query_envirionment_by_id(id: i64) -> Result<Environment, ApplicationServerError> {
+    pub async fn query_envirionment_by_id(id: i32) -> Result<Environment, ApplicationServerError> {
         let pool = get_db()?;
         let enviroment: Environment = sqlx::query_as("select * from environments where id = $1")
             .bind(id)
@@ -159,10 +163,10 @@ impl Environment {
         let offset = page_num * page_size;
 
         let environments: Vec<Environment> =
-            sqlx::query_as("select * from environments limit $1 offset $2 where group_id = $3")
+            sqlx::query_as("select * from environments where group_id = $1 limit $2 offset $3")
+                .bind(group_id)
                 .bind(page_size)
                 .bind(offset)
-                .bind(group_id)
                 .fetch_all(db)
                 .await?;
 
@@ -204,39 +208,41 @@ impl Environment {
     SET 
         name = ?1,
         owner_id = ?2,
-        domain_name = ?3,
-        open_urls = ?4,
-        repeat_config = ?5,
-        username = ?6,
-        password = ?7,
-        fakey = ?8,
-        cookie = ?9,
-        ignore_cookie_error = ?10,
-        group_id = ?11,
-        fp_info_id = ?12,
-        ua = ?13,
-        os = ?14,
-        country = ?15,
-        region = ?16,
-        city = ?17,
-        remark = ?18,
-        ipchecker = ?19,
-        sys_app_cate_id = ?20,
-        user_proxy_config = ?21,
-        proxy = ?22,
-        proxy_enable = ?23,
-        is_tz = ?24,
-        is_pos = ?25,
-        user_data_file = ?26,
-        driver_location = ?27,
-        status = ?28,
+        description = ?3,
+        domain_name = ?4,
+        open_urls = ?5,
+        repeat_config = ?6,
+        username = ?7,
+        password = ?8,
+        fakey = ?9,
+        cookie = ?10,
+        ignore_cookie_error = ?11,
+        group_id = ?12,
+        fp_info_id = ?13,
+        ua = ?14,
+        os = ?15,
+        country = ?16,
+        region = ?17,
+        city = ?18,
+        remark = ?19,
+        ipchecker = ?20,
+        sys_app_cate_id = ?21,
+        user_proxy_config = ?22,
+        proxy = ?23,
+        proxy_enable = ?24,
+        is_tz = ?25,
+        is_pos = ?26,
+        user_data_file = ?27,
+        driver_location = ?28,
+        status = ?29,
         updated_at = DATETIME('now')
-    WHERE id = ?29
+    WHERE id = ?30
 ";
 
         let row = sqlx::query(sql)
             .bind(&environment.name) // name
             .bind(&environment.owner_id) // name
+            .bind(&environment.description) // name
             .bind(&environment.domain_name) // domain_name
             .bind(environment.open_urls.unwrap_or_default()) // open_urls
             .bind(environment.repeat_config.unwrap_or_default()) // repeat_config
@@ -266,7 +272,7 @@ impl Environment {
                 generate_nanosecond_timestamp() // Ensure timestamp is added
             )) // user_data_file
             .bind(environment.driver_location.unwrap_or_default()) // driver_location
-            .bind(environment.status as i32) // status (bool -> i32)
+            .bind(environment.status) // status (bool -> i32)
             .bind(&environment.id) // id
             .execute(get_db()?) // Execute the query
             .await?;
@@ -278,8 +284,8 @@ impl Environment {
     ///
     /// 可以通过这个方法来更新浏览器的启动和关闭
     pub async fn update_envirionment_status(
-        id: i8,
-        status: bool,
+        id: i32,
+        status: i8,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("UPDATE environments SET status = ?1 WHERE id = ?2")
             .bind(status)
@@ -291,8 +297,8 @@ impl Environment {
 
     /// envirionment表更新浏览器代理
     pub async fn update_envirionment_proxy(
-        id: i8,
-        proxy: Option<&str>,
+        id: i32,
+        proxy: &str,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("UPDATE environments SET proxy = ?1 WHERE id = ?2")
             .bind(proxy)
@@ -305,7 +311,7 @@ impl Environment {
     /// envirionment表更新浏览器ua
     ///
     /// empty ua 已经在函数外被筛选
-    pub async fn update_envirionment_ua(id: i8, ua: &str) -> Result<bool, ApplicationServerError> {
+    pub async fn update_envirionment_ua(id: i32, ua: &str) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("UPDATE environments SET ua = ?1 WHERE id = ?2")
             .bind(ua)
             .bind(id)
@@ -315,8 +321,8 @@ impl Environment {
     }
 
     pub async fn update_envirionment_group(
-        id: u8,
-        group_id: u8,
+        id: i32,
+        group_id: i32,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("UPDATE environments SET group_id = ?1 WHERE id = ?2")
             .bind(group_id)
@@ -327,8 +333,8 @@ impl Environment {
     }
 
     pub async fn update_envirionment_fp(
-        id: u8,
-        fp_info_id: u8,
+        id: i32,
+        fp_info_id: i32,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("UPDATE environments SET fp_info_id = ?1 WHERE id = ?2")
             .bind(fp_info_id)
@@ -349,7 +355,7 @@ impl Environment {
 
     /// 更新当前环境的的浏览器驱动位置
     pub async fn update_envirionment_driver_location(
-        id: u8,
+        id: i32,
         location: &str,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("UPDATE environments SET driver_location = ?1 WHERE id = ?2")

@@ -120,7 +120,7 @@ impl BrowserChildInfo {
             .clone()
             .unwrap_or_else(|| "".to_string());
 
-        if self.environemnt_info.proxy_enable {
+        if self.environemnt_info.proxy_enable == 1 {
             args.push(if proxy_str.is_empty() {
                 format!(
                     "--proxy-server=socks5://{}",
@@ -158,7 +158,7 @@ impl BrowserChildInfo {
 #[allow(dead_code)]
 pub struct Processer {
     childs: Arc<Mutex<HashMap<u32, (Child, BrowserChildInfo)>>>,
-    index: HashMap<i8, u32>, // i8: browser_id, u32: child pid
+    index: HashMap<i32, u32>, // i8: browser_id, u32: child pid
 }
 
 impl Processer {
@@ -185,7 +185,7 @@ impl Processer {
             .spawn()?;
 
         let browser_id = payload.environemnt_info.id.unwrap_or_default();
-        update_browser_status_handle(browser_id, true).await?;
+        update_browser_status_handle(browser_id, 1).await?;
         let child_pid = child
             .id()
             .ok_or(ApplicationServerError::ChildRunningError)?;
@@ -202,7 +202,7 @@ impl Processer {
         Ok(AppResponse::success(None, Some(true)))
     }
 
-    pub async fn stop_browser(&mut self, browser_id: i8) -> Result<AppResponse<ExitStatus>> {
+    pub async fn stop_browser(&mut self, browser_id: i32) -> Result<AppResponse<ExitStatus>> {
         let child_id = self
             .index
             .get(&browser_id)
@@ -219,14 +219,14 @@ impl Processer {
             child.wait().await?
         };
 
-        update_browser_status_handle(browser_id, false).await?;
+        update_browser_status_handle(browser_id, 0).await?;
         Ok(AppResponse::success(
             Some("close browser finally !".to_string()),
             Some(exit_status),
         ))
     }
 
-    pub async fn status(&self, browser_id: i8) -> Result<AppResponse<bool>> {
+    pub async fn status(&self, browser_id: i32) -> Result<AppResponse<bool>> {
         let child_id = self
             .index
             .get(&browser_id)
@@ -246,21 +246,21 @@ impl Processer {
             }
         };
 
-        update_browser_status_handle(browser_id, status).await?;
+        update_browser_status_handle(browser_id, 0).await?;
         Ok(AppResponse::success(
             Some("select browser status !".to_string()),
             Some(status),
         ))
     }
 
-    pub async fn all_status(&self) -> Result<AppResponse<HashMap<i8, bool>>> {
+    pub async fn all_status(&self) -> Result<AppResponse<HashMap<i32, bool>>> {
         let mut status = HashMap::new();
 
         for (browser_id, _) in &self.index {
             let data = self.status(*browser_id).await?.data;
             let data = data.unwrap_or_default();
 
-            update_browser_status_handle(*browser_id, data).await?;
+            update_browser_status_handle(*browser_id, 0).await?;
             status.insert(*browser_id, data);
         }
 
