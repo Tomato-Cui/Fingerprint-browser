@@ -107,8 +107,6 @@ impl AppConfig {
 
     /// 初始化配置项
     pub fn build(config_str: &str) -> std::result::Result<Self, ConfigError> {
-        let t = config::File::from_str(config_str, FileFormat::Toml);
-
         let config = Config::builder()
             .add_source(config::File::from_str(config_str, FileFormat::Toml))
             .build()
