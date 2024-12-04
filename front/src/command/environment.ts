@@ -87,8 +87,8 @@ export const starts = async (browsers: Array<Browser>): Promise<any> => {
     return response
 }
 
-export const stops = async (browser_ids: Array<number>): Promise<any> => {
-    let response = invoke && await invoke('stops', { browser_ids });
+export const stops = async (browserIds: Array<number>): Promise<any> => {
+    let response = invoke && await invoke('stops', { browserIds });
     return response
 }
 

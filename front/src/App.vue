@@ -12,7 +12,7 @@
 import { starts, stops, status } from '@/command/environment'
 
 let environment = {
-  "id": 1,
+  "ID": 1, // TODO: 注意这里一定要大写.
   "name": "DEV Environment",
   "owner_id": "owner_123",
   "domain_name": "example.com",
