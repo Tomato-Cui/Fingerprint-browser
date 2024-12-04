@@ -16,6 +16,7 @@ pub fn build_root_router() -> Router {
             "/api/management/v1",
             Router::new()
                 .merge(routes::browser::build_browser_router())
+                .merge(routes::user::build_router())
                 .merge(routes::environment::build_environment_router())
                 .merge(routes::group::build_group_router())
                 .merge(

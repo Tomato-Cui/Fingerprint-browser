@@ -5,7 +5,7 @@ use sqlx::prelude::FromRow;
 /// Group数据结构
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct Group {
-    #[serde(skip_deserializing)] // 忽略反序列化
+    #[serde(rename = "ID")] // 忽略反序列化
     pub id: i32,
     pub name: String,
     pub description: Option<String>,
@@ -18,11 +18,11 @@ impl Group {
     /// 插入数据到group表
     pub async fn insert_group(
         name: &str,
-        description: Option<String>,
+        description: &str,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("insert into groups (name, description) values(?1, ?2)")
             .bind(name)
-            .bind(description.unwrap_or_default())
+            .bind(description)
             .execute(get_db()?)
             .await?;
 
@@ -30,7 +30,7 @@ impl Group {
     }
 
     /// 删除group表数据
-    pub async fn delete_group(id: i8) -> Result<bool, ApplicationServerError> {
+    pub async fn delete_group(id: i32) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query("delete from groups where id = ?1")
             .bind(id)
             .execute(get_db()?)
@@ -65,9 +65,9 @@ impl Group {
 
     /// 更新group表数据
     pub async fn update_group(
+        id: i32,
         name: &str,
-        description: Option<String>,
-        id: i8,
+        description: &str,
     ) -> Result<bool, ApplicationServerError> {
         let row = sqlx::query(
             "update groups set name = ?1, description = ?2, updated_at = DATETIME('now') where id = ?3",

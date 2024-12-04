@@ -174,7 +174,7 @@ const handleLogin = async () => {
       ElMessage.success("登录成功");
 
       // 跳转到首页
-      // router.push("/home");
+      router.push("/home");
     } else {
       // 如果没有 token，则提示用户登录失败
       throw new Error("登录失败，未返回 token");
