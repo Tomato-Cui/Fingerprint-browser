@@ -1,9 +1,12 @@
+static CONFIG: &str = include_str!("../.././config.toml");
+
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     use cores::database;
     use cores::database::Database;
 
     // init config
-    cores::config::init_config(r#"config.toml"#).await;
+    // cores::config::init_config(r#"config.toml"#).await;
+    cores::config::init_config_by_str(CONFIG).await;
 
     // init location before db
     cores::init_location(cores::config::get_config()?.get_locations().await?).await?;
