@@ -4,6 +4,7 @@ CREATE TABLE
         id INTEGER PRIMARY KEY AUTOINCREMENT, -- 自增ID
         owner_id TEXT NOT NULL,
         name TEXT NOT NULL UNIQUE, -- 环境名称
+        description TEXT, -- 环境名称
         domain_name TEXT NOT NULL, -- 域名
         open_urls TEXT NOT NULL, -- 其他URL
         repeat_config TEXT NOT NULL, -- 去重配置
@@ -32,6 +33,7 @@ CREATE TABLE
         status INTEGER NOT NULL DEFAULT 1, -- 浏览器状态（1为启用，0为禁用）
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 创建时间
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 更新时间
+        lasted_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 创建时间
         deleted_at DATETIME -- 删除时间
         -- FOREIGN KEY (group_id) REFERENCES groups (id) -- 外键关联group表
         -- FOREIGN KEY (fp_info_id) REFERENCES fingerprints (id) -- 外键关联group表

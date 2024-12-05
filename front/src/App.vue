@@ -3,10 +3,7 @@
   <router-view />
 </template>
 
-<script setup lang="ts">
-// import Home from '@/views/Home/Home.vue';
-import Home from "@/layouts/index.vue";
-</script>
+<script setup lang="ts"></script>
 
 <style>
 body {

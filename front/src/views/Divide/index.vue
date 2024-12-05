@@ -46,20 +46,18 @@
       <!-- 数据表 -->
       <div>
         <el-table
-          :data="divides"
+          :data="paginatedData"
           border
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column prop="id_code" label="ID/编码"></el-table-column>
-          <el-table-column prop="group_name" label="分组名称" width="180"
+          <el-table-column prop="id" label="ID/编码"></el-table-column>
+          <el-table-column prop="name" label="分组名称" width="180"
             ><template #default="{ row }">
-              <el-button
-                @click="goToEnvironmentPage(row.group_name)"
-                type="text"
-                >{{ row.group_name }}</el-button
-              >
+              <el-button @click="goToEnvironmentPage(row.id)" type="text">{{
+                row.name
+              }}</el-button>
             </template></el-table-column
           >
           <el-table-column
@@ -67,9 +65,9 @@
             label="分组环境总数"
           ></el-table-column>
           <el-table-column prop="remark" label="备注"></el-table-column>
-          <el-table-column prop="created_at" label="创建时间"></el-table-column>
-          <el-table-column prop="created_by" label="创建用户"></el-table-column>
-          <el-table-column prop="email" label="邮箱"></el-table-column>
+          <el-table-column prop="createdAt" label="创建时间"></el-table-column>
+          <el-table-column prop="ownerId" label="创建用户"></el-table-column>
+          <!-- <el-table-column prop="email" label="邮箱"></el-table-column> -->
           <el-table-column label="操作" width="300">
             <template #default="scope">
               <el-button size="mini" @click="handleRefresh(scope.row)"
@@ -94,7 +92,7 @@
                     <el-dropdown-item @click="handleTop(scope.row)">
                       {{ scope.row.isTop ? "取消置顶" : "置顶" }}
                     </el-dropdown-item>
-                    <el-dropdown-item @click="confirmDelete(scope.row)"
+                    <el-dropdown-item @click="deleteDivide(scope.row.id)"
                       >删除</el-dropdown-item
                     >
                   </el-dropdown-menu>
@@ -266,21 +264,19 @@ import { Search, ArrowDown } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import axios from "axios";
 import { getDivides, createDivide, deleteDivide } from "@/api/divideService";
-// import axiosInstance from "./axiosConfig";
-import { fetchDivides } from "@/api/divideService";
 import Layout from "@/layouts/index.vue";
-// State variables using Vue 3 Composition API
-const divides = ref([]); // 存储分组数据
-const page = ref(1); // 当前页码
-const pageSize = ref(10); // 每页显示的记录数
-const totalItems = ref(0); // 总记录数
 import { useRouter } from "vue-router";
+
 const router = useRouter();
 
 // 计算总页数
 const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
 // 获取分页数据
+const paginatedData = computed(() => {
+  const start = (page.value - 1) * pageSize.value;
+  return divides.value.slice(start, start + pageSize.value);
+});
 
 // 跳转到环境页面，传递 group_name 参数
 const goToEnvironmentPage = (groupName) => {
@@ -292,28 +288,42 @@ const goToEnvironmentPage = (groupName) => {
 // 切换页码
 const handlePageChange = async (newPage) => {
   page.value = newPage;
-  // fetchDivides();
-  const res = await getDivides(currentPage.value, pageSize.value);
-  console.log("res:", res.meta.total_items);
+  const res = await getDivides(page.value, pageSize.value);
   totalItems.value = res.meta.total_items;
   divides.value = res.data;
 };
 
-// 页面加载时获取分组数据
-onMounted(() => {
-  // fetchDivides();
-  console.log("----------------:", fetchDivides());
-});
+const page = ref(1); // 当前页
+const pageSize = ref(10); // 每页显示的条数
+const totalItems = ref(0); // 总数据条数
+const divides = ref([]); // 分组数据
 
-// 页面加载时获取分组数据
-onMounted(() => {
-  divides;
+onMounted(async () => {
+  try {
+    const res = await getDivides(page.value, pageSize.value);
+
+    // 检查返回数据的有效性
+    if (res && res.code === 1 && res.data) {
+      totalItems.value = res.data.total_count || 0; // 获取总条数
+      divides.value = res.data.data || []; // 获取分组数据，防止为空
+    } else {
+      console.error("响应数据格式错误或缺少必要字段");
+    }
+
+    // 判断是否有数据
+    if (totalItems.value === 0) {
+      console.log("没有符合条件的数据");
+      // 你可以在这里做一些处理，例如显示一个 "没有数据" 的提示
+    }
+  } catch (error) {
+    console.error("请求出错:", error);
+  }
 });
 
 const selectedGroup = ref("");
 
 const filteredData = computed(() => {
-  let filtered = tableData.value;
+  let filtered = divides.value;
 
   if (selectedGroup.value) {
     filtered = filtered.filter((item) =>
@@ -335,7 +345,7 @@ const filteredData = computed(() => {
 });
 
 const handleSearch = () => {
-  currentPage.value = 1;
+  page.value = 1;
 };
 
 const selectedRows = ref([]);
@@ -344,12 +354,12 @@ const handleSelectionChange = (selection) => {
 };
 
 const filteredGroups = computed(() => {
-  if (!tableData.value || !Array.isArray(tableData.value)) {
+  if (!divides.value || !Array.isArray(divides.value)) {
     return [];
   }
   return Array.from(
     new Set(
-      tableData.value.map((item) => ({
+      divides.value.map((item) => ({
         id: item.id,
         name: item.name,
       }))
@@ -393,7 +403,7 @@ const resetForm = () => {
 const formRef = ref(null);
 
 const handleCreateGroup = () => {
-  if (tableData.value.some((group) => group.name === form.value.name)) {
+  if (divides.value.some((group) => group.name === form.value.name)) {
     ElMessage.error("分组名称已存在，请使用其他名称");
     return;
   }
@@ -410,7 +420,7 @@ const handleCreateGroup = () => {
     topTime: null,
   };
 
-  tableData.value.push(newGroup);
+  divides.value.push(newGroup);
   dialogVisible.value = false;
   form.value = {
     name: "",
@@ -455,7 +465,7 @@ const handleDelete = () => {
   })
     .then(() => {
       const selectedIds = selectedRows.value.map((row) => row.id);
-      tableData.value = tableData.value.filter(
+      divides.value = divides.value.filter(
         (row) => !selectedIds.includes(row.id)
       );
       ElMessage.success("删除成功");
@@ -472,9 +482,9 @@ const handleRefresh = (row) => {
   });
 
   setTimeout(() => {
-    const index = tableData.value.findIndex((item) => item.id === row.id);
+    const index = divides.value.findIndex((item) => item.id === row.id);
     if (index !== -1) {
-      tableData.value[index] = {
+      divides.value[index] = {
         ...row,
         time: new Date().toLocaleString(),
         count: Math.floor(Math.random() * 100),
@@ -491,14 +501,12 @@ const handleRefresh = (row) => {
 const handleTop = (row) => {
   if (row.isTop) {
     row.isTop = false;
-    tableData.value.push(
-      tableData.value.splice(tableData.value.indexOf(row), 1)[0]
-    );
+    divides.value.push(divides.value.splice(divides.value.indexOf(row), 1)[0]);
     ElMessage.info(`已取消置顶：${row.name}`);
   } else {
     row.isTop = true;
-    tableData.value.unshift(
-      tableData.value.splice(tableData.value.indexOf(row), 1)[0]
+    divides.value.unshift(
+      divides.value.splice(divides.value.indexOf(row), 1)[0]
     );
     ElMessage.success(`已置顶：${row.name}`);
   }
@@ -511,7 +519,7 @@ const mergeForm = ref({
 });
 
 const availableGroups = computed(() => {
-  return tableData.value.filter(
+  return divides.value.filter(
     (item) => item.name !== mergeForm.value.currentGroup
   );
 });
@@ -528,10 +536,10 @@ const handleMergeConfirm = () => {
     return;
   }
 
-  const currentGroupData = tableData.value.filter(
+  const currentGroupData = divides.value.filter(
     (item) => item.name === mergeForm.value.currentGroup
   );
-  const targetGroupData = tableData.value.filter(
+  const targetGroupData = divides.value.filter(
     (item) => item.name === mergeForm.value.targetGroup
   );
 
@@ -539,13 +547,13 @@ const handleMergeConfirm = () => {
     currentGroupData.reduce((sum, item) => sum + item.count, 0) +
     targetGroupData.reduce((sum, item) => sum + item.count, 0);
 
-  tableData.value = tableData.value.filter(
+  divides.value = divides.value.filter(
     (item) =>
       item.name !== mergeForm.value.currentGroup &&
       item.name !== mergeForm.value.targetGroup
   );
 
-  tableData.value.push({
+  divides.value.push({
     id: Date.now(),
     name: mergeForm.value.targetGroup,
     count: totalCount,
@@ -578,11 +586,11 @@ const handleEditClick = (row) => {
 };
 
 const handleEditConfirm = () => {
-  const index = tableData.value.findIndex(
+  const index = divides.value.findIndex(
     (item) => item.name === editForm.value.name
   );
   if (index !== -1) {
-    tableData.value[index].remark = editForm.value.remark;
+    divides.value[index].remark = editForm.value.remark;
     ElMessage.success("分组修改成功");
     editDialogVisible.value = false;
   } else {
@@ -608,65 +616,25 @@ const confirmDelete = (row) => {
 };
 
 const deleteRow = (row) => {
-  tableData.value = tableData.value.filter((item) => item.id !== row.id);
+  divides.value = divides.value.filter((item) => item.id !== row.id);
   ElMessage({
     type: "success",
     message: "删除成功！",
   });
 };
 
-const tableData = ref([]);
 const searchKey = ref("");
 
 const currentPage = ref(1);
-// const pageSize = ref(10);
 const total = ref(0);
-
-onMounted(async () => {
-  tableData.value = await getDivides();
-  console.log("tableData.value:", tableData.value);
-});
-const paginatedData = computed(() => {
-  // 先过滤数据
-  let filteredResults = filteredData.value;
-
-  // 计算分页
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-
-  // 更新总数
-  total.value = filteredResults.length;
-
-  // 返回当前页数据
-  return filteredResults.slice(start, end);
-});
 
 const handleSizeChange = async (newSize) => {
   pageSize.value = newSize;
   currentPage.value = 1;
   const res = await getDivides(currentPage.value, pageSize.value);
-  console.log("res:", res.meta.total_items);
   totalItems.value = res.meta.total_items;
   divides.value = res.data;
 };
-
-// const handlePageChange = (newPage) => {
-//   currentPage.value = newPage;
-// };
-
-// const divides = ref([]);
-
-onMounted(async () => {
-  try {
-    // divides.value = await getDivides(1, 10);
-    const res = await getDivides(currentPage.value, pageSize.value);
-    console.log("res:", res.meta.total_items);
-    totalItems.value = res.meta.total_items;
-    divides.value = res.data;
-  } catch (error) {
-    console.error("加载分组数据失败:", error);
-  }
-});
 
 const newDivide = ref({
   idCode: "",

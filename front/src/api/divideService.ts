@@ -1,44 +1,60 @@
 import axiosInstance from './axiosConfig';
 
-
-
-export const fetchDivides = async (params: any) => {
-  console.log("fetchDivides:", params);
-
-  const { page, pageSize, divides, totalItems } = params;
+export const getDivides = async (page: number, pageSize: number) => {
+  console.log("getDivides:", page, pageSize);
 
   try {
-    const response = await axiosInstance.get("/divides", {
-      params: {
-        page: page.value,
-        page_size: pageSize.value,
-      },
-    });
-    divides.value = response.data.data;
-    totalItems.value = response.data.meta.total_items;
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching divides:", error);
-  }
-};
-
-
-export const getDivides = async (page: any, pageSize: any) => {
-
-  try {
-    const response = await axiosInstance.get('/divides', {
+    // 发起请求
+    const response = await axiosInstance.get("/environments/GetEnvironmentGroupBypage", {
       params: {
         page: page,
-        page_size: pageSize,
+        limit: pageSize,
       },
-    }); // 发送 GET 请求
+    });
     console.log("response.data:", response.data);
-    return response.data; // 返回分组数据
-  } catch (error) {
+
+    // 根据返回的JSON格式重构返回数据
+    return {
+      code: response.data.code,
+      message: response.data.message,
+      data: {
+        data: response.data.data.data.map((item: any) => ({
+          id: item.ID,
+          name: item.name,
+          remark: item.remark,
+          description: item.description,
+          createdAt: item.CreatedAt,
+          updatedAt: item.UpdatedAt,
+          ownerId: item.OwnerID,
+          group_count: item.count
+        })),
+        meta: {
+          page: response.data.data.page,
+          page_size: response.data.data.page_size,
+          total_items: response.data.data.total_count
+        }
+      }
+    };
+  } catch (error: any) {
     console.error('获取分组数据失败', error);
-    throw error; // 抛出错误
+
+    if (error.response) {
+      // 请求发出去了，服务器响应了状态码
+      console.error('Response error:', error.response.status);
+      console.error('Response data:', error.response.data);
+    } else if (error.request) {
+      // 请求发出去了，但没有收到响应
+      console.error('Request error:', error.request);
+    } else {
+      // 其他错误
+      console.error('Error message:', error.message);
+    }
+
+    throw error;  // 抛出错误
   }
 };
+
+
 
 
 export const createDivide = async (divideData: any) => {
@@ -54,20 +70,35 @@ export const createDivide = async (divideData: any) => {
 };
 
 
+
+
 export const deleteDivide = async (id: any) => {
+  console.log("deleteDivide:", id);
   try {
-    const response = await axiosInstance.delete(`/divides/${id}`); // 发送 DELETE 请求
-    return response.data; // 返回删除成功的响应数据
+    const response = await axiosInstance.delete(`/environments/groups/${id}`);
+
+    if (response.status === 200) {
+      window.location.reload();
+      console.log('删除成功');
+
+      return true; // 或者你可以返回删除成功的某个状态
+    }
+    console.log('删除失败，状态码：', response.status);
+    return false;
   } catch (error) {
     console.error('删除分组失败', error);
-    throw error; // 抛出错误
+    throw error;
   }
+
 };
+
+
+
+
 
 
 export default {
   getDivides,
   createDivide,
   deleteDivide,
-  fetchDivides
 };

@@ -1,5 +1,9 @@
 use crate::{apis::Result, state::get_app_cache_location};
+<<<<<<< HEAD
 use config::{Config, ConfigError};
+=======
+use config::{Config, ConfigError, FileFormat};
+>>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
 use serde::Deserialize;
 use std::path::PathBuf;
 use tokio::sync::OnceCell;
@@ -7,6 +11,19 @@ use tokio::sync::OnceCell;
 use crate::errors::ApplicationServerError;
 
 pub static ACONFIG: OnceCell<AppConfig> = OnceCell::const_new();
+<<<<<<< HEAD
+=======
+
+pub async fn init_config_by_str(config: &str) -> &'static AppConfig {
+    ACONFIG
+        .get_or_init(|| async {
+            let config = AppConfig::build(config).unwrap();
+            config
+        })
+        .await
+}
+
+>>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
 pub async fn init_config(path: &str) -> &'static AppConfig {
     ACONFIG
         .get_or_init(|| async {
@@ -89,6 +106,16 @@ impl AppConfig {
             .add_source(config::File::with_name(config_name))
             .add_source(config::File::with_name(".").required(false))
             .add_source(config::Environment::with_prefix("APP"))
+            .build()
+            .unwrap();
+
+        config.try_deserialize()
+    }
+
+    /// 初始化配置项
+    pub fn build(config_str: &str) -> std::result::Result<Self, ConfigError> {
+        let config = Config::builder()
+            .add_source(config::File::from_str(config_str, FileFormat::Toml))
             .build()
             .unwrap();
 

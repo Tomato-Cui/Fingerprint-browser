@@ -393,13 +393,13 @@
           <el-table-column type="selection" width="55"></el-table-column>
 
           <el-table-column
-            prop="id_code"
+            prop="ID"
             label="ID/编码"
             width="auto"
           ></el-table-column>
 
           <el-table-column
-            prop="group_name"
+            prop="group_id"
             label="分组"
             width="auto"
           ></el-table-column>
@@ -413,7 +413,7 @@
                 "
               >
                 <span>{{ scope.row.name }}</span>
-                <el-button type="text" @click="openCountDialog(scope.row)"
+                <el-button type="text" @click="openNameDialog(scope.row)"
                   >修改名称</el-button
                 >
               </div>
@@ -428,18 +428,19 @@
                   align-items: center;
                 "
               >
-                <span>{{ scope.row.ip }}</span>
-                <el-button type="text" @click="openIpDialog(scope.row)"
+                <span>{{ scope.row.proxy }}</span>
+                <el-button type="text" @click="proxyDialogVisible = true"
                   >修改IP</el-button
                 >
               </div>
             </template>
           </el-table-column>
           <el-table-column
-            prop="account_platform"
-            label="账号平台"
+            prop="lasted_at"
+            label="最近打开"
             width="auto"
-          >
+          ></el-table-column>
+          <el-table-column prop="domain_name" label="账号平台" width="auto">
             <template #default="scope">
               <div
                 style="
@@ -448,7 +449,7 @@
                   align-items: center;
                 "
               >
-                <span>{{ scope.row.account_platform }}</span>
+                <span>{{ scope.row.domain_name }}</span>
                 <el-button
                   type="text"
                   @click="openAccountPlatformDialog(scope.row)"
@@ -457,11 +458,50 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="last_opened"
-            label="最近打开"
-            width="auto"
-          ></el-table-column>
+
+          <el-table-column label="备注" width="auto" prop="remark">
+            <template #default="scope">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <span>{{ scope.row.remark }}</span>
+                <el-button type="text" @click="openRemarksDialog(scope.row)"
+                  >修改备注</el-button
+                >
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="创建时间" width="auto" prop="CreatedAt">
+            <template #default="scope">
+              <span>{{
+                scope.row.CreatedAt
+                  ? new Date(scope.row.CreatedAt).toLocaleString()
+                  : "N/A"
+              }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="浏览器" width="auto">
+            <template #default="scope">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <!-- <span>浏览器</span> -->
+                <el-button type="text" @click="openBrowser(scope.row)"
+                  >打开浏览器</el-button
+                >
+              </div>
+            </template>
+          </el-table-column>
+
           <el-table-column label="操作" width="auto">
             <template #default="scope">
               <el-dropdown>
@@ -476,7 +516,8 @@
                     <el-dropdown-item @click="handleCopy(scope.row)"
                       >复制</el-dropdown-item
                     >
-                    <el-dropdown-item @click="handleDeleteClick(scope.row)"
+                    <el-dropdown-item
+                      @click="handleDeleteClickWrapper(scope.row)"
                       >删除</el-dropdown-item
                     >
                     <el-dropdown-item @click="handleClearCache(scope.row)"
@@ -557,16 +598,16 @@
     </el-dialog>
 
     <!-- 修改IP对话框 -->
-    <el-dialog v-model="ipDialogVisible" title="修改IP" width="50%" center>
+    <el-dialog v-model="proxyDialogVisible" title="修改IP" width="50%" center>
       <el-form :model="ipForm" label-width="100px">
         <el-form-item label="IP地址">
-          <el-input v-model="ipForm.ip" placeholder="请输入IP地址" />
+          <!-- <el-input v-model="ipForm.ip" placeholder="请输入IP地址" /> -->
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="ipDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleIpConfirm">确定</el-button>
+          <el-button @click="proxyDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleProxyConfirm">确定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -593,9 +634,13 @@ import {
   updateEnvironmentIP,
   updateEnvironmentName,
   updateEnvironmentAccountPlatform,
+  getEnvironmentGroup,
 } from "@/api/environmentService";
 
 import { ElMessageBox, ElMessage } from "element-plus";
+import router from "@/router";
+import { useRoute } from "vue-router";
+import { removeGlobalNode } from "element-plus/es/utils/index.mjs";
 
 const input3 = ref("");
 const select = ref("");
@@ -677,16 +722,6 @@ const handleCurrentChange = (newPage: number) => {
   });
 };
 
-// 页面加载时调用
-onMounted(async () => {
-  const obj = await loadData(currentPage.value, pageSize.value);
-  console.log("?????????????:", obj);
-  tableData.value = obj.tableData;
-  total.value = Number(obj.total);
-  // tableData.value = obj.value.tableData;
-  // total.value = obj.value.total;
-});
-
 // 表单数据
 const moveForm = ref({
   group: "",
@@ -760,14 +795,56 @@ const refreshData = async () => {
   }
 };
 
-const openCountDialog = (row: any) => {
-  selectedRow.value = row;
-  currentRow.value.id = row.id; //需要修改的哪一行的id
-  console.log("------:", currentRow.value.id);
+// const openNameDialog = (row: any) => {
+//   // 非空和长度限制验证
+//   if (!row.name || row.name.length === 0) {
+//     ElMessage.error("名称不能为空");
+//     return; // 退出函数，不继续执行
+//   }
 
+//   if (row.name.length > 50) {
+//     // 假设名称长度最大为 50
+//     ElMessage.error("名称不能超过 50 个字符");
+//     return; // 退出函数，不继续执行
+//   }
+
+//   // 如果名称通过验证，则继续执行以下逻辑
+//   selectedRow.value = row;
+//   currentRow.value.id = row.id; // 需要修改的哪一行的id
+//   console.log("------:", currentRow.value.id);
+
+//   // 显示 countDialogVisible 对话框
+//   countForm.value.count = row.count;
+//   countDialogVisible.value = true;
+// };
+
+const openNameDialog = (row: any) => {
+  console.log("tableData:", tableData.value);
+  console.log("row.id:" + row.ID);
+  if (!row.ID) {
+    ElMessage.error("ID 无效");
+    return; // 如果 ID 无效，不继续执行
+  }
+
+  // 非空和长度限制验证
+  if (!row.name || row.name.length === 0) {
+    ElMessage.error("名称不能为空");
+    return; // 退出函数，不继续执行
+  }
+
+  if (row.name.length > 50) {
+    // 假设名称长度最大为 50
+    ElMessage.error("名称不能超过 50 个字符");
+    return; // 退出函数，不继续执行
+  }
+
+  // 如果名称通过验证，则继续执行以下逻辑
+  selectedRow.value = row;
+  currentRow.value.id = row.ID; // 需要修改的哪一行的id
+
+  // 显示 countDialogVisible 对话框
   countForm.value.count = row.count;
   countDialogVisible.value = true;
-  // updateEnvironmentName(row.id, row.name);
 };
 
 const openProxyDialog = (row: any) => {
@@ -826,23 +903,8 @@ const isValidIPv4 = (ip: string): boolean => {
 };
 
 // 确认修改 IP
-// const handleIpConfirm = async () => {
-//   try {
-//     if (!isValidIPv4(ipForm.value.ip)) {
-//       ElMessage.error("请输入有效的 IPv4 地址");
-//       return;
-//     }
-//     await updateEnvironmentIP(selectedRow.value.id, ipForm.value.ip);
-//     ElMessage.success("IP 更新成功");
-//     ipDialogVisible.value = false;
-//     loadData(currentPage.value, pageSize.value); // 重新加载数据
-//   } catch (error) {
-//     ElMessage.error("IP 更新失败");
-//   }
-// };
-
-// 确认修改 IP
 const handleIpConfirm = async () => {
+  console.log("ipForm.value.ip:", ipForm.value.ip);
   try {
     if (!isValidIPv4(ipForm.value.ip)) {
       ElMessage.error("请输入有效的 IPv4 地址");
@@ -854,7 +916,7 @@ const handleIpConfirm = async () => {
       return;
     }
 
-    await updateEnvironmentIP(selectedRow.value.id, ipForm.value.ip);
+    await updateEnvironmentIP(selectedRow.value.ID, ipForm.value.ip);
     ElMessage.success("IP 更新成功");
     ipDialogVisible.value = false;
     loadData(currentPage.value, pageSize.value); // 重新加载数据
@@ -871,21 +933,28 @@ const currentRow = ref<any>({
 }); // 存储当前选中的行
 
 // 加载表格数据
-const fetchTableData = async () => {
-  try {
-    const { tableData: data, total: totalItems } = await loadData(
-      currentPage.value,
-      pageSize.value
-    );
-    tableData.value = data;
-    total.value = Number(totalItems);
-  } catch (error) {
-    console.error("加载数据失败：", error);
-    ElMessage.error("加载数据失败，请稍后重试！");
-  }
-};
 
-// 提交修改名称的请求
+// // 提交修改名称的请求
+// const confirmUpdateName = async () => {
+//   if (countForm.value.count === "") {
+//     ElMessage.error("名称不能为空！");
+//     return;
+//   }
+
+//   try {
+//     await updateEnvironmentName(currentRow.value.id, countForm.value.count);
+//     // ElMessage.success("名称修改成功！");
+//     countDialogVisible.value = false;
+//     await loadData(currentPage.value, pageSize.value); // 重新加载数据
+//     console.log("调用loadData");
+
+//     window.location.reload();
+//   } catch (error) {
+//     console.error("更新名称失败：", error);
+//     ElMessage.error("名称修改失败，请稍后重试！");
+//   }
+// };
+
 const confirmUpdateName = async () => {
   if (countForm.value.count === "") {
     ElMessage.error("名称不能为空！");
@@ -893,10 +962,18 @@ const confirmUpdateName = async () => {
   }
 
   try {
+    // 调用修改名称的接口
     await updateEnvironmentName(currentRow.value.id, countForm.value.count);
-    // ElMessage.success("名称修改成功！");
+
+    // 关闭名称修改对话框
     countDialogVisible.value = false;
-    await fetchTableData(); // 重新加载数据
+
+    // 重新加载数据，刷新表格内容
+    window.location.reload();
+    console.log("数据已更新");
+
+    // 如果您想要显示修改成功的信息，可以使用以下消息提示
+    ElMessage.success("名称修改成功！");
   } catch (error) {
     console.error("更新名称失败：", error);
     ElMessage.error("名称修改失败，请稍后重试！");
@@ -959,6 +1036,39 @@ const confirmUpdateAccountPlatform = async () => {
   } catch (error) {
     console.error("更新账号平台失败:", error);
     ElMessage.error("账号平台修改失败，请稍后重试！");
+  }
+};
+
+onMounted(async () => {
+  const route = useRoute();
+  let group_id = route.query.group;
+
+  try {
+    if (group_id) {
+      let data = await getEnvironmentGroup(group_id as any, [
+        currentPage.value,
+        pageSize.value,
+      ]);
+      tableData.value = data.data.data;
+      console.log(data.data.data);
+      total.value = Number(data.data.total_count);
+    } else {
+      const data = await loadData(currentPage.value, pageSize.value);
+
+      tableData.value = data.data.data;
+      console.log(data.data.data);
+      total.value = Number(data.data.total_count);
+    }
+  } catch (error) {
+    console.error("更新账号平台失败:", error);
+    ElMessage.error("账号平台修改失败，请稍后重试！");
+  }
+});
+
+const handleDeleteClickWrapper = async (row: any) => {
+  let ok = await handleDeleteClick(row);
+  if (ok) {
+    tableData.value = tableData.value.filter((item: any) => item.ID != row.ID);
   }
 };
 </script>

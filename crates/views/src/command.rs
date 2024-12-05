@@ -44,7 +44,7 @@ pub mod browser {
     #[tauri::command]
     pub async fn starts(
         browsers: Vec<StartEnvironmentParams>,
-    ) -> Result<AppResponse<HashMap<i8, bool>>, tauri::Error> {
+    ) -> Result<AppResponse<HashMap<i32, bool>>, tauri::Error> {
         Ok(match browser::starts(browsers).await {
             Ok(v) => v,
             Err(_) => AppResponse::fail(Some("启动失败".to_string())),
@@ -53,11 +53,19 @@ pub mod browser {
 
     #[tauri::command]
     pub async fn stops(
-        browser_ids: Vec<i8>,
-    ) -> Result<AppResponse<HashMap<i8, i32>>, tauri::Error> {
+        browser_ids: Vec<i32>,
+    ) -> Result<AppResponse<HashMap<i32, i32>>, tauri::Error> {
         Ok(match browser::stop(browser_ids).await {
             Ok(v) => v,
             Err(_) => AppResponse::fail(Some("关闭失败".to_string())),
+        })
+    }
+
+    #[tauri::command]
+    pub async fn status() -> Result<AppResponse<HashMap<i32, bool>>, tauri::Error> {
+        Ok(match browser::view_active().await {
+            Ok(v) => v,
+            Err(_) => AppResponse::fail(Some("查询失败".to_string())),
         })
     }
 }
