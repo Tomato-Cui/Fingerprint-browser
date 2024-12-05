@@ -1,9 +1,12 @@
+use axum::routing::get;
 use axum::{extract::Json, response::IntoResponse};
 use axum::{routing::post, Router};
 use serde::{Deserialize, Serialize};
 
 pub fn build_router() -> Router {
-    Router::new().nest("/users", Router::new().route("/login", post(login::handle)))
+    Router::new()
+        .nest("/users", Router::new().route("/login", post(login::handle)))
+        .route("/logout", get(logout::handle))
 }
 
 mod login {
@@ -22,5 +25,15 @@ mod login {
             Ok(res) => AppResponse::<()>::success(res.message, None),
             Err(r) => AppResponse::<()>::success(Some(r.to_string()), None),
         }
+    }
+}
+
+mod logout {
+    use cores::requests::backend::auth;
+
+    use super::*;
+
+    pub async fn handle() -> impl IntoResponse {
+        auth::logout().await.unwrap_or_else(|e| e.into())
     }
 }

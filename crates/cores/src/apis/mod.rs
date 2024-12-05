@@ -54,6 +54,7 @@ pub mod enviroment {
     ) -> Result<AppResponse<(i64, Vec<Environment>)>> {
         let (mut total, mut browsers) =
             Environment::query_envirionment_by_group_id(page_num, page_size, group_id).await?;
+
         let last_len = page_num.unwrap_or_default() * page_size.unwrap_or_default();
         if last_len as i64 >= total || total == 0 {
             (total, browsers) = backend::environment::get_environment_by_group_id(
@@ -78,8 +79,12 @@ pub mod enviroment {
             Ok(b) => Ok(AppResponse::success(None, Some(Some(b)))),
             Err(e) => match e {
                 ApplicationServerError::DatabaseExecuteError(sqlx::Error::RowNotFound) => {
-                    let browser_ = backend::environment::get_environment_by_id(id).await?;
-                    Ok(AppResponse::success(None, Some(browser_)))
+                    match backend::environment::get_environment_by_id(id).await {
+                        Ok(browser_) => Ok(AppResponse::success(None, Some(browser_))),
+                        Err(_) => Ok(AppResponse::fail(Some(
+                            "current data not found. ".to_string(),
+                        ))),
+                    }
                 }
                 _ => Ok(AppResponse::success(None, Some(None))),
             },
@@ -331,7 +336,9 @@ pub static ACTUATOR: Lazy<Arc<Mutex<Processer>>> =
 pub mod browser {
     use std::collections::HashMap;
 
-    use models::{enviroment::Environment, fingerprint::Fingerprint};
+    use enviroment::get_browser_by_id_handle;
+    use models::fingerprint::Fingerprint;
+    use serde_json::{json, Value};
 
     use super::*;
     use crate::utils::{
@@ -341,7 +348,7 @@ pub mod browser {
 
     #[derive(Debug, Deserialize, Serialize)]
     pub struct StartEnvironmentParams {
-        environment: Environment,
+        environment_id: i32,
         fingerprint: Fingerprint,
     }
 
@@ -349,29 +356,43 @@ pub mod browser {
     /// get_proxy_from_registry
     pub async fn starts(
         payloads: Vec<StartEnvironmentParams>,
-    ) -> Result<AppResponse<HashMap<i32, bool>>> {
+    ) -> Result<AppResponse<HashMap<i32, Value>>> {
         let mut data = HashMap::new();
         for payload in payloads {
             let port = get_debug_port().await?;
+            let current_env = get_browser_by_id_handle(payload.environment_id).await?;
 
-            let id = payload.environment.id.clone().unwrap_or_default();
-            let browser_child_info = BrowserChildInfo::new(
-                payload.environment,
-                payload.fingerprint,
-                port,
-                &get_chrome_install_path().ok_or(ApplicationServerError::Error(
-                    anyhow::anyhow!("chrome location get fail !"),
-                ))?,
-            );
-
-            let ok = ACTUATOR
-                .lock()
-                .await
-                .start_browser(browser_child_info)
-                .await
-                .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
-
-            data.insert(id, ok.data.unwrap_or_default());
+            if let Some(Some(current_env)) = current_env.data {
+                let browser_child_info = BrowserChildInfo::new(
+                    current_env,
+                    payload.fingerprint,
+                    port,
+                    &get_chrome_install_path().ok_or(ApplicationServerError::Error(
+                        anyhow::anyhow!("chrome location get fail !"),
+                    ))?,
+                );
+                let ok = ACTUATOR
+                    .lock()
+                    .await
+                    .start_browser(browser_child_info)
+                    .await
+                    .map_err(|v| ApplicationServerError::Error(anyhow::anyhow!(v)))?;
+                data.insert(
+                    payload.environment_id,
+                    json!({
+                        "status": ok.data.unwrap_or_default(),
+                        "message":format!("环境ID为{}启动成功.", payload.environment_id),
+                    }),
+                );
+            } else {
+                data.insert(
+                    payload.environment_id,
+                    json!({
+                        "status":  false,
+                        "message":format!("启动失败, 指定环境ID不存在."),
+                    }),
+                );
+            }
         }
         Ok(AppResponse::success(None, Some(data)))
     }

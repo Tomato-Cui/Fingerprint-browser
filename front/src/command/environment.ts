@@ -1,43 +1,6 @@
 
 import { invoke } from '@tauri-apps/api/core';
 
-interface Environment {
-    ID?: number | null;                   // 自增ID, 可选的数字，可能为null
-    name: string;                         // 环境名称
-    description?: string | null;          // 环境描述，可能为null
-    owner_id: string;                     // 所有者ID
-    domain_name: string;                  // 账号平台的域名
-    open_urls?: string | null;            // 其他URL，可能为null
-    repeat_config?: string | null;        // 去重配置，可能为null
-    username: string;                     // 账号
-    password: string;                     // 密码
-    fakey: string;                        // 2FA密钥
-    cookie?: string | null;               // Cookie，可能为null
-    ignore_cookie_error?: number | null;  // 校验Cookie失败时的行为，可能为null
-    group_id?: number | null;             // 分组ID，可能为null
-    fp_info_id?: number | null;           // 指纹信息ID，可能为null
-    ua: string;                           // 用户代理
-    os: string;                           // 操作系统
-    country?: string | null;              // 国家/地区，可能为null
-    region?: string | null;               // 省/州，可能为null
-    city?: string | null;                 // 城市，可能为null
-    remark?: string | null;               // 备注，可能为null
-    ipchecker: string;                    // IP查询渠道
-    sys_app_cate_id: string;              // 应用分类ID
-    user_proxy_config?: string | null;    // 环境代理配置，可能为null
-    proxy?: string | null;                // 代理IP，可能为null
-    proxy_enable: number;                 // 代理启用
-    is_tz: number;                        // 是否启用时区
-    is_pos: number;                       // 是否启用地理位置
-    user_data_file: string;               // 用户数据文件路径
-    driver_location?: string | null;      // 浏览器驱动位置，可能为null
-    status: number;                       // 浏览器状态
-    created_at?: string | null;           // 创建时间，可能为null
-    updated_at?: string | null;           // 更新时间，可能为null
-    lasted_at?: string | null;            // 最近时间，可能为null
-    deleted_at?: string | null;           // 删除时间，可能为null
-}
-
 interface Fingerprint {
     id?: number | null;                    // 自增ID, 可选，可能为null
     ua_version: number;                    // UA版本范围102~124
@@ -76,29 +39,73 @@ interface Fingerprint {
     deleted_at?: string | null;            // 删除时间，可能为null
 }
 
-interface Browser {
-    environment: Environment,
+export interface Browser {
+    environment_id: Number,
     fingerprint: Fingerprint,
 }
 
+export const default_fingerprint = {
+    "id": 1,
+    "ua_version": 105,
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36",
+    "language_type": 1,
+    "languages": "en-US,en;q=0.9",
+    "gmt": "GMT+8",
+    "geography": "Asia/Shanghai",
+    "geo_tips": 1,
+    "geo_rule": 0,
+    "longitude": "121.4737",
+    "latitude": "31.2304",
+    "radius": 50,
+    "height": 1080,
+    "width": 1920,
+    "fonts_type": 1,
+    "fonts": "Arial, Helvetica, sans-serif",
+    "font_fingerprint": 1,
+    "web_rtc": 3,
+    "web_rtc_local_ip": "192.168.1.1",
+    "canvas": 0,
+    "webgl": 1,
+    "hardware_acceleration": 1,
+    "webgl_info": 0,
+    "audio_context": 0,
+    "speech_voices": 1,
+    "media": 0,
+    "cpu": 8,
+    "memory": 8,
+    "do_not_track": 1,
+    "battery": 1,
+    "port_scan": 0,
+    "white_list": "192.168.1.1, 192.168.1.2",
+    "created_at": "2024-01-01T10:00:00Z",
+    "updated_at": "2024-01-10T12:00:00Z",
+    "deleted_at": null
+};
 
-export const starts = async (browsers: Array<Browser>): Promise<any> => {
-    let response = invoke && await invoke('starts', { browsers });
+export const start = async (environment_id: Number, fingerprint: Fingerprint): Promise<any> => {
+    let response = invoke && await invoke('starts', {
+        environments: [
+            {
+                environment_id,
+                fingerprint
+            }
+        ]
+    });
+    return response
+}
+export const starts = async (browsers: Browser[]): Promise<any> => {
+    let response = invoke && await invoke('starts', {
+        environments: browsers
+    });
     return response
 }
 
-export const stops = async (browserIds: Array<number>): Promise<any> => {
-    let response = invoke && await invoke('stops', { browserIds });
+export const stops = async (envIds: Array<number>): Promise<any> => {
+    let response = invoke && await invoke('stops', { envIds });
     return response
 }
 
 export const status = async (): Promise<any> => {
     let response = invoke && await invoke('status');
     return response
-}
-
-export default {
-    starts,
-    stops,
-    status,
 }
