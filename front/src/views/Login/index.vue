@@ -157,6 +157,11 @@ import {
 
 import { login, register, sendCode } from "@/api/loginService";
 import { login as loginCommand } from "@/command/auth";
+import { getPlatForm } from "@/command/os";
+
+// const platform = getPlatForm().then((res) => {
+//   console.log(res);
+// });
 
 // 登录操作
 const handleLogin = async () => {
