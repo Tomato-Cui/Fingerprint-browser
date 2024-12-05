@@ -399,7 +399,7 @@
           ></el-table-column>
 
           <el-table-column
-            prop="name"
+            prop="group_id"
             label="分组"
             width="auto"
           ></el-table-column>
@@ -449,7 +449,7 @@
                   align-items: center;
                 "
               >
-                <span>{{ scope.row.account_platform }}</span>
+                <span>{{ scope.row.domain_name }}</span>
                 <el-button
                   type="text"
                   @click="openAccountPlatformDialog(scope.row)"
@@ -459,7 +459,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="备注" width="auto" prop="remarks">
+          <el-table-column label="备注" width="auto" prop="remark">
             <template #default="scope">
               <div
                 style="
@@ -468,7 +468,7 @@
                   align-items: center;
                 "
               >
-                <span>{{ scope.row.remarks }}</span>
+                <span>{{ scope.row.remark }}</span>
                 <el-button type="text" @click="openRemarksDialog(scope.row)"
                   >修改备注</el-button
                 >
@@ -476,11 +476,11 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="创建时间" width="auto" prop="creation_time">
+          <el-table-column label="创建时间" width="auto" prop="CreatedAt">
             <template #default="scope">
               <span>{{
-                scope.row.creation_time
-                  ? new Date(scope.row.creation_time).toLocaleString()
+                scope.row.CreatedAt
+                  ? new Date(scope.row.CreatedAt).toLocaleString()
                   : "N/A"
               }}</span>
             </template>

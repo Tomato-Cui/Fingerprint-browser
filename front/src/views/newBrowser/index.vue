@@ -39,22 +39,34 @@
                 placeholder="请输入浏览器名称"
               ></el-input>
             </el-col>
+
             <el-col :span="6">
               <div>分组</div>
-              <el-select v-model="form.groupName" placeholder="分组名字">
-                <el-option label="高" value="high"></el-option>
-                <el-option label="中" value="medium"></el-option>
-                <el-option label="低" value="low"></el-option>
+              <el-select
+                v-model="form.groupId"
+                placeholder="请选择分组"
+                :disabled="loading"
+                :style="{ width: '100%' }"
+                :dropdown-style="{ maxHeight: '300px', overflowY: 'auto' }"
+              >
+                <el-option
+                  v-for="groupId in groupIds"
+                  :key="groupId"
+                  :label="groupId"
+                  :value="groupId"
+                ></el-option>
               </el-select>
+              <el-spin v-if="loading" />
             </el-col>
-            <el-col :span="3">
+
+            <!-- <el-col :span="3">
               <br />
               <el-select v-model="form.priority" placeholder="便签">
                 <el-option label="高" value="high"></el-option>
                 <el-option label="中" value="medium"></el-option>
                 <el-option label="低" value="low"></el-option>
               </el-select>
-            </el-col>
+            </el-col> -->
           </el-row>
           <el-row :gutter="20">
             <el-col :span="6">
@@ -425,6 +437,29 @@ import Summary from "@/views/newBrowser/components/Summary.vue";
 import { ElMessage } from "element-plus";
 import Layout from "@/layouts/index.vue";
 import { type BaseInfo } from "@/config/components/struct";
+// import { fetchGroups } from "@/api/newbrowserService";
+import { onMounted } from "vue";
+
+import { fetchGroupIds } from "@/api/newbrowserService";
+import { createEnvironment } from "@/api/newbrowserService";
+
+const groupIds = ref([]); // 存储从后端获取的所有分组ID
+const loading = ref(false); // 加载状态
+
+// 获取分组ID数据的函数
+const fetchGroupIdsData = async () => {
+  loading.value = true; // 开始加载
+  try {
+    groupIds.value = await fetchGroupIds(1, 100); // 调用服务层获取所有分组ID
+  } catch (error) {
+    console.error("Failed to load group IDs:", error);
+  } finally {
+    loading.value = false; // 加载结束
+  }
+};
+
+// 组件挂载时获取数据
+onMounted(fetchGroupIdsData);
 
 const checkNetwork = () => {
   // 随机生成 0 或 1 的布尔值
@@ -446,7 +481,9 @@ const checkNetwork = () => {
     });
   }
 };
+
 const radio1 = ref("New York");
+
 // 基础数据
 const form: BaseInfo = reactive({
   id: 1,
@@ -460,6 +497,7 @@ const form: BaseInfo = reactive({
   cookie: "", //获取cookie信息
   combineCookie: false, //是否合并cookie
   remark: "", //获取备注信息
+  groupId: null, // 绑定选中的分组ID
 });
 
 // 代理数据
@@ -475,6 +513,7 @@ const platform = reactive({
   platform: "", //获取平台信息
   accountUrl: "", //获取账号地址
 });
+
 //指纹设置
 const finge = reactive({
   timeZone: true, //获取时区关于ip匹配
@@ -508,14 +547,6 @@ const apply = reactive({
   appName: "", //获取应用名称
 });
 
-const INFO = reactive({
-  form,
-  proxy,
-  platform,
-  finge,
-  apply,
-});
-
 // 滚动到页面的指定部分
 const scrollToSection = (sectionId: string) => {
   const section = document.getElementById(sectionId);
@@ -525,18 +556,53 @@ const scrollToSection = (sectionId: string) => {
 };
 
 // 提交表单
-// const onSubmit = () => {
-//   console.log('表单提交数据:', form);
-// };
+const onSubmit = async () => {
+  try {
+    const data = {
+      name: form.browserName,
+      domain_name: platform.accountUrl,
+      open_urls: "", // 需要根据实际情况设置
+      repeat_config: "", // 需要根据实际情况设置
+      username: "", // 需要根据实际情况设置
+      password: "", // 需要根据实际情况设置
+      fakey: "", // 需要根据实际情况设置
+      cookie: form.cookie,
+      ignore_cookie_error: 0,
+      group_id: 0, // 需要根据form.groupName转换
+      fp_info_id: 0, // 需要根据实际情况设置
+      ua: form.userAgent,
+      os: form.os,
+      country: "", // 需要根据实际情况设置
+      region: "", // 需要根据实际情况设置
+      city: "", // 需要根据实际情况设置
+      remark: form.remark,
+      ipchecker: proxy.ipLocation,
+      sys_app_cate_id: "0",
+      user_proxy_config: "", // 需要根据proxy配置转换
+      proxy: "", // 需要根据proxy配置转换
+      proxy_enable: proxy.proxyEnabled ? 1 : 0,
+      is_tz: finge.timeZone ? 1 : 0,
+      is_pos: finge.geLocation ? 1 : 0,
+      user_data_file: "", // 需要根据实际情况设置
+      driver_location: "", // 需要根据实际情况设置
+      status: 1,
+    };
 
-const onSubmit = () => {
-  ElMessageBox.alert(JSON.stringify(INFO, null, 2), "表单数据", {
-    confirmButtonText: "确定",
-    callback: <T>(action: T) => {
-      console.log("表单提交数据:", finge);
-    },
-  });
+    const response = await createEnvironment(data);
+    ElMessage({
+      message: "创建成功",
+      type: "success",
+    });
+    console.log("创建环境成功:", response);
+  } catch (error) {
+    ElMessage({
+      message: "创建失败",
+      type: "error",
+    });
+    console.error("创建环境失败:", error);
+  }
 };
+
 // 取消操作
 const onCancel = () => {
   console.log("取消操作");

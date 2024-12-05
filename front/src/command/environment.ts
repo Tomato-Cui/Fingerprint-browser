@@ -96,3 +96,9 @@ export const status = async (): Promise<any> => {
     let response = invoke && await invoke('status');
     return response
 }
+
+export default {
+    starts,
+    stops,
+    status,
+}

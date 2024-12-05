@@ -25,7 +25,8 @@ export const getDivides = async (page: number, pageSize: number) => {
           description: item.description,
           createdAt: item.CreatedAt,
           updatedAt: item.UpdatedAt,
-          ownerId: item.OwnerID
+          ownerId: item.OwnerID,
+          group_count: item.count
         })),
         meta: {
           page: response.data.data.page,
@@ -69,17 +70,7 @@ export const createDivide = async (divideData: any) => {
 };
 
 
-// export const deleteDivide = async (id: any) => {
-//   console.log("deleteDivide:", id);
-//   try {
-//     const response = await axiosInstance.delete(`/groups/environments/${id}`); // 发送 DELETE 请求
-//     return response.data; // 返回删除成功的响应数据
-//   } catch (error) {
-//     console.error('删除分组失败', error);
-//     throw error; // 抛出错误
-//   }
 
-// };
 
 export const deleteDivide = async (id: any) => {
   console.log("deleteDivide:", id);
@@ -100,6 +91,9 @@ export const deleteDivide = async (id: any) => {
   }
 
 };
+
+
+
 
 
 

@@ -29,10 +29,7 @@ export const getEnvironmentByID = async (id: number) => {
  * @param {Object} data 新的环境数据
  * @returns {Promise} 返回创建的记录
  */
-export const createEnvironment = async (data: any) => {
-  const response = await axiosInstance.post("/environments", data);
-  return response.data;
-};
+
 
 /**
  * 更新现有的环境记录
@@ -57,6 +54,7 @@ interface TableDataItem {
   creation_time: string;
   remarks: string;
   label: string | null; // 假设 label 是可选字段
+  // group_count: number;
 }
 
 export const loadData = async (...params: any) => {
@@ -310,7 +308,9 @@ export const getEnvironmentGroup = async (id: number, params: any) => {
     throw error;
   }
 };
-//
+
+
+
 
 // 导出所有方法
 export default {
@@ -320,4 +320,5 @@ export default {
   updateEnvironmentName,
   updateEnvironmentAccountPlatform,
   getEnvironmentGroup,
+
 };
