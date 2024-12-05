@@ -217,6 +217,11 @@ import {
 
 import { login, register, sendCode } from "@/api/loginService";
 import { login as loginCommand } from "@/command/auth";
+import { getPlatForm } from "@/command/os";
+
+// const platform = getPlatForm().then((res) => {
+//   console.log(res);
+// });
 
 // 登录操作
 const handleLogin = async () => {
@@ -227,7 +232,8 @@ const handleLogin = async () => {
     let token = response.data.token;
     // 登录成功后，检查返回的数据中是否包含 token
     if (token) {
-      //await loginCommand(token);
+      await loginCommand(token);
+      // await getPlatForm();
 
       // 保存 token 到 localStorage
       localStorage.setItem("token", token);

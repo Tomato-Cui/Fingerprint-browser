@@ -78,41 +78,9 @@ export const loadData = async (...params: any) => {
 
     // 检查返回数据的结构
     if (response.data && response.data.code === 1) {
-      // 获取数据和分页信息
-      // const responseData = response.data.data.data; // 获取实际数据数组
-      // const pagination = response.data.data; // 获取分页信息（在 data 中）
-
-      // 确保返回的数据是一个数组，并且分页信息存在
-      // if (Array.isArray(responseData) && pagination) {
-      // // 格式化表格数据
-      // obj.value.tableData = responseData.map((item: any, index: number) => ({
-      //   id: item.ID,
-      //   id_code: (params[0] - 1) * params[1] + index + 1, // 当前页码的显示 ID
-      //   group_name: item.group_id,
-      //   name: item.name,
-      //   ip: item.proxy,
-      //   last_opened: item.lasted_at
-      //     ? new Date(item.lasted_at).toLocaleString()
-      //     : "N/A", // 格式化时间
-      //   account_platform: item.domain_name,
-      //   actions: item.actions || null, // 确保 actions 字段可以为空
-      //   creation_time: item.CreatedAt,
-      //   remarks: item.remark || "", // 确保 remarks 字段为空时给一个空字符串
-      //   label: item.label || null, // 确保 label 字段可以为空
-      // }));
-
-      // // 更新总条数
-      // obj.value.total = pagination.total_count || 0; // 确保 pagination.total_count 存在
 
       return response.data;
 
-      // } else {
-      //   console.error(
-      //     "返回的数据格式不正确：数据或分页信息缺失",
-      //     response.data
-      //   );
-      //   ElMessage.error("数据加载失败：返回的数据格式不正确");
-      // }
     } else {
       console.error(
         "后端返回的状态码不是 1，错误信息：",
@@ -127,6 +95,9 @@ export const loadData = async (...params: any) => {
 
   return obj.value;
 };
+
+
+
 
 export const handleDeleteClick = async (row: any): Promise<boolean> => {
   console.log("loadData 类型: ", typeof loadData); // 打印 loadData 的类型
@@ -149,18 +120,7 @@ export const handleDeleteClick = async (row: any): Promise<boolean> => {
     const response = await axiosInstance.delete(deleteUrl);
     ElMessage.success("删除成功");
     return true;
-    // // 检查 loadData 是否是函数
-    // if (typeof loadData !== "function") {
-    //   throw new Error("loadData is not a valid function");
-    // }
 
-    // console.log("调用 loadData");
-    // loadData(1, 10); // 调用 loadData
-
-
-    // console.log("loadData 调用完成");
-
-    // window.location.reload();
   } catch (error: any) {
     if (error.isAxiosError) {
       console.error("请求失败:", error.response);
@@ -173,10 +133,10 @@ export const handleDeleteClick = async (row: any): Promise<boolean> => {
   }
 };
 
-export const updateEnvironmentIP = async (id: number, ip: string) => {
-  console.log("调用updateEnvironmentIP，传递的ID:", id, "IP:", ip);
+export const updateEnvironmentIP = async (ID: number, ip: string) => {
+  console.log("调用updateEnvironmentIP，传递的ID:", ID, "IP:", ip);
 
-  if (!id || !ip) {
+  if (!ID || !ip) {
     throw new Error("ID 或 IP 参数缺失");
   }
 
@@ -188,7 +148,7 @@ export const updateEnvironmentIP = async (id: number, ip: string) => {
 
     // 配置请求头，确保发送 JSON 格式
     const response = await axiosInstance.put(
-      `/environments/${id}`,
+      `/environments/${ID}`,
       requestData,
       {}
     );
@@ -206,6 +166,7 @@ export const updateEnvironmentIP = async (id: number, ip: string) => {
 };
 
 export const updateEnvironmentName = async (id: number, name: string) => {
+  console.log("name:", name);
   console.log("调用updateEnvironmentName");
   try {
     // 发送更新名称请求
