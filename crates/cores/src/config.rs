@@ -1,9 +1,5 @@
 use crate::{apis::Result, state::get_app_cache_location};
-<<<<<<< HEAD
-use config::{Config, ConfigError};
-=======
 use config::{Config, ConfigError, FileFormat};
->>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
 use serde::Deserialize;
 use std::path::PathBuf;
 use tokio::sync::OnceCell;
@@ -11,8 +7,6 @@ use tokio::sync::OnceCell;
 use crate::errors::ApplicationServerError;
 
 pub static ACONFIG: OnceCell<AppConfig> = OnceCell::const_new();
-<<<<<<< HEAD
-=======
 
 pub async fn init_config_by_str(config: &str) -> &'static AppConfig {
     ACONFIG
@@ -23,7 +17,6 @@ pub async fn init_config_by_str(config: &str) -> &'static AppConfig {
         .await
 }
 
->>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
 pub async fn init_config(path: &str) -> &'static AppConfig {
     ACONFIG
         .get_or_init(|| async {

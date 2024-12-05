@@ -30,23 +30,15 @@ pub mod client {
     type BeforeCallFunction = fn(
         rb: reqwest::RequestBuilder,
     ) -> Pin<
-<<<<<<< HEAD
-        Box<dyn Future<Output = std::result::Result<reqwest::RequestBuilder, reqwest::Error>>>,
-=======
         Box<
             dyn Future<Output = std::result::Result<reqwest::RequestBuilder, reqwest::Error>>
                 + Send,
         >,
->>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
     >;
     type AfterCallFunction = fn(
         response: reqwest::Response,
     ) -> Pin<
-<<<<<<< HEAD
-        Box<dyn Future<Output = std::result::Result<reqwest::Response, reqwest::Error>>>,
-=======
         Box<dyn Future<Output = std::result::Result<reqwest::Response, reqwest::Error>> + Send>,
->>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
     >;
 
     pub struct Client {
