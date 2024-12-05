@@ -182,9 +182,20 @@ pub mod client {
 }
 
 pub mod auth {
-    use crate::auth::{init_auth_state, set_token};
+    use crate::{
+        auth::{clear_token, init_auth_state, set_token},
+        utils::response::AppResponse,
+    };
 
     use super::*;
+
+    pub async fn logout() -> Result<AppResponse<()>> {
+        clear_token().await;
+        Ok(AppResponse::success(
+            Some("logout success.".to_string()),
+            Some(()),
+        ))
+    }
 
     pub async fn login(username: &str, password: &str) -> Result<JsonRespnse> {
         let data = json!({

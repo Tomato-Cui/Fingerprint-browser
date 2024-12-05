@@ -4,40 +4,15 @@
       <div class="search-bar">
         <el-input-group>
           <!-- 筛选字段选择框 -->
-          <el-select
-            v-model="select"
-            placeholder="请选择字段"
-            style="width: 200px"
-            class="adaptive-select"
-          >
-            <el-option
-              v-for="item in fields"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
+          <el-select v-model="select" placeholder="请选择字段" style="width: 200px" class="adaptive-select">
+            <el-option v-for="item in fields" :key="item.value" :label="item.label" :value="item.value"></el-option>
           </el-select>
           <!-- 操作符选择框 -->
-          <el-select
-            v-model="operator"
-            placeholder="操作符"
-            style="width: 150px"
-            class="adaptive-select"
-          >
-            <el-option
-              v-for="item in operators"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
+          <el-select v-model="operator" placeholder="操作符" style="width: 150px" class="adaptive-select">
+            <el-option v-for="item in operators" :key="item.value" :label="item.label" :value="item.value"></el-option>
           </el-select>
           <!-- 输入内容框 -->
-          <el-input
-            v-model="input3"
-            placeholder="请输入内容"
-            style="width: 300px"
-            class="adaptive-input"
-          ></el-input>
+          <el-input v-model="input3" placeholder="请输入内容" style="width: 300px" class="adaptive-input"></el-input>
           <!-- 删除条件按钮 -->
           <!-- <el-button
           icon="el-icon-close"
@@ -51,51 +26,33 @@
       <div class="function">
         <div class="function-left">
           <!-- 批量打开按钮 -->
-          <el-button type="text">
-            <img src="@/icons/svg/dakai.svg" alt="" />批量打开</el-button
-          >
+          <el-button type="text" :onclick="openBrowsers">
+            <img src="@/icons/svg/dakai.svg" alt="" />批量打开</el-button>
           <!-- 批量导出按钮 -->
           <el-button type="text">
-            <img src="@/icons/svg/daochu.svg" alt="" />批量导出</el-button
-          >
+            <img src="@/icons/svg/daochu.svg" alt="" />批量导出</el-button>
           <!-- 关闭按钮 -->
           <el-button type="text">
-            <img src="@/icons/svg/guanbi.svg" alt="" />关闭</el-button
-          >
+            <img src="@/icons/svg/guanbi.svg" alt="" />关闭</el-button>
           <!-- 移动按钮 -->
           <el-button type="text" @click="moveDialogVisible = true">
-            <img src="@/icons/svg/yidong.svg" alt="" />移动</el-button
-          >
+            <img src="@/icons/svg/yidong.svg" alt="" />移动</el-button>
 
           <!-- 移动环境对话框 -->
-          <el-dialog
-            v-model="moveDialogVisible"
-            title="移动环境"
-            width="600px"
-            center
-          >
+          <el-dialog v-model="moveDialogVisible" title="移动环境" width="600px" center>
             <el-form :model="moveForm" label-width="80px">
               <el-form-item label="环境编号">
                 <span>{{ selectedEnvId }}</span>
               </el-form-item>
               <el-form-item label="分组">
-                <el-select
-                  v-model="moveForm.group"
-                  placeholder="请选择分组"
-                  style="width: 100%"
-                >
+                <el-select v-model="moveForm.group" placeholder="请选择分组" style="width: 100%">
                   <el-option label="分组1" value="1" />
                   <el-option label="分组2" value="2" />
                   <el-option label="分组3" value="3" />
                 </el-select>
               </el-form-item>
               <el-form-item label="授权用户">
-                <el-select
-                  v-model="moveForm.users"
-                  multiple
-                  placeholder="请选择用户"
-                  style="width: 100%"
-                >
+                <el-select v-model="moveForm.users" multiple placeholder="请选择用户" style="width: 100%">
                   <el-option label="用户1" value="1" />
                   <el-option label="用户2" value="2" />
                   <el-option label="用户3" value="3" />
@@ -105,20 +62,14 @@
             <template #footer>
               <span class="dialog-footer">
                 <el-button @click="moveDialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="handleMoveConfirm"
-                  >确定</el-button
-                >
+                <el-button type="primary" @click="handleMoveConfirm">确定</el-button>
               </span>
             </template>
           </el-dialog>
 
           <el-dropdown>
             <!-- 修改环境按钮 -->
-            <el-button
-              type="text"
-              :disabled="selectedRows.length !== 1"
-              style="display: none"
-            >
+            <el-button type="text" :disabled="selectedRows.length !== 1" style="display: none">
               <img src="@/icons/svg/xiugaihuanjing.svg" alt="" />
               修改环境
               <el-icon class="el-icon--right"><arrow-down /></el-icon>
@@ -126,25 +77,26 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item @click="proxyDialogVisible = true">
-                  <el-icon><Connection /></el-icon>修改代理
+                  <el-icon>
+                    <Connection />
+                  </el-icon>修改代理
                 </el-dropdown-item>
                 <el-dropdown-item @click="fingerprintDialogVisible = true">
-                  <el-icon><Stamp /></el-icon>修改指纹
+                  <el-icon>
+                    <Stamp />
+                  </el-icon>修改指纹
                 </el-dropdown-item>
                 <el-dropdown-item @click="accountDialogVisible = true">
-                  <el-icon><User /></el-icon>修改账号
+                  <el-icon>
+                    <User />
+                  </el-icon>修改账号
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
 
           <!-- 修改代理对话框 -->
-          <el-dialog
-            v-model="proxyDialogVisible"
-            title="修改代理"
-            width="50%"
-            center
-          >
+          <el-dialog v-model="proxyDialogVisible" title="修改代理" width="50%" center>
             <el-form :model="proxyForm" label-width="100px">
               <el-form-item label="环境编号">
                 <span>{{ selectedEnvId }}</span>
@@ -172,26 +124,14 @@
             <template #footer>
               <span class="dialog-footer">
                 <el-button @click="proxyDialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="handleProxyConfirm"
-                  >确定</el-button
-                >
+                <el-button type="primary" @click="handleProxyConfirm">确定</el-button>
               </span>
             </template>
           </el-dialog>
 
           <!-- 修改指纹对话框 -->
-          <el-dialog
-            v-model="fingerprintDialogVisible"
-            title="修改指纹"
-            width="50%"
-            center
-            :style="{ padding: '20px' }"
-          >
-            <el-form
-              :model="fingerprintForm"
-              label-width="100px"
-              label-position="left"
-            >
+          <el-dialog v-model="fingerprintDialogVisible" title="修改指纹" width="50%" center :style="{ padding: '20px' }">
+            <el-form :model="fingerprintForm" label-width="100px" label-position="left">
               <el-form-item label="环境编号">
                 <span>{{ selectedEnvId }}</span>
               </el-form-item>
@@ -211,10 +151,7 @@
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="User Agent">
-                <el-select
-                  v-model="fingerprintForm.userAgent"
-                  placeholder="请选择User Agent"
-                >
+                <el-select v-model="fingerprintForm.userAgent" placeholder="请选择User Agent">
                   <el-option label="Chrome" value="chrome"></el-option>
                   <el-option label="Firefox" value="firefox"></el-option>
                   <el-option label="Safari" value="safari"></el-option>
@@ -284,76 +221,41 @@
             </el-form>
             <template #footer>
               <span class="dialog-footer">
-                <el-button @click="fingerprintDialogVisible = false"
-                  >取消</el-button
-                >
-                <el-button type="primary" @click="handleFingerprintConfirm"
-                  >确定</el-button
-                >
+                <el-button @click="fingerprintDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="handleFingerprintConfirm">确定</el-button>
               </span>
             </template>
           </el-dialog>
 
           <!-- 修改账号对话框 -->
-          <el-dialog
-            v-model="accountDialogVisible"
-            title="修改账号"
-            width="50%"
-            center
-          >
+          <el-dialog v-model="accountDialogVisible" title="修改账号" width="50%" center>
             <el-form :model="accountForm" label-width="100px">
               <el-form-item label="环境编号">
                 <span>{{ selectedEnvId }}</span>
               </el-form-item>
               <el-form-item label="账号平台">
-                <el-input
-                  v-model="accountPlatformForm.account_platform"
-                  placeholder="请输入平台"
-                />
+                <el-input v-model="accountPlatformForm.account_platform" placeholder="请输入平台" />
               </el-form-item>
               <el-form-item label="标签">
-                <el-input
-                  type="textarea"
-                  v-model="accountForm.tags"
-                  placeholder="请输入标签，多个标签用逗号分隔"
-                />
+                <el-input type="textarea" v-model="accountForm.tags" placeholder="请输入标签，多个标签用逗号分隔" />
               </el-form-item>
               <el-form-item label="用户账号">
-                <el-input
-                  v-model="accountForm.username"
-                  placeholder="请输入用户账号"
-                />
+                <el-input v-model="accountForm.username" placeholder="请输入用户账号" />
               </el-form-item>
               <el-form-item label="用户密码">
-                <el-input
-                  v-model="accountForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                />
+                <el-input v-model="accountForm.password" type="password" placeholder="请输入密码" />
               </el-form-item>
               <el-form-item label="2FA密钥">
-                <el-input
-                  v-model="accountForm.twoFactorKey"
-                  placeholder="请输入2FA密钥"
-                />
+                <el-input v-model="accountForm.twoFactorKey" placeholder="请输入2FA密钥" />
               </el-form-item>
               <el-form-item label="Cookie">
-                <el-input
-                  type="textarea"
-                  v-model="accountForm.cookies"
-                  placeholder="请输入Cookie"
-                  :rows="3"
-                />
+                <el-input type="textarea" v-model="accountForm.cookies" placeholder="请输入Cookie" :rows="3" />
               </el-form-item>
             </el-form>
             <template #footer>
               <span class="dialog-footer">
-                <el-button @click="accountDialogVisible = false"
-                  >取消</el-button
-                >
-                <el-button type="primary" @click="handleAccountConfirm"
-                  >确定</el-button
-                >
+                <el-button @click="accountDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="handleAccountConfirm">确定</el-button>
               </span>
             </template>
           </el-dialog>
@@ -361,8 +263,7 @@
           <el-dropdown trigger="hover">
             <!-- 更多按钮 -->
             <el-button type="text">
-              <img src="@/icons/svg/gengduo.svg" alt="" />更多</el-button
-            >
+              <img src="@/icons/svg/gengduo.svg" alt="" />更多</el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>更新环境</el-dropdown-item>
@@ -378,100 +279,64 @@
         <div class="function-right">
           <!-- 刷新按钮 -->
           <el-button type="text" @click="refreshData">
-            <img src="@/icons/svg/shuaxin-small.svg" alt="" />刷新</el-button
-          >
+            <img src="@/icons/svg/shuaxin-small.svg" alt="" />刷新</el-button>
         </div>
       </div>
       <div>
         <!-- 数据表格 -->
-        <el-table
-          :data="tableData"
-          border
-          style="width: 100%"
-          @selection-change="handleSelectionChange"
-        >
+        <el-table :data="tableData" border style="width: 100%" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55"></el-table-column>
 
-          <el-table-column
-            prop="ID"
-            label="ID/编码"
-            width="auto"
-          ></el-table-column>
+          <el-table-column prop="ID" label="ID/编码" width="auto"></el-table-column>
 
-          <el-table-column
-            prop="group_id"
-            label="分组"
-            width="auto"
-          ></el-table-column>
+          <el-table-column prop="group_id" label="分组" width="auto"></el-table-column>
           <el-table-column label="名称" width="auto">
             <template #default="scope">
-              <div
-                style="
+              <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                "
-              >
+                ">
                 <span>{{ scope.row.name }}</span>
-                <el-button type="text" @click="openNameDialog(scope.row)"
-                  >修改名称</el-button
-                >
+                <el-button type="text" @click="openNameDialog(scope.row)">修改名称</el-button>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="IP" width="auto">
             <template #default="scope">
-              <div
-                style="
+              <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                "
-              >
+                ">
                 <span>{{ scope.row.proxy }}</span>
-                <el-button type="text" @click="openIpDialog(scope.row)"
-                  >修改IP</el-button
-                >
+                <el-button type="text" @click="openIpDialog(scope.row)">修改IP</el-button>
               </div>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="lasted_at"
-            label="最近打开"
-            width="auto"
-          ></el-table-column>
+          <el-table-column prop="lasted_at" label="最近打开" width="auto"></el-table-column>
           <el-table-column prop="domain_name" label="账号平台" width="auto">
             <template #default="scope">
-              <div
-                style="
+              <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                "
-              >
+                ">
                 <span>{{ scope.row.domain_name }}</span>
-                <el-button
-                  type="text"
-                  @click="openAccountPlatformDialog(scope.row)"
-                  >修改平台</el-button
-                >
+                <el-button type="text" @click="openAccountPlatformDialog(scope.row)">修改平台</el-button>
               </div>
             </template>
           </el-table-column>
 
           <el-table-column label="备注" width="auto" prop="remark">
             <template #default="scope">
-              <div
-                style="
+              <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                "
-              >
+                ">
                 <span>{{ scope.row.remark }}</span>
-                <el-button type="text" @click="openRemarksDialog(scope.row)"
-                  >修改备注</el-button
-                >
+                <el-button type="text" @click="openRemarksDialog(scope.row)">修改备注</el-button>
               </div>
             </template>
           </el-table-column>
@@ -487,17 +352,16 @@
           </el-table-column>
           <el-table-column label="浏览器" width="auto">
             <template #default="scope">
-              <div
-                style="
+              <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                "
-              >
+                ">
                 <!-- <span>浏览器</span> -->
-                <el-button type="text" @click="openBrowser(scope.row)"
-                  >打开浏览器</el-button
-                >
+                <el-button type="text"
+                  @click="() => isOpened(scope.row) ? closeBrowser(scope.row) : openBrowser(scope.row)">{{
+                    isOpened(scope.row) ? "关闭" : "打开"
+                  }}浏览器</el-button>
               </div>
             </template>
           </el-table-column>
@@ -510,28 +374,13 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item @click="handleEdit(scope.row)"
-                      >编辑</el-dropdown-item
-                    >
-                    <el-dropdown-item @click="handleCopy(scope.row)"
-                      >复制</el-dropdown-item
-                    >
-                    <el-dropdown-item
-                      @click="handleDeleteClickWrapper(scope.row)"
-                      >删除</el-dropdown-item
-                    >
-                    <el-dropdown-item @click="handleClearCache(scope.row)"
-                      >清除缓存</el-dropdown-item
-                    >
-                    <el-dropdown-item @click="openProxyDialog(scope.row)"
-                      >修改代理</el-dropdown-item
-                    >
-                    <el-dropdown-item @click="openAccountDialog(scope.row)"
-                      >修改账号</el-dropdown-item
-                    >
-                    <el-dropdown-item @click="openFingerprintDialog(scope.row)"
-                      >修改指纹</el-dropdown-item
-                    >
+                    <el-dropdown-item @click="handleEdit(scope.row)">编辑</el-dropdown-item>
+                    <el-dropdown-item @click="handleCopy(scope.row)">复制</el-dropdown-item>
+                    <el-dropdown-item @click="handleDeleteClickWrapper(scope.row)">删除</el-dropdown-item>
+                    <el-dropdown-item @click="handleClearCache(scope.row)">清除缓存</el-dropdown-item>
+                    <el-dropdown-item @click="openProxyDialog(scope.row)">修改代理</el-dropdown-item>
+                    <el-dropdown-item @click="openAccountDialog(scope.row)">修改账号</el-dropdown-item>
+                    <el-dropdown-item @click="openFingerprintDialog(scope.row)">修改指纹</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -539,42 +388,23 @@
           </el-table-column>
         </el-table>
         <!-- 分页组件 -->
-        <el-pagination
-          background
-          layout="prev, pager, next, sizes, total"
-          :current-page="currentPage"
-          :page-sizes="[5, 10, 20, 50]"
-          :page-size="pageSize"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        ></el-pagination>
+        <el-pagination background layout="prev, pager, next, sizes, total" :current-page="currentPage"
+          :page-sizes="[5, 10, 20, 50]" :page-size="pageSize" :total="total" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"></el-pagination>
       </div>
     </div>
 
     <!-- 修改状态对话框 -->
-    <el-dialog
-      v-model="accountPlatformDialogVisible"
-      title="修改账号平台"
-      width="50%"
-      center
-    >
+    <el-dialog v-model="accountPlatformDialogVisible" title="修改账号平台" width="50%" center>
       <el-form :model="statusForm" label-width="100px">
         <el-form-item label="网址">
-          <el-input
-            v-model="accountPlatformForm.account_platform"
-            placeholder="请输入网址"
-          />
+          <el-input v-model="accountPlatformForm.account_platform" placeholder="请输入网址" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="accountPlatformDialogVisible = false"
-            >取消</el-button
-          >
-          <el-button type="primary" @click="confirmUpdateAccountPlatform"
-            >确定</el-button
-          >
+          <el-button @click="accountPlatformDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmUpdateAccountPlatform">确定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -590,9 +420,7 @@
         <span class="dialog-footer">
           <el-button @click="countDialogVisible = false">取消</el-button>
 
-          <el-button type="primary" @click="confirmUpdateName()"
-            >确定</el-button
-          >
+          <el-button type="primary" @click="confirmUpdateName()">确定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -640,6 +468,7 @@ import {
 import { ElMessageBox, ElMessage } from "element-plus";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { default_fingerprint, start, starts, stops } from "@/command/environment";
 
 const input3 = ref("");
 const select = ref("");
@@ -1035,6 +864,42 @@ const handleDeleteClickWrapper = async (row: any) => {
     tableData.value = tableData.value.filter((item: any) => item.ID != row.ID);
   }
 };
+
+const openedBrowser = ref<Array<string>>([]);
+const isOpened = (row: any) => {
+  let exist = openedBrowser.value.find(item => item == row.ID)
+  return exist
+}
+const openBrowser = async (row: any) => {
+  let response = await start(row.ID, default_fingerprint)
+  let rows = response.data;
+
+  console.log(row.ID, response);
+
+  for (let key of Object.keys(rows)) {
+    let { status } = rows[key];
+    if (status) { openedBrowser.value.push(key) }
+  }
+}
+const closeBrowser = async (row: any) => {
+  let response = await stops([row.ID])
+}
+
+const openBrowsers = async () => {
+  let checkEnvs = selectedRows.value.map(item => ({
+    environment_id: item.ID,
+    fingerprint: default_fingerprint,
+  }));
+
+  let response = await starts(checkEnvs);
+
+  let rows = response.data;
+  for (let key of Object.keys(rows)) {
+    let { status } = rows[key];
+    if (status) { openedBrowser.value.push(key) }
+  }
+}
+
 </script>
 
 <style scoped>
@@ -1043,29 +908,37 @@ const handleDeleteClickWrapper = async (row: any) => {
   align-items: center;
   gap: 10px;
 }
+
 .input-with-select {
   margin: 10px;
 }
+
 .adaptive-select {
   min-width: 120px;
 }
+
 .adaptive-input {
   min-width: 180px;
 }
+
 .Env {
   background-color: #ffffff;
   border-radius: 16px 16px;
 }
+
 .function {
   margin: 10px;
 }
+
 .search-input {
   flex-grow: 1;
 }
+
 .el-button {
   color: black;
   background-color: #f7f8fa;
 }
+
 .function {
   display: flex;
   justify-content: space-between;
@@ -1094,6 +967,7 @@ const handleDeleteClickWrapper = async (row: any) => {
   .function {
     flex-direction: column;
   }
+
   .function-left,
   .function-right {
     justify-content: center;

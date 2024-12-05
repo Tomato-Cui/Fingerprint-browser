@@ -31,47 +31,25 @@
       <div class="login-right">
         <el-tabs v-model="activeTab" class="login-tabs">
           <el-tab-pane label="登录" name="login">
-            <el-form
-              :model="loginForm"
-              :rules="loginRules"
-              ref="loginFormRef"
-              class="login-form"
-            >
+            <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
               <h3 class="form-title">账号登录</h3>
 
               <el-form-item prop="username">
-                <el-input
-                  v-model="loginForm.username"
-                  placeholder="请输入账号"
-                  prefix-icon="el-icon-user"
-                  class="custom-input"
-                />
+                <el-input v-model="loginForm.username" placeholder="请输入账号" prefix-icon="el-icon-user"
+                  class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="password">
-                <el-input
-                  v-model="loginForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  prefix-icon="el-icon-lock"
-                  show-password
-                  class="custom-input"
-                />
+                <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" prefix-icon="el-icon-lock"
+                  show-password class="custom-input" />
               </el-form-item>
 
               <div class="remember-forgot">
                 <el-checkbox v-model="loginForm.rememberMe">记住我</el-checkbox>
-                <el-button type="text" @click="forgotPassword"
-                  >忘记密码？</el-button
-                >
+                <el-button type="text" @click="forgotPassword">忘记密码？</el-button>
               </div>
 
-              <el-button
-                type="primary"
-                class="submit-btn"
-                :loading="loading"
-                @click="handleLogin"
-              >
+              <el-button type="primary" class="submit-btn" :loading="loading" @click="handleLogin">
                 登录
               </el-button>
 
@@ -101,67 +79,34 @@
           </el-tab-pane>
 
           <el-tab-pane label="注册" name="register">
-            <el-form
-              :model="registerForm"
-              :rules="registerRules"
-              ref="registerFormRef"
-              class="login-form"
-            >
+            <el-form :model="registerForm" :rules="registerRules" ref="registerFormRef" class="login-form">
               <h3 class="form-title">新用户注册</h3>
 
               <el-form-item prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  placeholder="请输入账号"
-                  prefix-icon="el-icon-user"
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.username" placeholder="请输入账号" prefix-icon="el-icon-user"
+                  class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  prefix-icon="el-icon-lock"
-                  show-password
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" prefix-icon="el-icon-lock"
+                  show-password class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="confirmPassword">
-                <el-input
-                  v-model="registerForm.confirmPassword"
-                  type="password"
-                  placeholder="请确认密码"
-                  prefix-icon="el-icon-lock"
-                  show-password
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请确认密码"
+                  prefix-icon="el-icon-lock" show-password class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="email">
-                <el-input
-                  v-model="registerForm.email"
-                  placeholder="请输入邮箱"
-                  prefix-icon="el-icon-mail"
-                  class="custom-input"
-                />
+                <el-input v-model="registerForm.email" placeholder="请输入邮箱" prefix-icon="el-icon-mail"
+                  class="custom-input" />
               </el-form-item>
 
               <el-form-item prop="verificationCode">
                 <div class="verification-code-input">
-                  <el-input
-                    v-model="registerForm.verificationCode"
-                    placeholder="请输入验证码"
-                    prefix-icon="el-icon-key"
-                    class="custom-input"
-                  />
-                  <el-button
-                    type="primary"
-                    :disabled="isCodeSending"
-                    @click="sendVerificationCode"
-                  >
+                  <el-input v-model="registerForm.verificationCode" placeholder="请输入验证码" prefix-icon="el-icon-key"
+                    class="custom-input" />
+                  <el-button type="primary" :disabled="isCodeSending" @click="sendVerificationCode">
                     {{ codeButtonText }}
                   </el-button>
                 </div>
@@ -176,13 +121,8 @@
                 </el-checkbox>
               </el-form-item>
 
-              <el-button
-                type="primary"
-                class="submit-btn"
-                :loading="loading"
-                :disabled="!registerForm.agreeTerms"
-                @click="handleRegister"
-              >
+              <el-button type="primary" class="submit-btn" :loading="loading" :disabled="!registerForm.agreeTerms"
+                @click="handleRegister">
                 注册
               </el-button>
             </el-form>
@@ -227,7 +167,7 @@ const handleLogin = async () => {
     let token = response.data.token;
     // 登录成功后，检查返回的数据中是否包含 token
     if (token) {
-      //await loginCommand(token);
+      await loginCommand(token);
 
       // 保存 token 到 localStorage
       localStorage.setItem("token", token);

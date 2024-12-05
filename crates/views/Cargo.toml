@@ -9,6 +9,7 @@ serde = { workspace = true }
 log = { workspace = true }
 tauri = { workspace = true }
 tauri-plugin-log = { workspace = true }
+tauri-plugin-os = { workspace = true }
 tokio = { workspace = true }
 
 cores = { workspace = true }

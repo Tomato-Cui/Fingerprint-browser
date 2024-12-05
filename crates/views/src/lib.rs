@@ -10,6 +10,7 @@ pub fn run() {
     let app = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             command::auth::login,
+            command::auth::logout,
             command::browser::starts,
             command::browser::stops,
             command::browser::status,
@@ -40,6 +41,8 @@ pub fn run() {
             )
             .unwrap();
     }
+
+    app_handle.plugin(tauri_plugin_os::init()).unwrap();
 
     app.run(|_app_handle, event| match event {
         tauri::RunEvent::ExitRequested { api, .. } => {
