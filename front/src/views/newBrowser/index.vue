@@ -513,10 +513,6 @@ const platform = reactive({
   platform: "", //获取平台信息
   accountUrl: "", //获取账号地址
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> 4fdcda9abc366d8d307af88791f0d43fea771c54
 //指纹设置
 const finge = reactive({
   timeZone: true, //获取时区关于ip匹配
