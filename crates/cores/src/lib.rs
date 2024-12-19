@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use errors::ApplicationServerError;
 use state::get_app_cache_location;
 
+pub mod processor;
+
 pub mod apis;
 pub mod auth;
 pub mod config;

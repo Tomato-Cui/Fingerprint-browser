@@ -9,14 +9,14 @@ axum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
-cores = { workspace = true }
-server = { workspace = true }
-views = { workspace = true }
+# cores = { workspace = true }
+# server = { workspace = true }
+# views = { workspace = true }
+
+commons = { workspace = true }
+states = { workspace = true }
+apis = { workspace = true }
 
 [[bin]]
 name = "api"
 path = "src/bin/api.rs"
-
-# [[bin]]
-# name = "app"
-# path = "src/bin/app.rs"

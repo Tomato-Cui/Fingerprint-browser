@@ -1,0 +1,13 @@
+pub mod environment;
+pub mod fingerprint;
+pub mod group;
+pub mod proxy;
+pub mod user;
+
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub struct Pagination {
+    page_num: u32,
+    page_size: u32,
+}

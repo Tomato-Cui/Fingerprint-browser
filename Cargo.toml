@@ -1,7 +1,18 @@
 [workspace]
 resolver = "1"
-# members = ["cmds", "crates/cores", "crates/server", "crates/views", "tests"]
-members = ["clients", "crates/cores", "crates/server", "crates/views", "tests"]
+members = [
+  "clients",
+  "crates/apis",
+  "crates/commons",
+  "crates/cores",
+  "crates/models", "crates/remote-services",
+  "crates/requests",
+  "crates/server",
+  "crates/services",
+  "crates/states",
+  "crates/views",
+  "tests",
+]
 
 [workspace.dependencies]
 axum = { version = "0.7", features = ["macros", "multipart"] }
@@ -19,6 +30,10 @@ block-padding = "0.2"
 chrono = "0.4"
 aes-gcm = "0.10.3"
 rand = "0.8.5"
+md5 = "0.7"
+jwt = "0.16.0"
+sha2 = "0.10.8"
+hmac = "0.12.1"
 winapi = { version = "0.3", features = ["dpapi", "winerror"] }
 lazy_static = "1.5.0"
 config = "0.14"
@@ -42,3 +57,10 @@ thirtyfour = "0.35.0"
 cores = { path = "./crates/cores" }
 server = { path = "./crates/server" }
 views = { path = "./crates/views" }
+
+commons = { path = "./crates/commons" }
+services = { path = "./crates/services" }
+remote_services = { path = "./crates/remote-services" }
+models = { path = "./crates/models" }
+states = { path = "./crates/states" }
+apis = { path = "./crates/apis" }

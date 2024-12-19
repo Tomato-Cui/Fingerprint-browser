@@ -1,5 +1,5 @@
 [package]
-name = "server"
+name = "apis"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,6 +8,7 @@ tokio = { workspace = true }
 axum = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+anyhow = { workspace = true }
 thiserror = { workspace = true }
 rand = { workspace = true }
 lazy_static = { workspace = true }
@@ -15,4 +16,6 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
 
-cores = { workspace = true }
+services = { workspace = true }
+commons = { workspace = true }
+models = { workspace = true }

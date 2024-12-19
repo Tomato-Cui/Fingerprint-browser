@@ -4,9 +4,13 @@ use axum::{routing::post, Router};
 use serde::{Deserialize, Serialize};
 
 pub fn build_router() -> Router {
-    Router::new()
-        .nest("/users", Router::new().route("/login", post(login::handle)))
-        .route("/logout", get(logout::handle))
+    Router::new().nest(
+        "/users",
+        Router::new()
+            .route("/login", post(login::handle))
+            .route("/logout", get(logout::handle))
+            .route("/register", get(logout::handle)),
+    )
 }
 
 mod login {
