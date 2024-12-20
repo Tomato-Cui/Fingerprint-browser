@@ -13,7 +13,7 @@ pub struct Environment {
     pub repeat_config: Option<String>,     // 去重配置
     pub username: String,                  // 账号
     pub password: String,                  // 密码
-    pub fakey: Option<String>,                     // 2FA密钥
+    pub fakey: Option<String>,             // 2FA密钥
     pub cookie: Option<String>,            // Cookie
     pub ignore_cookie_error: Option<i8>,   // 校验Cookie失败时的行为
     pub group_id: Option<i32>,             // 分组ID
@@ -41,7 +41,11 @@ pub struct Environment {
 
 impl Environment {
     #[allow(dead_code)]
-    pub async fn insert(pool: &Pool<Sqlite>, environment: &Environment) -> Result<bool, Error> {
+    pub async fn insert(
+        pool: &Pool<Sqlite>,
+        user_id: u32,
+        environment: &Environment,
+    ) -> Result<bool, Error> {
         let sql = r#"
         INSERT INTO environments (
             name, owner_id, description,domain_name, open_urls, repeat_config, username, password, 
@@ -51,7 +55,7 @@ impl Environment {
 
         let row = sqlx::query(sql)
             .bind(&environment.name)
-            .bind(&environment.owner_id)
+            .bind(user_id)
             .bind(&environment.description)
             .bind(&environment.domain_name)
             .bind(&environment.open_urls)
@@ -85,11 +89,29 @@ impl Environment {
     }
 
     #[allow(dead_code)]
-    pub async fn query_by_id(pool: &Pool<Sqlite>, id: i32) -> Result<Environment, Error> {
-        let enviroment: Environment = sqlx::query_as("select * from environments where id = $1")
-            .bind(id)
-            .fetch_one(pool)
-            .await?;
+    pub async fn query_by_id(
+        pool: &Pool<Sqlite>,
+        user_id: Option<u32>,
+        id: u32,
+        group_id: Option<u32>,
+    ) -> Result<Environment, Error> {
+        let mut query_builder = sqlx::query_as(
+            "select * from environments where id = ? and (owner_id = ? or group_id = ?)",
+        )
+        .bind(id);
+        if let Some(owner_id) = user_id {
+            query_builder = query_builder.bind(owner_id);
+        } else {
+            query_builder = query_builder.bind(None::<i32>);
+        };
+
+        if let Some(group_id) = group_id {
+            query_builder = query_builder.bind(group_id);
+        } else {
+            query_builder = query_builder.bind(None::<i32>);
+        };
+
+        let enviroment: Environment = query_builder.fetch_one(pool).await?;
 
         Ok(enviroment)
     }
@@ -97,14 +119,28 @@ impl Environment {
     #[allow(dead_code)]
     pub async fn query_by_col(
         pool: &Pool<Sqlite>,
+        user_id: u32,
         col_name: &str,
         col_value: &str,
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<Environment>), Error> {
-        let (total,): (i64,) = sqlx::query_as("select count(1) from environments")
+        let (total,): (i64,) = if col_name.is_empty() {
+            sqlx::query_as("select count(1) from environments where owner_id = ?")
+                .bind(user_id)
+                .fetch_one(pool)
+                .await?
+        } else {
+            sqlx::query_as(&format!(
+                "select count(1) from environments where {} = ? and owner_id = ?",
+                col_name
+            ))
+            .bind(col_value)
+            .bind(user_id)
             .fetch_one(pool)
-            .await?;
+            .await?
+        };
+
         let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
             0
         } else {
@@ -113,17 +149,19 @@ impl Environment {
         let offset = page_num * page_size;
 
         let environments: Vec<Environment> = if col_name.is_empty() {
-            sqlx::query_as("select * from environments limit ? offset ?")
+            sqlx::query_as("select * from environments where owner_id = ? limit ? offset ?")
+                .bind(user_id)
                 .bind(page_size)
                 .bind(offset)
                 .fetch_all(pool)
                 .await?
         } else {
             sqlx::query_as(&format!(
-                "select * from environments where {} = ? limit ? offset ?",
+                "select * from environments where {} = ? and owner_id = ? limit ? offset ?",
                 col_name
             ))
             .bind(col_value)
+            .bind(user_id)
             .bind(page_size)
             .bind(offset)
             .fetch_all(pool)
@@ -134,19 +172,22 @@ impl Environment {
     }
 
     #[allow(dead_code)]
-    pub async fn update(pool: &Pool<Sqlite>, environment: &Environment) -> Result<bool, Error> {
+    pub async fn update(
+        pool: &Pool<Sqlite>,
+        user_id: u32,
+        environment: &Environment,
+    ) -> Result<bool, Error> {
         let sql = "
             UPDATE environments
-            SET name = ?, owner_id = ?, description = ?, domain_name = ?, open_urls = ?, repeat_config = ?, username = ?, password = ?, fakey = ?, cookie = ?,
+            SET name = ?, description = ?, domain_name = ?, open_urls = ?, repeat_config = ?, username = ?, password = ?, fakey = ?, cookie = ?,
                 ignore_cookie_error = ?, group_id = ?, fp_info_id = ?, ua = ?, os = ?, country = ?, region = ?, city = ?, remark = ?, ipchecker = ?,
                 sys_app_cate_id = ?, user_proxy_config = ?, proxy_enable = ?, is_tz = ?, is_pos = ?, user_data_file = ?, driver_location = ?, status = ?, 
                 updated_at = DATETIME('now') 
-            WHERE id = ?
+            WHERE id = ? and owner_id = ?
         ";
 
         let row = sqlx::query(sql)
             .bind(&environment.name)
-            .bind(&environment.owner_id)
             .bind(&environment.description)
             .bind(&environment.domain_name)
             .bind(&environment.open_urls)
@@ -178,6 +219,7 @@ impl Environment {
             .bind(&environment.driver_location)
             .bind(environment.status)
             .bind(&environment.id)
+            .bind(user_id)
             .execute(pool)
             .await?;
 
@@ -187,7 +229,8 @@ impl Environment {
     #[allow(dead_code)]
     pub async fn update_by_col(
         pool: &Pool<Sqlite>,
-        id: i32,
+        user_id: u32,
+        id: u32,
         col_name: &str,
         col_value: &str,
     ) -> Result<bool, Error> {
@@ -198,20 +241,25 @@ impl Environment {
             )));
         }
         let row = sqlx::query(&format!(
-            "UPDATE environments SET {} = ? WHERE id = ?",
+            "UPDATE environments SET {} = ? WHERE id = ? and owner_id = ?",
             col_name
         ))
         .bind(col_value)
         .bind(id)
+        .bind(user_id)
         .execute(pool)
         .await?;
         Ok(row.rows_affected() == 1)
     }
 
     #[allow(dead_code)]
-    pub async fn delete(pool: &Pool<Sqlite>, id: i32) -> Result<bool, Error> {
-        let sql = "delete from environments where id = ?";
-        let row = sqlx::query(&sql).bind(id).execute(pool).await?;
+    pub async fn delete(pool: &Pool<Sqlite>, id: u32, user_id: u32) -> Result<bool, Error> {
+        let sql = "delete from environments where id = ? and owner_id = ?";
+        let row = sqlx::query(&sql)
+            .bind(id)
+            .bind(user_id)
+            .execute(pool)
+            .await?;
         Ok(row.rows_affected() == 1)
     }
 }

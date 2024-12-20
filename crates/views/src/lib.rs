@@ -4,6 +4,7 @@ use tauri::Manager;
 
 pub mod command;
 pub mod components;
+pub mod response;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,7 +12,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             command::auth::login,
             command::auth::logout,
-            command::browser::starts,
+            command::browser::start,
+            command::browser::starts::starts,
             command::browser::stops,
             command::browser::status,
         ])
@@ -24,10 +26,13 @@ pub fn run() {
         let handle = app_handle.clone();
         async move {
             let cache_dir = handle.path().cache_dir().unwrap();
-            cores::state::init_state(cores::state::State {
-                app_cache_location: cache_dir,
-            })
-            .await;
+
+            print!("cache_dir: {:?}", cache_dir);
+
+            // cores::state::init_state(cores::state::State {
+            //     app_cache_location: cache_dir,
+            // })
+            // .await;
         }
     });
 

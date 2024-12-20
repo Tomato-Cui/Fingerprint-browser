@@ -5,13 +5,12 @@ members = [
   "crates/apis",
   "crates/commons",
   "crates/cores",
-  "crates/models", "crates/remote-services",
-  "crates/requests",
-  "crates/server",
+  "crates/models",
   "crates/services",
+  "crates/services-remote",
+  "crates/requests",
   "crates/states",
   "crates/views",
-  "tests",
 ]
 
 [workspace.dependencies]
@@ -60,7 +59,7 @@ views = { path = "./crates/views" }
 
 commons = { path = "./crates/commons" }
 services = { path = "./crates/services" }
-remote_services = { path = "./crates/remote-services" }
+remote_services = { path = "./crates/services-remote" }
 models = { path = "./crates/models" }
 states = { path = "./crates/states" }
 apis = { path = "./crates/apis" }

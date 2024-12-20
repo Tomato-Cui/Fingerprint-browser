@@ -6,6 +6,8 @@ pub struct App {
     pub id: String,
     pub name: String,
     pub remote_switch: bool,
+    pub remote_url: String,
+    pub location: Location,
 }
 
 #[derive(Deserialize, Debug)]
@@ -15,7 +17,7 @@ pub struct Database {
     pub location: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Location {
     pub user_data_location: String,
     pub user_logs_location: String,

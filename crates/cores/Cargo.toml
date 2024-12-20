@@ -25,3 +25,7 @@ axum = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true }
 sqlx = { workspace = true }
+
+states = { workspace = true }
+commons = { workspace = true }
+models = { workspace = true }

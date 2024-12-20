@@ -1,5 +1,3 @@
-pub mod backend;
-
 use reqwest::Client;
 use std::path::Path;
 use tokio::{
@@ -7,11 +5,8 @@ use tokio::{
     io::{self, AsyncWriteExt},
 };
 
-use crate::{errors::ApplicationServerError, Result};
-
 pub mod browser_resources {
     pub mod chrome {
-        use crate::Result;
         use serde::Deserialize;
         use std::collections::HashMap;
         use tokio::sync::OnceCell;
@@ -62,7 +57,7 @@ pub mod browser_resources {
         }
 
         impl Action {
-            pub async fn new(url: &str) -> Result<Action> {
+            pub async fn new(url: &str) -> Result<Action, anyhow::Error> {
                 let response = reqwest::get(url).await?;
                 if response.status().is_success() {
                     let response_json: ApiResponse = response.json().await?;
@@ -85,7 +80,7 @@ pub mod browser_resources {
                         milestones,
                     });
                 }
-                Err(crate::errors::ApplicationServerError::BrowserDriverVersionInfoLoadFail)
+                Err(anyhow::anyhow!("get browser resources fail."))
             }
 
             pub fn get_all_version(&self) -> Vec<String> {
@@ -143,13 +138,10 @@ pub mod browser_resources {
     }
 }
 
-pub async fn download_file(url: &str, dest: &str) -> Result<()> {
+pub async fn download_file(url: &str, dest: &str) -> Result<(), anyhow::Error> {
     let mut response = Client::new().get(url).send().await?;
     if !response.status().is_success() {
-        return Err(ApplicationServerError::Error(anyhow::anyhow!(
-            "download {} resource fail.",
-            url
-        )));
+        return Err(anyhow::anyhow!("download {} resource fail.", url));
     }
 
     let total_size = response

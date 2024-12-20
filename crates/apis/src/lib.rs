@@ -17,6 +17,7 @@ pub fn build_root_router() -> Router {
                 .merge(routes::environment::build_router())
                 .merge(routes::fingerprint::build_router())
                 .merge(routes::group::build_router())
+                .merge(routes::proxy::build_router())
                 .merge(
                     Router::new()
                         .route("/status", get(|| async { String::from("status: running") })),

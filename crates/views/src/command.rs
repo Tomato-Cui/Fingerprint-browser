@@ -1,23 +1,22 @@
+use crate::response::AppResponse;
 pub mod auth {
-    use cores::auth::{clear_token, init_auth_state, set_token};
-    use cores::utils::response::AppResponse;
+    use super::*;
 
     #[tauri::command]
     pub async fn login(token: &str) -> Result<AppResponse<bool>, tauri::Error> {
-        init_auth_state().await;
-        set_token(token).await;
+        states::auth::set_token(token).await;
         Ok(AppResponse::success(None, Some(true)))
     }
 
     #[tauri::command]
     pub async fn logout() -> Result<AppResponse<bool>, tauri::Error> {
-        clear_token().await;
+        states::auth::clear_token().await;
         Ok(AppResponse::success(None, Some(true)))
     }
 }
 
 pub mod environment {
-    use cores::utils::response::AppResponse;
+    use super::*;
 
     #[tauri::command]
     pub async fn create() -> Result<AppResponse<bool>, tauri::Error> {
@@ -41,40 +40,85 @@ pub mod environment {
 }
 
 pub mod browser {
+    use super::*;
     use std::collections::HashMap;
 
-    use cores::{
-        apis::browser::{self, StartEnvironmentParams},
-        auth::get_token,
-        utils::response::AppResponse,
-    };
     use serde_json::Value;
 
     #[tauri::command]
-    pub async fn starts(
-        environments: Vec<StartEnvironmentParams>,
-    ) -> Result<AppResponse<HashMap<i32, Value>>, tauri::Error> {
-        let token = get_token().await;
-        println!("{:?}", token);
-        Ok(match browser::starts(environments).await {
-            Ok(v) => v,
-            Err(_) => AppResponse::fail(Some("启动失败".to_string())),
-        })
+    pub async fn start(
+        user_id: Option<u32>,
+        group_id: Option<u32>,
+        environment_id: u32,
+    ) -> Result<AppResponse<Value>, tauri::Error> {
+        Ok(
+            match services::command::start_browser(user_id, group_id, environment_id).await {
+                Ok(v) => AppResponse::success(Some("启动成功".to_string()), Some(v)),
+                Err(_) => AppResponse::fail(Some("启动失败".to_string())),
+            },
+        )
+    }
+
+    pub mod starts {
+        use serde::Deserialize;
+        use serde_json::json;
+
+        use super::*;
+
+        #[derive(Deserialize)]
+        pub struct Payload {
+            user_id: Option<u32>,
+            group_id: Option<u32>,
+            environment_id: u32,
+        }
+
+        #[tauri::command]
+        pub async fn starts(
+            payload: Vec<Payload>,
+        ) -> Result<AppResponse<HashMap<u32, Value>>, tauri::Error> {
+            let mut result = HashMap::new();
+
+            for item in payload {
+                let (user_id, group_id, environment_id) =
+                    (item.user_id, item.group_id, item.environment_id);
+
+                match services::command::start_browser(user_id, group_id, environment_id).await {
+                    Ok(v) => {
+                        result.insert(environment_id, v);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            environment_id,
+                            json!({
+                                "environment_id": environment_id,
+                                "status":  false,
+                                "message": format!("启动失败: {}", e),
+                            }),
+                        );
+                    }
+                };
+            }
+
+            Ok(AppResponse::success(None, Some(result)))
+        }
     }
 
     #[tauri::command]
-    pub async fn stops(env_ids: Vec<i32>) -> Result<AppResponse<HashMap<i32, i32>>, tauri::Error> {
-        Ok(match browser::stop(env_ids).await {
-            Ok(v) => v,
+    pub async fn stops(ids: Vec<i32>) -> Result<AppResponse<HashMap<i32, i32>>, tauri::Error> {
+        Ok(match services::command::stop(ids).await {
+            Ok(v) => AppResponse::success(
+                Some("关闭成功，具体关闭信息查看响应数据.".to_string()),
+                Some(v),
+            ),
             Err(_) => AppResponse::fail(Some("关闭失败".to_string())),
         })
     }
 
     #[tauri::command]
     pub async fn status() -> Result<AppResponse<HashMap<i32, bool>>, tauri::Error> {
-        Ok(match browser::view_active().await {
-            Ok(v) => v,
-            Err(_) => AppResponse::fail(Some("查询失败".to_string())),
+        Ok(match services::command::view_active().await {
+            Ok(v) => AppResponse::success(Some("查询状态成功.".to_string()), Some(v)),
+            Err(_) => AppResponse::fail(Some("查询状态失败".to_string())),
         })
     }
 }

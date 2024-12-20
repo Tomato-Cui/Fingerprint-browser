@@ -2,6 +2,7 @@ CREATE TABLE
     fingerprints
 (
     id                    INTEGER PRIMARY KEY AUTOINCREMENT,                           -- 自增ID
+    owner_id              INTEGER,
     ua                    TEXT    NOT NULL,                                            -- 自定义UA
     language_type         INTEGER NOT NULL CHECK (language_type IN (0, 1, 2)),         -- 语言类型 0-跟随IP，1-自定义，2-跟随电脑
     languages             TEXT    NOT NULL,                                            -- 渲染语言

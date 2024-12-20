@@ -2,12 +2,13 @@
 id = "com.ads-hubstudio.browser"
 name = "ads-hubstudio"
 remote_switch = false
+remote_url = 'http://192.168.6.116:8080'
 
 [app.location]
-user_data_location = "datas/user-data"
-user_logs_location = "datas/user-logs"
-browser_drivers_location = "datas/browser-drivers"
-browser_extensions_location = "datas/browser-extensions"
+user_data_location = "user-data"
+user_logs_location = "user-logs"
+browser_drivers_location = "browser-drivers"
+browser_extensions_location = "browser-extensions"
 
 [database]
 driver = "sqlite3"

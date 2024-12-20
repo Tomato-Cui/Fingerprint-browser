@@ -10,9 +10,19 @@ pub async fn init_sqlite_database() -> Result<&'static Arc<Database>, sqlx::erro
         .map(|v| v.get_database_config())
         .expect("config not found");
 
+    let url = if config.url.contains(".db") {
+        if let Some(location) = config.location.clone() {
+            &format!(r#"data/{}/{}"#, location, &config.url)
+        } else {
+            &format!(r#"data/cache/{}"#, &config.url)
+        }
+    } else {
+        &config.url
+    };
+
     Ok(DATABASE
         .get_or_init(|| async {
-            let database = Database::new(DatabaseDriverType::Sqlite, &config.url)
+            let database = Database::new(DatabaseDriverType::Sqlite, url)
                 .await
                 .unwrap();
 

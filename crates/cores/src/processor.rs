@@ -9,47 +9,37 @@ use tokio::{
     sync::Mutex,
 };
 
-pub use crate::errors::ApplicationServerError;
-use crate::{
-    apis::{enviroment::update_browser_status_handle, Result},
-    config,
-    models::{enviroment::Environment, fingerprint::Fingerprint},
-    utils::{
-        common::{app_localer, to_string},
-        encryption,
-    },
-};
-
-use crate::utils::common::get_proxy_from_registry;
-
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
 pub struct BrowserChildInfo {
-    environemnt_info: Environment,
-    fingerprint_info: Fingerprint,
+    environemnt_info: models::environment::Environment,
+    fingerprint_info: models::fingerprint::Fingerprint,
+    proxy_info: models::proxies::Proxy,
     pub port: u16,
     pub browser_exe_path: String,
 }
 impl BrowserChildInfo {
     pub fn new(
-        environemnt_info: Environment,
-        fingerprint_info: Fingerprint,
+        environemnt_info: models::environment::Environment,
+        fingerprint_info: models::fingerprint::Fingerprint,
+        proxy_info: models::proxies::Proxy,
         port: u16,
         browser_exe_path: &str,
     ) -> Self {
         BrowserChildInfo {
             environemnt_info,
             fingerprint_info,
+            proxy_info,
             port,
             browser_exe_path: browser_exe_path.to_string(),
         }
     }
 
-    pub async fn format(&self) -> Result<Vec<String>> {
+    pub async fn format(&self) -> Result<Vec<String>, anyhow::Error> {
         let breeze_fp = format!(
             "--breeze-fp={}",
-            encryption::base64_encode(&to_string(&self.fingerprint_info)?)
+            commons::encryption::base64_encode(&serde_json::to_string(&self.fingerprint_info)?)
         );
         let new_window = "--new-window".to_string();
         let window_size = format!(
@@ -66,27 +56,19 @@ impl BrowserChildInfo {
         let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);
         let no_first_run = "--no-first-run".to_string();
 
+        let app_config = states::config::get_config().unwrap();
+
         let user_data_dir = format!(
-            "--user-data-dir={}",
-            config::get_config()?
-                .get_user_data_location()
-                .await?
-                .join(config::get_config()?.get_user_data_location().await?)
-                .join(&self.environemnt_info.user_data_file)
-                .join(
-                    SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .unwrap()
-                        .as_micros()
-                        .to_string()
-                )
-                .to_str()
-                .unwrap()
+            r#"data/{}-{}-{}"#,
+            app_config.app.location.user_data_location,
+            &self.environemnt_info.user_data_file,
+            commons::time::get_system_time_mills(),
         );
+
         let no_default_browser_check = "--no-default-browser-check".to_string();
         let browser_unique = format!(
             "--app-browser-unique={}.{}",
-            config::get_config()?.app.id,
+            app_config.app.id,
             format!(
                 "{}.{}",
                 self.environemnt_info.id.unwrap_or_default(),
@@ -112,30 +94,17 @@ impl BrowserChildInfo {
             debugger_address,
         ];
 
-        let proxy_str = self
-            .environemnt_info
-            .proxy
-            .clone()
-            .unwrap_or_else(|| "".to_string());
-
         if self.environemnt_info.proxy_enable == 1 {
-            args.push(if proxy_str.is_empty() {
+            let (kind, value) = (&self.proxy_info.kind, &self.proxy_info.value);
+
+            args.push(if !value.is_empty() {
+                format!("--proxy-server={}://{}", kind, value,)
+            } else {
                 format!(
                     "--proxy-server=socks5://{}",
-                    get_proxy_from_registry().unwrap_or_default()
+                    commons::util::get_proxy_from_registry().unwrap_or_default()
                 )
-            } else {
-                let proxy = get_proxy_from_registry().unwrap_or_default();
-
-                if !proxy.is_empty() {
-                    format!(
-                        "--proxy-server=socks5://{}",
-                        get_proxy_from_registry().unwrap_or_default()
-                    )
-                } else {
-                    "".to_string()
-                }
-            })
+            });
         }
 
         for url in self
@@ -155,7 +124,7 @@ impl BrowserChildInfo {
 #[allow(dead_code)]
 pub struct Processer {
     childs: Arc<Mutex<HashMap<u32, (Child, BrowserChildInfo)>>>,
-    index: HashMap<i32, u32>, // i8: browser_id, u32: child pid
+    index: HashMap<i32, u32>,
 }
 
 impl Processer {
@@ -169,23 +138,18 @@ impl Processer {
     pub async fn start_browser(
         &mut self,
         payload: BrowserChildInfo,
-    ) -> core::result::Result<bool, ApplicationServerError> {
-        let browser_path = app_localer::app_location()
-            // TODO: WANR: 这里我随便写一个路径都能通过测试.join("test")
-            // .join("BreezeBrowser")
-            .join(&payload.browser_exe_path);
-
-        let child = Command::new(browser_path)
+    ) -> core::result::Result<bool, anyhow::Error> {
+        let child = Command::new(&payload.browser_exe_path)
             .args(&payload.format().await?)
             .stderr(Stdio::null())
             .stdout(Stdio::null())
             .spawn()?;
 
         let browser_id = payload.environemnt_info.id.unwrap_or_default();
-        update_browser_status_handle(browser_id, 1).await?;
+
         let child_pid = child
             .id()
-            .ok_or(ApplicationServerError::ChildRunningError)?;
+            .ok_or(anyhow::anyhow!("child starting failed."))?;
 
         self.index.insert(browser_id, child_pid);
         {
@@ -199,40 +163,38 @@ impl Processer {
         Ok(true)
     }
 
-    pub async fn stop_browser(&mut self, browser_id: i32) -> Result<ExitStatus> {
+    pub async fn stop_browser(&mut self, browser_id: i32) -> Result<ExitStatus, anyhow::Error> {
         let child_id = self
             .index
             .get(&browser_id)
-            .ok_or(ApplicationServerError::ChildCloseError)?;
+            .ok_or(anyhow::anyhow!("child stoping failed."))?;
 
         let exit_status = {
             let mut childs_lock = self.childs.lock().await;
 
             let (child, _) = childs_lock
                 .get_mut(child_id)
-                .ok_or(ApplicationServerError::ChildCloseError)?;
+                .ok_or(anyhow::anyhow!("child stoping failed."))?;
 
             let _ = child.kill().await?;
             child.wait().await?
         };
 
-        update_browser_status_handle(browser_id, 0).await?;
-
         Ok(exit_status)
     }
 
-    pub async fn status(&self, browser_id: i32) -> Result<bool> {
+    pub async fn status(&self, browser_id: i32) -> Result<bool, anyhow::Error> {
         let child_id = self
             .index
             .get(&browser_id)
-            .ok_or(ApplicationServerError::ChildCloseError)?;
+            .ok_or(anyhow::anyhow!("child status failed."))?;
 
         let status = {
             let mut childs_lock = self.childs.lock().await;
 
             let (child, _) = childs_lock
                 .get_mut(child_id)
-                .ok_or(ApplicationServerError::ChildCloseError)?;
+                .ok_or(anyhow::anyhow!("child status failed."))?;
 
             match child.try_wait() {
                 Ok(Some(_)) => false,
@@ -241,17 +203,15 @@ impl Processer {
             }
         };
 
-        update_browser_status_handle(browser_id, 0).await?;
         Ok(status)
     }
 
-    pub async fn all_status(&self) -> Result<HashMap<i32, bool>> {
+    pub async fn all_status(&self) -> Result<HashMap<i32, bool>, anyhow::Error> {
         let mut status = HashMap::new();
 
         for (browser_id, _) in &self.index {
             let data = self.status(*browser_id).await?;
 
-            update_browser_status_handle(*browser_id, 0).await?;
             status.insert(*browser_id, data);
         }
 
