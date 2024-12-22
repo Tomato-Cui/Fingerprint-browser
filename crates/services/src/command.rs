@@ -46,22 +46,19 @@ pub async fn start_browser(
     let port = get_debug_port().await?;
     match environment::query_by_id(user_id, group_id, environment_id).await {
         Ok(current_environement) => {
-            let fp_info = if let Some(user_id) = current_environement.owner_id {
-                fingerprint::query_by_id(
-                    user_id as u32,
-                    current_environement.fp_info_id.unwrap_or_default() as u32,
-                )
-                .await?
+            let user_id = current_environement.owner_id.unwrap() as u32;
+            let fp_info = if let Some(fp_info_id) = current_environement.fp_info_id {
+                fingerprint::query_by_id(user_id, fp_info_id as u32).await?
             } else {
                 fingerprint::default().await?
             };
 
-            let proxy_info = if let Some(user_id) = current_environement.owner_id {
-                proxy::query_by_env_id(user_id as u32, environment_id).await?
-            } else {
-                models::proxies::Proxy {
+            // let proxy_info = if let Some(user_id) =
+            let proxy_info = match proxy::query_by_env_id(user_id as u32, environment_id).await {
+                Ok(v) => v,
+                Err(_) => models::proxies::Proxy {
                     ..Default::default()
-                }
+                },
             };
 
             let chrome_install_path =
@@ -92,4 +89,12 @@ pub async fn start_browser(
                         "message":format!("启动失败, 指定环境ID不存在."),
         })),
     }
+}
+
+#[tokio::test]
+async fn test_start_browser() {
+    states::init_config_state(r#"../../config.toml"#).await;
+    crate::setup().await;
+    let t = start_browser(Some(1), None, 2).await;
+    println!("{:?}", t);
 }

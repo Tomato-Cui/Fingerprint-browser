@@ -265,3 +265,11 @@ mod tests {
         println!("{:?}", ok);
     }
 }
+
+#[tokio::test]
+async fn test_query_by_id() {
+    states::init_config_state(r#"../../config.toml"#).await;
+    crate::setup().await;
+    let token = query_by_id(Some(1), None, 1).await;
+    println!("{:?}", token);
+}

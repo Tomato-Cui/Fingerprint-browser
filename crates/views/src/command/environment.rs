@@ -24,7 +24,10 @@ pub async fn environment_query_id(id: u32) -> Result<AppResponse<Value>, tauri::
 }
 
 #[tauri::command]
-pub async fn environment_query(page_num: u32, page_size: u32) -> Result<AppResponse<Value>, tauri::Error> {
+pub async fn environment_query(
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
     let user_id = get_user_id().await;
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
         Some(format!("查询失败: {}", v))
@@ -118,26 +121,17 @@ pub async fn environment_modify(
 pub mod move_to_group {
     use super::*;
 
-    #[derive(serde::Deserialize)]
-    pub struct Payload {
-        pub environment_id: u32,
-        pub group_id: u32,
-    }
-
     #[tauri::command]
-    pub async fn environment_move_to_group(payload: Payload) -> Result<AppResponse<bool>, tauri::Error> {
+    pub async fn environment_move_to_group(
+        environment_id: u32,
+        group_id: u32,
+    ) -> Result<AppResponse<bool>, tauri::Error> {
         let user_id = get_user_id().await;
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment::move_to_group(
-            user_id,
-            payload.environment_id,
-            payload.group_id,
-        )
-        .await
-        {
+        match services::environment::move_to_group(user_id, environment_id, group_id).await {
             Ok(data) => {
                 if data {
                     Ok(AppResponse::<bool>::success(success_msg, Some(data)))
@@ -153,27 +147,18 @@ pub mod move_to_group {
 pub mod batch_move_to_group {
     use super::*;
 
-    #[derive(serde::Deserialize)]
-    pub struct Payload {
-        pub environment_ids: Vec<u32>,
-        pub group_id: u32,
-    }
-
     #[tauri::command]
     pub async fn environment_batch_move_to_group(
-        payload: Payload,
+        environment_ids: Vec<u32>,
+        group_id: u32,
     ) -> Result<AppResponse<Vec<Value>>, tauri::Error> {
         let user_id = get_user_id().await;
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment::batch_move_to_group(
-            user_id,
-            payload.environment_ids.clone(),
-            payload.group_id,
-        )
-        .await
+        match services::environment::batch_move_to_group(user_id, environment_ids.clone(), group_id)
+            .await
         {
             Ok(data) => Ok(AppResponse::<Vec<Value>>::success(success_msg, Some(data))),
             Err(r) => Ok(AppResponse::<Vec<Value>>::fail(warn_msg(r.to_string()))),
@@ -201,7 +186,9 @@ pub async fn environment_delete(id: u32) -> Result<AppResponse<bool>, tauri::Err
 }
 
 #[tauri::command]
-pub async fn environment_batch_delete(ids: Vec<u32>) -> Result<AppResponse<Vec<bool>>, tauri::Error> {
+pub async fn environment_batch_delete(
+    ids: Vec<u32>,
+) -> Result<AppResponse<Vec<bool>>, tauri::Error> {
     let user_id = get_user_id().await;
     let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
         Some(format!("删除失败: {}", v))

@@ -46,10 +46,10 @@ pub fn run() {
             proxy_command::proxies_create,
             proxy_command::proxies_modify,
             proxy_command::proxies_delete,
-            browser_command::start,
-            browser_command::starts::starts,
-            browser_command::stops,
-            browser_command::status,
+            browser_command::browser_start,
+            browser_command::starts::browser_starts,
+            browser_command::browser_stops,
+            browser_command::browser_status,
             command::os::platform,
         ])
         .build(tauri::generate_context!())
