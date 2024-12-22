@@ -9,8 +9,6 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     states::init_config_state(r#"config.toml"#).await;
     // cores::config::init_config_by_str(CONFIG).await;
 
-    // init cache locations
-
     let config = states::config::get_config().unwrap();
     let Location {
         user_data_location,
@@ -25,19 +23,20 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|| "cache".to_string());
 
     let locations = vec![
-        PathBuf::from_str(&format!(r#"data/{}"#, &user_data_location)).unwrap(),
-        PathBuf::from_str(&format!(r#"data/{}"#, &user_logs_location)).unwrap(),
-        PathBuf::from_str(&format!(r#"data/{}"#, &browser_drivers_location)).unwrap(),
-        PathBuf::from_str(&format!(r#"data/{}"#, &browser_extensions_location)).unwrap(),
-        PathBuf::from_str(&format!(r#"data/{}"#, &browser_extensions_location)).unwrap(),
-        PathBuf::from_str(&format!(r#"data/{}"#, &database_location)).unwrap(),
+        PathBuf::from_str(&user_data_location).unwrap(),
+        PathBuf::from_str(&user_logs_location).unwrap(),
+        PathBuf::from_str(&browser_drivers_location).unwrap(),
+        PathBuf::from_str(&browser_extensions_location).unwrap(),
+        PathBuf::from_str(&browser_extensions_location).unwrap(),
+        PathBuf::from_str(&database_location).unwrap(),
     ];
+    // init cache locations
     cores::init_location(locations).await?;
 
     // init browser version info, WARN: move other where
     // cores::requests::browser_resources::chrome::init_action_client(url);
 
-    // init cache locations
+    // init states
     states::init_state().await;
 
     // migrates

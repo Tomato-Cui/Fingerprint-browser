@@ -1,7 +1,7 @@
 use config::{Config, ConfigError, FileFormat};
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct App {
     pub id: String,
     pub name: String,
@@ -17,7 +17,7 @@ pub struct Database {
     pub location: Option<String>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct Location {
     pub user_data_location: String,
     pub user_logs_location: String,

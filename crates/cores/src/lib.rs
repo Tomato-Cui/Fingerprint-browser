@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use states::config::APP_DATA;
 pub mod processor;
 pub mod request;
 pub mod requests;
@@ -12,12 +13,7 @@ mod not_win_imports {
 }
 
 pub async fn init_location(locations: Vec<PathBuf>) -> Result<(), std::io::Error> {
-    let cache_location = states::tauri::get_app_cache_location().await;
-    let cache_location = if let Some(path) = cache_location {
-        path
-    } else {
-        std::env::current_dir()?
-    };
+    let cache_location = APP_DATA.clone();
 
     for location in locations {
         let setting_file_location = cache_location.join(location);

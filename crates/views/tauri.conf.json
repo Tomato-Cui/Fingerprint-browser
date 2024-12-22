@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.tauri.dev",
   "build": {
-    "frontendDist": "../../front",
-    "beforeDevCommand": "cd ../../front && npm run dev",
-    "beforeBuildCommand": "cd ../o../front && npm run build",
+    "frontendDist": "../../frontend",
+    "beforeDevCommand": "cd ../../frontend && npm run dev",
+    "beforeBuildCommand": "cd ../o../frontend && npm run build",
     "devUrl": "http://localhost:5173"
   },
   "app": {

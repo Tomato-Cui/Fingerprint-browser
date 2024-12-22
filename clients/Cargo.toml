@@ -11,12 +11,12 @@ tracing-subscriber = { workspace = true }
 
 # cores = { workspace = true }
 # server = { workspace = true }
-# views = { workspace = true }
 
 apis = { workspace = true }
 cores = { workspace = true }
 states = { workspace = true }
 commons = { workspace = true }
+views = { workspace = true }
 
 [[bin]]
 name = "api"

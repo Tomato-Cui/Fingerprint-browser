@@ -57,9 +57,14 @@ impl BrowserChildInfo {
         let no_first_run = "--no-first-run".to_string();
 
         let app_config = states::config::get_config().unwrap();
-
+        let current_dir = std::env::current_dir().unwrap();
+        let app_data = states::config::APP_DATA.clone();
+        let app_data = app_data
+            .to_str()
+            .unwrap_or_else(|| current_dir.to_str().unwrap());
         let user_data_dir = format!(
-            r#"data/{}-{}-{}"#,
+            r#"{}/{}-{}-{}"#,
+            app_data,
             app_config.app.location.user_data_location,
             &self.environemnt_info.user_data_file,
             commons::time::get_system_time_mills(),

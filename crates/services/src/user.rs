@@ -1,8 +1,6 @@
-use serde_json::{json, Value};
-
 use crate::error::ServiceError;
 
-pub async fn login(nickname: &str, password: &str) -> Result<Value, ServiceError> {
+pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceError> {
     let pool = states::database::get_database_pool()?;
     let user = models::user::User::query_nickname(pool, nickname).await;
     let user = match user {
@@ -20,9 +18,7 @@ pub async fn login(nickname: &str, password: &str) -> Result<Value, ServiceError
 
     states::auth::set_token(&token).await;
 
-    Ok(json!({
-        "token": token,
-    }))
+    Ok(token)
 }
 
 pub async fn regsiter(email: &str, nickname: &str, password: &str) -> Result<bool, ServiceError> {

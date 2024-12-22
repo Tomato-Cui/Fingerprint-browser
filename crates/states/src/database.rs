@@ -3,6 +3,8 @@ use sqlx::{Pool, Sqlite};
 use std::sync::Arc;
 use tokio::sync::OnceCell;
 
+use crate::config::APP_DATA;
+
 static DATABASE: OnceCell<Arc<Database>> = OnceCell::const_new();
 
 pub async fn init_sqlite_database() -> Result<&'static Arc<Database>, sqlx::error::Error> {
@@ -10,11 +12,16 @@ pub async fn init_sqlite_database() -> Result<&'static Arc<Database>, sqlx::erro
         .map(|v| v.get_database_config())
         .expect("config not found");
 
+    let app_data = APP_DATA.clone();
+    let cache_base_location = app_data.to_str().unwrap();
     let url = if config.url.contains(".db") {
         if let Some(location) = config.location.clone() {
-            &format!(r#"data/{}/{}"#, location, &config.url)
+            &format!(
+                r#"{}/{}/{}"#,
+                cache_base_location, location, &config.url
+            )
         } else {
-            &format!(r#"data/cache/{}"#, &config.url)
+            &format!(r#"{}/cache/{}"#, cache_base_location, &config.url)
         }
     } else {
         &config.url

@@ -22,6 +22,8 @@ pub fn build_router() -> Router {
 
 mod login {
 
+    use serde_json::json;
+
     use super::*;
 
     #[derive(Deserialize, Serialize, Debug)]
@@ -36,7 +38,12 @@ mod login {
         });
 
         match services::user::login(&payload.username, &payload.password).await {
-            Ok(token) => AppResponse::<Value>::success(success_msg, Some(token)),
+            Ok(token) => AppResponse::<Value>::success(
+                success_msg,
+                Some(json!({
+                    "token": token,
+                })),
+            ),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
     }

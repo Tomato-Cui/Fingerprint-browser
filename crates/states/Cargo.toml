@@ -10,5 +10,6 @@ serde = { workspace = true }
 anyhow = { workspace = true }
 tokio = { workspace = true }
 sqlx = { workspace = true }
+dirs = { workspace = true }
 
 commons = { workspace = true }
