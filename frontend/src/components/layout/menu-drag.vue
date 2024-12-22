@@ -22,8 +22,6 @@ onMounted(() => {
         dragClass: '!rounded-none'
     });
 });
-console.log(route.path);
-
 </script>
 
 <template>

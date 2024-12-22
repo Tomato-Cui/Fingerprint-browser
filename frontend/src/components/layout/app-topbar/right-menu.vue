@@ -1,6 +1,6 @@
 <script setup>
 import { IconChevronDown, IconTransform, IconMessage, IconUpdate } from '@/assets/icons/index'
-import { Eraser as EraserIcon, Download as DownloadIcon, User2 as User2Icon, UserPlus as UserPlusIcon, Users as UsersIcon, Tag as TagIcon, LogOut as LogOutIcon } from 'lucide-vue-next'
+import { Eraser as EraserIcon, Download as DownloadIcon, User2 as User2Icon, UserPlus as UserPlusIcon, Users as UsersIcon, Tag as TagIcon, LogOut as LogOutIcon, LanguagesIcon, BellIcon, HistoryIcon, ChevronUpIcon, ChevronDownIcon } from 'lucide-vue-next'
 import {
     Popover,
     PopoverContent,
@@ -21,9 +21,10 @@ const invMember = ref(false)
 const switchTeam = ref(false)
 const quitTeamDialog = ref(false)
 const createAndJoin = ref(false)
+const profileDown = ref(false)
 
 const userSotre = useUserStore();
-const userInfo = userSotre.userInfo;
+const userInfo = userSotre.getUserInfo();
 
 const subQuit = () => {
     quitTeamDialog.value = false
@@ -41,8 +42,8 @@ const subQuit = () => {
         <Popover>
             <PopoverTrigger as-child>
                 <button
-                    class="flex justify-center items-center h-11 w-11 rounded-full bg-[#FFFFFF66] border-[#FFFFFFFF] border-[1px]">
-                    <IconTransform class="w-ful h-full" />
+                    class="flex justify-center items-center h-11 w-11 rounded-md hover:bg-sidebar border-[#FFFFFFFF] border-[1px] transform ease-in-out duration-500">
+                    <LanguagesIcon class="w-ful h-full text-slate-500" />
                 </button>
             </PopoverTrigger>
             <PopoverContent class="min-w-48 w-48 p-2 text-sm" align="end">
@@ -56,8 +57,8 @@ const subQuit = () => {
         <Popover>
             <PopoverTrigger as-child>
                 <button
-                    class="flex justify-center items-center h-11 w-11 rounded-full bg-[#FFFFFF66] border-[#FFFFFFFF] border-[1px]">
-                    <IconMessage />
+                    class="flex justify-center items-center h-11 w-11 rounded-md hover:bg-sidebar border-[#FFFFFFFF] border-[1px] transform ease-in-out duration-500">
+                    <BellIcon class="w-ful h-full text-slate-500" />
                 </button>
             </PopoverTrigger>
             <PopoverContent class="w-80 h-[calc(100vh_/_2)] p-0 rounded-lg overflow-hidden" align="end">
@@ -104,12 +105,12 @@ const subQuit = () => {
                 </div>
             </PopoverContent>
         </Popover>
-
+        <div class="bg-gray-200 w-[1px]">&nbsp;</div>
         <Popover>
             <PopoverTrigger as-child>
                 <button
-                    class="flex justify-center items-center h-11 w-11 rounded-full bg-[#FFFFFF66] border-[#FFFFFFFF] border-[1px]">
-                    <IconUpdate />
+                    class="flex justify-center items-center h-11 w-11 rounded-md hover:bg-sidebar border-[#FFFFFFFF] border-[1px] transform ease-in-out duration-500">
+                    <HistoryIcon class="w-ful h-full text-slate-500" />
                 </button>
             </PopoverTrigger>
             <PopoverContent class="w-96 p-3" align="end">
@@ -162,18 +163,20 @@ const subQuit = () => {
 
         <Popover>
             <PopoverTrigger as-child>
-                <div class="flex items-center space-x-4 h-11 w-36 px-2 bg-[#EDF2F7FF] rounded-full cursor-pointer">
+                <div class="flex items-center space-x-4 h-11 w-36 px-2 bg-sidebar rounded-md cursor-pointer"
+                    @click="profileDown = !profileDown">
                     <img class="w-10 h-10 rounded-full" :src="userInfo.avatar" alt="User Avatar">
                     <div class="flex flex-auto items-center gap-x-1 overflow-hidden">
                         <p class="flex-auto text-gray-500 text-sm text-ellipsis overflow-hidden whitespace-nowrap">{{
                             userInfo.account }}</p>
                         <p class="w-4 h-4">
-                            <IconChevronDown class="w-4 h-4 text-gray-500 " />
+                            <ChevronUpIcon v-if="profileDown" class="w-4 h-4 text-gray-500 " />
+                            <ChevronDownIcon v-else class="w-4 h-4 text-gray-500 " />
                         </p>
                     </div>
                 </div>
             </PopoverTrigger>
-            <PopoverContent class="w-48 rounded-xl p-2" align="end">
+            <PopoverContent class=" w-48 rounded-xl p-2" align="end">
                 <div class="flex flex-col gap-y-2">
                     <div @click="router.push('/personal/account')"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
