@@ -40,11 +40,11 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     states::init_state().await;
 
     // migrates
-    let migration_path = std::env::current_dir().unwrap().join("migrations");
-    let pool = states::database::get_database_pool()?;
-    commons::database::Database::migrator(pool, migration_path)
-        .await
-        .unwrap();
+    // let migration_path = std::env::current_dir().unwrap().join("migrations");
+    // let pool = states::database::get_database_pool()?;
+    // commons::database::Database::migrator(pool, migration_path)
+    //     .await
+    //     .unwrap();
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:5678").await?;
     let routes = apis::build_root_router();

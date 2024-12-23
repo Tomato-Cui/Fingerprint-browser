@@ -10,11 +10,21 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "../ui/colla
 import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as ComponentIcon } from 'lucide-vue-next'
 import { useRoute } from "vue-router";
 import MenuDrag from './menu-drag.vue'
+import { onMounted } from "vue";
+import { group_query } from '@/commands/group'
 // import { Search as SearchIcon } from 'lucide-vue-next'
 // import Input from '@/components/input.vue'
 
 const props = defineProps(['menus'])
 const route = useRoute();
+
+onMounted(() => {
+    // group_query(1, 1000).then(res => {
+    //     console.log("分组：" , res)
+    // }).catch(err => {
+    //     console.log(err)
+    // })
+})
 </script>
 
 <template>
