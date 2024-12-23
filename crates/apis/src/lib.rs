@@ -15,6 +15,7 @@ pub fn build_root_router() -> Router {
             Router::new()
                 .merge(routes::user::build_router())
                 .merge(routes::environment::build_router())
+                .merge(routes::environment_trash::build_router())
                 .merge(routes::fingerprint::build_router())
                 .merge(routes::group::build_router())
                 .merge(routes::proxy::build_router())

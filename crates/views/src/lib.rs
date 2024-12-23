@@ -6,6 +6,7 @@ pub mod response;
 
 use command::browser as browser_command;
 use command::environment as environment_command;
+use command::environment_trash as environment_trash_command;
 use command::fingerprint as fingerprint_command;
 use command::group as group_command;
 use command::proxy as proxy_command;
@@ -30,6 +31,13 @@ pub fn run() {
             environment_command::batch_move_to_group::environment_batch_move_to_group,
             environment_command::environment_delete,
             environment_command::environment_batch_delete,
+            environment_trash_command::environment_trash_query_id,
+            environment_trash_command::environment_trash_query,
+            environment_trash_command::environment_trash_recover,
+            environment_trash_command::environment_trash_recovers,
+            environment_trash_command::environment_trash_recover_all,
+            environment_trash_command::environment_trash_delete_again,
+            environment_trash_command::environment_trash_clean,
             fingerprint_command::fingerprint_query_id,
             fingerprint_command::fingerprint_query,
             fingerprint_command::fingerprint_create,

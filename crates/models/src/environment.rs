@@ -115,6 +115,37 @@ impl Environment {
 
         Ok(enviroment)
     }
+    #[allow(dead_code)]
+    pub async fn query_delete(
+        pool: &Pool<Sqlite>,
+        user_id: u32,
+        page_num: u32,
+        page_size: u32,
+    ) -> Result<(i64, Vec<Environment>), Error> {
+        let (total,): (i64,) = sqlx::query_as(
+            "select count(1) from environments where owner_id = ? and deleted_at is not NULL",
+        )
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
+
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
+        let offset = page_num * page_size;
+
+        let environments: Vec<Environment> =
+            sqlx::query_as("select * from environments where owner_id = ? and deleted_at is not NULL limit ? offset ?")
+                .bind(user_id)
+                .bind(page_size)
+                .bind(offset)
+                .fetch_all(pool)
+                .await?;
+
+        Ok((total, environments))
+    }
 
     #[allow(dead_code)]
     pub async fn query_by_col(
@@ -241,7 +272,7 @@ impl Environment {
             )));
         }
         let row = sqlx::query(&format!(
-            "UPDATE environments SET {} = ? WHERE id = ? and owner_id = ?",
+            "UPDATE environments SET {} = ?,updated_at = DATETIME('now') WHERE id = ? and owner_id = ?",
             col_name
         ))
         .bind(col_value)
@@ -253,14 +284,56 @@ impl Environment {
     }
 
     #[allow(dead_code)]
-    pub async fn delete(pool: &Pool<Sqlite>, id: u32, user_id: u32) -> Result<bool, Error> {
-        let sql = "delete from environments where id = ? and owner_id = ?";
-        let row = sqlx::query(&sql)
-            .bind(id)
+    pub async fn delete(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<bool, Error> {
+        let row = sqlx::query(
+            "UPDATE environments SET deleted_at = DATETIME('now') WHERE id = ? and owner_id = ?",
+        )
+        .bind(id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn delete_again(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<bool, Error> {
+        let row = sqlx::query(
+            " DELETE FROM environments WHERE id = ? and owner_id = ? and deleted_at is not null",
+        )
+        .bind(id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn recover(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<bool, Error> {
+        let row =
+            sqlx::query("UPDATE environments SET deleted_at = NULL WHERE id = ? and owner_id = ?")
+                .bind(id)
+                .bind(user_id)
+                .execute(pool)
+                .await?;
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn recover_all(pool: &Pool<Sqlite>, user_id: u32) -> Result<bool, Error> {
+        let row = sqlx::query("UPDATE environments SET deleted_at = NULL WHERE owner_id = ?")
             .bind(user_id)
             .execute(pool)
             .await?;
+        Ok(row.rows_affected() > 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn clean(pool: &Pool<Sqlite>, user_id: u32) -> Result<bool, Error> {
+        let row =
+            sqlx::query(" DELETE FROM environments WHERE owner_id = ? and deleted_at is not null")
+                .bind(user_id)
+                .execute(pool)
+                .await?;
         Ok(row.rows_affected() == 1)
     }
 }
-

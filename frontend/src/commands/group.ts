@@ -1,31 +1,25 @@
 import { invoke } from '@tauri-apps/api/core'
 
-// 根据ID查询分组信息
-export const group_query_id = async (): Promise<any> => {
-    return await invoke('group_query_id', {})
+export const group_query_id = async (id: number): Promise<any> => {
+    return await invoke('group_query_id', { id })
 };
 
-// 分页查询分组列表
 export const group_query = async (pageNum: number, pageSize: number): Promise<any> => {
     return await invoke('group_query', { pageNum, pageSize })
 };
 
-// 创建新分组
-export const group_create = async (): Promise<any> => {
-    return await invoke('group_create', {})
+export const group_create = async (name: string, description?: string): Promise<any> => {
+    return await invoke('group_create', { name, description })
 };
 
-// 修改分组信息
-export const group_modify = async (): Promise<any> => {
-    return await invoke('group_modify', {})
+export const group_modify = async (id: number, name: string, description?: string): Promise<any> => {
+    return await invoke('group_modify', { id, name, description })
 };
 
-// 授权用户访问分组
-export const group_grant_user = async (): Promise<any> => {
-    return await invoke('group_grant_user', {})
+export const group_grant_user = async (group_id: number): Promise<any> => {
+    return await invoke('group_grant_user', { id: group_id })
 };
 
-// 删除分组
-export const group_delete = async (): Promise<any> => {
-    return await invoke('group_delete', {})
+export const group_delete = async (group_id: number): Promise<any> => {
+    return await invoke('group_delete', { id: group_id })
 };

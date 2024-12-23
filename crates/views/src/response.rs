@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
-const CODE_FAIL: i8 = 1;
-const CODE_SUCCESS: i8 = 0;
+const CODE_FAIL: i8 = 0;
+const CODE_SUCCESS: i8 = 1;
 const EMPTY_MESSAGE: &str = "empty message.";
 
 #[derive(Debug, serde::Serialize)]
