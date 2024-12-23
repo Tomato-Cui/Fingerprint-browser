@@ -2,8 +2,6 @@
 import { h, ref } from "vue";
 import { SearchIcon, SlidersHorizontalIcon } from "lucide-vue-next";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-
-const searchFilterValue = ref("");
 </script>
 
 <template>

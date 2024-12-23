@@ -4,7 +4,7 @@ export const browser_start = async (environmentId: number, groupId?: number,): P
     return await invoke('browser_start', { groupId, environmentId })
 };
 
-export const browser_starts = async (payload: Array<{ group_id: number, environment_id: number }>): Promise<any> => {
+export const browser_starts = async (payload: Array<{ environment_id: number, group_id?: number }>): Promise<any> => {
     return await invoke('browser_starts', { payload })
 };
 

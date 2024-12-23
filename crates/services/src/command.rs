@@ -53,7 +53,6 @@ pub async fn start_browser(
                 fingerprint::default().await?
             };
 
-            // let proxy_info = if let Some(user_id) =
             let proxy_info = match proxy::query_by_env_id(user_id as u32, environment_id).await {
                 Ok(v) => v,
                 Err(_) => models::proxies::Proxy {
@@ -96,5 +95,13 @@ async fn test_start_browser() {
     states::init_config_state(r#"../../config.toml"#).await;
     crate::setup().await;
     let t = start_browser(Some(1), None, 2).await;
+    println!("{:?}", t);
+
+    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+
+    // let t = stop(vec![2]).await;
+    // println!("{:?}", t);
+
+    let t = view_active().await;
     println!("{:?}", t);
 }

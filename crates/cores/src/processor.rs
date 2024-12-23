@@ -63,7 +63,7 @@ impl BrowserChildInfo {
             .to_str()
             .unwrap_or_else(|| current_dir.to_str().unwrap());
         let user_data_dir = format!(
-            r#"{}/{}-{}-{}"#,
+            r#"--user-data-dir={}/{}/{}/{}"#,
             app_data,
             app_config.app.location.user_data_location,
             &self.environemnt_info.user_data_file,
@@ -213,6 +213,7 @@ impl Processer {
 
     pub async fn all_status(&self) -> Result<HashMap<i32, bool>, anyhow::Error> {
         let mut status = HashMap::new();
+        println!("{:?}", &self.index);
 
         for (browser_id, _) in &self.index {
             let data = self.status(*browser_id).await?;

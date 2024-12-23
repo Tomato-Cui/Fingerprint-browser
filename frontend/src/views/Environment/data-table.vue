@@ -27,14 +27,15 @@ import {
   useVueTable,
 } from "@tanstack/vue-table";
 import { ArrowUpDown, ChromeIcon, InboxIcon } from "lucide-vue-next";
-import { h, ref, defineProps, withDefaults } from "vue";
+import { h, ref, defineProps, withDefaults, onMounted } from "vue";
 import { PrimaryButton } from "@/components/button/index";
 import { MoreBtn } from "./more-btn";
-import { browser_start } from "@/commands/browser";
+import { browser_start, browser_stops } from "@/commands/browser";
 import { toast } from "vue-sonner";
+import { useBrowserStatusStore } from "@/stores/browser";
 
 export interface Payment {
-  id: string;
+  id: number;
   name: string;
   description: string;
   country: string;
@@ -58,6 +59,8 @@ const props = withDefaults(defineProps<TableProps>(), {
   },
 });
 
+const browserStatusStore = useBrowserStatusStore();
+const emits = defineEmits(["onSelect", "onSyncColumns"]);
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -67,14 +70,26 @@ const columns = [
         checked:
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate"),
-        "onUpdate:checked": (value) => table.toggleAllPageRowsSelected(!!value),
+        "onUpdate:checked": (value) => {
+          table.toggleAllPageRowsSelected(!!value);
+          emits(
+            "onSelect",
+            table.getSelectedRowModel().rows.map((item) => item.getValue("id"))
+          );
+        },
         ariaLabel: "Select all",
         class: "mx-2",
       }),
     cell: ({ row }) => {
       return h(Checkbox, {
         checked: row.getIsSelected(),
-        "onUpdate:checked": (value) => row.toggleSelected(!!value),
+        "onUpdate:checked": (value) => {
+          row.toggleSelected(!!value);
+          emits(
+            "onSelect",
+            table.getSelectedRowModel().rows.map((item) => item.getValue("id"))
+          );
+        },
         ariaLabel: "Select row",
         class: "mx-2",
       });
@@ -195,7 +210,11 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h("div", { class: "lowercase" }, row.getValue("country") || "/"),
+      h(
+        "div",
+        { class: "lowercase whitespace-nowrap" },
+        row.getValue("country") || "/"
+      ),
   }),
   columnHelper.display({
     id: "actions",
@@ -207,6 +226,7 @@ const columns = [
         h("div", { class: "whitespace-nowrap px-2" }, "更多"),
       ]),
     cell: ({ row }) => {
+      let id = row.getValue("id") as number;
       return h("div", { class: "flex gap-x-4" }, [
         h(
           "div",
@@ -216,19 +236,37 @@ const columns = [
             {
               class: "px-2 flex gap-x-2 items-center text-md w-32",
               onClick: () => {
-                let id = row.getValue("id") as number;
-                if (id) {
-                  browser_start(id)
-                    .then((res) => {
-                      console.log(res);
-                    })
-                    .catch((_) => toast.warning("启动失败"));
+                if (!browserStatusStore.getStatus(id)) {
+                  if (id) {
+                    browser_start(id)
+                      .then((res) => {
+                        let data = res.data;
+                        browserStatusStore.updateStatus(
+                          data.environment_id,
+                          data.status
+                        );
+                      })
+                      .catch((_) => toast.warning("启动失败"));
+                  }
+                } else {
+                  browser_stops([id]).then((res: any) => {
+                    if (
+                      res.message &&
+                      (res.message as string).includes("关闭成功")
+                    ) {
+                      browserStatusStore.updateStatus(id, false);
+                    }
+                  });
                 }
               },
             },
             [
               h(ChromeIcon, { class: "w-4 h-4" }),
-              h("span", { class: "text-sm" }, "打开浏览器"),
+              h(
+                "span",
+                { class: "text-sm" },
+                !browserStatusStore.getStatus(id) ? "打开浏览器" : "关闭浏览器"
+              ),
             ]
           )
         ),
@@ -243,6 +281,13 @@ const columnFilters = ref<ColumnFiltersState>([]);
 const columnVisibility = ref<VisibilityState>({});
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
+
+onMounted(() => {
+  emits(
+    "onSyncColumns",
+    table.getAllColumns().filter((column) => column.getCanHide())
+  );
+});
 
 const table = useVueTable({
   get data() {
