@@ -92,7 +92,6 @@ pub async fn start_browser(
 
 #[tokio::test]
 async fn test_start_browser() {
-    states::init_config_state(r#"../../config.toml"#).await;
     crate::setup().await;
     let t = start_browser(Some(1), None, 2).await;
     println!("{:?}", t);

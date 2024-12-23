@@ -25,7 +25,7 @@ pub fn build_router() -> Router {
             // .route("/grant-permission", put(batch::handle))
             // .route("/batch/grant-permission", put(batch::handle))
             .route("/delete/:id", delete(delete::handle))
-            .route("/delete/batch", delete(batch_delete::handle)),
+            .route("/delete/batch", delete(batch_delete::handle))
     )
 }
 
