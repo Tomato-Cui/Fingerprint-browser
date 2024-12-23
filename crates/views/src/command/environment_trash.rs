@@ -36,7 +36,7 @@ pub async fn environment_trash_query(
     });
 
     Ok(
-        match services::environment::query(user_id, page_num, page_size).await {
+        match services::environment_trash::query(user_id, page_num, page_size).await {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         },
