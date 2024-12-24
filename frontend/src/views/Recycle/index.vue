@@ -1,19 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive, computed } from "vue";
+import { Button } from "@/components/ui/button";
 import {
   SearchIcon,
-  LayoutGridIcon,
-  ListIcon,
-  MenuIcon,
-  SquareIcon,
-  XIcon,
-  EditIcon,
-  ShareIcon,
-  LogInIcon,
-  MoreVerticalIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  Trash2,
   Settings2Icon,
   SquarePenIcon,
   Trash2Icon,
@@ -21,25 +10,35 @@ import {
   Recycle,
   Delete,
   RefreshCcw,
-  EllipsisVertical,
-  Rotate3d,
-  RotateCcw,
+  LogsIcon,
+  PackageOpenIcon,
+  PackageIcon,
+  ExternalLinkIcon,
+  TrashIcon,
+  ArrowRightFromLineIcon,
 } from "lucide-vue-next";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/select";
+import {} from "@/components/select";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import {
   environment_trash_query,
   environment_trash_delete_again,
+  environment_trash_recover,
+  environment_trash_clean,
+  environment_trash_recover_all,
+  environment_trash_recovers,
 } from "@/commands/environment-trash";
 import TooltipButton from "@/components/tooltip-button.vue";
 import { PrimaryButton } from "@/components/button";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
 
 interface Payment {
   id: number;
@@ -57,11 +56,9 @@ const data = ref<Array<Payment>>([]);
 
 const columns = ref<any[]>([]);
 
-const onSyncColumns = (value: any) => (columns.value = value);
-
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 16,
+  pageSize: 2,
   total: 0,
 });
 
@@ -96,7 +93,15 @@ const toggleRowSelection = (row: Payment) => {
 };
 
 const deleteAll = () => {
-  visible.value = !visible.value;
+  environment_trash_clean();
+  pagination.total = 0;
+  data.value = [];
+};
+
+const recoverAll = () => {
+  environment_trash_recover_all();
+  data.value = [];
+  // loadData(pagination.pageIndex, pagination.pageSize);
 };
 
 const confirmDelete = () => {
@@ -119,8 +124,41 @@ const deleteVisible = (id?: number) => {
 };
 
 const handleRecover = (id: number) => {
-  // TODO: Implement recovery logic
+  console.log(id);
+  environment_trash_recover(id).then(() => {
+    loadData(pagination.pageIndex, pagination.pageSize);
+  });
 };
+
+const paginationClickHandle = (index: number) => {
+  loadData(index, pagination.pageSize);
+  pagination.pageIndex = index;
+};
+
+const selectData = computed(() => {
+  return data.value.filter((item) => item.selected);
+});
+
+const groupOperationBtns = computed(() => [
+  {
+    title: "多选恢复",
+    icon: PackageIcon,
+    click: () => {
+      let ids = selectData.value.map((item) => item.id);
+      environment_trash_recovers(ids);
+      pagination.total = pagination.total - selectData.value.length;
+      loadData(pagination.pageIndex, pagination.pageSize);
+    },
+    disabled: selectData.value.length <= 0,
+  },
+
+  {
+    title: "多选删除",
+    icon: TrashIcon,
+    click: () => {},
+    disabled: selectData.value.length <= 0,
+  },
+]);
 </script>
 
 <template>
@@ -131,114 +169,89 @@ const handleRecover = (id: number) => {
       class="flex overflow-hidden flex-col flex-1 py-4 bg-white rounded-lg shadow"
     >
       <!-- Header -->
-      <div class="bg-white rounded-lg">
-        <div class="flex justify-between items-center mb-[20px] text-center">
-          <div class="flex relative flex-1 justify-between items-center">
-            <!-- 搜索框 -->
-            <div class="flex">
-              <div
-                class="ml-4 relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500"
-              >
-                <input
-                  v-model="selectVal"
-                  class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none"
-                />
-                <SearchIcon
-                  class="absolute top-2.5 left-3 w-5 h-5 text-gray-400"
-                />
-                <More>
-                  <MoreTrigger>
-                    <button class="p-2 ml-4 rounded-lg hover:bg-gray-100">
-                      <SlidersHorizontalIcon class="w-5 h-5 text-gray-500" />
-                    </button>
-                  </MoreTrigger>
-                  <MoreContent>
-                    <MoreItem class="cursor-pointer" @click="">
-                      <Settings2Icon class="w-4 h-4" />名称
-                    </MoreItem>
-                    <MoreItem class="cursor-pointer" @click="">
-                      <SquarePenIcon class="w-4 h-4" />序号
-                    </MoreItem>
-                    <MoreItem class="cursor-pointer" @click="">
-                      <Trash2Icon class="w-4 h-4" />环境ID
-                    </MoreItem>
+      <div class="mb-4 bg-white rounded-lg">
+        <div class="flex justify-between w-full">
+          <!-- 搜索框 -->
 
-                    <MoreItem class="cursor-pointer" @click="">
-                      <Trash2Icon class="w-4 h-4" />账号平台
-                    </MoreItem>
+          <div class="flex gap-x-4 justify-center">
+            <div
+              class="ml-4 relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500"
+            >
+              <input
+                v-model="selectVal"
+                class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none"
+              />
+              <SearchIcon
+                class="absolute top-2.5 left-3 w-5 h-5 text-gray-400"
+              />
+              <More>
+                <MoreTrigger>
+                  <button class="p-2 ml-4 rounded-lg hover:bg-gray-100">
+                    <SlidersHorizontalIcon class="w-5 h-5 text-gray-500" />
+                  </button>
+                </MoreTrigger>
+                <MoreContent>
+                  <MoreItem class="cursor-pointer" @click="">
+                    <Settings2Icon class="w-4 h-4" />名称
+                  </MoreItem>
+                  <MoreItem class="cursor-pointer" @click="">
+                    <SquarePenIcon class="w-4 h-4" />序号
+                  </MoreItem>
+                  <MoreItem class="cursor-pointer" @click="">
+                    <Trash2Icon class="w-4 h-4" />环境ID
+                  </MoreItem>
 
-                    <MoreItem class="cursor-pointer" @click="">
-                      <Trash2Icon class="w-4 h-4" />平台账号
-                    </MoreItem>
+                  <MoreItem class="cursor-pointer" @click="">
+                    <Trash2Icon class="w-4 h-4" />账号平台
+                  </MoreItem>
 
-                    <MoreItem class="cursor-pointer" @click="">
-                      <Trash2Icon class="w-4 h-4" />备注
-                    </MoreItem>
-                  </MoreContent>
-                </More>
-              </div>
+                  <MoreItem class="cursor-pointer" @click="">
+                    <Trash2Icon class="w-4 h-4" />平台账号
+                  </MoreItem>
 
-              <div class="ml-4">
-                <PrimaryButton @click="">
-                  <div class="flex justify-center items-center">
-                    <Recycle class="w-5 h-5" />
-                    <span>恢复</span>
-                  </div>
-                </PrimaryButton>
-              </div>
-
-              <div class="ml-4">
-                <PrimaryButton @click="">
-                  <div
-                    class="flex justify-center items-center"
-                    style="text-align: center"
-                  >
-                    <Delete class="w-5 h-5" />
-                    <span>删除</span>
-                  </div>
-                </PrimaryButton>
-              </div>
+                  <MoreItem class="cursor-pointer" @click="">
+                    <Trash2Icon class="w-4 h-4" />备注
+                  </MoreItem>
+                </MoreContent>
+              </More>
             </div>
-
-            <div class="flex mr-8">
-              <div class="">
-                <TooltipButton
-                  title="刷新"
-                  @click=""
-                  class="p-2 rounded border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
-                >
-                  <div
-                    class="flex justify-center items-center space-x-2"
-                    style="text-align: center"
-                  >
-                    <RefreshCcw class="w-5 h-5" />
-                  </div>
-                </TooltipButton>
-              </div>
-
-              <div class="ml-4">
-                <More>
-                  <MoreTrigger>
-                    <button
-                      class="p-2 rounded border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
-                    >
-                      <EllipsisVertical class="w-5 h-5 text-gray-500" />
-                    </button>
-                  </MoreTrigger>
-                  <MoreContent>
-                    <MoreItem class="cursor-pointer" @click="">
-                      全部恢复
-                    </MoreItem>
-                    <MoreItem class="cursor-pointer" @click="deleteAll">
-                      全部删除
-                    </MoreItem>
-                  </MoreContent>
-                </More>
-              </div>
+            <div class="flex gap-x-4 items-center">
+              <TooltipButton
+                v-for="(item, index) in groupOperationBtns"
+                :key="index"
+                class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+                :title="item.title"
+                @click="item.click"
+                :disabled="item.disabled"
+              >
+                <component :is="item.icon" class="w-5 h-5 text-gray-600" />
+              </TooltipButton>
             </div>
           </div>
 
-          <!-- <div class="flex gap-4 items-center ml-4"></div> -->
+          <div class="flex">
+            <div class="ml-4">
+              <PrimaryButton @click="recoverAll">
+                <div class="flex justify-center items-center">
+                  <Recycle class="w-5 h-5" />
+
+                  <span>全部恢复</span>
+                </div>
+              </PrimaryButton>
+            </div>
+
+            <div class="ml-4">
+              <PrimaryButton @click="deleteAll">
+                <div
+                  class="flex justify-center items-center"
+                  style="text-align: center"
+                >
+                  <Delete class="w-5 h-5" />
+                  <span>全部删除</span>
+                </div>
+              </PrimaryButton>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -370,22 +383,62 @@ const handleRecover = (id: number) => {
       </table>
 
       <!-- Pagination -->
-
       <div class="flex justify-between items-center p-4 mt-auto bg-white">
-        <div class="text-sm text-gray-600">共 101 项数据</div>
-        <div class="flex items-center space-x-2">
-          <button class="p-2 rounded hover:bg-gray-100">
-            <ChevronLeftIcon class="w-4 h-4" />
-          </button>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">1</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">2</button>
-          <button class="px-3 py-1 text-white bg-blue-500 rounded">3</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">4</button>
-          <span>...</span>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">20</button>
-          <button class="p-2 rounded hover:bg-gray-100">
-            <ChevronRightIcon class="w-4 h-4" />
-          </button>
+        <div class="flex justify-end items-center py-1 space-x-2 w-full">
+          <div class="flex-1 text-sm text-muted-foreground">
+            共{{ pagination.total }}条.
+          </div>
+          <div class="space-x-2">
+            <Pagination
+              :total="pagination.total"
+              :itemsPerPage="pagination.pageSize"
+              :default-page="1"
+            >
+              <PaginationList
+                v-slot="{ items }"
+                class="flex gap-1 items-center"
+              >
+                <PaginationFirst @click="() => paginationClickHandle(0)" />
+                <PaginationPrev
+                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
+                />
+
+                <template v-for="(item, index) in items">
+                  <PaginationListItem
+                    v-if="item.type === 'page'"
+                    :key="index"
+                    :value="item.value"
+                    as-child
+                  >
+                    <Button
+                      class="p-0 w-10 h-10"
+                      @click="() => paginationClickHandle(index)"
+                      :variant="
+                        item.value === pagination.pageIndex + 1
+                          ? 'default'
+                          : 'outline'
+                      "
+                    >
+                      {{ item.value }}
+                    </Button>
+                  </PaginationListItem>
+                  <PaginationEllipsis v-else :key="item.type" :index="index" />
+                </template>
+
+                <PaginationNext
+                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
+                />
+                <PaginationLast
+                  @click="
+                    () =>
+                      paginationClickHandle(
+                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                      )
+                  "
+                />
+              </PaginationList>
+            </Pagination>
+          </div>
         </div>
       </div>
     </div>
