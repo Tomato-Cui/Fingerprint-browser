@@ -34,6 +34,8 @@ CREATE TABLE
     updated_at          DATETIME         DEFAULT CURRENT_TIMESTAMP, -- 更新时间
     lasted_at           DATETIME         DEFAULT CURRENT_TIMESTAMP, -- 创建时间
     deleted_at          DATETIME,                                   -- 删除时间
+    deleted_id          INTEGER,                                    -- 删除时间
+    deleted_username    TEXT,                                       -- 删除时间
     FOREIGN KEY (group_id) REFERENCES groups (id),                  -- 外键关联group表
     FOREIGN KEY (fp_info_id) REFERENCES fingerprints (id),          -- 外键关联fingerprints表
     FOREIGN KEY (owner_id) REFERENCES users (id)                    -- 外键关联users表
