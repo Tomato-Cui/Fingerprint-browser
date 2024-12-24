@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import {
   SearchIcon,
   LayoutGridIcon,
@@ -38,8 +38,41 @@ import { environment_trash_query } from "@/commands/environment-trash";
 import TooltipButton from "@/components/tooltip-button.vue";
 import { PrimaryButton } from "@/components/button";
 
+interface Payment {
+  id: number;
+  name: string;
+  group: string;
+  location: string;
+  domain_name: string;
+  remark: string;
+  deleted_username: string;
+  deleted_at: string;
+}
+
+const data = ref<Array<Payment>>([]);
+
+const columns = ref<any[]>([]);
+
+const onSyncColumns = (value: any) => (columns.value = value);
+
+const pagination = reactive({
+  pageIndex: 0,
+  pageSize: 16,
+  total: 0,
+});
+
+const loadData = (index: number, size: number) => {
+  environment_trash_query(index, size).then((res) => {
+    let { data: data_, total } = res.data;
+    pagination.total = total;
+    data.value = data_;
+  });
+};
+
+onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
+
 // 表格数据
-const tableData = ref([]);
+// const tableData = ref([]);
 
 // 全选复选框的状态
 const selectAll = ref(false);
@@ -48,7 +81,7 @@ const visible = ref(false);
 
 // 切换所有行的选择状态
 const toggleAll = () => {
-  tableData.value.forEach((row) => {
+  data.value.forEach((row) => {
     row.selected = selectAll.value;
   });
 };
@@ -65,12 +98,12 @@ const closePopup = () => {
   visible.value = false;
 };
 
-onMounted(() => {
-  environment_trash_query(1, 10).then((res) => {
-    tableData.value = res.data.data;
-    console.log(res);
-  });
-});
+// onMounted(() => {
+//   environment_trash_query(1, 10).then((res) => {
+//     tableData.value = res.data.data;
+//     console.log(res);
+//   });
+// });
 </script>
 
 <template>
@@ -91,15 +124,6 @@ onMounted(() => {
               >
                 <input
                   v-model="selectVal"
-                  type="text"
-                  :placeholder="
-                    '请输入' +
-                    (selectType === 1
-                      ? '名称'
-                      : selectType === 2
-                      ? '备注'
-                      : '手机号或邮箱')
-                  "
                   class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none"
                 />
                 <SearchIcon
@@ -112,25 +136,25 @@ onMounted(() => {
                     </button>
                   </MoreTrigger>
                   <MoreContent>
-                    <MoreItem class="cursor-pointer" @click="selectT(1)">
+                    <MoreItem class="cursor-pointer" @click="">
                       <Settings2Icon class="w-4 h-4" />名称
                     </MoreItem>
-                    <MoreItem class="cursor-pointer" @click="selectT(2)">
+                    <MoreItem class="cursor-pointer" @click="">
                       <SquarePenIcon class="w-4 h-4" />序号
                     </MoreItem>
-                    <MoreItem class="cursor-pointer" @click="selectT(3)">
+                    <MoreItem class="cursor-pointer" @click="">
                       <Trash2Icon class="w-4 h-4" />环境ID
                     </MoreItem>
 
-                    <MoreItem class="cursor-pointer" @click="selectT(3)">
+                    <MoreItem class="cursor-pointer" @click="">
                       <Trash2Icon class="w-4 h-4" />账号平台
                     </MoreItem>
 
-                    <MoreItem class="cursor-pointer" @click="selectT(3)">
+                    <MoreItem class="cursor-pointer" @click="">
                       <Trash2Icon class="w-4 h-4" />平台账号
                     </MoreItem>
 
-                    <MoreItem class="cursor-pointer" @click="selectT(3)">
+                    <MoreItem class="cursor-pointer" @click="">
                       <Trash2Icon class="w-4 h-4" />备注
                     </MoreItem>
                   </MoreContent>
@@ -269,8 +293,7 @@ onMounted(() => {
             </th>
             <th class="px-4 py-3 text-sm font-medium text-left">序号</th>
             <th class="px-4 py-3 text-sm font-medium text-left">名称</th>
-            <th class="px-4 py-3 text-sm font-medium text-left">分组</th>
-            <th class="px-4 py-3 text-sm font-medium text-left">IP</th>
+
             <th class="px-4 py-3 text-sm font-medium text-left">账号平台</th>
             <th class="px-4 py-3 text-sm font-medium text-left">备注</th>
             <th class="px-4 py-3 text-sm font-medium text-left">操作者</th>
@@ -282,7 +305,7 @@ onMounted(() => {
         </thead>
         <tbody class="">
           <tr
-            v-for="(row, index) in tableData"
+            v-for="(row, index) in data"
             :key="index"
             class="hover:bg-blue-100 h-[20px]"
             :class="{ 'bg-blue-50': row.selected }"
@@ -293,31 +316,15 @@ onMounted(() => {
             </td>
             <td class="px-4 py-3 text-sm">{{ row.id }}</td>
             <td class="px-4 py-3 text-sm">{{ row.name }}</td>
-            <td class="px-4 py-3 text-sm">{{ row.group }}</td>
-            <td class="px-4 py-3 text-sm">
-              <div class="flex items-center">
-                <img
-                  src="../../assets/icons/check.svg"
-                  class="mr-1 w-4 h-4"
-                  style="width: 20px; height: 20px"
-                />
 
-                <img
-                  src="../../assets/icons/location.svg"
-                  class="mr-1 w-4 h-4"
-                />
-                {{ row.ip }}
-                <span class="ml-1 text-gray-500">{{ row.location }}</span>
-              </div>
-            </td>
             <td class="px-4 py-3">
               <div class="flex items-center">
                 <img src="../../assets/icons/stop.svg" class="mr-1 w-4 h-4" />
                 <span
-                  v-if="row.platform"
+                  v-if="row.domain_name"
                   class="px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded"
                 >
-                  {{ row.platform }}
+                  {{ row.domain_name }}
                 </span>
               </div>
             </td>
@@ -334,8 +341,8 @@ onMounted(() => {
               </button>
             </td> -->
             <td class="px-4 py-3 text-sm">{{ row.remark }}</td>
-            <td class="px-4 py-3 text-sm">{{ row.operator }}</td>
-            <td class="px-4 py-3 text-sm">{{ row.deleteTime }}</td>
+            <td class="px-4 py-3 text-sm">{{ row.deleted_username }}</td>
+            <td class="px-4 py-3 text-sm">{{ row.deleted_at }}</td>
             <td class="px-4 py-3 text-sm">
               <div class="flex items-center">
                 <button
