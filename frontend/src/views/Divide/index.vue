@@ -108,6 +108,7 @@ const batchDelete = () => {
   environment_batch_delete(ids)
     .then((_: any) => {
       data.value = data.value.filter((item) => !ids.includes(item.id));
+      selectData.value = [];
     })
     .catch((err) => {
       toast.warning(err);

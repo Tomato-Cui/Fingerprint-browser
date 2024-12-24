@@ -33,6 +33,7 @@ import { MoreBtn } from "./more-btn";
 import { browser_start, browser_stops } from "@/commands/browser";
 import { toast } from "vue-sonner";
 import { useBrowserStatusStore } from "@/stores/browser";
+import { environment_delete } from "@/commands/environment";
 
 export interface Payment {
   id: number;
@@ -142,11 +143,7 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h(
-        "div",
-        { class: "lowercase whitespace-nowrap" },
-        row.getValue("os") || "/"
-      ),
+      h("div", { class: "lowercase whitespace-nowrap" }, row.getValue("os") || "/"),
   }),
   columnHelper.accessor("proxy", {
     header: ({ column }) => {
@@ -160,8 +157,7 @@ const columns = [
         () => ["代理", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
       );
     },
-    cell: ({ row }) =>
-      h("div", { class: "lowercase" }, row.getValue("proxy") || "/"),
+    cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("proxy") || "/"),
   }),
   columnHelper.accessor("group", {
     header: ({ column }) => {
@@ -175,8 +171,7 @@ const columns = [
         () => ["分组", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
       );
     },
-    cell: ({ row }) =>
-      h("div", { class: "lowercase" }, row.getValue("group") || "/"),
+    cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("group") || "/"),
   }),
   columnHelper.accessor("open_urls", {
     header: ({ column }) => {
@@ -210,11 +205,7 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h(
-        "div",
-        { class: "lowercase whitespace-nowrap" },
-        row.getValue("country") || "/"
-      ),
+      h("div", { class: "lowercase whitespace-nowrap" }, row.getValue("country") || "/"),
   }),
   columnHelper.display({
     id: "actions",
@@ -241,19 +232,13 @@ const columns = [
                     browser_start(id)
                       .then((res) => {
                         let data = res.data;
-                        browserStatusStore.updateStatus(
-                          data.environment_id,
-                          data.status
-                        );
+                        browserStatusStore.updateStatus(data.environment_id, data.status);
                       })
                       .catch((_) => toast.warning("启动失败"));
                   }
                 } else {
                   browser_stops([id]).then((res: any) => {
-                    if (
-                      res.message &&
-                      (res.message as string).includes("关闭成功")
-                    ) {
+                    if (res.message && (res.message as string).includes("关闭成功")) {
                       browserStatusStore.updateStatus(id, false);
                     }
                   });
@@ -270,7 +255,12 @@ const columns = [
             ]
           )
         ),
-        MoreBtn(),
+        h("div", { class: "parent-container" }, [
+          h(MoreBtn, {
+            id: id, // 传递 id
+            removeEnv: removeEnv, // 传递 removeEnv 函数
+          }),
+        ]), //传入点击事件参数
       ]);
     },
   }),
@@ -282,6 +272,20 @@ const columnVisibility = ref<VisibilityState>({});
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 
+const removeEnv = (id: number) => {
+  console.log("删除:", id);
+  environment_delete(id).then((res) => {
+    if (res.message && (res.message as string).includes("删除成功")) {
+      toast.success("删除成功");
+      //过滤当前被删除的一行
+      table.getRowModel().rows = table.getRowModel().rows.filter(
+        (item) => item.getValue("id") !== id
+      );
+    } else {
+      toast.warning("删除失败");
+    }
+  });
+};
 onMounted(() => {
   emits(
     "onSyncColumns",
@@ -300,12 +304,10 @@ const table = useVueTable({
   getFilteredRowModel: getFilteredRowModel(),
   getExpandedRowModel: getExpandedRowModel(),
   onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
-  onColumnFiltersChange: (updaterOrValue) =>
-    valueUpdater(updaterOrValue, columnFilters),
+  onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
   onColumnVisibilityChange: (updaterOrValue) =>
     valueUpdater(updaterOrValue, columnVisibility),
-  onRowSelectionChange: (updaterOrValue) =>
-    valueUpdater(updaterOrValue, rowSelection),
+  onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
   onExpandedChange: (updaterOrValue) => valueUpdater(updaterOrValue, expanded),
   manualPagination: true,
   state: {
@@ -336,10 +338,7 @@ const table = useVueTable({
 <template>
   <Table>
     <TableHeader class="z-10 sticky top-0">
-      <TableRow
-        v-for="headerGroup in table.getHeaderGroups()"
-        :key="headerGroup.id"
-      >
+      <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
         <TableHead
           v-for="header in headerGroup.headers"
           :key="header.id"
@@ -364,10 +363,7 @@ const table = useVueTable({
     <TableBody>
       <template v-if="table.getRowModel().rows?.length">
         <template v-for="row in table.getRowModel().rows" :key="row.id">
-          <TableRow
-            :data-state="row.getIsSelected() && 'selected'"
-            class="group"
-          >
+          <TableRow :data-state="row.getIsSelected() && 'selected'" class="group">
             <TableCell
               v-for="cell in row.getVisibleCells()"
               :key="cell.id"
