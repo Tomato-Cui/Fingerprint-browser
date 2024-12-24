@@ -34,7 +34,10 @@ import {
   SelectValue,
 } from "@/components/select";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-import { environment_trash_query } from "@/commands/environment-trash";
+import {
+  environment_trash_query,
+  environment_trash_delete_again,
+} from "@/commands/environment-trash";
 import TooltipButton from "@/components/tooltip-button.vue";
 import { PrimaryButton } from "@/components/button";
 
@@ -47,6 +50,7 @@ interface Payment {
   remark: string;
   deleted_username: string;
   deleted_at: string;
+  selected?: boolean;
 }
 
 const data = ref<Array<Payment>>([]);
@@ -71,13 +75,14 @@ const loadData = (index: number, size: number) => {
 
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
-// 表格数据
-// const tableData = ref([]);
-
 // 全选复选框的状态
 const selectAll = ref(false);
 
 const visible = ref(false);
+
+const selectVal = ref("");
+
+const environmentId = ref<number>();
 
 // 切换所有行的选择状态
 const toggleAll = () => {
@@ -86,24 +91,36 @@ const toggleAll = () => {
   });
 };
 
+const toggleRowSelection = (row: Payment) => {
+  row.selected = !row.selected;
+};
+
 const deleteAll = () => {
   visible.value = !visible.value;
 };
 
 const confirmDelete = () => {
-  visible.value = false;
+  if (environmentId.value) {
+    console.log(environmentId.value);
+    environment_trash_delete_again(environmentId.value).then(() => {
+      loadData(pagination.pageIndex, pagination.pageSize);
+      visible.value = false;
+    });
+  }
 };
 
 const closePopup = () => {
   visible.value = false;
 };
 
-// onMounted(() => {
-//   environment_trash_query(1, 10).then((res) => {
-//     tableData.value = res.data.data;
-//     console.log(res);
-//   });
-// });
+const deleteVisible = (id?: number) => {
+  environmentId.value = id;
+  visible.value = true;
+};
+
+const handleRecover = (id: number) => {
+  // TODO: Implement recovery logic
+};
 </script>
 
 <template>
@@ -209,7 +226,7 @@ const closePopup = () => {
                     </button>
                   </MoreTrigger>
                   <MoreContent>
-                    <MoreItem class="cursor-pointer" @click="selectT(1)">
+                    <MoreItem class="cursor-pointer" @click="">
                       全部恢复
                     </MoreItem>
                     <MoreItem class="cursor-pointer" @click="deleteAll">
@@ -228,6 +245,7 @@ const closePopup = () => {
       <!-- 弹出窗遮罩层 -->
       <div
         v-if="visible"
+        @click="closePopup"
         class="flex fixed inset-0 justify-center items-center bg-gray-800 bg-opacity-50"
       >
         <!-- 弹出窗主体 -->
@@ -293,14 +311,11 @@ const closePopup = () => {
             </th>
             <th class="px-4 py-3 text-sm font-medium text-left">序号</th>
             <th class="px-4 py-3 text-sm font-medium text-left">名称</th>
-
             <th class="px-4 py-3 text-sm font-medium text-left">账号平台</th>
             <th class="px-4 py-3 text-sm font-medium text-left">备注</th>
             <th class="px-4 py-3 text-sm font-medium text-left">操作者</th>
             <th class="px-4 py-3 text-sm font-medium text-left">删除时间</th>
             <th class="px-4 py-3 text-sm font-medium text-left">操作</th>
-            <!-- <th class="px-4 py-3 text-sm text-left">操作</th> -->
-            <!-- <th class="px-4 py-3 text-sm text-left">更多</th> -->
           </tr>
         </thead>
         <tbody class="">
@@ -328,18 +343,7 @@ const closePopup = () => {
                 </span>
               </div>
             </td>
-            <!-- <td class="px-4 py-3">
-              <div class="flex items-center">
-                <button class="">
-                  <img src="../../assets/icons/open.svg" class="h-7 w-18" />
-                </button>
-              </div>
-            </td> -->
-            <!-- <td class="px-4 py-3">
-              <button class="p-1 rounded hover:bg-gray-100">
-                <MoreVerticalIcon class="w-4 h-4" />
-              </button>
-            </td> -->
+
             <td class="px-4 py-3 text-sm">{{ row.remark }}</td>
             <td class="px-4 py-3 text-sm">{{ row.deleted_username }}</td>
             <td class="px-4 py-3 text-sm">{{ row.deleted_at }}</td>
@@ -354,7 +358,7 @@ const closePopup = () => {
                 </button>
                 <button
                   class="flex items-center px-2 py-1 text-sm text-blue-600 rounded-md hover:bg-red-50"
-                  @click="handleDelete(row.id)"
+                  @click="deleteVisible(row.id)"
                 >
                   <Trash2Icon class="mr-1 w-4 h-4" />
                   删除
