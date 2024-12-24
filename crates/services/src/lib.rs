@@ -7,6 +7,7 @@ pub mod fingerprint;
 pub mod group;
 pub mod proxy;
 pub mod resource_whitelist;
+pub mod team;
 pub mod user;
 
 #[allow(dead_code)]
