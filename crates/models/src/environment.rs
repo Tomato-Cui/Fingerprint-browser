@@ -297,8 +297,8 @@ impl Environment {
         let row = sqlx::query(
             "UPDATE environments SET deleted_at = DATETIME('now'), deleted_id = ? WHERE id = ? and owner_id = ?",
         )
-        .bind(id)
         .bind(user_id)
+        .bind(id)
         .bind(user_id)
         .execute(pool)
         .await?;
