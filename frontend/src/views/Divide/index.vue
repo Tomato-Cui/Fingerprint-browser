@@ -40,6 +40,7 @@ import { browser_starts, browser_stops } from "@/commands/browser";
 import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
+import { environment_delete } from "@/commands/environment";
 
 const route = useRoute();
 const browserStatusStore = useBrowserStatusStore();
@@ -51,7 +52,6 @@ const columns = ref<any[]>([]);
 })
 
 const onSyncColumns = (value: any) => (columns.value = value);
-
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 16,
@@ -71,7 +71,7 @@ const loadData = (groupId: number, index: number, size: number) => {
 
 onMounted(() => loadData(Number(route.params.id), pagination.pageIndex, pagination.pageSize));
 const paginationClickHandle = (index: number) => {
-  loadData(route.params.id, index, pagination.pageSize);
+  loadData(Number(route.params.id), index, pagination.pageSize);
   pagination.pageIndex = index;
 };
 const openGroup = async () => {
@@ -119,6 +119,19 @@ const exportData = () => {
   downloadCSV(convertToCSV(data.value));
 };
 
+const removeEnv = (id: number) => {
+  console.log("删除:", id);
+  environment_delete(id).then((res) => {
+    if (res.message && (res.message as string).includes("删除成功")) {
+      toast.success("删除成功");
+      //过滤当前被删除的一行
+      data.value = data.value.filter((item) => item.id !== id);
+    } else {
+      toast.warning("删除失败");
+    }
+  });
+};
+
 const groupOperationBtns = computed(() => [
   {
     title: "关闭",
@@ -147,7 +160,7 @@ const groupOperationBtns = computed(() => [
 ]);
 
 // 监听路由中id的变化
-watch(() => route.params.id, (value) => {
+watch(() => route.params.id, (value: any) => {
   loadData(Number(value), pagination.pageIndex, pagination.pageSize);
 });
 </script>
@@ -209,6 +222,7 @@ watch(() => route.params.id, (value) => {
           <DataTable
             :data="data"
             :pagination="pagination"
+            @removeEnv="removeEnv"
             @onSyncColumns="onSyncColumns"
             @onSelect="(v: Number[]) => selectData = v"
           />

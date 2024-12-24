@@ -1,5 +1,5 @@
-<script setup>
-import { ref } from "vue";
+<script setup lang="ts">
+import { onMounted, ref, watch } from "vue";
 import {
   Select,
   SelectContent,
@@ -8,10 +8,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-const groupSwitchSelect = ref("");
+import { group_query } from "@/commands/group";
+
+const groups = ref<any[]>([]);
+const emits = defineEmits(["select"]);
+
+const select = ref<string | undefined>(undefined);
+
+onMounted(() => {
+  group_query(0, 100).then((res) => {
+    groups.value = res.data.data;
+  });
+});
+
+watch(select, (newSelect) => {
+  emits("select", newSelect);
+});
 </script>
 <template>
-  <Select v-model="groupSwitchSelect">
+  <Select v-model="select">
     <SelectTrigger class="w-44 bg-[#f9f9f9]">
       <SelectValue
         placeholder="请选择环境分组"
@@ -20,9 +35,10 @@ const groupSwitchSelect = ref("");
     </SelectTrigger>
     <SelectContent>
       <SelectGroup>
-        <SelectItem value="1"> 未分组 </SelectItem>
-        <SelectItem value="2"> 分组1 </SelectItem>
-        <SelectItem value="3"> 分组2 </SelectItem>
+        <SelectItem value="0">未分组</SelectItem>
+        <SelectItem :value="item.id" v-for="item in groups">
+          {{ item.name }}
+        </SelectItem>
       </SelectGroup>
     </SelectContent>
   </Select>

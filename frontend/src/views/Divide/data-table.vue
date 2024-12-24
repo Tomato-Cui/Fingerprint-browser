@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<TableProps>(), {
 });
 
 const browserStatusStore = useBrowserStatusStore();
-const emits = defineEmits(["onSelect", "onSyncColumns"]);
+const emits = defineEmits(["onSelect", "onSyncColumns", "removeEnv"]);
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -218,6 +218,7 @@ const columns = [
       ]),
     cell: ({ row }) => {
       let id = row.getValue("id") as number;
+
       return h("div", { class: "flex gap-x-4" }, [
         h(
           "div",
@@ -256,10 +257,8 @@ const columns = [
           )
         ),
         h("div", { class: "parent-container" }, [
-          h(MoreBtn, {
-            id: id, // 传递 id
-            removeEnv: removeEnv, // 传递 removeEnv 函数
-          }),
+          
+          MoreBtn({'removeEnv':()=>emits('removeEnv', id)}), 
         ]), //传入点击事件参数
       ]);
     },
@@ -272,20 +271,6 @@ const columnVisibility = ref<VisibilityState>({});
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 
-const removeEnv = (id: number) => {
-  console.log("删除:", id);
-  environment_delete(id).then((res) => {
-    if (res.message && (res.message as string).includes("删除成功")) {
-      toast.success("删除成功");
-      //过滤当前被删除的一行
-      table.getRowModel().rows = table.getRowModel().rows.filter(
-        (item) => item.getValue("id") !== id
-      );
-    } else {
-      toast.warning("删除失败");
-    }
-  });
-};
 onMounted(() => {
   emits(
     "onSyncColumns",
@@ -362,7 +347,9 @@ const table = useVueTable({
     </TableHeader>
     <TableBody>
       <template v-if="table.getRowModel().rows?.length">
+        {{ table.getRowModel().rows[1].original.id }}
         <template v-for="row in table.getRowModel().rows" :key="row.id">
+          <!-- {{ row }} -->
           <TableRow :data-state="row.getIsSelected() && 'selected'" class="group">
             <TableCell
               v-for="cell in row.getVisibleCells()"

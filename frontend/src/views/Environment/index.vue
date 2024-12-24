@@ -16,7 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ref, onMounted, reactive, computed } from "vue";
+import { ref, onMounted, reactive, computed, watch } from "vue";
 import TooltipButton from "@/components/tooltip-button.vue";
 import {
   LogsIcon,
@@ -31,6 +31,7 @@ import GroupSelect from "./group-select.vue";
 import {
   environment_batch_delete,
   environment_query,
+  environment_query_by_group,
 } from "@/commands/environment";
 import DataTable, { type Payment } from "./data-table.vue";
 import { PrimaryButton } from "@/components/button";
@@ -43,6 +44,11 @@ const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
 const selectData = ref<Number[]>([]);
 const columns = ref<any[]>([]);
+const groupSelect = ref<string | undefined>();
+const searchType = ref<{ title: keyof Payment; value: string }>({
+  title: "name",
+  value: "名称",
+});
 
 const onSyncColumns = (value: any) => (columns.value = value);
 
@@ -135,6 +141,36 @@ const groupOperationBtns = computed(() => [
     disabled: selectData.value.length <= 0,
   },
 ]);
+const groupSelectHandle = (value: string) => {
+  groupSelect.value = value;
+};
+
+const searchValueHandle = (value: string) => {
+  if (value.length != 0) {
+    data.value = data.value.filter((item) => {
+      let current = item[searchType.value.title as keyof Payment] as string;
+      return current ? current.includes(value) : false;
+    });
+  } else {
+    loadData(pagination.pageIndex, pagination.pageSize);
+  }
+};
+
+watch(groupSelect, (newVal) => {
+  if (newVal && newVal != "0") {
+    environment_query_by_group(
+      parseInt(newVal),
+      pagination.pageIndex,
+      pagination.pageSize
+    ).then((res) => {
+      let { data: data_, total } = res.data;
+      pagination.total = total;
+      data.value = data_;
+    });
+  } else if (newVal == "0") {
+    loadData(pagination.pageIndex, pagination.pageSize);
+  }
+});
 </script>
 
 <template>
@@ -145,8 +181,12 @@ const groupOperationBtns = computed(() => [
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
-            <GroupSelect />
-            <SearchInput />
+            <GroupSelect @select="groupSelectHandle" />
+            <SearchInput
+              :search-current-type="searchType"
+              @update:searchType="(value:any) => (searchType = value)"
+              @update:searchValue="searchValueHandle"
+            />
           </div>
           <div class="flex gap-2 py-2 ju justify-end flex-auto px-2">
             <DropdownMenu>

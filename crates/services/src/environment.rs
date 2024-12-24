@@ -156,7 +156,7 @@ pub async fn batch_move_to_group(
 pub async fn delete(user_id: u32, env_id: u32) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = models::environment::Environment::delete(pool, env_id, user_id).await?;
+    let ok = models::environment::Environment::delete(pool, user_id, env_id).await?;
 
     Ok(ok)
 }
@@ -166,7 +166,7 @@ pub async fn batch_delete(user_id: u32, env_ids: Vec<u32>) -> Result<Vec<bool>, 
 
     let mut response = vec![];
     for env_id in env_ids {
-        let ok = models::environment::Environment::delete(pool, env_id, user_id).await?;
+        let ok = models::environment::Environment::delete(pool, user_id, env_id).await?;
         response.push(ok);
     }
     Ok(response)
@@ -271,5 +271,13 @@ async fn test_query_by_id() {
     states::init_config_state(r#"../../config.toml"#).await;
     crate::setup().await;
     let token = query_by_id(Some(1), None, 1).await;
+    println!("{:?}", token);
+}
+
+#[tokio::test]
+async fn test_delete() {
+    crate::setup().await;
+
+    let token = delete(1, 1).await;
     println!("{:?}", token);
 }
