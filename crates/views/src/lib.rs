@@ -37,6 +37,7 @@ pub fn run() {
             environment_trash_command::environment_trash_recovers,
             environment_trash_command::environment_trash_recover_all,
             environment_trash_command::environment_trash_delete_again,
+            environment_trash_command::environment_trash_batch_delete_again,
             environment_trash_command::environment_trash_clean,
             fingerprint_command::fingerprint_query_id,
             fingerprint_command::fingerprint_query,

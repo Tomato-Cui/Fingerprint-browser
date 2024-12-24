@@ -1,3 +1,4 @@
+
 use serde_json::{json, Value};
 
 use crate::error::ServiceError;
@@ -44,6 +45,13 @@ pub async fn recover_all(user_id: u32) -> Result<bool, ServiceError> {
 pub async fn delete_again(user_id: u32, env_id: u32) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
     let ok = models::environment::Environment::delete_again(pool, user_id, env_id).await?;
+
+    Ok(ok)
+}
+
+pub async fn batch_delete_again(user_id: u32, env_ids: Vec<u32>) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+    let ok = models::environment::Environment::batch_delete_again(pool, user_id, env_ids).await?;
 
     Ok(ok)
 }

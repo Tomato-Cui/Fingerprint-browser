@@ -1,3 +1,4 @@
+pub mod browser;
 pub mod environment;
 pub mod environment_trash;
 pub mod fingerprint;
