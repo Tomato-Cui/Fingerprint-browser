@@ -23,6 +23,13 @@ export const environment_trash_recover_all = async (): Promise<any> => {
 
 export const environment_trash_delete_again = async (id: number): Promise<any> => {
     return await invoke('environment_trash_delete_again', { id })
+<<<<<<< HEAD
+=======
+};
+
+export const environment_trash_batch_delete_again = async (ids: number[]): Promise<any> => {
+    return await invoke('environment_trash_batch_delete_again', { ids })
+>>>>>>> c9947a3b90c9729c1c60118e94b6d6b3292c17d7
 };
 
 export const environment_trash_clean = async (

@@ -103,6 +103,29 @@ pub async fn environment_trash_recover_all() -> Result<AppResponse<bool>, tauri:
 }
 
 #[tauri::command]
+pub async fn environment_trash_batch_delete_again(
+    ids: Vec<u32>,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_id = get_user_id().await;
+    let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
+        Some(format!("删除成功: {}", v))
+    });
+
+    Ok(
+        match services::environment_trash::batch_delete_again(user_id, ids).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
 pub async fn environment_trash_delete_again(id: u32) -> Result<AppResponse<bool>, tauri::Error> {
     let user_id = get_user_id().await;
     let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {

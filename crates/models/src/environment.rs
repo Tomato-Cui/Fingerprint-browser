@@ -1,3 +1,4 @@
+
 use serde::{Deserialize, Serialize};
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
@@ -39,8 +40,8 @@ pub struct Environment {
     pub updated_at: Option<String>,        // 更新时间
     pub lasted_at: Option<String>,         // 最近时间
     pub deleted_at: Option<String>,        // 删除时间
-    pub deleted_id: Option<u32>,        // 删除时间
-    pub deleted_username: Option<String>,        // 删除时间
+    pub deleted_id: Option<u32>,           // 删除时间
+    pub deleted_username: Option<String>,  // 删除时间
 }
 
 impl Environment {
@@ -151,7 +152,7 @@ impl Environment {
                 .await?;
         environments
             .iter_mut()
-            .for_each(|v| v.deleted_username= Some(current_user.nickname.clone()));
+            .for_each(|v| v.deleted_username = Some(current_user.nickname.clone()));
 
         Ok((total, environments))
     }
@@ -166,10 +167,12 @@ impl Environment {
         page_size: u32,
     ) -> Result<(i64, Vec<Environment>), Error> {
         let (total,): (i64,) = if col_name.is_empty() {
-            sqlx::query_as("select count(1) from environments where owner_id = ? and deleted_at is null")
-                .bind(user_id)
-                .fetch_one(pool)
-                .await?
+            sqlx::query_as(
+                "select count(1) from environments where owner_id = ? and deleted_at is null",
+            )
+            .bind(user_id)
+            .fetch_one(pool)
+            .await?
         } else {
             sqlx::query_as(&format!(
                 "select count(1) from environments where {} = ? and owner_id = ? and deleted_at is null",
@@ -316,6 +319,29 @@ impl Environment {
         .execute(pool)
         .await?;
         Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn batch_delete_again(
+        pool: &Pool<Sqlite>,
+        user_id: u32,
+        ids: Vec<u32>,
+    ) -> Result<bool, Error> {
+        let ids = ids
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+
+        let row = sqlx::query(&format!(
+            "DELETE FROM environments WHERE id in ({}) and owner_id = ? and deleted_at is not null",
+            ids
+        ))
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+
+        Ok(row.rows_affected() > 1)
     }
 
     #[allow(dead_code)]

@@ -16,6 +16,7 @@ pub fn build_router() -> Router {
             .route("/recovers", put(recovers::handle))
             .route("/recover-all", put(recover_all::handle))
             .route("/delete-again/:id", delete(delete_again::handle))
+            .route("/batch/delete", delete(delete_batch::handle))
             .route("/clean", delete(clean::handle)),
     )
 }
@@ -157,6 +158,38 @@ mod delete_again {
                 }
             }
             Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod delete_batch {
+    use axum::Json;
+    use serde::Deserialize;
+
+    use super::*;
+
+    #[derive(Deserialize)]
+    pub struct Payload {
+        pub ids: Vec<u32>,
+    }
+
+    pub async fn handle(
+        state: Extension<middlewares::CurrentUser>,
+        Json(payload): Json<Payload>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
+            Some(format!("删除失败: {}", v))
+        });
+
+        match services::environment_trash::batch_delete_again(state.id, payload.ids).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         }
     }
 }
