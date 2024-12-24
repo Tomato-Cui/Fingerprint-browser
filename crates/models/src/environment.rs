@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
+use crate::user;
+
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Environment {
     #[serde(skip)]
@@ -37,6 +39,8 @@ pub struct Environment {
     pub updated_at: Option<String>,        // 更新时间
     pub lasted_at: Option<String>,         // 最近时间
     pub deleted_at: Option<String>,        // 删除时间
+    pub deleted_id: Option<u32>,        // 删除时间
+    pub deleted_username: Option<String>,        // 删除时间
 }
 
 impl Environment {
@@ -122,6 +126,8 @@ impl Environment {
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<Environment>), Error> {
+        let current_user = user::User::query_id(pool, user_id as i32).await?;
+
         let (total,): (i64,) = sqlx::query_as(
             "select count(1) from environments where owner_id = ? and deleted_at is not NULL",
         )
@@ -136,13 +142,16 @@ impl Environment {
         };
         let offset = page_num * page_size;
 
-        let environments: Vec<Environment> =
+        let mut environments: Vec<Environment> =
             sqlx::query_as("select * from environments where owner_id = ? and deleted_at is not NULL limit ? offset ?")
                 .bind(user_id)
                 .bind(page_size)
                 .bind(offset)
                 .fetch_all(pool)
                 .await?;
+        environments
+            .iter_mut()
+            .for_each(|v| v.deleted_username= Some(current_user.nickname.clone()));
 
         Ok((total, environments))
     }
@@ -286,12 +295,14 @@ impl Environment {
     #[allow(dead_code)]
     pub async fn delete(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<bool, Error> {
         let row = sqlx::query(
-            "UPDATE environments SET deleted_at = DATETIME('now') WHERE id = ? and owner_id = ?",
+            "UPDATE environments SET deleted_at = DATETIME('now'), deleted_id = ? WHERE id = ? and owner_id = ?",
         )
         .bind(id)
         .bind(user_id)
+        .bind(user_id)
         .execute(pool)
         .await?;
+
         Ok(row.rows_affected() == 1)
     }
 
