@@ -3,6 +3,7 @@ pub mod environment_trash;
 pub mod fingerprint;
 pub mod group;
 pub mod proxy;
+pub mod team;
 pub mod user;
 
 use serde::Deserialize;
