@@ -91,55 +91,47 @@ impl Team {
         }
     }
 
-    // #[allow(dead_code)]
-    // pub async fn update(pool: &Pool<Sqlite>, user_id: u32, proxy: &Proxy) -> Result<bool, Error> {
-    //     let row = sqlx::query(
-    //         "update proxies set kind = ?, value = ?, updated_at = DATETIME('now') where id = ? and owner_id = ?",
-    //     )
-    //     .bind(&proxy.kind)
-    //     .bind(&proxy.value)
-    //     .bind(proxy.id)
-    //     .bind(user_id)
-    //     .execute(pool)
-    //     .await?;
+    #[allow(dead_code)]
+    pub async fn update(pool: &Pool<Sqlite>, user_id: u32, team: &Team) -> Result<bool, Error> {
+        let mut tx = pool.begin().await?;
+        let team_ids: Vec<(u32,)> =
+            sqlx::query_as("select team_id from user_team_relation where user_id = ?")
+                .bind(user_id)
+                .fetch_all(&mut *tx)
+                .await?;
 
-    //     Ok(row.rows_affected() == 1)
-    // }
+        let ok = team_ids.iter().any(|(id,)| *id as i32 == team.id);
 
-    // #[allow(dead_code)]
-    // pub async fn update_by_col(
-    //     pool: &Pool<Sqlite>,
-    //     user_id: u32,
-    //     id: u32,
-    //     col_name: &str,
-    //     col_value: &str,
-    // ) -> Result<bool, Error> {
-    //     if col_name.is_empty() {
-    //         return Err(sqlx::error::Error::ColumnNotFound(format!(
-    //             "{} column not found",
-    //             col_name
-    //         )));
-    //     }
-    //     let row = sqlx::query(&format!(
-    //         "UPDATE proxies SET {} = ? WHERE id = ? and owner_id = ?",
-    //         col_name
-    //     ))
-    //     .bind(col_value)
-    //     .bind(id)
-    //     .bind(user_id)
-    //     .execute(pool)
-    //     .await?;
-    //     Ok(row.rows_affected() == 1)
-    // }
+        if ok {
+            sqlx::query(
+                "update teams set name = ?, description = ?, updated_at = DATETIME('now') where id = ?",
+            )
+            .bind(&team.name)
+            .bind(&team.description)
+            .bind(team.id)
+            .execute(&mut *tx)
+            .await?;
+        };
 
-    // #[allow(dead_code)]
-    // pub async fn delete(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<bool, Error> {
-    //     let row = sqlx::query("delete from proxies where id = ? and owner_id = ?")
-    //         .bind(id)
-    //         .bind(user_id)
-    //         .execute(pool)
-    //         .await?;
+        Ok(true)
+    }
 
-    //     Ok(row.rows_affected() == 1)
-    // }
+    #[allow(dead_code)]
+    pub async fn delete(pool: &Pool<Sqlite>, user_id: u32, team_id: u32) -> Result<bool, Error> {
+        let mut tx = pool.begin().await?;
+        let (team_id,): (u32,) = sqlx::query_as(
+            "select team_id from user_team_relation where user_id = ? and team_id = ?",
+        )
+        .bind(user_id)
+        .bind(team_id)
+        .fetch_one(&mut *tx)
+        .await?;
+
+        let row = sqlx::query("delete from teams where id = ? ")
+            .bind(team_id)
+            .execute(&mut *tx)
+            .await?;
+
+        Ok(row.rows_affected() > 1)
+    }
 }
