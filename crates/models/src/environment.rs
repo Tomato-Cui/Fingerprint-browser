@@ -166,13 +166,13 @@ impl Environment {
         page_size: u32,
     ) -> Result<(i64, Vec<Environment>), Error> {
         let (total,): (i64,) = if col_name.is_empty() {
-            sqlx::query_as("select count(1) from environments where owner_id = ? and deleted_at is not null")
+            sqlx::query_as("select count(1) from environments where owner_id = ? and deleted_at is null")
                 .bind(user_id)
                 .fetch_one(pool)
                 .await?
         } else {
             sqlx::query_as(&format!(
-                "select count(1) from environments where {} = ? and owner_id = ? and deleted_at is not null",
+                "select count(1) from environments where {} = ? and owner_id = ? and deleted_at is null",
                 col_name
             ))
             .bind(col_value)
@@ -189,7 +189,7 @@ impl Environment {
         let offset = page_num * page_size;
 
         let environments: Vec<Environment> = if col_name.is_empty() {
-            sqlx::query_as("select * from environments where owner_id = ? and deleted_at is not null limit ? offset ? ")
+            sqlx::query_as("select * from environments where owner_id = ? and deleted_at is null limit ? offset ? ")
                 .bind(user_id)
                 .bind(page_size)
                 .bind(offset)
@@ -197,7 +197,7 @@ impl Environment {
                 .await?
         } else {
             sqlx::query_as(&format!(
-                "select * from environments where {} = ? and owner_id = ? and deleted_at is not null  limit ? offset ?",
+                "select * from environments where {} = ? and owner_id = ? and deleted_at is null  limit ? offset ?",
                 col_name
             ))
             .bind(col_value)
