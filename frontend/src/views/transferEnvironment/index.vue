@@ -19,86 +19,89 @@ import {
   Settings2Icon,
   SquarePenIcon,
   Trash2Icon,
+  TrashIcon,
+  PackageIcon,
+  RotateCcw,
 } from "lucide-vue-next";
 import { environment_trash_query } from "@/commands/environment-trash";
+import { environment_transfer_query } from "@/commands/environment_transfer";
 
-export interface Payment {
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
+
+import { Button } from "@/components/ui/button";
+import SearchInput from "./search-input.vue";
+
+import TooltipButton from "@/components/tooltip-button.vue";
+
+import { PrimaryButton } from "@/components/button";
+
+interface Payment {
   id: number;
   name: string;
   group: string;
   location: string;
   remark: string;
   browser: string;
+  domain_name: string;
   transferTime: string;
   transferType: string;
+  selected?: boolean;
 }
 
-// const selectAll = ref(false);
-
-// const tableData = ref([]);
-
-// const browserStatusStore = useBrowserStatusStore();
-// const data = ref<Array<Payment>>([]);
 const selectData = ref<Number[]>([]);
 const columns = ref<any[]>([]);
 const groupSelect = ref<string | undefined>();
 
 const data = ref<Array<Payment>>([]);
-// const searchType = ref<{ title: keyof Payment; value: string }>({
-//   title: "name",
-//   value: "名称",
-// });
 
+const searchType = ref<{ title: keyof Payment; value: string }>({
+  title: "name",
+  value: "名称",
+});
 const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 16,
+  pageSize: 2,
   total: 0,
 });
 
-// const loadingData = (index: number, size: number) => {
-//   environment_trash_query(index, size).then((res) => {
-//     let { data: data_, total } = res.data;
-//     pagination.total = total;
-//     data_.value = data_;
-//   });
-// };
-
 const loadData = (index: number, size: number) => {
-  environment_trash_query(index, size).then((res) => {
+  environment_transfer_query(index, size).then((res) => {
     let { data: data_, total } = res.data;
+    console.log("res.data", res.data);
     pagination.total = total;
     data.value = data_;
   });
 };
 
+const paginationClickHandle = (index: number) => {
+  loadData(index, pagination.pageSize);
+  pagination.pageIndex = index;
+};
+
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
-// const paginationClickHandle = (index) => {
-//   loadData(index, pagination.pageSize);
-//   pagination.pageIndex = index;
-// };
-
-// const openGroup = async () => {
-//   let ids = [...selectData.value].map(
-//     (item) => ({ environment_id: item } as any)
-//   );
-//   try {
-//     let data = await browser_starts(ids);
-//     data = await data.data;
-//     let status = Object.values(data).map((item: any) => ({
-//       id: item.environment_id,
-//       status: item.status,
-//     }));
-
-//     status.forEach((item: any) => {
-//       browserStatusStore.updateStatus(item.id, item.status);
-//     });
-//   } catch (_err) {
-//     toast.warning("启动失败");
-//   }
-// };
+const searchValueHandle = (value: string) => {
+  if (value.length != 0) {
+    console.log(value);
+    data.value = data.value.filter((item) => {
+      let current = item[searchType.value.title as keyof Payment] as string;
+      return current ? current.includes(value) : false;
+    });
+  } else {
+    loadData(pagination.pageIndex, pagination.pageSize);
+  }
+};
 </script>
 
 <template>
@@ -108,143 +111,20 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
       style="padding: 20px"
     >
       <!-- Header -->
-      <div lass="bg-white rounded-lg p-4 m-[20px] h-[50px]">
-        <div class="flex justify-between items-center mb-[20px]">
-          <div
-            class="relative flex-1 flex items-center gap-4 min-w-[500px] max-w-[1000px]"
-          >
-            <!-- 搜索框 -->
-            <div
-              class="relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500"
-            >
-              <input
-                v-model="selectVal"
-                type="text"
-                :placeholder="
-                  '请输入' +
-                  (selectType === 1
-                    ? '名称'
-                    : selectType === 2
-                    ? '备注'
-                    : '手机号或邮箱')
-                "
-                class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none"
+      <div class="bg-white rounded-lg">
+        <div class="flex justify-between w-full">
+          <!-- 搜索框 -->
+
+          <div class="flex gap-x-4 justify-center">
+            <div class="flex gap-2 items-center py-2 mb-4">
+              <!-- <GroupSelect @select="groupSelectHandle" /> -->
+              <SearchInput
+                :search-current-type="searchType"
+                @update:searchType="(value:any) => (searchType = value)"
+                @update:searchValue="searchValueHandle"
               />
-              <SearchIcon
-                class="absolute top-2.5 left-3 w-5 h-5 text-gray-400"
-              />
-              <More>
-                <MoreTrigger>
-                  <button class="p-2 ml-4 rounded-lg hover:bg-gray-100">
-                    <SlidersHorizontalIcon class="w-5 h-5 text-gray-500" />
-                  </button>
-                </MoreTrigger>
-                <MoreContent>
-                  <MoreItem class="cursor-pointer" @click="selectT(1)">
-                    <Settings2Icon class="w-4 h-4" />名称
-                  </MoreItem>
-                  <MoreItem class="cursor-pointer" @click="selectT(2)">
-                    <SquarePenIcon class="w-4 h-4" />备注
-                  </MoreItem>
-                  <MoreItem class="cursor-pointer" @click="selectT(3)">
-                    <Trash2Icon class="w-4 h-4" />手机号/邮箱
-                  </MoreItem>
-                </MoreContent>
-              </More>
-            </div>
-
-            <TooltipButton
-              title="搜索条件"
-              @click="openDialog"
-              class="p-2 rounded border-[1px] ml-[-20px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
-              style="margin-left: 5px"
-            >
-              <MenuIcon class="w-5 h-5" />
-            </TooltipButton>
-
-            <!-- 弹窗蒙层 -->
-            <div
-              v-if="showDialog"
-              class="flex fixed inset-0 justify-center items-center bg-gray-800 bg-opacity-50"
-            >
-              <!-- 弹窗内容 -->
-              <div class="w-full max-w-md bg-white rounded-lg shadow-lg">
-                <!-- 弹窗标题 -->
-                <div class="p-4 text-xl font-semibold border-b">筛选</div>
-
-                <!-- 筛选表单 -->
-                <div class="p-4 space-y-4">
-                  <!-- 循环生成选择框 -->
-                  <div
-                    v-for="(item, index) in filters"
-                    :key="index"
-                    class="flex items-center"
-                  >
-                    <label class="w-24 text-gray-700">{{ item.label }}</label>
-                    <select
-                      v-model="item.value"
-                      class="flex-1 px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="" disabled>请选择</option>
-                      <option
-                        v-for="option in item.options"
-                        :key="option"
-                        :value="option"
-                      >
-                        {{ option }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- 转移类型 -->
-                  <div class="flex items-center">
-                    <label class="w-24 text-gray-700">转移类型</label>
-                    <select
-                      v-model="transferType"
-                      class="flex-1 px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="含备注与代理">含备注与代理</option>
-                    </select>
-                  </div>
-
-                  <!-- 转移时间 -->
-                  <div class="flex items-center space-x-2">
-                    <label class="w-24 text-gray-700">转移时间</label>
-                    <input
-                      type="date"
-                      v-model="startTime"
-                      class="flex-1 px-3 py-2 rounded-md border focus:ring-2 focus:ring-blue-500"
-                      style="width: 150px"
-                    />
-                    <span>→</span>
-                    <input
-                      type="date"
-                      v-model="endTime"
-                      class="flex-1 px-3 py-2 rounded-md border focus:ring-2 focus:ring-blue-500"
-                      style="width: 150px"
-                    />
-                  </div>
-                </div>
-
-                <!-- 底部按钮 -->
-                <div class="flex justify-center p-4 space-x-4 border-t">
-                  <button
-                    @click="handleConfirm"
-                    class="px-6 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                  >
-                    确定
-                  </button>
-                  <button
-                    @click="handleCancel"
-                    class="px-6 py-2 text-gray-800 bg-gray-200 rounded-md hover:bg-gray-300"
-                  >
-                    取消
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
-          <!-- <div class="flex gap-4 items-center ml-4"></div> -->
         </div>
       </div>
 
@@ -263,11 +143,7 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
               >
                 名称
               </th>
-              <th
-                class="px-4 py-3 text-sm font-medium text-left text-gray-600 min-w-48"
-              >
-                分组
-              </th>
+
               <th
                 class="px-4 py-3 text-sm font-medium text-left text-gray-600 min-w-48"
               >
@@ -315,7 +191,7 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
           </thead>
           <tbody>
             <tr
-              v-for="(row, index) in tableData"
+              v-for="(row, index) in data"
               :key="index"
               class="hover:bg-blue-100"
               :class="{ 'bg-blue-50': row.selected }"
@@ -337,11 +213,7 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
               </button> -->
                 </div>
               </td>
-              <td class="px-4 py-3 text-sm min-w-48">
-                <div class="flex items-center">
-                  <span class="text-gray-500">{{ row.group }}</span>
-                </div>
-              </td>
+
               <td class="px-4 py-3 text-sm min-w-48">
                 <div class="flex items-center">
                   <img
@@ -359,7 +231,7 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
                       class="flex justify-center items-center mr-1 w-6 h-6 text-xs text-blue-800 bg-blue-100 rounded-full"
                       >b</span
                     >
-                    {{ row.platform }}
+                    {{ row.domain_name }}
                   </span>
                   <span v-else class="text-gray-400">\</span>
                 </div>
@@ -383,22 +255,64 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
           </tbody>
         </table>
       </div>
+
       <!-- Pagination -->
       <div class="flex justify-between items-center p-4 mt-auto bg-white">
-        <div class="text-sm text-gray-600">共 101 项数据</div>
-        <div class="flex items-center space-x-2">
-          <button class="p-2 rounded hover:bg-gray-100">
-            <ChevronLeftIcon class="w-4 h-4" />
-          </button>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">1</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">2</button>
-          <button class="px-3 py-1 text-white bg-blue-500 rounded">3</button>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">4</button>
-          <span>...</span>
-          <button class="px-3 py-1 rounded hover:bg-gray-100">20</button>
-          <button class="p-2 rounded hover:bg-gray-100">
-            <ChevronRightIcon class="w-4 h-4" />
-          </button>
+        <div class="flex justify-end items-center py-1 space-x-2 w-full">
+          <div class="flex-1 text-sm text-muted-foreground">
+            共{{ pagination.total }}条.
+          </div>
+          <div class="space-x-2">
+            <Pagination
+              :total="pagination.total"
+              :itemsPerPage="pagination.pageSize"
+              :default-page="1"
+            >
+              <PaginationList
+                v-slot="{ items }"
+                class="flex gap-1 items-center"
+              >
+                <PaginationFirst @click="() => paginationClickHandle(0)" />
+                <PaginationPrev
+                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
+                />
+
+                <template v-for="(item, index) in items">
+                  <PaginationListItem
+                    v-if="item.type === 'page'"
+                    :key="index"
+                    :value="item.value"
+                    as-child
+                  >
+                    <Button
+                      class="p-0 w-10 h-10"
+                      @click="() => paginationClickHandle(index)"
+                      :variant="
+                        item.value === pagination.pageIndex + 1
+                          ? 'default'
+                          : 'outline'
+                      "
+                    >
+                      {{ item.value }}
+                    </Button>
+                  </PaginationListItem>
+                  <PaginationEllipsis v-else :key="item.type" :index="index" />
+                </template>
+
+                <PaginationNext
+                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
+                />
+                <PaginationLast
+                  @click="
+                    () =>
+                      paginationClickHandle(
+                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                      )
+                  "
+                />
+              </PaginationList>
+            </Pagination>
+          </div>
         </div>
       </div>
     </div>

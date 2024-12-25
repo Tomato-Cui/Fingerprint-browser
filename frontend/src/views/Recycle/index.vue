@@ -187,48 +187,6 @@ const searchValueHandle = (value: string) => {
           <!-- 搜索框 -->
 
           <div class="flex gap-x-4 justify-center">
-            <!-- <div
-              class="ml-4 relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500"
-            >
-              <input
-                v-model="selectVal"
-                class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none"
-              />
-              <SearchIcon
-                class="absolute top-2.5 left-3 w-5 h-5 text-gray-400"
-              />
-              <More>
-                <MoreTrigger>
-                  <button class="p-2 ml-4 rounded-lg hover:bg-gray-100">
-                    <SlidersHorizontalIcon class="w-5 h-5 text-gray-500" />
-                  </button>
-                </MoreTrigger>
-                <MoreContent>
-                  <MoreItem class="cursor-pointer" @click="">
-                    <Settings2Icon class="w-4 h-4" />名称
-                  </MoreItem>
-                  <MoreItem class="cursor-pointer" @click="">
-                    <SquarePenIcon class="w-4 h-4" />序号
-                  </MoreItem>
-                  <MoreItem class="cursor-pointer" @click="">
-                    <Trash2Icon class="w-4 h-4" />环境ID
-                  </MoreItem>
-
-                  <MoreItem class="cursor-pointer" @click="">
-                    <Trash2Icon class="w-4 h-4" />账号平台
-                  </MoreItem>
-
-                  <MoreItem class="cursor-pointer" @click="">
-                    <Trash2Icon class="w-4 h-4" />平台账号
-                  </MoreItem>
-
-                  <MoreItem class="cursor-pointer" @click="">
-                    <Trash2Icon class="w-4 h-4" />备注
-                  </MoreItem>
-                </MoreContent>
-              </More>
-            </div> -->
-
             <div class="flex gap-2 items-center py-2 ml-4 w-3/4">
               <!-- <GroupSelect @select="groupSelectHandle" /> -->
               <SearchInput
