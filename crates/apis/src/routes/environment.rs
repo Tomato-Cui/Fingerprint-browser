@@ -91,14 +91,14 @@ mod create {
 
     pub async fn handle(
         state: Extension<middlewares::CurrentUser>,
-        payload: Json<models::environment::Environment>,
+        Json(payload): Json<models::environment::Environment>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
-        let user_id = state.id;
+        let user_id = &state.user_uuid;
 
-        match services::environment::create(user_id, &payload).await {
+        match services::environment::create(user_id, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -116,25 +116,20 @@ mod batch {
 
     pub async fn handle(
         state: Extension<middlewares::CurrentUser>,
-        mut payload: Json<Vec<models::environment::Environment>>,
+        Json(payload): Json<Vec<models::environment::Environment>>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
 
-        payload
-            .iter_mut()
-            .for_each(|v| v.owner_id = Some(state.id as i32));
-        let user_id = state.id;
-
-        match services::environment::create_batch(user_id, &payload).await {
+        match services::environment::create_batch(&state.user_uuid, payload).await {
             Ok(data) => AppResponse::<Vec<Value>>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Vec<Value>>::fail(warn_msg(r.to_string())),
         }
     }
 }
 
-mod modify {
+mod modify_info {
     use super::*;
 
     pub async fn handle(
@@ -146,8 +141,6 @@ mod modify {
             Some(format!("更新失败: {}", v))
         });
 
-        let user_id = state.id;
-        payload.id = Some(id as i32);
         match services::environment::modify(user_id, &payload).await {
             Ok(data) => {
                 if data {

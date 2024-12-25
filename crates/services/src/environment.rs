@@ -99,6 +99,15 @@ pub async fn batch_move_to_group(
     Ok(response)
 }
 
+pub async fn modify_info(user_uuid: &str, env_uuid: &str) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = models::environment::Environment::delete_and_move_to_trash(pool, user_uuid, env_uuid)
+        .await?;
+
+    Ok(ok)
+}
+
 pub async fn delete(user_uuid: &str, env_uuid: &str) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
