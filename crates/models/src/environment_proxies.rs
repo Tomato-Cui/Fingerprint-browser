@@ -97,6 +97,7 @@ impl Proxy {
     #[allow(dead_code)]
     pub async fn update_proxy(
         pool: &Pool<Sqlite>,
+        id: u32,
         user_uuid: &str,
         proxy: &Proxy,
     ) -> Result<bool, Error> {
@@ -113,7 +114,7 @@ impl Proxy {
             .bind(&proxy.username)
             .bind(&proxy.password)
             .bind(&proxy.environment_group_id)
-            .bind(proxy.id)
+            .bind(id)
             .bind(user_uuid)
             .execute(pool)
             .await?;

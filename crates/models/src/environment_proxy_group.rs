@@ -103,6 +103,7 @@ impl ProxyGroup {
     #[allow(dead_code)]
     pub async fn update_proxy_group(
         pool: &Pool<Sqlite>,
+        id: u32,
         proxy_group: &ProxyGroup,
     ) -> Result<bool, Error> {
         let sql = "
@@ -114,7 +115,7 @@ impl ProxyGroup {
         let row = sqlx::query(sql)
             .bind(&proxy_group.name)
             .bind(&proxy_group.description)
-            .bind(proxy_group.id)
+            .bind(id)
             .execute(pool)
             .await?;
 

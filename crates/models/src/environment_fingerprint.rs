@@ -122,9 +122,11 @@ impl EnvironmentFingerprint {
 
     #[allow(dead_code)]
     pub async fn default_fingerprint(pool: &Pool<Sqlite>) -> Result<EnvironmentFingerprint, Error> {
-        let fingerprint: EnvironmentFingerprint = sqlx::query_as("SELECT * FROM environment_fingerprints WHERE id = 1 AND deleted_at IS NULL")
-            .fetch_one(pool)
-            .await?;
+        let fingerprint: EnvironmentFingerprint = sqlx::query_as(
+            "SELECT * FROM environment_fingerprints WHERE id = 1 AND deleted_at IS NULL",
+        )
+        .fetch_one(pool)
+        .await?;
 
         Ok(fingerprint)
     }
@@ -156,6 +158,7 @@ impl EnvironmentFingerprint {
     #[allow(dead_code)]
     pub async fn update(
         pool: &Pool<Sqlite>,
+        id: u32,
         user_uuid: &str,
         fingerprint: &EnvironmentFingerprint,
     ) -> Result<bool, Error> {
@@ -205,7 +208,7 @@ impl EnvironmentFingerprint {
             .bind(&fingerprint.battery)
             .bind(&fingerprint.port_scan)
             .bind(&fingerprint.white_list)
-            .bind(fingerprint.id)
+            .bind(id)
             .bind(user_uuid)
             .execute(pool)
             .await?;
@@ -249,6 +252,6 @@ impl EnvironmentFingerprint {
             .execute(pool)
             .await?;
 
-        Ok(row.rows_affected() == 1) 
+        Ok(row.rows_affected() == 1)
     }
 }

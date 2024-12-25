@@ -9,6 +9,13 @@ pub async fn query_by_id(id: u32) -> Result<TeamGroup, ServiceError> {
     Ok(group)
 }
 
+pub async fn query_by_team_id(id: u32) -> Result<Vec<TeamGroup>, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+    let groups = TeamGroup::query_team_group_by_team_id(pool, id).await?;
+
+    Ok(groups)
+}
+
 pub async fn create(payload: &TeamGroup) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 

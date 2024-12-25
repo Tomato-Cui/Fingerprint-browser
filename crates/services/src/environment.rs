@@ -81,7 +81,7 @@ pub async fn move_to_group(env_uuid: &str, group_id: u32) -> Result<bool, Servic
 }
 
 pub async fn batch_move_to_group(
-    env_uuids: Vec<&str>,
+    env_uuids: Vec<String>,
     group_id: u32,
 ) -> Result<Vec<Value>, ServiceError> {
     let pool = states::database::get_database_pool()?;
@@ -89,7 +89,7 @@ pub async fn batch_move_to_group(
     let mut response = vec![];
     for env_id in env_uuids {
         let ok =
-            models::environment::Environment::move_environment_to_group(pool, env_id, group_id)
+            models::environment::Environment::move_environment_to_group(pool, &env_id, group_id)
                 .await?;
         response.push(json!({
             "environment_id": env_id,
@@ -99,11 +99,15 @@ pub async fn batch_move_to_group(
     Ok(response)
 }
 
-pub async fn modify_info(user_uuid: &str, env_uuid: &str) -> Result<bool, ServiceError> {
+pub async fn modify_info(
+    uuid: &str,
+    name: &str,
+    description: Option<String>,
+) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = models::environment::Environment::delete_and_move_to_trash(pool, user_uuid, env_uuid)
-        .await?;
+    let ok =
+        models::environment::Environment::modify_basic_info(pool, uuid, name, description).await?;
 
     Ok(ok)
 }
@@ -117,13 +121,16 @@ pub async fn delete(user_uuid: &str, env_uuid: &str) -> Result<bool, ServiceErro
     Ok(ok)
 }
 
-pub async fn batch_delete(user_uuid: &str, env_ids: Vec<&str>) -> Result<Vec<bool>, ServiceError> {
+pub async fn batch_delete(
+    user_uuid: &str,
+    env_ids: Vec<String>,
+) -> Result<Vec<bool>, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     let mut response = vec![];
     for env_id in env_ids {
         let ok =
-            models::environment::Environment::delete_and_move_to_trash(pool, env_id, user_uuid)
+            models::environment::Environment::delete_and_move_to_trash(pool, &env_id, user_uuid)
                 .await?;
         response.push(ok);
     }

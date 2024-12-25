@@ -14,12 +14,12 @@ pub fn build_router() -> Router {
         Router::new()
             .route("/:uuid", get(query_id::handle))
             .route("/query", get(query::handle))
-            .route("/query-by-group/:id", get(query_by_group::handle))
+            .route("/query-by-group/:uuid", get(query_by_group::handle))
             .route("/create", post(create::handle))
             .route("/batch", post(batch::handle))
             .route("/batch-import", post(batch::handle))
             .route("/batch-export", post(query::handle))
-            .route("/modify/:id", put(modify::handle))
+            .route("/modify-info/:uuid", put(modify_info::handle))
             .route("/move-to-group", put(move_to_group::handle))
             .route("/batch/move-to-group", put(batch_move_to_group::handle))
             // .route("/grant-permission", put(batch::handle))
@@ -133,15 +133,14 @@ mod modify_info {
     use super::*;
 
     pub async fn handle(
-        state: Extension<middlewares::CurrentUser>,
-        Path(id): Path<u32>,
-        mut payload: Json<models::environment::Environment>,
+        Path(uuid): Path<String>,
+        Json(payload): Json<models::environment::Environment>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment::modify(user_id, &payload).await {
+        match services::environment::modify_info(&uuid, &payload.name, payload.description).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -159,24 +158,17 @@ mod move_to_group {
 
     #[derive(serde::Deserialize)]
     pub struct Payload {
-        pub environment_id: u32,
+        pub environment_uuid: String,
         pub group_id: u32,
     }
 
-    pub async fn handle(
-        state: Extension<middlewares::CurrentUser>,
-        payload: Json<Payload>,
-    ) -> impl IntoResponse {
+    pub async fn handle(payload: Json<Payload>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment::move_to_group(
-            state.id,
-            payload.environment_id,
-            payload.group_id,
-        )
-        .await
+        match services::environment::move_to_group(&payload.environment_uuid, payload.group_id)
+            .await
         {
             Ok(data) => {
                 if data {
@@ -195,20 +187,16 @@ mod batch_move_to_group {
 
     #[derive(serde::Deserialize)]
     pub struct Payload {
-        pub environment_ids: Vec<u32>,
+        pub environment_ids: Vec<String>,
         pub group_id: u32,
     }
 
-    pub async fn handle(
-        state: Extension<middlewares::CurrentUser>,
-        payload: Json<Payload>,
-    ) -> impl IntoResponse {
+    pub async fn handle(payload: Json<Payload>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
         match services::environment::batch_move_to_group(
-            state.id,
             payload.environment_ids.clone(),
             payload.group_id,
         )
@@ -225,13 +213,13 @@ mod delete {
 
     pub async fn handle(
         state: Extension<middlewares::CurrentUser>,
-        Path(id): Path<u32>,
+        Path(environmnet_uuid): Path<String>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
             Some(format!("删除失败: {}", v))
         });
 
-        match services::environment::delete(state.id, id).await {
+        match services::environment::delete(&state.user_uuid, &environmnet_uuid).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -249,7 +237,7 @@ mod batch_delete {
 
     #[derive(serde::Deserialize)]
     pub struct Payload {
-        pub environment_ids: Vec<u32>,
+        pub environment_uuids: Vec<String>,
     }
 
     pub async fn handle(
@@ -260,7 +248,12 @@ mod batch_delete {
             Some(format!("删除失败: {}", v))
         });
 
-        match services::environment::batch_delete(state.id, payload.environment_ids.clone()).await {
+        match services::environment::batch_delete(
+            &state.user_uuid,
+            payload.environment_uuids.clone(),
+        )
+        .await
+        {
             Ok(data) => AppResponse::<Vec<bool>>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Vec<bool>>::fail(warn_msg(r.to_string())),
         }

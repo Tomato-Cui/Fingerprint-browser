@@ -134,7 +134,7 @@ impl Environment {
         pool: &Pool<Sqlite>,
         uuid: &str,
         name: &str,
-        description: Option<&str>,
+        description: Option<String>,
     ) -> Result<bool, Error> {
         let sql = "
             UPDATE environments

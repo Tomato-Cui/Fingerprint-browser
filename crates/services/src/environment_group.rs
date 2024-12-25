@@ -32,10 +32,10 @@ pub async fn create(payload: &EnvironmentGroup) -> Result<bool, ServiceError> {
     Ok(ok)
 }
 
-pub async fn modify(payload: &EnvironmentGroup) -> Result<bool, ServiceError> {
+pub async fn modify(id: u32, payload: &EnvironmentGroup) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = EnvironmentGroup::update(pool, payload).await?;
+    let ok = EnvironmentGroup::update(pool, id, payload).await?;
 
     Ok(ok)
 }
