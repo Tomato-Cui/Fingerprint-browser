@@ -40,7 +40,7 @@ hubstudio & adspower browser
 git clone -b client https://github.com/Tu-guang/zonghu-fingerprint-frontend.git
 
 # 执行前端代码
-cd zonghu-fingerprint-frontend/front && npm i && npm run dev
+cd zonghu-fingerprint-frontend/frontend && npm i && npm run dev
 
 # 执行客户端代码
 cd zonghu-fingerprint-frontend/clients && cargo run --bin clients

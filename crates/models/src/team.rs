@@ -3,46 +3,87 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Team {
-    pub id: i32,
-    pub name: String,
-    pub description: String,
-    pub created_at: Option<String>,
-    pub updated_at: Option<String>,
-    pub deleted_at: Option<String>,
+    pub id: i32,                     // 自增ID
+    pub name: String,                // 团队名称
+    pub description: Option<String>, // 团队描述
+    pub created_at: Option<String>,  // 创建时间
+    pub updated_at: Option<String>,  // 更新时间
+    pub deleted_at: Option<String>,  // 删除时间
 }
 
 impl Team {
     #[allow(dead_code)]
-    pub async fn insert(pool: &Pool<Sqlite>, user_id: u32, team: &Team) -> Result<bool, Error> {
+    pub async fn insert(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team: &Team,
+        description: Option<String>,
+    ) -> Result<bool, Error> {
         let mut tx = pool.begin().await?;
 
-        let (team_id,): (u32,) =
-            sqlx::query_as("insert into teams (name, description) values(?, ?) returning id;")
-                .bind(&team.name)
-                .bind(&team.description)
-                .fetch_one(&mut *tx)
-                .await?;
+        let sql = "
+            INSERT INTO teams (
+                name, description
+            ) VALUES (
+                ?, ?
+            ) RETURNING id";
 
-        sqlx::query("insert into user_team_relation (user_id, team_id) values(?, ?)")
-            .bind(&user_id)
-            .bind(&team_id)
+        let team_id: i32 = sqlx::query_scalar(sql)
+            .bind(&team.name)
+            .bind(&team.description)
             .fetch_one(&mut *tx)
             .await?;
 
-        Ok(team_id != 0)
+        let default_groups = vec![
+            ("管理组", "管理组描述", 4), // 对应 '增加' 权限
+            ("编辑组", "编辑组描述", 2), // 对应 '编辑' 权限
+            ("权限组", "权限组描述", 3), // 对应 '删除' 权限
+            ("默认组", "默认组描述", 1), // 对应 '查看' 权限
+        ];
+
+        let mut group_ids = Vec::new();
+        for (name, description, permission_id) in default_groups {
+            let sql = "
+            INSERT INTO team_groups (
+                name, description, team_id, team_group_permission_id
+            ) VALUES (
+                ?, ?, ?, ?
+            ) RETURNING id";
+
+            let group_id: i32 = sqlx::query_scalar(sql)
+                .bind(name)
+                .bind(description)
+                .bind(team_id)
+                .bind(permission_id)
+                .fetch_one(&mut *tx)
+                .await?;
+
+            group_ids.push(group_id);
+        }
+
+        let sql = "
+            INSERT INTO user_team_relation (
+                user_uuid, team_id, team_group_id, is_leader, blocked, description
+            ) VALUES (
+                ?, ?, NULL, 1, 0, ?
+            )";
+
+        let row = sqlx::query(sql)
+            .bind(user_uuid)
+            .bind(team_id)
+            .bind(description)
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+
+        Ok(row.rows_affected() == 1)
     }
 
     #[allow(dead_code)]
-    pub async fn query_id(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<Team, Error> {
-        let (team_id,): (u32,) =
-            sqlx::query_as("select id from user_team_relation where id = ? and user_id = ?")
-                .bind(id)
-                .bind(user_id)
-                .fetch_one(pool)
-                .await?;
-
-        let team: Team = sqlx::query_as("select id from teams where id = ?")
-            .bind(team_id)
+    pub async fn query_team_by_id(pool: &Pool<Sqlite>, id: u32) -> Result<Team, Error> {
+        let team: Team = sqlx::query_as("SELECT * FROM teams WHERE id = ? AND deleted_at IS NULL")
+            .bind(id)
             .fetch_one(pool)
             .await?;
 
@@ -50,19 +91,40 @@ impl Team {
     }
 
     #[allow(dead_code)]
-    pub async fn query(
+    pub async fn query_team_by_id_and_user_uuid(
         pool: &Pool<Sqlite>,
-        user_id: u32,
+        user_uuid: &str,
+        team_id: i32,
+    ) -> Result<Team, Error> {
+        let team: Team = sqlx::query_as(
+            "SELECT t.* FROM teams t
+         JOIN user_team_relation utr ON t.id = utr.team_id
+         WHERE t.id = ? AND utr.user_uuid = ? AND t.deleted_at IS NULL AND utr.deleted_at IS NULL",
+        )
+        .bind(team_id)
+        .bind(user_uuid)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(team)
+    }
+
+    #[allow(dead_code)]
+    pub async fn query_teams_by_user_uuid(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<Team>), Error> {
-        let team_ids: Vec<(u32,)> =
-            sqlx::query_as("select team_id from user_team_relation where user_id = ?")
-                .bind(user_id)
-                .fetch_all(pool)
-                .await?;
+        let (total,): (i64,) = sqlx::query_as(
+            "SELECT count(1) FROM teams t
+         JOIN user_team_relation utr ON t.id = utr.team_id
+         WHERE utr.user_uuid = ? AND t.deleted_at IS NULL AND utr.deleted_at IS NULL",
+        )
+        .bind(user_uuid)
+        .fetch_one(pool)
+        .await?;
 
-        let total = team_ids.len() as i64;
         let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
             0
         } else {
@@ -70,68 +132,45 @@ impl Team {
         };
         let offset = page_num * page_size;
 
-        if total > 0 {
-            let team_ids_str = team_ids
-                .iter()
-                .map(|(id,)| id.to_string())
-                .collect::<Vec<String>>()
-                .join(",");
-
-            let team_id_sql = format!("({})", team_ids_str);
-            let teams = sqlx::query_as("select * from teams where id in ? limit ? offset ?")
-                .bind(team_id_sql)
-                .bind(page_size)
-                .bind(offset)
-                .fetch_all(pool)
-                .await?;
-
-            Ok((total as i64, teams))
-        } else {
-            Ok((total as i64, vec![]))
-        }
-    }
-
-    #[allow(dead_code)]
-    pub async fn update(pool: &Pool<Sqlite>, user_id: u32, team: &Team) -> Result<bool, Error> {
-        let mut tx = pool.begin().await?;
-        let team_ids: Vec<(u32,)> =
-            sqlx::query_as("select team_id from user_team_relation where user_id = ?")
-                .bind(user_id)
-                .fetch_all(&mut *tx)
-                .await?;
-
-        let ok = team_ids.iter().any(|(id,)| *id as i32 == team.id);
-
-        if ok {
-            sqlx::query(
-                "update teams set name = ?, description = ?, updated_at = DATETIME('now') where id = ?",
-            )
-            .bind(&team.name)
-            .bind(&team.description)
-            .bind(team.id)
-            .execute(&mut *tx)
-            .await?;
-        };
-
-        Ok(true)
-    }
-
-    #[allow(dead_code)]
-    pub async fn delete(pool: &Pool<Sqlite>, user_id: u32, team_id: u32) -> Result<bool, Error> {
-        let mut tx = pool.begin().await?;
-        let (team_id,): (u32,) = sqlx::query_as(
-            "select team_id from user_team_relation where user_id = ? and team_id = ?",
+        let teams: Vec<Team> = sqlx::query_as(
+            "SELECT t.* FROM teams t
+         JOIN user_team_relation utr ON t.id = utr.team_id
+         WHERE utr.user_uuid = ? AND t.deleted_at IS NULL AND utr.deleted_at IS NULL
+         LIMIT ? OFFSET ?",
         )
-        .bind(user_id)
-        .bind(team_id)
-        .fetch_one(&mut *tx)
+        .bind(user_uuid)
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(pool)
         .await?;
 
-        let row = sqlx::query("delete from teams where id = ? ")
-            .bind(team_id)
-            .execute(&mut *tx)
+        Ok((total, teams))
+    }
+
+    #[allow(dead_code)]
+    pub async fn update(pool: &Pool<Sqlite>, id: u32, team: &Team) -> Result<bool, Error> {
+        let sql = "
+        UPDATE teams
+            SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND deleted_at IS NULL;
+        ";
+
+        let row = sqlx::query(sql)
+            .bind(&team.name)
+            .bind(&team.description)
+            .bind(id)
+            .execute(pool)
             .await?;
 
-        Ok(row.rows_affected() > 1)
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn delete(pool: &Pool<Sqlite>, id: u32) -> Result<bool, Error> {
+        let sql = "UPDATE teams SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?";
+
+        let row = sqlx::query(sql).bind(id).execute(pool).await?;
+
+        Ok(row.rows_affected() == 1)
     }
 }

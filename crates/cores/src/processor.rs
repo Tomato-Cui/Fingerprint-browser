@@ -14,16 +14,16 @@ use std::time::UNIX_EPOCH;
 
 pub struct BrowserChildInfo {
     environemnt_info: models::environment::Environment,
-    fingerprint_info: models::fingerprint::Fingerprint,
-    proxy_info: models::proxies::Proxy,
+    fingerprint_info: models::environment_fingerprint::EnvironmentFingerprint,
+    proxy_info: models::environment_proxies::Proxy,
     pub port: u16,
     pub browser_exe_path: String,
 }
 impl BrowserChildInfo {
     pub fn new(
         environemnt_info: models::environment::Environment,
-        fingerprint_info: models::fingerprint::Fingerprint,
-        proxy_info: models::proxies::Proxy,
+        fingerprint_info: models::environment_fingerprint::EnvironmentFingerprint,
+        proxy_info: models::environment_proxies::Proxy,
         port: u16,
         browser_exe_path: &str,
     ) -> Self {
@@ -52,7 +52,7 @@ impl BrowserChildInfo {
             self.fingerprint_info.longitude.clone().unwrap_or_default(),
             self.fingerprint_info.latitude.clone().unwrap_or_default(),
         );
-        let user_agent = format!("--user-agent={}", self.environemnt_info.ua);
+        let user_agent = format!("--user-agent={}", self.fingerprint_info.ua);
         let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);
         let no_first_run = "--no-first-run".to_string();
 
@@ -63,10 +63,9 @@ impl BrowserChildInfo {
             .to_str()
             .unwrap_or_else(|| current_dir.to_str().unwrap());
         let user_data_dir = format!(
-            r#"--user-data-dir={}/{}/{}/{}"#,
+            r#"--user-data-dir={}/{}/{}"#,
             app_data,
             app_config.app.location.user_data_location,
-            &self.environemnt_info.user_data_file,
             commons::time::get_system_time_mills(),
         );
 
@@ -76,7 +75,7 @@ impl BrowserChildInfo {
             app_config.app.id,
             format!(
                 "{}.{}",
-                self.environemnt_info.id.unwrap_or_default(),
+                self.environemnt_info.uuid.clone().unwrap_or_default(),
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
@@ -100,7 +99,10 @@ impl BrowserChildInfo {
         ];
 
         if self.environemnt_info.proxy_enable == 1 {
-            let (kind, value) = (&self.proxy_info.kind, &self.proxy_info.value);
+            let (kind, value) = (
+                &self.proxy_info.kind,
+                format!("{}:{}", &self.proxy_info.host, &self.proxy_info.port),
+            );
 
             args.push(if !value.is_empty() {
                 format!("--proxy-server={}://{}", kind, value,)
@@ -114,7 +116,7 @@ impl BrowserChildInfo {
 
         for url in self
             .environemnt_info
-            .open_urls
+            .default_urls
             .clone()
             .unwrap_or_default()
             .split(",")
@@ -129,7 +131,7 @@ impl BrowserChildInfo {
 #[allow(dead_code)]
 pub struct Processer {
     childs: Arc<Mutex<HashMap<u32, (Child, BrowserChildInfo)>>>,
-    index: HashMap<i32, u32>,
+    index: HashMap<String, u32>,
 }
 
 impl Processer {
@@ -150,13 +152,13 @@ impl Processer {
             .stdout(Stdio::null())
             .spawn()?;
 
-        let browser_id = payload.environemnt_info.id.unwrap_or_default();
+        let browser_id = &payload.environemnt_info.uuid.clone().unwrap_or_default();
 
         let child_pid = child
             .id()
             .ok_or(anyhow::anyhow!("child starting failed."))?;
 
-        self.index.insert(browser_id, child_pid);
+        self.index.insert(browser_id.to_string(), child_pid);
         {
             self.childs
                 .clone()
@@ -168,10 +170,10 @@ impl Processer {
         Ok(true)
     }
 
-    pub async fn stop_browser(&mut self, browser_id: i32) -> Result<ExitStatus, anyhow::Error> {
+    pub async fn stop_browser(&mut self, browser_uuid: &str) -> Result<ExitStatus, anyhow::Error> {
         let child_id = self
             .index
-            .get(&browser_id)
+            .get(browser_uuid)
             .ok_or(anyhow::anyhow!("child stoping failed."))?;
 
         let exit_status = {
@@ -188,10 +190,10 @@ impl Processer {
         Ok(exit_status)
     }
 
-    pub async fn status(&self, browser_id: i32) -> Result<bool, anyhow::Error> {
+    pub async fn status(&self, browser_uuid: &str) -> Result<bool, anyhow::Error> {
         let child_id = self
             .index
-            .get(&browser_id)
+            .get(browser_uuid)
             .ok_or(anyhow::anyhow!("child status failed."))?;
 
         let status = {
@@ -211,14 +213,14 @@ impl Processer {
         Ok(status)
     }
 
-    pub async fn all_status(&self) -> Result<HashMap<i32, bool>, anyhow::Error> {
+    pub async fn all_status(&self) -> Result<HashMap<String, bool>, anyhow::Error> {
         let mut status = HashMap::new();
         println!("{:?}", &self.index);
 
-        for (browser_id, _) in &self.index {
-            let data = self.status(*browser_id).await?;
+        for (browser_uuid, _) in &self.index {
+            let data = self.status(&*&browser_uuid).await?;
 
-            status.insert(*browser_id, data);
+            status.insert(browser_uuid.clone(), data);
         }
 
         Ok(status)

@@ -19,7 +19,7 @@ pub async fn logger(req: Request, next: Next) -> Result<Response, StatusCode> {
 
 #[derive(Clone)]
 pub struct CurrentUser {
-    pub id: u32,
+    pub user_uuid: String,
 }
 
 pub async fn auth(mut req: Request, next: Next) -> Result<Response, StatusCode> {
@@ -50,19 +50,11 @@ pub async fn auth(mut req: Request, next: Next) -> Result<Response, StatusCode> 
         return Err(StatusCode::UNAUTHORIZED);
     };
 
-    let id = match commons::encryption::verify_token(token_str) {
+    let uuid = match commons::encryption::verify_token(token_str) {
         Ok(data) => data,
         Err(_) => return Err(StatusCode::UNAUTHORIZED),
     };
 
-    // 进行权限校验，只有用户存在该资源才有权进行访问。
-    // if let Ok(exist) = lc_services::auth(&uuid, resource, resource_method).await {
-    //     if exist {
-    //         req.extensions_mut().insert(CurrentUser { uuid });
-    //         return Ok(next.run(req).await);
-    //     }
-    // }
-    // return Err(StatusCode::UNAUTHORIZED);
-    req.extensions_mut().insert(CurrentUser { id: id as u32 });
+    req.extensions_mut().insert(CurrentUser { user_uuid: uuid });
     return Ok(next.run(req).await);
 }
