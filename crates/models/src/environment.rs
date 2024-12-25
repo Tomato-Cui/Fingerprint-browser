@@ -130,6 +130,29 @@ impl Environment {
     }
 
     #[allow(dead_code)]
+    pub async fn modify_basic_info(
+        pool: &Pool<Sqlite>,
+        uuid: &str,
+        name: &str,
+        description: Option<&str>,
+    ) -> Result<bool, Error> {
+        let sql = "
+            UPDATE environments
+            SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE uuid = ? AND deleted_at IS NULL
+        ";
+
+        let row = sqlx::query(sql)
+            .bind(name)
+            .bind(description)
+            .bind(uuid)
+            .execute(pool)
+            .await?;
+
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
     pub async fn query_environments_by_team_id_and_user_uuid(
         pool: &Pool<Sqlite>,
         user_uuid: &str,

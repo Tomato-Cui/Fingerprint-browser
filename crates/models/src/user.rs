@@ -24,7 +24,7 @@ impl User {
         let mut tx = pool.begin().await?;
 
         let user_info_id: u32 = sqlx::query_scalar(
-            "insert into user_infos (nickname, password, email) values(?, ?, ?) returing id;",
+            "insert into user_infos (nickname, password, email) values(?, ?, ?) returning id;",
         )
         .bind(&user_info.nickname)
         .bind(&user_info.password)
@@ -37,7 +37,7 @@ impl User {
         let row = sqlx::query("insert into users (uuid, user_info_id) values(?, ?)")
             .bind(uuid)
             .bind(user_info_id)
-            .execute(pool)
+            .execute(&mut *tx)
             .await?;
 
         tx.commit().await?;

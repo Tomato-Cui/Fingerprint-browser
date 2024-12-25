@@ -87,7 +87,7 @@ mod tests {
     #[tokio::test]
     async fn test_login() {
         crate::setup().await;
-        let token = super::login("abc", "123").await;
+        let token = super::login("abc", "abc").await;
         println!("{:?}", token);
 
         super::logout().await.unwrap();
