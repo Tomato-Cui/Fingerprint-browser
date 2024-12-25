@@ -2,12 +2,17 @@ pub mod error;
 
 pub mod command;
 pub mod environment;
+pub mod environment_account;
+pub mod environment_fingerprint;
+pub mod environment_group;
+pub mod environment_proxy;
+pub mod environment_proxy_group;
+pub mod environment_transfer_history;
 pub mod environment_trash;
-pub mod fingerprint;
-pub mod group;
-pub mod proxy;
+pub mod environmnet_cookie;
 pub mod resource_whitelist;
 pub mod team;
+pub mod team_group;
 pub mod user;
 
 #[allow(dead_code)]

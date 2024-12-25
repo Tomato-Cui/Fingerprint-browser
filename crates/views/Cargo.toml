@@ -10,6 +10,7 @@ log = { workspace = true }
 tauri = { workspace = true }
 tauri-plugin-log = { workspace = true }
 tokio = { workspace = true }
+anyhow = { workspace = true }
 
 cores = { workspace = true }
 commons = { workspace = true }

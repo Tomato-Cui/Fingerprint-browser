@@ -1,6 +1,6 @@
 -- Add migration script here
 
-create table user_team_temp
+create table user_team_temps
 (
     id            INTEGER
         primary key autoincrement,

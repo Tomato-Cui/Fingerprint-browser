@@ -1,16 +1,15 @@
-use crate::middlewares;
 use crate::response::AppResponse;
+use axum::extract::Json;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
-use axum::Extension;
-use axum::{Json, Router};
+use axum::Router;
 use serde_json::Value;
 
 pub fn build_router() -> Router {
     Router::new().nest(
         "/browsers",
         Router::new()
-            .route("/start/:id", get(start::handle))
+            .route("/start/:uuid", get(start::handle))
             .route("/starts", post(starts::handle))
             .route("/stops", post(stops::handle))
             .route("/status", get(status::handle)),
@@ -20,15 +19,13 @@ pub fn build_router() -> Router {
 mod start {
     use super::*;
     use axum::extract::Path;
-    use middlewares::CurrentUser;
 
-    pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
+    pub async fn handle(Path(uuid): Path<String>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("开启成功".to_string()), |v| {
             Some(format!("开启失败: {}", v))
         });
 
-        let (id, user_id) = (id, state.id);
-        match services::command::start_browser(Some(user_id), None, id).await {
+        match services::command::start_browser(&uuid).await {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
@@ -39,35 +36,27 @@ mod starts {
     use std::collections::HashMap;
 
     use super::*;
-    use middlewares::CurrentUser;
     use serde::Deserialize;
     use serde_json::json;
 
     #[derive(Deserialize)]
     pub struct Payload {
-        pub group_id: Option<u32>,
-        pub id: u32,
+        pub environment_uuids: Vec<String>,
     }
 
-    pub async fn handle(
-        state: Extension<CurrentUser>,
-        Json(payload): Json<Vec<Payload>>,
-    ) -> impl IntoResponse {
-        let user_id = state.id;
-
+    pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
         let mut result = HashMap::new();
-        for item in payload {
-            let (user_id, group_id, environment_id) = (user_id, item.group_id, item.id);
 
-            match services::command::start_browser(Some(user_id), group_id, environment_id).await {
+        for environment_uuid in payload.environment_uuids {
+            match services::command::start_browser(&environment_uuid).await {
                 Ok(v) => {
-                    result.insert(environment_id, v);
+                    result.insert(environment_uuid.to_string(), v);
                 }
                 Err(e) => {
                     result.insert(
-                        environment_id,
+                        environment_uuid.to_string(),
                         json!({
-                            "environment_id": environment_id,
+                            "environment_id": environment_uuid.to_string(),
                             "status":  false,
                             "message": format!("启动失败: {}", e),
                         }),
@@ -88,7 +77,7 @@ mod stops {
 
     #[derive(Deserialize)]
     pub struct Payload {
-        pub ids: Vec<i32>,
+        pub environment_uuids: Vec<String>,
     }
 
     pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
@@ -96,9 +85,9 @@ mod stops {
             Some(format!("关闭失败: {}", v))
         });
 
-        match services::command::stop(payload.ids).await {
-            Ok(data) => AppResponse::<HashMap<i32, i32>>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<HashMap<i32, i32>>::fail(warn_msg(r.to_string())),
+        match services::command::stop(payload.environment_uuids).await {
+            Ok(data) => AppResponse::<HashMap<String, i32>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<HashMap<String, i32>>::fail(warn_msg(r.to_string())),
         }
     }
 }
@@ -114,8 +103,8 @@ mod status {
         });
 
         match services::command::view_active().await {
-            Ok(data) => AppResponse::<HashMap<i32, bool>>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<HashMap<i32, bool>>::fail(warn_msg(r.to_string())),
+            Ok(data) => AppResponse::<HashMap<String, bool>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<HashMap<String, bool>>::fail(warn_msg(r.to_string())),
         }
     }
 }

@@ -1,10 +1,10 @@
 -- Add migration script here
-
-create table fingerprints
+create table environment_fingerprints
 (
     id                    integer
         primary key autoincrement,
     user_uuid             integer,
+    browser               text    not NULL,
     ua                    text    not null,
     os                    text    not null,
     country               TEXT,

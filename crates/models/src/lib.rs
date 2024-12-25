@@ -1,10 +1,20 @@
 pub mod environment;
-pub mod fingerprint;
-pub mod group;
-pub mod proxies;
+pub mod environment_account;
+pub mod environment_fingerprint;
+pub mod environment_group;
+pub mod environment_proxies;
+pub mod environment_proxy_group;
+pub mod environment_transfer_history;
+pub mod environment_trash;
+pub mod environmnet_cookie;
 pub mod resource_whitelist;
 pub mod team;
+pub mod team_group;
+pub mod team_group_permission;
 pub mod user;
+pub mod user_avatar;
+pub mod user_info;
+pub mod user_team_temp;
 
 #[allow(dead_code)]
 pub(crate) async fn setup() {

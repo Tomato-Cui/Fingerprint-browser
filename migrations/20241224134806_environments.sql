@@ -20,7 +20,7 @@ create table environments
     deleted_at   DATETIME,
     foreign key (user_uuid) references users (uuid),
     foreign key (team_id) references teams (id),
-    foreign key (proxy_id) references proxies (id),
-    foreign key (fp_info_id) references fingerprints (id),
+    foreign key (proxy_id) references environment_proxies(id),
+    foreign key (fp_info_id) references environment_fingerprints(id),
     foreign key (group_id) references environment_groups(id)
 );

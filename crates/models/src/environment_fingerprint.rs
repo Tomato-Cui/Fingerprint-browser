@@ -2,10 +2,15 @@ use serde::{Deserialize, Serialize};
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
-pub struct Fingerprint {
+pub struct EnvironmentFingerprint {
     pub id: Option<i32>,                  // 自增ID
-    pub owner_id: Option<i32>,            // 用户id
+    pub user_uuid: Option<i32>,           // 用户UUID
+    pub browser: String,                  // 浏览器
     pub ua: String,                       // 自定义UA
+    pub os: String,                       // 操作系统
+    pub country: Option<String>,          // 国家
+    pub region: Option<String>,           // 省/州
+    pub city: Option<String>,             // 城市
     pub language_type: i32,               // 语言类型 0-跟随IP，1-自定义，2-跟随电脑
     pub languages: String,                // 渲染语言
     pub gmt: String,                      // 时区
@@ -40,25 +45,30 @@ pub struct Fingerprint {
     pub deleted_at: Option<String>,       // 删除时间
 }
 
-impl Fingerprint {
+impl EnvironmentFingerprint {
     #[allow(dead_code)]
     pub async fn insert(
         pool: &Pool<Sqlite>,
-        user_id: u32,
-        fingerprint: &Fingerprint,
+        user_uuid: &str,
+        fingerprint: &EnvironmentFingerprint,
     ) -> Result<bool, Error> {
         let sql = "
-            INSERT INTO fingerprints (
-                owner_id,ua,language_type,languages,gmt,geography,geo_tips,geo_rule,longitude,latitude,radius,height,
-                width,fonts_type,fonts,font_fingerprint,web_rtc,web_rtc_local_ip,canvas,webgl,hardware_acceleration,
-                webgl_info,audio_context,speech_voices,media,cpu,memory,do_not_track,battery,port_scan,white_list
+            INSERT INTO environment_fingerprints (
+                user_uuid, browser, ua, os, country, region, city, language_type, languages, gmt, geography, geo_tips, geo_rule, longitude, latitude, radius, height,
+                width, fonts_type, fonts, font_fingerprint, web_rtc, web_rtc_local_ip, canvas, webgl, hardware_acceleration,
+                webgl_info, audio_context, speech_voices, media, cpu, memory, do_not_track, battery, port_scan, white_list
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )";
 
         let row = sqlx::query(sql)
-            .bind(user_id)
+            .bind(user_uuid)
+            .bind(&fingerprint.browser)
             .bind(&fingerprint.ua)
+            .bind(&fingerprint.os)
+            .bind(&fingerprint.country)
+            .bind(&fingerprint.region)
+            .bind(&fingerprint.city)
             .bind(&fingerprint.language_type)
             .bind(&fingerprint.languages)
             .bind(&fingerprint.gmt)
@@ -97,13 +107,13 @@ impl Fingerprint {
     #[allow(dead_code)]
     pub async fn query_by_id(
         pool: &Pool<Sqlite>,
-        user_id: u32,
+        user_uuid: &str,
         id: u32,
-    ) -> Result<Fingerprint, Error> {
-        let fingerprint: Fingerprint =
-            sqlx::query_as("select * from fingerprints where id = ? and owner_id = ?")
+    ) -> Result<EnvironmentFingerprint, Error> {
+        let fingerprint: EnvironmentFingerprint =
+            sqlx::query_as("SELECT * FROM environment_fingerprints WHERE id = ? AND user_uuid = ? AND deleted_at IS NULL")
                 .bind(id)
-                .bind(user_id)
+                .bind(user_uuid)
                 .fetch_one(pool)
                 .await?;
 
@@ -111,8 +121,8 @@ impl Fingerprint {
     }
 
     #[allow(dead_code)]
-    pub async fn default_fingerprint(pool: &Pool<Sqlite>) -> Result<Fingerprint, Error> {
-        let fingerprint: Fingerprint = sqlx::query_as("select * from fingerprints where id = 1")
+    pub async fn default_fingerprint(pool: &Pool<Sqlite>) -> Result<EnvironmentFingerprint, Error> {
+        let fingerprint: EnvironmentFingerprint = sqlx::query_as("SELECT * FROM environment_fingerprints WHERE id = 1 AND deleted_at IS NULL")
             .fetch_one(pool)
             .await?;
 
@@ -120,49 +130,25 @@ impl Fingerprint {
     }
 
     #[allow(dead_code)]
-    pub async fn query_by_col(
+    pub async fn query_by_user_uuid(
         pool: &Pool<Sqlite>,
-        user_id: u32,
-        col_name: &str,
-        col_value: &str,
+        user_uuid: &str,
         page_num: u32,
         page_size: u32,
-    ) -> Result<(i64, Vec<Fingerprint>), Error> {
-        let (total,): (i64,) = if col_name.is_empty() {
-            sqlx::query_as("select count(1) from fingerprints where owner_id = ?")
-                .bind(user_id)
-                .fetch_one(pool)
-                .await?
-        } else {
-            sqlx::query_as(&format!(
-                "select count(1) from fingerprints where {} = ? and owner_id = ?",
-                col_name
-            ))
-            .bind(col_value)
-            .bind(user_id)
+    ) -> Result<(i64, Vec<EnvironmentFingerprint>), Error> {
+        let (total,): (i64,) = sqlx::query_as("SELECT count(1) FROM environment_fingerprints WHERE user_uuid = ? AND deleted_at IS NULL")
+            .bind(user_uuid)
             .fetch_one(pool)
-            .await?
-        };
+            .await?;
 
         let offset = page_num * page_size;
 
-        let fingerprints: Vec<Fingerprint> = if col_name.is_empty() {
-            sqlx::query_as("select * from fingerprints where owner_id = ? limit ? offset ? ")
-                .bind(page_size)
-                .bind(offset)
-                .fetch_all(pool)
-                .await?
-        } else {
-            sqlx::query_as(&format!(
-                "select * from fingerprints where {} = ? and owner_id = ? limit ? offset ? ",
-                col_name
-            ))
-            .bind(col_value)
+        let fingerprints: Vec<EnvironmentFingerprint> = sqlx::query_as("SELECT * FROM environment_fingerprints WHERE user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?")
+            .bind(user_uuid)
             .bind(page_size)
             .bind(offset)
             .fetch_all(pool)
-            .await?
-        };
+            .await?;
 
         Ok((total, fingerprints))
     }
@@ -170,21 +156,26 @@ impl Fingerprint {
     #[allow(dead_code)]
     pub async fn update(
         pool: &Pool<Sqlite>,
-        user_id: u32,
-        fingerprint: &Fingerprint,
+        user_uuid: &str,
+        fingerprint: &EnvironmentFingerprint,
     ) -> Result<bool, Error> {
         let sql = "
-        UPDATE fingerprints
-            SET ua = ?, language_type = ?, languages = ?, gmt = ?, geography = ?, geo_tips = ?, geo_rule = ?,
+        UPDATE environment_fingerprints
+            SET browser = ?, ua = ?, os = ?, country = ?, region = ?, city = ?, language_type = ?, languages = ?, gmt = ?, geography = ?, geo_tips = ?, geo_rule = ?,
                 longitude = ?, latitude = ?, radius = ?, height = ?, width = ?, fonts_type = ?, fonts = ?, font_fingerprint = ?, 
                 web_rtc = ?, web_rtc_local_ip = ?, canvas = ?, webgl = ?, hardware_acceleration = ?, webgl_info = ?, audio_context = ?, 
                 speech_voices = ?, media = ?, cpu = ?, memory = ?, do_not_track = ?, battery = ?, port_scan = ?, white_list = ?, 
                 updated_at = CURRENT_TIMESTAMP
-        WHERE id = ? and user_id = ?;
+        WHERE id = ? AND user_uuid = ? AND deleted_at IS NULL;
         ";
 
         let row = sqlx::query(sql)
+            .bind(&fingerprint.browser)
             .bind(&fingerprint.ua)
+            .bind(&fingerprint.os)
+            .bind(&fingerprint.country)
+            .bind(&fingerprint.region)
+            .bind(&fingerprint.city)
             .bind(&fingerprint.language_type)
             .bind(&fingerprint.languages)
             .bind(&fingerprint.gmt)
@@ -215,7 +206,7 @@ impl Fingerprint {
             .bind(&fingerprint.port_scan)
             .bind(&fingerprint.white_list)
             .bind(fingerprint.id)
-            .bind(user_id)
+            .bind(user_uuid)
             .execute(pool)
             .await?;
 
@@ -225,7 +216,7 @@ impl Fingerprint {
     #[allow(dead_code)]
     pub async fn update_by_col(
         pool: &Pool<Sqlite>,
-        user_id: u32,
+        user_uuid: &str,
         id: u32,
         col_name: &str,
         col_value: &str,
@@ -237,27 +228,27 @@ impl Fingerprint {
             )));
         }
         let row = sqlx::query(&format!(
-            "UPDATE fingerprints SET {} = ? WHERE id = ? and owner_id = ?",
+            "UPDATE environment_fingerprints SET {} = ? WHERE id = ? AND user_uuid = ? AND deleted_at IS NULL",
             col_name
         ))
         .bind(col_value)
         .bind(id)
-        .bind(user_id)
+        .bind(user_uuid)
         .execute(pool)
         .await?;
         Ok(row.rows_affected() == 1)
     }
 
     #[allow(dead_code)]
-    pub async fn delete(pool: &Pool<Sqlite>, user_id: u32, id: u32) -> Result<bool, Error> {
-        let sql = "DELETE FROM fingerprints WHERE id = ? and owner_id = ?";
+    pub async fn delete(pool: &Pool<Sqlite>, user_uuid: &str, id: u32) -> Result<bool, Error> {
+        let sql = "UPDATE environment_fingerprints SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND user_uuid = ?";
 
         let row = sqlx::query(sql)
             .bind(id)
-            .bind(user_id)
+            .bind(user_uuid)
             .execute(pool)
             .await?;
 
-        Ok(row.rows_affected() == 1) // 如果删除了 1 行则返回 true
+        Ok(row.rows_affected() == 1) 
     }
 }

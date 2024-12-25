@@ -14,18 +14,6 @@ pub struct UserAvatars {
 
 impl UserAvatars {
     #[allow(dead_code)]
-    pub async fn insert(pool: &Pool<Sqlite>, payload: &UserAvatars) -> Result<bool, Error> {
-        let row = sqlx::query("insert into user_avatars (href, path, hash) values(?, ?, ?)")
-            .bind(&payload.href)
-            .bind(&payload.path)
-            .bind(&payload.path)
-            .execute(pool)
-            .await?;
-
-        Ok(row.rows_affected() == 1)
-    }
-
-    #[allow(dead_code)]
     pub async fn query_id(pool: &Pool<Sqlite>, id: i32) -> Result<UserAvatars, Error> {
         let user: UserAvatars = sqlx::query_as("select * from user_avatars where id = ?")
             .bind(id)

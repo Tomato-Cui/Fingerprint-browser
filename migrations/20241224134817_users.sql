@@ -5,7 +5,7 @@ create table users
         primary key autoincrement,
     uuid           integer not null unique,
     user_info_id   integer not null,
-    user_avatar_id integer not null,
+    user_avatar_id integer,
     created_at     DATETIME default CURRENT_TIMESTAMP,
     updated_at     DATETIME default CURRENT_TIMESTAMP,
     deleted_at     DATETIME,
