@@ -2,23 +2,17 @@
 import { ref, onMounted, reactive, computed } from "vue";
 import { Button } from "@/components/ui/button";
 import {
-  SearchIcon,
-  Settings2Icon,
-  SquarePenIcon,
   Trash2Icon,
-  SlidersHorizontalIcon,
   Recycle,
   Delete,
-  RefreshCcw,
-  LogsIcon,
-  PackageOpenIcon,
-  PackageIcon,
-  ExternalLinkIcon,
   TrashIcon,
-  ArrowRightFromLineIcon,
+  PackageIcon,
+  RotateCcw,
 } from "lucide-vue-next";
 import {} from "@/components/select";
-import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+import GroupSelect from "./group-select.vue";
+import SearchInput from "./search-input.vue";
+
 import {
   environment_trash_query,
   environment_trash_delete_again,
@@ -26,6 +20,7 @@ import {
   environment_trash_clean,
   environment_trash_recover_all,
   environment_trash_recovers,
+  environment_trash_batch_delete_again,
 } from "@/commands/environment-trash";
 import TooltipButton from "@/components/tooltip-button.vue";
 import { PrimaryButton } from "@/components/button";
@@ -52,9 +47,12 @@ interface Payment {
   selected?: boolean;
 }
 
-const data = ref<Array<Payment>>([]);
+const searchType = ref<{ title: keyof Payment; value: string }>({
+  title: "name",
+  value: "名称",
+});
 
-const columns = ref<any[]>([]);
+const data = ref<Array<Payment>>([]);
 
 const pagination = reactive({
   pageIndex: 0,
@@ -76,8 +74,6 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 const selectAll = ref(false);
 
 const visible = ref(false);
-
-const selectVal = ref("");
 
 const environmentId = ref<number>();
 
@@ -155,10 +151,27 @@ const groupOperationBtns = computed(() => [
   {
     title: "多选删除",
     icon: TrashIcon,
-    click: () => {},
+    click: () => {
+      let ids = selectData.value.map((item) => item.id);
+      environment_trash_batch_delete_again(ids);
+      pagination.total = pagination.total - selectData.value.length;
+      loadData(pagination.pageIndex, pagination.pageSize);
+    },
     disabled: selectData.value.length <= 0,
   },
 ]);
+
+const searchValueHandle = (value: string) => {
+  if (value.length != 0) {
+    console.log(value);
+    data.value = data.value.filter((item) => {
+      let current = item[searchType.value.title as keyof Payment] as string;
+      return current ? current.includes(value) : false;
+    });
+  } else {
+    loadData(pagination.pageIndex, pagination.pageSize);
+  }
+};
 </script>
 
 <template>
@@ -174,7 +187,7 @@ const groupOperationBtns = computed(() => [
           <!-- 搜索框 -->
 
           <div class="flex gap-x-4 justify-center">
-            <div
+            <!-- <div
               class="ml-4 relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500"
             >
               <input
@@ -214,7 +227,17 @@ const groupOperationBtns = computed(() => [
                   </MoreItem>
                 </MoreContent>
               </More>
+            </div> -->
+
+            <div class="flex gap-2 items-center py-2 ml-4 w-3/4">
+              <!-- <GroupSelect @select="groupSelectHandle" /> -->
+              <SearchInput
+                :search-current-type="searchType"
+                @update:searchType="(value:any) => (searchType = value)"
+                @update:searchValue="searchValueHandle"
+              />
             </div>
+
             <div class="flex gap-x-4 items-center">
               <TooltipButton
                 v-for="(item, index) in groupOperationBtns"
