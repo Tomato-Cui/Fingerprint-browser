@@ -64,6 +64,11 @@ impl EnvironmentAccount {
             .fetch_one(pool)
             .await?;
 
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
         let offset = page_num * page_size;
 
         let accounts: Vec<EnvironmentAccount> = sqlx::query_as("SELECT * FROM environment_accounts WHERE environment_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?")
@@ -99,10 +104,11 @@ impl EnvironmentAccount {
             .bind(&account.platform_description)
             .bind(&account.environment_uuid)
             .bind(&account.user_uuid)
+            .bind(&account.id)
             .execute(pool)
             .await?;
 
-        Ok(row.rows_affected() == 1)
+        Ok(row.rows_affected() >= 1)
     }
 
     #[allow(dead_code)]

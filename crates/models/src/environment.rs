@@ -6,7 +6,7 @@ pub struct Environment {
     pub id: i32,                      // 自增ID
     pub uuid: Option<String>,         // UUID
     pub user_uuid: String,            // 用户UUID
-    pub team_id: Option<i32>,                 // 团队ID
+    pub team_id: Option<i32>,         // 团队ID
     pub proxy_id: Option<i32>,        // 代理ID
     pub fp_info_id: Option<i32>,      // 指纹信息ID
     pub group_id: Option<i32>,        // 分组ID
@@ -14,7 +14,6 @@ pub struct Environment {
     pub description: Option<String>,  // 环境描述
     pub default_urls: Option<String>, // 默认打开网页
     pub proxy_enable: i8,             // 代理启用
-    pub status: i8,                   // 状态
     pub created_at: Option<String>,   // 创建时间
     pub updated_at: Option<String>,   // 更新时间
     pub lasted_at: Option<String>,    // 最近时间

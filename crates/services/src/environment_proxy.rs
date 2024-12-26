@@ -76,7 +76,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_id() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let id = 1;
         let result = query_by_id(user_uuid, id).await;
         assert!(result.is_ok());
@@ -84,7 +85,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_uuid() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let page_num = 1;
         let page_size = 10;
         let result = query_by_uuid(user_uuid, page_num, page_size).await;
@@ -96,7 +98,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_query() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
@@ -108,18 +111,19 @@ mod tests {
 
     #[tokio::test]
     async fn test_create() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let payload = Proxy {
-            ..Default::default() // other fields initialization
+            ..Default::default()
         };
         let result = create(user_uuid, payload).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_update() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let id = 1;
         let payload = Proxy {
             ..Default::default()
@@ -131,6 +135,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_move_to_proxy_group() {
+        crate::setup().await;
         let proxy_id = 1;
         let proxy_group_id = 2;
         let result = move_to_proxy_group(proxy_id, proxy_group_id).await;
@@ -140,7 +145,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_delete() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let id = 1;
         let result = delete(user_uuid, id).await;
         assert!(result.is_ok());

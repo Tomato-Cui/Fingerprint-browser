@@ -46,7 +46,6 @@ impl EnvironmentGroup {
     ) -> Result<(i64, Vec<EnvironmentGroup>), Error> {
         let mut tx = pool.begin().await?;
 
-        // 获取总数
         let (total,): (i64,) = sqlx::query_as(
             "SELECT count(1) FROM environment_groups 
          WHERE user_uuid = ? AND deleted_at IS NULL",

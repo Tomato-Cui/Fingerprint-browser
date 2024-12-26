@@ -1,3 +1,5 @@
+use models::team::Team;
+
 use crate::error::ServiceError;
 
 pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceError> {
@@ -38,7 +40,20 @@ pub async fn regsiter(email: &str, nickname: &str, password: &str) -> Result<boo
     };
 
     let uuid = commons::encryption::uuid();
-    let ok = models::user::User::insert(pool, &uuid, &user_info).await?;
+    let mut ok = models::user::User::insert(pool, &uuid, &user_info).await?;
+
+    if ok {
+        ok = models::team::Team::insert(
+            pool,
+            &uuid,
+            &Team {
+                name: email.to_string(),
+                ..Default::default()
+            },
+            None,
+        )
+        .await?;
+    }
 
     Ok(ok)
 }
@@ -100,7 +115,7 @@ mod tests {
     #[tokio::test]
     async fn test_register() {
         crate::setup().await;
-        let ok = super::regsiter("abc@abc.ab", "abc", "abc").await;
+        let ok = super::regsiter("thisistes", "2342", "123").await;
         println!("{:?}", ok)
     }
 
