@@ -68,7 +68,6 @@ impl TeamGroup {
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<TeamGroup>), Error> {
-        // 获取总数
         let (total,): (i64,) =
             sqlx::query_as("SELECT count(1) FROM team_groups WHERE deleted_at IS NULL")
                 .fetch_one(pool)
@@ -81,7 +80,6 @@ impl TeamGroup {
         };
         let offset = page_num * page_size;
 
-        // 获取分页的组列表
         let team_groups: Vec<TeamGroup> =
             sqlx::query_as("SELECT * FROM team_groups WHERE deleted_at IS NULL LIMIT ? OFFSET ?")
                 .bind(page_size)
