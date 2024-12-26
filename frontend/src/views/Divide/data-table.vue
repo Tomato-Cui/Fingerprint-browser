@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<TableProps>(), {
 });
 
 const browserStatusStore = useBrowserStatusStore();
-const emits = defineEmits(["onSelect", "onSyncColumns", "removeEnv"]);
+const emits = defineEmits(["onSelect", "onSyncColumns", "removeEnv", 'setCommonBtn', 'transferEnvBtn', 'authMemberBtn', 'editProxyBtn', 'editAccountBtn', 'editEnvBtn']);
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -258,7 +258,15 @@ const columns = [
         ),
         h("div", { class: "parent-container" }, [
           
-          MoreBtn({'removeEnv':()=>emits('removeEnv', id)}), 
+          MoreBtn({
+            'editEnvBtn':()=>emits('editEnvBtn', id),
+            'editAccountBtn':()=>emits('editAccountBtn', id),
+            'editProxyBtn':()=>emits('editProxyBtn', id),
+            'authMemberBtn':()=>emits('authMemberBtn', id),
+            'transferEnvBtn':()=>emits('transferEnvBtn', id),
+            'setCommonBtn':()=>emits('setCommonBtn', id),
+            'removeEnv':()=>emits('removeEnv', id)
+          }), 
         ]), //传入点击事件参数
       ]);
     },
@@ -347,7 +355,6 @@ const table = useVueTable({
     </TableHeader>
     <TableBody>
       <template v-if="table.getRowModel().rows?.length">
-        {{ table.getRowModel().rows[1].original.id }}
         <template v-for="row in table.getRowModel().rows" :key="row.id">
           <!-- {{ row }} -->
           <TableRow :data-state="row.getIsSelected() && 'selected'" class="group">

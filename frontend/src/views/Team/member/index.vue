@@ -133,37 +133,29 @@
         数据为空，没有成员
       </div>
       <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4 px-2">
-        <div class="text-sm text-gray-500">共 {{ memberTotal }} 项数据</div>
-        <div class="flex items-center gap-2">
-          <!-- Previous button -->
-          <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage === 1"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            ←
-          </button>
+      <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+        <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+          <PaginationFirst @click="() => paginationClickHandle(0)" />
+          <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
-          <!-- Page numbers -->
-          <template v-for="number in displayedPages" :key="number">
-            <button v-if="number !== '...'" @click="handlePageChange(number)" :class="[
-              'w-10 h-10 rounded-md border flex items-center justify-center',
-              currentPage === number
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'hover:bg-gray-50',
-            ]">
-              {{ number }}
-            </button>
-            <span v-else class="w-10 h-10 flex items-center justify-center">
-              ...
-            </span>
+          <template v-for="(item, index) in items">
+            <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+              <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                ">
+                {{ item.value }}
+              </Button>
+            </PaginationListItem>
+            <PaginationEllipsis v-else :key="item.type" :index="index" />
           </template>
 
-          <!-- Next button -->
-          <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage === totalPages"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            →
-          </button>
-        </div>
-      </div>
+          <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+          <PaginationLast @click="() =>
+            paginationClickHandle(
+              Math.ceil(pagination.total / pagination.pageSize) - 1
+            )
+            " />
+        </PaginationList>
+      </Pagination>
     </div>
 
     <!-- Detail Slide Panel -->
@@ -275,7 +267,17 @@
 <script setup>
 import InvMember from "./InvMember.vue"; //邀请成员
 import addMember from "./addMember.vue"; //添加成员
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
+import { ref, computed, onMounted, onBeforeUnmount, reactive } from "vue";
 import {
   UserPlusIcon,
   PlusIcon,
@@ -306,31 +308,10 @@ const addMemModel = ref(false); //添加成员
 const invMember = ref(false)  //邀请成员
 const forbidMem = ref(false) //禁用成员
 const delM = ref(false)  //删除成员
-
-const x = ref(0);
-const y = ref(0);
-const selectFlag = ref(0)
-function handleDocumentClick(event) {
-  x.value = event.clientX;
-  y.value = event.clientY;
-  // console.log("isopen1--:", isOpen.value);
-  // console.log("selectFlag--:", selectFlag.value);
-  if (!isOpen.value && selectFlag.value === 1) {
-    isOpen.value = true
-  } else {
-    selectFlag.value = 0
-    isOpen.value = false
-  }
-  // console.log("isopen2--:", isOpen.value);
-}
-onMounted(() => {
-  // console.log("查看分组成员，分组ID：", route.query.groupId);
-  document.addEventListener("click", handleDocumentClick);
-  // console.log("x-y", x.value + "--" + y.value);
-})
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleDocumentClick);
-  // console.log("x-y", x.value + "--" + y.value);
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 16,
+  total: 0,
 });
 
 const toggleDropdown = () => {
@@ -394,7 +375,7 @@ const filterMember = computed(() => {
 
   return members.value?.filter((member) => {
     // return member.username.includes(searchName.value)
-  } );
+  });
 });
 
 const openDetail = (member) => {
@@ -418,6 +399,11 @@ const props = defineProps({
     default: 1,
   },
 });
+
+const paginationClickHandle = (index) => {
+  // loadData(Number(route.params.id), index, pagination.pageSize);
+  pagination.pageIndex = index;
+};
 
 const emit = defineEmits(["page-change"]);
 
@@ -466,7 +452,7 @@ const handlePageChange = (page) => {
   emit("page-change", page);
 };
 
-onMounted(async() => {
-  
+onMounted(async () => {
+
 })
 </script>

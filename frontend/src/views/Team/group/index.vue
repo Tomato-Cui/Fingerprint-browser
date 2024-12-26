@@ -69,10 +69,10 @@
             </div>
           </div>
           <div class="text-gray-900 ">
-            {{ group.group_name }}
+            {{ group.name }}
           </div>
           <div class="text-gray-600 ">
-            {{ group.member_count }}
+            {{ group.member_count || 0 }}
           </div>
           <div class="text-gray-600 ">
             {{ group.description || "\\" }}
@@ -201,6 +201,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter } from "vue-router";
 import { buttonVariants } from "@/components/ui/button";
+import { team_query } from "@/commands/team";
 
 const router = useRouter()
 const searchQuery = ref("");
@@ -226,7 +227,7 @@ const toggleTooltip = () => {
 };
 const filteredGroups = computed(() => {
   return groups.value.filter((group) =>
-    group.group_name?.includes(searchQuery.value)  //分组名称筛选
+    group.name?.includes(searchQuery.value)  //分组名称筛选
   );
 });
 const props = defineProps({ //分页
@@ -340,8 +341,8 @@ const selectGroup = (group) => {
     // 如果不存在，添加
     selectIds.value.add(group.id);
   }
-  console.log([...selectIds.value]); // 打印当前选中的id数组
-  console.log("----:", selectIds.value.size);
+  // console.log([...selectIds.value]); // 打印当前选中的id数组
+  // console.log("----:", selectIds.value.size);
 
   if (selectIds.value.size > 0 && selectIds.value.size < groups.value.length - 4) {  //全选时修改半选中状态
     isIndeterminate.value = true
@@ -381,10 +382,17 @@ const isChecked = ref(false)  //选中状态
 //授权
 const authPri = () => {
   authModel.value = true;
-  console.log("-=-=-:", selectIds.value);
+  // console.log("-=-=-:", selectIds.value);
+
 }
 
 onMounted(async () => {
+  team_query(currentPage, 10).then(res => {
+    console.log("res----:", res);
+    groups.value = res
+    console.log("groups----:", groups.value);
+    
+  })
 })
 </script>
 

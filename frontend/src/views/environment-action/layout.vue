@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { PrimaryButton, CancelButton } from '@/components/button';
 import { ShuffleIcon, WaypointsIcon } from 'lucide-vue-next'
 import ImportProxyModel from './components/import-proxy-model.vue'
-
 const tabs = [
     { id: 'single', name: '单个创建', href: '/environment-action/create' },
     { id: 'batch', name: '批量创建', href: '/environment-action/creates' },
@@ -128,7 +127,7 @@ console.log(importProxyOpen);
         </div>
         <div class="flex gap-x-4 pt-3 px-6 mb-8 bg-white border-t">
             <PrimaryButton>确定</PrimaryButton>
-            <CancelButton>取消</CancelButton>
+            <CancelButton @click="router.go(-1)">取消</CancelButton>
         </div>
 
         <ImportProxyModel :open="importProxyOpen" @close="proxyModelCloseHandle" />

@@ -2,6 +2,16 @@
 import { h, ref } from "vue";
 import { SearchIcon, SlidersHorizontalIcon } from "lucide-vue-next";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+
+const searchTypes = [
+  { title: "name", value: "名称" },
+  { title: "description", value: "描述" },
+];
+const searchValue = ref("");
+const props = defineProps({
+  searchCurrentType: {},
+});
+const emits = defineEmits(["update:searchValue", "update:searchType"]);
 </script>
 
 <template>
@@ -10,7 +20,8 @@ import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
   >
     <input
       class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none hover:ring-0 hover:outline-none"
-      :placeholder="'请输入' + searchFilterValue + '搜索'"
+      :placeholder="'请输入' + props.searchCurrentType.value + '搜索'"
+      @change="(v) => emits('update:searchValue', v.target.value)"
     />
     <SearchIcon class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
     <More>
@@ -20,14 +31,13 @@ import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
         </button>
       </MoreTrigger>
       <MoreContent>
-        <MoreItem class="cursor-pointer">
-          <Settings2Icon class="w-4 h-4" />名称
-        </MoreItem>
-        <MoreItem class="cursor-pointer">
-          <SquarePenIcon class="w-4 h-4" />备注
-        </MoreItem>
-        <MoreItem class="cursor-pointer">
-          <Trash2Icon class="w-4 h-4" />手机号/邮箱
+        <MoreItem
+          class="cursor-pointer"
+          v-for="(item, index) in searchTypes"
+          :key="index"
+          @click="() => emits('update:searchType', item)"
+        >
+          {{ item.value }}
         </MoreItem>
       </MoreContent>
     </More>
