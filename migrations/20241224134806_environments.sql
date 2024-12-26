@@ -3,7 +3,7 @@ create table environments
 (
     id           INTEGER
         primary key autoincrement,
-    uuid         INTEGER unique,
+    uuid         TEXT unique,
     user_uuid    TEXT,
     team_id      integer,
     proxy_id     integer,
