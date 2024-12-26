@@ -46,3 +46,58 @@ pub async fn delete(id: u32) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[tokio::test]
+//     async fn test_query_by_group_id() {
+//         let result = query_by_group_id(1).await;
+//         assert!(result.is_ok());
+//         let proxy_group = result.unwrap();
+//         assert_eq!(proxy_group.id, 1);
+//     }
+
+//     #[tokio::test]
+//     async fn test_query() {
+//         let result = query("user-uuid", 1, 10).await;
+//         assert!(result.is_ok());
+//         let value: Value = result.unwrap();
+//         assert!(value["total"].as_u64().is_some());
+//         assert!(value["data"].as_array().is_some());
+//     }
+
+//     #[tokio::test]
+//     async fn test_create() {
+//         let proxy_group = ProxyGroup {
+//             id: 0,
+//             name: "Test Group".to_string(),
+//             user_uuid: "user-uuid".to_string(),
+//             ..Default::default()
+//         };
+//         let result = create(proxy_group).await;
+//         assert!(result.is_ok());
+//         assert!(result.unwrap());
+//     }
+
+//     #[tokio::test]
+//     async fn test_update() {
+//         let proxy_group = ProxyGroup {
+//             id: 1,
+//             name: "Updated Group".to_string(),
+//             user_uuid: "user-uuid".to_string(),
+//             ..Default::default()
+//         };
+//         let result = update(1, proxy_group).await;
+//         assert!(result.is_ok());
+//         assert!(result.unwrap());
+//     }
+
+//     #[tokio::test]
+//     async fn test_delete() {
+//         let result = delete(1).await;
+//         assert!(result.is_ok());
+//         assert!(result.unwrap());
+//     }
+// }

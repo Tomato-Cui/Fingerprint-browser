@@ -7,7 +7,7 @@ use models::environmnet_cookie::EnvironmentCookie;
 
 pub fn build_router() -> Router {
     Router::new().nest(
-        "/proxies",
+        "/environmnet-cookies",
         Router::new()
             .route("/query/:uuid", get(query_by_uuid::handle))
             .route("/create/:uuid", post(create::handle))
