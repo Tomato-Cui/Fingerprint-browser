@@ -48,7 +48,7 @@ const router = useRouter();
 const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
 const copyData = ref<Array<Payment>>([]);
-const selectData = ref<Number[]>([]);
+const selectData = ref<string[]>([]);
 const searchType = ref<{ title: keyof Payment; value: string }>({
   title: "name",
   value: "名称",
@@ -114,15 +114,18 @@ const closeGroup = () => {
 };
 // 批量删除
 const batchDelete = () => {
-  let ids = [...selectData.value].map((item) => item) as number[];
+  let ids = [...selectData.value].map((item) => item) as string[];
+  
   environment_batch_delete(ids)
     .then((_: any) => {
-      data.value = data.value.filter((item) => !ids.includes(item.id));
+      data.value = data.value.filter((item) => !ids.includes(item.uuid));
       selectData.value = [];
     })
     .catch((err) => {
       toast.warning(err);
     });
+
+  selectData.value = []
 };
 
 const exportData = () => {
@@ -301,7 +304,7 @@ const handleSubmitDel = () => {
           <DataTable :data="data" :pagination="pagination" @editEnvBtn="editEnvBtn" @editAccountBtn="editAccountBtn"
             @editProxyBtn="editProxyBtn" @authMemberBtn="authMemberBtn" @transferEnvBtn="transferEnvBtn"
             @setCommonBtn="setCommonBtn" @removeEnv="removeEnv" @onSyncColumns="onSyncColumns"
-            @onSelect="(v: Number[]) => selectData = v" />
+            @onSelect="(v: string[]) => selectData = v" />
         </div>
 
         <div class="flex items-center justify-end space-x-2 py-1">

@@ -89,7 +89,7 @@ const columns = [
           row.toggleSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("id"))
+            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select row",
