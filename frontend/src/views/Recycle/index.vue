@@ -15,12 +15,11 @@ import SearchInput from "./search-input.vue";
 
 import {
   environment_trash_query,
-  environment_trash_delete_again,
   environment_trash_recover,
   environment_trash_clean,
   environment_trash_recover_all,
   environment_trash_recovers,
-  environment_trash_batch_delete_again,
+  environment_trash_delete_batch,
 } from "@/commands/environment-trash";
 import TooltipButton from "@/components/tooltip-button.vue";
 import { PrimaryButton } from "@/components/button";
@@ -103,7 +102,7 @@ const recoverAll = () => {
 const confirmDelete = () => {
   if (environmentId.value) {
     console.log(environmentId.value);
-    environment_trash_delete_again(environmentId.value).then(() => {
+    environment_trash_delete_batch(environmentId.value).then(() => {
       loadData(pagination.pageIndex, pagination.pageSize);
       visible.value = false;
     });
@@ -153,7 +152,7 @@ const groupOperationBtns = computed(() => [
     icon: TrashIcon,
     click: () => {
       let ids = selectData.value.map((item) => item.id);
-      environment_trash_batch_delete_again(ids);
+      environment_trash_delete_batch(ids);
       pagination.total = pagination.total - selectData.value.length;
       loadData(pagination.pageIndex, pagination.pageSize);
     },
