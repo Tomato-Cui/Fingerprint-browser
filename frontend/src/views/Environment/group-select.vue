@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-import { group_query } from "@/commands/group";
+// import { group_query } from "@/commands/group";
 
 const groups = ref<any[]>([]);
 const emits = defineEmits(["select"]);
@@ -16,9 +16,9 @@ const emits = defineEmits(["select"]);
 const select = ref<string | undefined>(undefined);
 
 onMounted(() => {
-  group_query(0, 100).then((res) => {
-    groups.value = res.data.data;
-  });
+  // group_query(0, 100).then((res) => {
+  //   groups.value = res.data.data;
+  // });
 });
 
 watch(select, (newSelect) => {

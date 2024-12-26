@@ -50,20 +50,20 @@ export const menuTop = [
         activeIcon: IconGroupActive,
         active: false,
         children: [
-            // {
-            //     title: `未分组`,
-            //     url: `/divide/0`,
-            //     icon: ComponentIcon,
-            //     activeIcon: ComponentIcon,
-            //     active: true,
-            // },
-            // {
-            //     title: `少云1组`,
-            //     url: `/divide/1`,
-            //     icon: ComponentIcon,
-            //     activeIcon: ComponentIcon,
-            //     active: true,
-            // }
+            {
+                title: `未分组`,
+                url: `/divide/0`,
+                icon: ComponentIcon,
+                activeIcon: ComponentIcon,
+                active: true,
+            },
+            {
+                title: `少云1组`,
+                url: `/divide/1`,
+                icon: ComponentIcon,
+                activeIcon: ComponentIcon,
+                active: true,
+            }
         ]
     },
     {

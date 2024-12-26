@@ -4,7 +4,6 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineEmits, defineProps, reactive, watch, onMounted, onUnmounted } from 'vue'
 import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
-// import { group_create } from "@/commands/group";
 import { toast } from "vue-sonner";
 import Input from "@/components/ui/input/Input.vue";
 

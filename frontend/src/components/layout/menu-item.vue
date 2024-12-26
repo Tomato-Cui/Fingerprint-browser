@@ -11,7 +11,7 @@ import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as C
 import { useRoute } from "vue-router";
 import MenuDrag from './menu-drag.vue'
 import { onMounted } from "vue";
-import { group_query } from '@/commands/group'
+import { environment_group_query } from '@/commands/environment-group';
 // import { Search as SearchIcon } from 'lucide-vue-next'
 // import Input from '@/components/input.vue'
 

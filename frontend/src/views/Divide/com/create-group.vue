@@ -4,7 +4,7 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineEmits, defineProps, reactive, watch } from 'vue'
 import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
-import { group_create } from "@/commands/group";
+import { environment_group_create } from "@/commands/environment-group";
 import { toast } from "vue-sonner";
 
 const props = defineProps({
@@ -28,8 +28,8 @@ const subMit = () => {
         toast.error("团队名称不能为空")
         return
     }
-    group_create(addGroup.groupName, addGroup.description).then(res => {
-        console.log(res)
+    environment_group_create(addGroup.groupName, addGroup.description).then(res => {
+        console.log("res", res)
     })
 }
 watch(() => props.createGroupDialog, (val) => {

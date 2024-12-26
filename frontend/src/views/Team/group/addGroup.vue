@@ -98,7 +98,7 @@
 <script setup>
 import { ref, computed, defineEmits, defineProps, onMounted, watch } from "vue";
 import { XIcon } from "lucide-vue-next";
-import { team_update } from "@/commands/team";
+// import { team_update } from "@/commands/team";
 
 const props = defineProps({
   //接收父组件传递的控制参数
