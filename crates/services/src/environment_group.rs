@@ -72,7 +72,7 @@ mod tests {
     async fn test_create() {
         crate::setup().await;
         let payload = EnvironmentGroup {
-            user_uuid: "e972d1df-ff52-447e-9e30-8c5af698f5e8".to_string(),
+            user_uuid: "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string(),
             name: "bac".to_string(),
             description: Some("bac".to_string()),
             ..Default::default()

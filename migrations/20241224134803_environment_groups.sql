@@ -4,7 +4,7 @@ create table environment_groups
 (
     id          INTEGER
         primary key autoincrement,
-    user_uuid    INTEGER not null,
+    user_uuid   TEXT not null,
     name        TEXT not null,
     description TEXT,
     created_at  DATETIME default CURRENT_TIMESTAMP,

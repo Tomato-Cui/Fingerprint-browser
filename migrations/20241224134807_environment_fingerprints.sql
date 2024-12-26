@@ -3,7 +3,7 @@ create table environment_fingerprints
 (
     id                    integer
         primary key autoincrement,
-    user_uuid             integer,
+    user_uuid             text,
     browser               text    not NULL,
     ua                    text    not null,
     os                    text    not null,
