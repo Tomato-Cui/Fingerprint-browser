@@ -51,10 +51,10 @@ pub mod starts {
 
 #[tauri::command]
 pub async fn browser_stops(
-    ids: Vec<String>,
+    environment_uuids: Vec<String>,
 ) -> Result<AppResponse<HashMap<String, i32>>, tauri::Error> {
     let _ = get_user_id().await?;
-    Ok(match services::command::stop(ids).await {
+    Ok(match services::command::stop(environment_uuids).await {
         Ok(v) => AppResponse::success(
             Some("关闭成功，具体关闭信息查看响应数据.".to_string()),
             Some(v),

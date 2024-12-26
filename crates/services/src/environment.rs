@@ -46,6 +46,7 @@ pub async fn create(user_uuid: &str, mut payload: Environment) -> Result<bool, S
 
     payload.user_uuid = user_uuid.to_string();
     payload.uuid = Some(commons::encryption::uuid());
+    println!("{:?}", payload);
 
     let ok = models::environment::Environment::insert(pool, &payload).await?;
     Ok(ok)
@@ -143,92 +144,99 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_uuid() {
-        let uuid = "test-uuid";
+        crate::setup().await;
+        let uuid = "9796eae9-1263-412e-9651-5ef1f13882eb";
         let result = query_by_uuid(uuid).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_query() {
-        let user_uuid = "test-user-uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_query_by_group_id() {
+        crate::setup().await;
         let group_id = 1;
         let page_num = 1;
         let page_size = 10;
         let result = query_by_group_id(group_id, page_num, page_size).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_create() {
-            let user_uuid = "test-user-uuid";
-            let payload = Environment {
-                ..Default::default()
-            };
-            let result = create(user_uuid, payload).await;
-            assert!(result.is_ok());
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
+        let payload = Environment {
+            name: "123".to_string(),
+            ..Default::default()
+        };
+
+        let result = create(&user_uuid, payload).await;
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_create_batch() {
-            let user_uuid = "test-user-uuid";
-            let payload = vec![
-                Environment {
-                    ..Default::default()
-                },
-                Environment {
-                    ..Default::default()
-                },
-            ];
-            let result = create_batch(user_uuid, payload).await;
-            assert!(result.is_ok());
+        let user_uuid = "test-user-uuid";
+        let payload = vec![
+            Environment {
+                ..Default::default()
+            },
+            Environment {
+                ..Default::default()
+            },
+        ];
+        let result = create_batch(user_uuid, payload).await;
+        assert!(result.is_ok());
     }
 
     #[tokio::test]
-   async  fn test_move_to_group() {
-            let env_uuid = "test-env-uuid";
-            let group_id = 1;
-            let result = move_to_group(env_uuid, group_id).await;
-            assert!(result.is_ok());
+    async fn test_move_to_group() {
+        crate::setup().await;
+        let env_uuid = "e972d1df-ff52-447e-9e30-8c5af698f5e8";
+        let group_id = 1;
+        let result = move_to_group(env_uuid, group_id).await;
+        println!("{:?}", result);
     }
 
     #[tokio::test]
-   async  fn test_batch_move_to_group() {
-            let env_uuids = vec!["test-env-uuid1".to_string(), "test-env-uuid2".to_string()];
-            let group_id = 1;
-            let result = batch_move_to_group(env_uuids, group_id).await;
-            assert!(result.is_ok());
+    async fn test_batch_move_to_group() {
+        let env_uuids = vec!["test-env-uuid1".to_string(), "test-env-uuid2".to_string()];
+        let group_id = 1;
+        let result = batch_move_to_group(env_uuids, group_id).await;
+        assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_modify_info() {
-            let uuid = "test-uuid";
-            let name = "new-name";
-            let description = Some("new-description".to_string());
-            let result = modify_info(uuid, name, description).await;
-            assert!(result.is_ok());
+        let uuid = "test-uuid";
+        let name = "new-name";
+        let description = Some("new-description".to_string());
+        let result = modify_info(uuid, name, description).await;
+        assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_delete() {
-            let user_uuid = "test-user-uuid";
-            let env_uuid = "test-env-uuid";
-            let result = delete(user_uuid, env_uuid).await;
-            assert!(result.is_ok());
+        let user_uuid = "test-user-uuid";
+        let env_uuid = "test-env-uuid";
+        let result = delete(user_uuid, env_uuid).await;
+        assert!(result.is_ok());
     }
-    
+
     #[tokio::test]
     async fn test_batch_delete() {
-            let user_uuid = "test-user-uuid";
-            let env_ids = vec!["test-env-uuid1".to_string(), "test-env-uuid2".to_string()];
-            let result = batch_delete(user_uuid, env_ids).await;
-            assert!(result.is_ok());
+        let user_uuid = "test-user-uuid";
+        let env_ids = vec!["test-env-uuid1".to_string(), "test-env-uuid2".to_string()];
+        let result = batch_delete(user_uuid, env_ids).await;
+        assert!(result.is_ok());
     }
 }

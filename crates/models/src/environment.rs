@@ -27,8 +27,8 @@ impl Environment {
         let sql = r#"
         INSERT INTO environments (
             uuid, user_uuid, team_id, proxy_id, fp_info_id, group_id, name, description, default_urls, 
-            proxy_enable, status, created_at, updated_at, lasted_at, deleted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
+            proxy_enable
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
 
         let row = sqlx::query(sql)
             .bind(&environment.uuid)
@@ -41,11 +41,6 @@ impl Environment {
             .bind(&environment.description)
             .bind(&environment.default_urls)
             .bind(environment.proxy_enable)
-            .bind(environment.status)
-            .bind(&environment.created_at)
-            .bind(&environment.updated_at)
-            .bind(&environment.lasted_at)
-            .bind(&environment.deleted_at)
             .execute(pool)
             .await?;
 
