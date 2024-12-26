@@ -3,17 +3,18 @@ use crate::error::ServiceError;
 pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceError> {
     let pool = states::database::get_database_pool()?;
     let user = models::user::User::query_nickname(pool, nickname).await;
-    let user = match user {
+    let user_info = match user {
         Ok(user) => user,
         Err(_) => return Err(ServiceError::Error("current user not exist.".to_string())),
     };
 
     let password = commons::encryption::md5(password);
-    if !user.password.eq(&password) {
+    if !user_info.password.eq(&password) {
         return Err(ServiceError::Error("password failed".to_string()));
     }
+    let user = models::user::User::query_user_by_user_info_id(pool, user_info.id).await?;
 
-    let token = commons::encryption::generate_token(user.id)
+    let token = commons::encryption::generate_token(&user.uuid)
         .map_err(|_| ServiceError::Error("generate token failed.".to_string()))?;
 
     states::auth::set_token(&token).await;
@@ -25,13 +26,16 @@ pub async fn regsiter(email: &str, nickname: &str, password: &str) -> Result<boo
     let pool = states::database::get_database_pool()?;
     let password = commons::encryption::md5(password);
 
-    let user = models::user::User {
+    let user_info = models::user_info::UserInfo {
         email: email.to_string(),
         nickname: nickname.to_string(),
         password: password.to_string(),
         ..Default::default()
     };
-    let ok = models::user::User::insert(pool, &user).await?;
+
+    let uuid = commons::encryption::uuid();
+    let ok = models::user::User::insert(pool, &uuid, &user_info).await?;
+
     Ok(ok)
 }
 
@@ -50,7 +54,7 @@ pub async fn reset_password(
     }
 
     let password = commons::encryption::md5(password2);
-    let ok = models::user::User::update_by_col(pool, user.id, "password", &password).await?;
+    let ok = models::user::User::update_password(pool, email, &password).await?;
 
     Ok(ok)
 }
@@ -83,7 +87,7 @@ mod tests {
     #[tokio::test]
     async fn test_login() {
         crate::setup().await;
-        let token = super::login("abc", "123").await;
+        let token = super::login("abc", "abc").await;
         println!("{:?}", token);
 
         super::logout().await.unwrap();

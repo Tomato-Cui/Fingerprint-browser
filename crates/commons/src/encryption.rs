@@ -2,6 +2,11 @@ use anyhow::anyhow;
 use base64::{engine::general_purpose, DecodeError, Engine};
 use std::{fs, path::PathBuf};
 
+pub fn uuid() -> String {
+    let uuid = uuid::Uuid::new_v4();
+    uuid.to_string()
+}
+
 pub fn base64_encode(data: &str) -> String {
     general_purpose::STANDARD.encode(data.as_bytes())
 }
@@ -15,7 +20,7 @@ pub fn md5(text: &str) -> String {
     format!("{:?}", md5::compute(text.as_bytes()))
 }
 
-pub fn generate_token(user_id: i32) -> Result<String, jwt::Error> {
+pub fn generate_token(user_uuid: &str) -> Result<String, jwt::Error> {
     use aes_gcm::KeyInit;
     use hmac::Hmac;
     use jwt::SignWithKey;
@@ -24,12 +29,12 @@ pub fn generate_token(user_id: i32) -> Result<String, jwt::Error> {
 
     let key: Hmac<Sha256> = Hmac::new_from_slice(b"some-secret").unwrap();
     let mut claims = BTreeMap::new();
-    claims.insert("id", format!("{}", user_id));
+    claims.insert("uuid", format!("{}", user_uuid));
 
     claims.sign_with_key(&key)
 }
 
-pub fn verify_token(token_str: &str) -> Result<i32, Box<dyn std::error::Error>> {
+pub fn verify_token(token_str: &str) -> Result<String, Box<dyn std::error::Error>> {
     use aes_gcm::KeyInit;
     use hmac::Hmac;
     use jwt::VerifyWithKey;
@@ -38,7 +43,7 @@ pub fn verify_token(token_str: &str) -> Result<i32, Box<dyn std::error::Error>> 
 
     let key: Hmac<Sha256> = Hmac::new_from_slice(b"some-secret")?;
     let claims: BTreeMap<String, String> = token_str.verify_with_key(&key)?;
-    claims["id"]
+    claims["uuid"]
         .parse()
         .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
 }
@@ -250,7 +255,7 @@ mod tests {
 
     #[test]
     fn test_generate_token() {
-        let token = generate_token(1).unwrap();
+        let token = generate_token("").unwrap();
         println!("{}", token)
     }
 

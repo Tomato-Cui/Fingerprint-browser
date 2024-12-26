@@ -1,15 +1,12 @@
-use serde_json::{json, Value};
 use crate::response::AppResponse;
+use serde_json::{json, Value};
 
-pub async fn get_user_id() -> u32 {
+pub async fn get_user_id() -> Result<String, anyhow::Error> {
     let token = states::auth::get_token().await;
     if let Some(token_str) = token {
-        match commons::encryption::verify_token(&token_str) {
-            Ok(id) => id as u32,
-            Err(_) => 0,
-        }
+        Ok(token_str)
     } else {
-        0
+        Err(anyhow::anyhow!("用户处于退出状态"))
     }
 }
 

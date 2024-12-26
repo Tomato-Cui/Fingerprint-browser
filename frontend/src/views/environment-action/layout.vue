@@ -17,7 +17,6 @@ const importProxyOpen = ref(false)
 const proxyModelCloseHandle = () => importProxyOpen.value = false;
 const proxyModelOpenHandle = () => importProxyOpen.value = true;
 
-console.log(importProxyOpen);
 </script>
 <template>
     <div class="h-main bg-white m-4 flex flex-col rounded-md">

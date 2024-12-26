@@ -7,7 +7,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "../ui/sidebar/index";
-import { group_query } from '@/commands/group'
+import { environment_group_query } from '@/commands/environment-group';
 import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as ComponentIcon } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -19,7 +19,7 @@ const route = useRoute();
 const menus = ref([])
 
 onMounted(() => {
-    group_query(1, 1000).then(res => {
+    environment_group_query(1, 1000).then(res => {
         //获取到的数组依次添加到props.menu中
         res.data.data.forEach(item => {
             menus.value.push(item)

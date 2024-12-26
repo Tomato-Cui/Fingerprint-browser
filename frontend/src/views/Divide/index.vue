@@ -39,7 +39,7 @@ import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import { environment_delete } from "@/commands/environment";
-import CreateGroup from "./com/create-group.vue"
+// import CreateGroup from "./com/create-group.vue"
 import EditAccount from "./com/edit-account.vue"
 import EditProxy from "./com/edit-proxy.vue";
 
@@ -258,11 +258,10 @@ const handleSubmitDel = () => {
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
-            <!-- <GroupSelect @select="groupSelectHandle" /> -->
-            <PrimaryButton class="flex gap-x-2" @click="createGroup">
-              <!-- <PackageOpenIcon /> -->
+            <!-- 创建分组 -->
+            <!-- <PrimaryButton class="flex gap-x-2" @click="createGroup">
               创建分组
-            </PrimaryButton>
+            </PrimaryButton> -->
             <SearchInput :search-current-type="searchType" @update:searchType="(value: any) => (searchType = value)"
               @update:searchValue="searchValueHandle" />
           </div>
