@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 
-export const browser_start = async (environmentUuid: number): Promise<any> => {
+export const browser_start = async (environmentUuid: string): Promise<any> => {
     return await invoke('browser_start', { environmentUuid })
 };
 
@@ -8,7 +8,7 @@ export const browser_starts = async (environmentUuids: Array<String>): Promise<a
     return await invoke('browser_starts', { environmentUuids })
 };
 
-export const browser_stops = async (environmentUuids: Array<number>): Promise<any> => {
+export const browser_stops = async (environmentUuids: Array<string>): Promise<any> => {
     return await invoke('browser_stops', { environmentUuids })
 };
 
