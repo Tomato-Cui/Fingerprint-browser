@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, reactive, nextTick } from "vue";
 import { AlertModel } from "@/components/alert-model";
 import { useRouter } from "vue-router";
@@ -34,6 +34,48 @@ import {
   SelectValue,
 } from "@/components/select";
 import { IconFilter, groupIcons } from "@/assets/icons/index";
+import {
+  environment_proxies_create,
+  environment_proxies_query,
+} from "@/commands/environment-proxy";
+
+interface Payment {
+  id: number;
+  info: string;
+  ip: string;
+  envCount: number;
+  notes: string;
+  ipChannel: string;
+  name: string;
+  group: string;
+  location: string;
+  domain_name: string;
+  remark: string;
+  deleted_username: string;
+  deleted_at: string;
+  selected?: boolean;
+}
+
+const searchType = ref<{ title: keyof Payment; value: string }>({
+  title: "name",
+  value: "名称",
+});
+
+const data = ref<Array<Payment>>([]);
+
+const pagination = reactive({
+  pageIndex: 0,
+  pageSize: 2,
+  total: 0,
+});
+
+const loadData = (index: number, size: number) => {
+  environment_proxies_query(index, size).then((res) => {
+    let { data: data_, total } = res.data;
+    pagination.total = total;
+    data.value = data_;
+  });
+};
 
 const router = useRouter();
 const selectAll = ref(false);
@@ -525,7 +567,7 @@ const removeAgent = (id) => {
 
           <tbody>
             <tr
-              v-for="agent in agents"
+              v-for="agent in data"
               :key="agent.id"
               :class="{
                 'border-t border-gray-100': true,

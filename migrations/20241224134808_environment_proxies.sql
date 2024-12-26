@@ -14,5 +14,5 @@ create table environment_proxies
     updated_at DATETIME default CURRENT_TIMESTAMP,
     deleted_at DATETIME,
     foreign key (user_uuid) references users (uuid),
-    foreign key (environment_group_id) references  environment_proxy_groups (uuid)
+    foreign key (environment_group_id) references  environment_proxy_groups (id)
 );
