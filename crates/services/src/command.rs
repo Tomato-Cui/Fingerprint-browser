@@ -1,4 +1,4 @@
-use crate::{environment, environment_fingerprint, environment_proxy, error::ServiceError};
+use crate::{environment, environment_fingerprint, environment_proxy};
 use commons::util::{get_chrome_install_path, get_debug_port};
 use cores::processor::{self, Processer};
 use models::environment_fingerprint::EnvironmentFingerprint;
@@ -7,11 +7,6 @@ use serde_json::{json, Value};
 use std::{collections::HashMap, sync::Arc};
 
 use tokio::sync::Mutex;
-
-pub async fn clean_cache() -> Result<bool, ServiceError> {
-    // TODO: 获取到路径
-    Ok(true)
-}
 
 pub static ACTUATOR: Lazy<Arc<Mutex<Processer>>> =
     Lazy::new(|| Arc::new(Mutex::new(Processer::new())));
@@ -93,5 +88,54 @@ pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Erro
                         "status":  false,
                         "message":format!("启动失败, 指定环境ID不存在."),
         })),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_view_active() {
+        crate::setup().await;
+
+        let result = view_active().await;
+        assert!(result.is_ok());
+        let status_map = result.unwrap();
+        assert!(status_map.is_empty() || status_map.values().all(|&v| v == true || v == false));
+    }
+
+    #[tokio::test]
+    async fn test_is_active() {
+        crate::setup().await;
+        let environment_uuid = "test_uuid";
+        let result = is_active(environment_uuid).await;
+        assert!(result.is_ok());
+        let status = result.unwrap();
+        assert!(status == true || status == false);
+    }
+
+    #[tokio::test]
+    async fn test_stop() {
+        crate::setup().await;
+        let ids = vec!["test_id1".to_string(), "test_id2".to_string()];
+        let result = stop(ids.clone()).await;
+        assert!(result.is_ok());
+        let status_map = result.unwrap();
+        for id in ids {
+            assert!(status_map.contains_key(&id));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_start_browser() {
+        crate::setup().await;
+        let environment_uuid = "test_uuid";
+        let result = start_browser(environment_uuid).await;
+        assert!(result.is_ok());
+        let response = result.unwrap();
+        assert_eq!(response["environment_uuid"], environment_uuid);
+        assert!(response["status"].is_boolean());
+        assert!(response["message"].is_string());
     }
 }
