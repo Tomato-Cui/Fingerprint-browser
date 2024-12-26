@@ -13,10 +13,12 @@ pub async fn environment_fingerprint_query_id(
         Some(format!("查询失败: {}", v))
     });
 
-    Ok(match services::environment_fingerprint::query_by_id(&user_uuid, id).await {
-        Ok(data) => AppResponse::<EnvironmentFingerprint>::success(success_msg, Some(data)),
-        Err(r) => AppResponse::<EnvironmentFingerprint>::fail(warn_msg(r.to_string())),
-    })
+    Ok(
+        match services::environment_fingerprint::query_by_id(&user_uuid, id).await {
+            Ok(data) => AppResponse::<EnvironmentFingerprint>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<EnvironmentFingerprint>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -90,14 +92,16 @@ pub async fn environment_fingerprint_delete(id: u32) -> Result<AppResponse<bool>
         Some(format!("删除失败: {}", v))
     });
 
-    Ok(match services::environment_fingerprint::delete(&user_uuid, id).await {
-        Ok(data) => {
-            if data {
-                AppResponse::<bool>::success(success_msg, Some(data))
-            } else {
-                AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+    Ok(
+        match services::environment_fingerprint::delete(&user_uuid, id).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
             }
-        }
-        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-    })
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }

@@ -3,12 +3,14 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct EnvironmentAccount {
-    pub id: Option<i32>,                      // 自增ID
-    pub platform: String,                     // 平台名称
-    pub platform_url: String,                 // 平台URL
+    pub id: Option<i32>,      // 自增ID
+    pub platform: String,     // 平台名称
+    pub platform_url: String, // 平台URL
+    pub platform_account: String,
+    pub platform_password: String,
     pub platform_description: Option<String>, // 平台描述
-    pub environment_uuid: Option<i32>,        // 环境UUID
-    pub user_uuid: Option<i32>,               // 用户UUID
+    pub environment_uuid: String,             // 环境UUID
+    pub user_uuid: String,                    // 用户UUID
     pub created_at: Option<String>,           // 创建时间
     pub updated_at: Option<String>,           // 更新时间
     pub deleted_at: Option<String>,           // 删除时间
@@ -19,14 +21,16 @@ impl EnvironmentAccount {
     pub async fn insert(pool: &Pool<Sqlite>, account: &EnvironmentAccount) -> Result<bool, Error> {
         let sql = "
             INSERT INTO environment_accounts (
-                platform, platform_url, platform_description, environment_uuid, user_uuid
+                platform, platform_url, platform_account, platform_password, platform_description, environment_uuid, user_uuid
             ) VALUES (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?
             )";
 
         let row = sqlx::query(sql)
             .bind(&account.platform)
             .bind(&account.platform_url)
+            .bind(&account.platform_account)
+            .bind(&account.platform_password)
             .bind(&account.platform_description)
             .bind(&account.environment_uuid)
             .bind(&account.user_uuid)
@@ -76,17 +80,25 @@ impl EnvironmentAccount {
     pub async fn update(pool: &Pool<Sqlite>, account: &EnvironmentAccount) -> Result<bool, Error> {
         let sql = "
         UPDATE environment_accounts
-            SET platform = ?, platform_url = ?, platform_description = ?, environment_uuid = ?, user_uuid = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ? AND deleted_at IS NULL;
+            SET 
+                platform = ?,
+                platform_url = ?,
+                platform_account = ?,
+                platform_password = ?,
+                platform_description = ?,
+                environment_uuid = ?,
+                user_uuid = ?
+            WHERE id = ? AND deleted_at IS NULL;
         ";
 
         let row = sqlx::query(sql)
             .bind(&account.platform)
             .bind(&account.platform_url)
+            .bind(&account.platform_account)
+            .bind(&account.platform_password)
             .bind(&account.platform_description)
             .bind(&account.environment_uuid)
             .bind(&account.user_uuid)
-            .bind(account.id)
             .execute(pool)
             .await?;
 

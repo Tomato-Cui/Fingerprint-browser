@@ -6,6 +6,7 @@ use serde_json::Value;
 
 #[tauri::command]
 pub async fn browser_start(environment_uuid: &str) -> Result<AppResponse<Value>, tauri::Error> {
+    let _ = get_user_id().await?;
     Ok(
         match services::command::start_browser(environment_uuid).await {
             Ok(v) => AppResponse::success(None, Some(v)),
@@ -23,6 +24,7 @@ pub mod starts {
     pub async fn browser_starts(
         environment_uuids: Vec<String>,
     ) -> Result<AppResponse<HashMap<String, Value>>, tauri::Error> {
+        let _ = get_user_id().await?;
         let mut result = HashMap::new();
 
         for item in environment_uuids {
@@ -51,6 +53,7 @@ pub mod starts {
 pub async fn browser_stops(
     ids: Vec<String>,
 ) -> Result<AppResponse<HashMap<String, i32>>, tauri::Error> {
+    let _ = get_user_id().await?;
     Ok(match services::command::stop(ids).await {
         Ok(v) => AppResponse::success(
             Some("关闭成功，具体关闭信息查看响应数据.".to_string()),
@@ -62,6 +65,7 @@ pub async fn browser_stops(
 
 #[tauri::command]
 pub async fn browser_status() -> Result<AppResponse<HashMap<String, bool>>, tauri::Error> {
+    let _ = get_user_id().await?;
     Ok(match services::command::view_active().await {
         Ok(v) => AppResponse::success(Some("查询状态成功.".to_string()), Some(v)),
         Err(_) => AppResponse::fail(Some("查询状态失败".to_string())),

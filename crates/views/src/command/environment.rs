@@ -5,16 +5,20 @@ use serde_json::Value;
 use super::user::get_user_id;
 
 #[tauri::command]
-pub async fn environment_query_id(uuid: String) -> Result<AppResponse<Environment>, tauri::Error> {
+pub async fn environment_query_id(
+    environment_uuid: String,
+) -> Result<AppResponse<Environment>, tauri::Error> {
     let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
         Some(format!("查询失败: {}", v))
     });
 
-    Ok(match services::environment::query_by_uuid(&uuid).await {
-        Ok(data) => AppResponse::<Environment>::success(success_msg, Some(data)),
-        Err(r) => AppResponse::<Environment>::fail(warn_msg(r.to_string())),
-    })
+    Ok(
+        match services::environment::query_by_uuid(&environment_uuid).await {
+            Ok(data) => AppResponse::<Environment>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Environment>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -85,15 +89,22 @@ pub async fn environment_batch_create(
 
 #[tauri::command]
 pub async fn environment_modify_info(
-    uuid: String,
+    environment_uuid: String,
     payload: Environment,
 ) -> Result<AppResponse<bool>, tauri::Error> {
+    let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
         Some(format!("更新失败: {}", v))
     });
 
     Ok(
-        match services::environment::modify_info(&uuid, &payload.name, payload.description).await {
+        match services::environment::modify_info(
+            &environment_uuid,
+            &payload.name,
+            payload.description,
+        )
+        .await
+        {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))
@@ -111,6 +122,7 @@ pub async fn environment_move_to_group(
     environment_uuid: String,
     group_id: u32,
 ) -> Result<AppResponse<bool>, tauri::Error> {
+    let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
         Some(format!("更新失败: {}", v))
     });
@@ -131,14 +143,15 @@ pub async fn environment_move_to_group(
 
 #[tauri::command]
 pub async fn environment_batch_move_to_group(
-    environment_ids: Vec<String>,
+    environment_uuids: Vec<String>,
     group_id: u32,
 ) -> Result<AppResponse<Vec<Value>>, tauri::Error> {
+    let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
         Some(format!("更新失败: {}", v))
     });
 
-    match services::environment::batch_move_to_group(environment_ids, group_id).await {
+    match services::environment::batch_move_to_group(environment_uuids, group_id).await {
         Ok(data) => Ok(AppResponse::<Vec<Value>>::success(success_msg, Some(data))),
         Err(r) => Ok(AppResponse::<Vec<Value>>::fail(warn_msg(r.to_string()))),
     }
