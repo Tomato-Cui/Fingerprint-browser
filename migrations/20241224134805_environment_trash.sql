@@ -9,5 +9,5 @@ create table environment_trash
     updated_at       DATETIME default CURRENT_TIMESTAMP,
     deleted_at       DATETIME,
     foreign key (environment_uuid) references environments (uuid),
-    foreign key (from_user_uuid) references users (uuid)
+    foreign key (from_user_uuid) references users (from_user_uuid)
 );

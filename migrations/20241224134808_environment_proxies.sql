@@ -8,7 +8,7 @@ create table environment_proxies
     port       TEXT not null,
     username   TEXT,
     password   TEXT,
-    user_uuid  INTEGER,
+    user_uuid  TEXT,
     environment_group_id  INTEGER,
     created_at DATETIME default CURRENT_TIMESTAMP,
     updated_at DATETIME default CURRENT_TIMESTAMP,
