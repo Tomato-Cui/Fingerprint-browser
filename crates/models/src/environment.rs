@@ -6,7 +6,7 @@ pub struct Environment {
     pub id: i32,                      // 自增ID
     pub uuid: Option<String>,         // UUID
     pub user_uuid: String,            // 用户UUID
-    pub team_id: i32,                 // 团队ID
+    pub team_id: Option<i32>,                 // 团队ID
     pub proxy_id: Option<i32>,        // 代理ID
     pub fp_info_id: Option<i32>,      // 指纹信息ID
     pub group_id: Option<i32>,        // 分组ID
@@ -134,7 +134,7 @@ impl Environment {
         pool: &Pool<Sqlite>,
         uuid: &str,
         name: &str,
-        description: Option<&str>,
+        description: Option<String>,
     ) -> Result<bool, Error> {
         let sql = "
             UPDATE environments

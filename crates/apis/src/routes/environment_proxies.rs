@@ -5,6 +5,7 @@ use axum::response::IntoResponse;
 use axum::routing::{delete, get, post, put};
 use axum::Extension;
 use axum::{Json, Router};
+use models::environment_proxies::Proxy;
 use serde_json::Value;
 
 pub fn build_router() -> Router {
@@ -21,14 +22,13 @@ pub fn build_router() -> Router {
 
 mod query_id {
     use super::*;
-    use models::proxies::Proxy;
 
     pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::proxy::query_by_id(state.id, id).await {
+        match services::environment_proxy::query_by_id(&state.user_uuid, id).await {
             Ok(data) => AppResponse::<Proxy>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Proxy>::fail(warn_msg(r.to_string())),
         }
@@ -48,7 +48,13 @@ mod query {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::proxy::query(state.id, payload.page_num, payload.page_size).await {
+        match services::environment_proxy::query(
+            &state.user_uuid,
+            payload.page_num,
+            payload.page_size,
+        )
+        .await
+        {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
@@ -58,26 +64,15 @@ mod query {
 mod create {
     use super::*;
 
-    #[derive(serde::Deserialize)]
-    pub struct Payload {
-        pub kind: String,
-        pub value: String,
-    }
-
     pub async fn handle(
         state: Extension<CurrentUser>,
-        payload: Json<Payload>,
+        Json(payload): Json<Proxy>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
-        let proxy = models::proxies::Proxy {
-            kind: payload.kind.clone(),
-            value: payload.value.clone(),
-            ..Default::default()
-        };
 
-        match services::proxy::create(state.id, &proxy).await {
+        match services::environment_proxy::create(&state.user_uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -93,28 +88,16 @@ mod create {
 mod modify {
     use super::*;
 
-    #[derive(serde::Deserialize)]
-    pub struct Payload {
-        pub kind: String,
-        pub value: String,
-    }
-
     pub async fn handle(
         state: Extension<CurrentUser>,
-        Path(id): Path<i32>,
-        payload: Json<Payload>,
+        Path(id): Path<u32>,
+        Json(payload): Json<Proxy>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
-        let proxy = models::proxies::Proxy {
-            id: id as i32,
-            kind: payload.kind.clone(),
-            value: payload.value.clone(),
-            ..Default::default()
-        };
 
-        match services::proxy::modify(state.id, &proxy).await {
+        match services::environment_proxy::update(&state.user_uuid, id, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -135,7 +118,7 @@ mod delete {
             Some(format!("删除失败: {}", v))
         });
 
-        match services::proxy::delete(state.id, id).await {
+        match services::environment_proxy::delete(&state.user_uuid, id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

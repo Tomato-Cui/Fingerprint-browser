@@ -14,6 +14,7 @@ pub mod resource_whitelist;
 pub mod team;
 pub mod team_group;
 pub mod user;
+pub mod user_team_temp;
 
 #[allow(dead_code)]
 pub(crate) async fn setup() {

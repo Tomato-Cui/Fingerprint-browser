@@ -34,11 +34,12 @@ pub async fn create(
 
 pub async fn modify(
     user_uuid: &str,
+    id: u32,
     payload: &EnvironmentFingerprint,
 ) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = EnvironmentFingerprint::update(pool, user_uuid, payload).await?;
+    let ok = EnvironmentFingerprint::update(pool, id, user_uuid, payload).await?;
 
     Ok(ok)
 }

@@ -5,11 +5,12 @@ use axum::response::IntoResponse;
 use axum::routing::{delete, get, post, put};
 use axum::Extension;
 use axum::{Json, Router};
+use models::environment_account::EnvironmentAccount;
 use serde_json::Value;
 
 pub fn build_router() -> Router {
     Router::new().nest(
-        "/fingerprints",
+        "/environment-accounts",
         Router::new()
             .route("/:id", get(query_id::handle))
             .route("/query", get(query::handle))
@@ -21,16 +22,15 @@ pub fn build_router() -> Router {
 
 mod query_id {
     use super::*;
-    use models::fingerprint::Fingerprint;
 
-    pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
+    pub async fn handle(Path(id): Path<u32>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::fingerprint::query_by_id(state.id, id).await {
-            Ok(data) => AppResponse::<Fingerprint>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<Fingerprint>::fail(warn_msg(r.to_string())),
+        match services::environment_account::query_by_id(id).await {
+            Ok(data) => AppResponse::<EnvironmentAccount>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<EnvironmentAccount>::fail(warn_msg(r.to_string())),
         }
     }
 }
@@ -47,7 +47,13 @@ mod query {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::fingerprint::query(state.id, payload.page_num, payload.page_size).await {
+        match services::environment_account::query(
+            &state.user_uuid,
+            payload.page_num,
+            payload.page_size,
+        )
+        .await
+        {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
@@ -58,15 +64,12 @@ mod create {
 
     use super::*;
 
-    pub async fn handle(
-        state: Extension<CurrentUser>,
-        payload: Json<models::fingerprint::Fingerprint>,
-    ) -> impl IntoResponse {
+    pub async fn handle(Json(payload): Json<EnvironmentAccount>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
 
-        match services::fingerprint::create(state.id, &payload).await {
+        match services::environment_account::create(&payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -83,16 +86,15 @@ mod modify {
     use super::*;
 
     pub async fn handle(
-        state: Extension<CurrentUser>,
         Path(id): Path<u32>,
-        mut payload: Json<models::fingerprint::Fingerprint>,
+        Json(mut payload): Json<EnvironmentAccount>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
         payload.id = Some(id as i32);
 
-        match services::fingerprint::modify(state.id, &payload).await {
+        match services::environment_account::modify(&payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -108,12 +110,12 @@ mod modify {
 mod delete {
     use super::*;
 
-    pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
+    pub async fn handle(Path(id): Path<u32>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
             Some(format!("删除失败: {}", v))
         });
 
-        match services::fingerprint::delete(state.id, id).await {
+        match services::environment_account::delete(id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

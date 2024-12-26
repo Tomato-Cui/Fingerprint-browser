@@ -2,35 +2,34 @@ use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
 use axum::extract::{Path, Query};
 use axum::response::IntoResponse;
-use axum::routing::{delete, get, post, put};
+use axum::routing::{delete, get, post};
 use axum::Extension;
 use axum::{Json, Router};
+use models::environment_transfer_history::EnvironmentTransferHistory;
 use serde_json::Value;
 
 pub fn build_router() -> Router {
     Router::new().nest(
         "/proxies",
         Router::new()
-            .route("/:id", get(query_id::handle))
+            .route("/:uuid", get(query_id::handle))
             .route("/query", get(query::handle))
-            .route("/create", post(create::handle))
-            .route("/modify/:id", put(modify::handle))
+            .route("/batch/create", post(batch_create::handle))
             .route("/delete/:id", delete(delete::handle)),
     )
 }
 
 mod query_id {
     use super::*;
-    use models::proxies::Proxy;
 
-    pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
+    pub async fn handle(Path(uuid): Path<String>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::proxy::query_by_id(state.id, id).await {
-            Ok(data) => AppResponse::<Proxy>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<Proxy>::fail(warn_msg(r.to_string())),
+        match services::environment_transfer_history::query_by_id(&uuid).await {
+            Ok(data) => AppResponse::<EnvironmentTransferHistory>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<EnvironmentTransferHistory>::fail(warn_msg(r.to_string())),
         }
     }
 }
@@ -48,81 +47,51 @@ mod query {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::proxy::query(state.id, payload.page_num, payload.page_size).await {
+        match services::environment_transfer_history::query(
+            &state.user_uuid,
+            payload.page_num,
+            payload.page_size,
+        )
+        .await
+        {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
     }
 }
 
-mod create {
+mod batch_create {
+    use std::collections::HashMap;
+
     use super::*;
 
     #[derive(serde::Deserialize)]
     pub struct Payload {
-        pub kind: String,
-        pub value: String,
+        pub environment_uuids: Vec<String>,
+        pub to_user_uuid: String,
     }
-
     pub async fn handle(
         state: Extension<CurrentUser>,
-        payload: Json<Payload>,
+        Json(payload): Json<Payload>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
-        let proxy = models::proxies::Proxy {
-            kind: payload.kind.clone(),
-            value: payload.value.clone(),
-            ..Default::default()
-        };
 
-        match services::proxy::create(state.id, &proxy).await {
-            Ok(data) => {
-                if data {
-                    AppResponse::<()>::success(success_msg, Some(()))
-                } else {
-                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
-                }
-            }
-            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
-        }
-    }
-}
+        let environment_transfer_historys = payload
+            .environment_uuids
+            .iter()
+            .map(|v| EnvironmentTransferHistory {
+                environment_uuid: v.to_string(),
+                from_user_uuid: state.user_uuid.clone(),
+                to_user_uuid: payload.to_user_uuid.clone(),
+                ..Default::default()
+            })
+            .collect::<Vec<EnvironmentTransferHistory>>();
 
-mod modify {
-    use super::*;
-
-    #[derive(serde::Deserialize)]
-    pub struct Payload {
-        pub kind: String,
-        pub value: String,
-    }
-
-    pub async fn handle(
-        state: Extension<CurrentUser>,
-        Path(id): Path<i32>,
-        payload: Json<Payload>,
-    ) -> impl IntoResponse {
-        let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
-            Some(format!("更新失败: {}", v))
-        });
-        let proxy = models::proxies::Proxy {
-            id: id as i32,
-            kind: payload.kind.clone(),
-            value: payload.value.clone(),
-            ..Default::default()
-        };
-
-        match services::proxy::modify(state.id, &proxy).await {
-            Ok(data) => {
-                if data {
-                    AppResponse::<()>::success(success_msg, Some(()))
-                } else {
-                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
-                }
-            }
-            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        match services::environment_transfer_history::create(environment_transfer_historys).await {
+            Ok(data) => AppResponse::<HashMap<String, bool>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<HashMap<String, bool>>::fail(warn_msg(r.to_string())),
         }
     }
 }
@@ -130,12 +99,17 @@ mod modify {
 mod delete {
     use super::*;
 
-    pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        Path(environment_uuid): Path<String>,
+    ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
             Some(format!("删除失败: {}", v))
         });
 
-        match services::proxy::delete(state.id, id).await {
+        match services::environment_transfer_history::delete(&state.user_uuid, &environment_uuid)
+            .await
+        {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

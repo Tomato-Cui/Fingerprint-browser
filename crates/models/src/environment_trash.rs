@@ -15,6 +15,21 @@ pub struct EnvironmentTrash {
 
 impl EnvironmentTrash {
     #[allow(dead_code)]
+    pub async fn query_deleted_environments_by_environment_uuid(
+        pool: &Pool<Sqlite>,
+        environment_uuid: &str,
+    ) -> Result<Environment, Error> {
+        let environment: Environment = sqlx::query_as(
+            "SELECT * FROM environments WHERE environment_uuid  = ? AND deleted_at IS NOT NULL",
+        )
+        .bind(environment_uuid)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(environment)
+    }
+
+    #[allow(dead_code)]
     pub async fn query_deleted_environments_by_user_uuid(
         pool: &Pool<Sqlite>,
         user_uuid: &str,
@@ -50,19 +65,26 @@ impl EnvironmentTrash {
     #[allow(dead_code)]
     pub async fn restore_deleted_environment(
         pool: &Pool<Sqlite>,
+        user_uuid: &str,
         environment_uuid: &str,
     ) -> Result<bool, Error> {
         let mut tx = pool.begin().await?;
 
-        let update_row = sqlx::query("UPDATE environments SET deleted_at = NULL WHERE uuid = ?")
-            .bind(environment_uuid)
-            .execute(&mut *tx)
-            .await?;
+        let update_row = sqlx::query(
+            "UPDATE environments SET deleted_at = NULL WHERE uuid = ? and from_user_uuid = ?",
+        )
+        .bind(environment_uuid)
+        .bind(user_uuid)
+        .execute(&mut *tx)
+        .await?;
 
-        let delete_row = sqlx::query("DELETE FROM environment_trash WHERE environment_uuid = ?")
-            .bind(environment_uuid)
-            .execute(&mut *tx)
-            .await?;
+        let delete_row = sqlx::query(
+            "DELETE FROM environment_trash WHERE environment_uuid = ? and from_user_uuid = ?",
+        )
+        .bind(environment_uuid)
+        .bind(user_uuid)
+        .execute(&mut *tx)
+        .await?;
 
         tx.commit().await?;
 
@@ -72,12 +94,13 @@ impl EnvironmentTrash {
     #[allow(dead_code)]
     pub async fn restore_deleted_environments(
         pool: &Pool<Sqlite>,
+        user_uuid: &str,
         environment_uuids: &[&str],
     ) -> Result<bool, Error> {
         let mut tx = pool.begin().await?;
 
         let update_query = format!(
-            "UPDATE environments SET deleted_at = NULL WHERE uuid IN ({})",
+            "UPDATE environments SET deleted_at = NULL WHERE uuid IN ({}) where from_user_uuid = ?",
             environment_uuids
                 .iter()
                 .map(|_| "?")
@@ -89,11 +112,12 @@ impl EnvironmentTrash {
         for uuid in environment_uuids {
             update_stmt = update_stmt.bind(uuid);
         }
+        update_stmt = update_stmt.bind(user_uuid);
 
         let update_row = update_stmt.execute(&mut *tx).await?;
 
         let delete_query = format!(
-            "DELETE FROM environment_trash WHERE environment_uuid IN ({})",
+            "DELETE FROM environment_trash WHERE environment_uuid IN ({}) and from_user_uuid = ?",
             environment_uuids
                 .iter()
                 .map(|_| "?")
@@ -106,6 +130,7 @@ impl EnvironmentTrash {
             delete_stmt = delete_stmt.bind(uuid);
         }
 
+        delete_stmt = delete_stmt.bind(user_uuid);
         let delete_row = delete_stmt.execute(&mut *tx).await?;
 
         tx.commit().await?;

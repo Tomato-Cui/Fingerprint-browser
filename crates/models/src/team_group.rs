@@ -49,6 +49,20 @@ impl TeamGroup {
     }
 
     #[allow(dead_code)]
+    pub async fn query_team_group_by_team_id(
+        pool: &Pool<Sqlite>,
+        team_id: u32,
+    ) -> Result<Vec<TeamGroup>, Error> {
+        let team_groups: Vec<TeamGroup> =
+            sqlx::query_as("SELECT * FROM team_groups WHERE team_id = ? AND deleted_at IS NULL")
+                .bind(team_id)
+                .fetch_all(pool)
+                .await?;
+
+        Ok(team_groups)
+    }
+
+    #[allow(dead_code)]
     pub async fn query_all_team_groups(
         pool: &Pool<Sqlite>,
         page_num: u32,

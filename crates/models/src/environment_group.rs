@@ -84,13 +84,17 @@ impl EnvironmentGroup {
     }
 
     #[allow(dead_code)]
-    pub async fn update(pool: &Pool<Sqlite>, group: &EnvironmentGroup) -> Result<bool, Error> {
+    pub async fn update(
+        pool: &Pool<Sqlite>,
+        id: u32,
+        group: &EnvironmentGroup,
+    ) -> Result<bool, Error> {
         let row = sqlx::query(
             "UPDATE environment_groups SET name = ?, description = ?, updated_at = DATETIME('now') WHERE id = ? AND deleted_at IS NULL",
         )
         .bind(&group.name)
         .bind(&group.description)
-        .bind(group.id)
+        .bind(id)
         .execute(pool)
         .await?;
 

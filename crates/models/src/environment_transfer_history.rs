@@ -6,7 +6,7 @@ use crate::environment::Environment;
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct EnvironmentTransferHistory {
     pub id: Option<i32>,            // 自增ID
-    pub environment_id: String,     // 环境ID
+    pub environment_uuid: String,   // 环境UUID
     pub from_user_uuid: String,     // 转移发起者UUID
     pub to_user_uuid: String,       // 接收者UUID
     pub created_at: Option<String>, // 创建时间
@@ -24,27 +24,26 @@ impl EnvironmentTransferHistory {
 
         let sql = "
         INSERT INTO environment_transfer_history (
-            environment_id, from_user_uuid, to_user_uuid
+            environment_uuid, from_user_uuid, to_user_uuid
         ) VALUES (
             ?, ?, ?
         )";
 
         let row = sqlx::query(sql)
-            .bind(&transfer_history.environment_id)
+            .bind(&transfer_history.environment_uuid)
             .bind(&transfer_history.from_user_uuid)
             .bind(&transfer_history.to_user_uuid)
             .execute(&mut *tx)
             .await?;
 
-        // 更新 environments 表中的 user_uuid
         let sql = "
         UPDATE environments
         SET user_uuid = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?";
+        WHERE uuid = ?";
 
         sqlx::query(sql)
             .bind(&transfer_history.to_user_uuid)
-            .bind(&transfer_history.environment_id)
+            .bind(&transfer_history.environment_uuid)
             .execute(&mut *tx)
             .await?;
 
@@ -62,7 +61,7 @@ impl EnvironmentTransferHistory {
     ) -> Result<(i64, Vec<Environment>), Error> {
         let (total,): (i64,) = sqlx::query_as(
             "SELECT count(1) FROM environments e
-         JOIN environment_transfer_history eth ON e.id = eth.environment_id
+         JOIN environment_transfer_history eth ON e.uuid = eth.environment_uuid
          WHERE eth.from_user_uuid = ? AND e.deleted_at IS NULL AND eth.deleted_at IS NULL",
         )
         .bind(from_user_uuid)
@@ -78,7 +77,7 @@ impl EnvironmentTransferHistory {
 
         let environments: Vec<Environment> = sqlx::query_as(
             "SELECT e.* FROM environments e
-         JOIN environment_transfer_history eth ON e.id = eth.environment_id
+         JOIN environment_transfer_history eth ON e.uuid = eth.environment_uuid
          WHERE eth.from_user_uuid = ? AND e.deleted_at IS NULL AND eth.deleted_at IS NULL
          LIMIT ? OFFSET ?",
         )
@@ -92,14 +91,14 @@ impl EnvironmentTransferHistory {
     }
 
     #[allow(dead_code)]
-    pub async fn query_transfer_history_by_id(
+    pub async fn query_transfer_history_by_environment_uuid(
         pool: &Pool<Sqlite>,
-        id: u32,
+        environment_uuid: &str,
     ) -> Result<EnvironmentTransferHistory, Error> {
         let transfer_history: EnvironmentTransferHistory = sqlx::query_as(
-            "SELECT * FROM environment_transfer_history WHERE id = ? AND deleted_at IS NULL",
+            "SELECT * FROM environment_transfer_history WHERE environment_uuid = ? AND deleted_at IS NULL",
         )
-        .bind(id)
+        .bind(environment_uuid)
         .fetch_one(pool)
         .await?;
 
@@ -145,12 +144,12 @@ impl EnvironmentTransferHistory {
     ) -> Result<bool, Error> {
         let sql = "
             UPDATE environment_transfer_history
-            SET environment_id = ?, from_user_uuid = ?, to_user_uuid = ?, updated_at = CURRENT_TIMESTAMP
+            SET environment_uuid = ?, from_user_uuid = ?, to_user_uuid = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ? AND deleted_at IS NULL
         ";
 
         let row = sqlx::query(sql)
-            .bind(&transfer_history.environment_id)
+            .bind(&transfer_history.environment_uuid)
             .bind(&transfer_history.from_user_uuid)
             .bind(&transfer_history.to_user_uuid)
             .bind(transfer_history.id)
@@ -161,11 +160,19 @@ impl EnvironmentTransferHistory {
     }
 
     #[allow(dead_code)]
-    pub async fn delete_transfer_history(pool: &Pool<Sqlite>, id: u32) -> Result<bool, Error> {
+    pub async fn delete_transfer_history(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        environment_uuid: &str,
+    ) -> Result<bool, Error> {
         let sql =
-            "UPDATE environment_transfer_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?";
+            "UPDATE environment_transfer_history SET deleted_at = CURRENT_TIMESTAMP WHERE environment_uuid = ? and to_user_uuid = ?";
 
-        let row = sqlx::query(sql).bind(id).execute(pool).await?;
+        let row = sqlx::query(sql)
+            .bind(environment_uuid)
+            .bind(user_uuid)
+            .execute(pool)
+            .await?;
 
         Ok(row.rows_affected() == 1)
     }

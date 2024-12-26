@@ -31,10 +31,10 @@ pub async fn create(payload: ProxyGroup) -> Result<bool, ServiceError> {
     Ok(ok)
 }
 
-pub async fn update(payload: ProxyGroup) -> Result<bool, ServiceError> {
+pub async fn update(id: u32, payload: ProxyGroup) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = ProxyGroup::update_proxy_group(pool, &payload).await?;
+    let ok = ProxyGroup::update_proxy_group(pool, id, &payload).await?;
 
     Ok(ok)
 }
