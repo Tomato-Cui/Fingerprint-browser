@@ -5,6 +5,7 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 pub struct ProxyGroup {
     pub id: Option<i32>,             // 自增ID
     pub name: String,                // 分组名称
+    pub user_uuid: String,           // 用户uuid
     pub description: Option<String>, // 分组描述
     pub created_at: Option<String>,  // 创建时间
     pub updated_at: Option<String>,  // 更新时间
@@ -57,11 +58,11 @@ impl ProxyGroup {
     ) -> Result<(i64, Vec<ProxyGroup>), Error> {
         // 获取总数
         let (total,): (i64,) = sqlx::query_as(
-        "SELECT count(DISTINCT environment_group_id) FROM environment_proxies WHERE user_uuid = ? AND deleted_at IS NULL"
-            )
-            .bind(user_uuid)
-            .fetch_one(pool)
-            .await?;
+        "SELECT count(1) FROM environment_proxy_groups WHERE user_uuid = ? AND deleted_at IS NULL"
+        )
+        .bind(user_uuid)
+        .fetch_one(pool)
+        .await?;
 
         let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
             0
@@ -70,30 +71,13 @@ impl ProxyGroup {
         };
         let offset = page_num * page_size;
 
-        // 获取分页的组ID列表
-        let group_ids: Vec<i32> = sqlx::query_as(
-            "SELECT DISTINCT environment_group_id FROM environment_proxies WHERE user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?"
-            )
-            .bind(user_uuid)
-            .bind(page_size)
-            .bind(offset)
-            .fetch_all(pool)
-            .await?
-            .into_iter()
-            .map(|(group_id,)| group_id)
-            .collect();
-
-        // 查询 environment_proxy_groups 表中的记录
+        // 获取分页的代理组列表
         let proxy_groups: Vec<ProxyGroup> = sqlx::query_as(
-            "SELECT * FROM environment_proxy_groups WHERE id IN (?) AND deleted_at IS NULL",
+        "SELECT * FROM environment_proxy_groups WHERE user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?"
         )
-        .bind(
-            group_ids
-                .iter()
-                .map(|v| v.to_string())
-                .collect::<Vec<String>>()
-                .join(","),
-        )
+        .bind(user_uuid)
+        .bind(page_size)
+        .bind(offset)
         .fetch_all(pool)
         .await?;
 
