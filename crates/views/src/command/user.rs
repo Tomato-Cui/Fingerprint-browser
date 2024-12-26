@@ -4,7 +4,10 @@ use serde_json::{json, Value};
 pub async fn get_user_id() -> Result<String, anyhow::Error> {
     let token = states::auth::get_token().await;
     if let Some(token_str) = token {
-        Ok(token_str)
+        match commons::encryption::verify_token(&token_str) {
+            Ok(user_uuid) => Ok(user_uuid),
+            Err(_e) => Err(anyhow::anyhow!("token 异常")),
+        }
     } else {
         Err(anyhow::anyhow!("用户处于退出状态"))
     }

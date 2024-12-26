@@ -47,55 +47,55 @@ pub async fn delete(group_id: u32) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
 
-//     #[tokio::test]
-//     async fn test_query_by_id() {
-//         let result = query_by_id(1).await;
-//         assert!(result.is_ok());
-//         let value = result.unwrap();
-//         assert!(value.get("data").is_some());
-//     }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[tokio::test]
-//     async fn test_query() {
-//         let result = query("user-uuid", 1, 10).await;
-//         assert!(result.is_ok());
-//         let value = result.unwrap();
-//         assert!(value.get("total").is_some());
-//         assert!(value.get("data").is_some());
-//     }
+    #[tokio::test]
+    async fn test_query_by_id() {
+        let result = query_by_id(1).await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert!(value.get("data").is_some());
+    }
 
-//     #[tokio::test]
-//     async fn test_create() {
-//         let payload = EnvironmentGroup {
-//             id: 1,
-//             name: "Test Group".to_string(),
-//             user_uuid: "user-uuid".to_string(),
-//         };
-//         let result = create(&payload).await;
-//         assert!(result.is_ok());
-//         assert!(result.unwrap());
-//     }
+    #[tokio::test]
+    async fn test_query() {
+        crate::setup().await;
 
-//     #[tokio::test]
-//     async fn test_modify() {
-//         let payload = EnvironmentGroup {
-//             id: 1,
-//             name: "Updated Group".to_string(),
-//             user_uuid: "user-uuid".to_string(),
-//         };
-//         let result = modify(1, &payload).await;
-//         assert!(result.is_ok());
-//         assert!(result.unwrap());
-//     }
+        let result = query("e972d1df-ff52-447e-9e30-8c5af698f5e8", 0, 10).await;
+        println!("{:?}", result);
+    }
 
-//     #[tokio::test]
-//     async fn test_delete() {
-//         let result = delete(1).await;
-//         assert!(result.is_ok());
-//         assert!(result.unwrap());
-//     }
-// }
+    #[tokio::test]
+    async fn test_create() {
+        crate::setup().await;
+        let payload = EnvironmentGroup {
+            user_uuid: "e972d1df-ff52-447e-9e30-8c5af698f5e8".to_string(),
+            name: "bac".to_string(),
+            description: Some("bac".to_string()),
+            ..Default::default()
+        };
+
+        let result = create(&payload).await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_modify() {
+        let payload = EnvironmentGroup {
+            ..Default::default()
+        };
+        let result = modify(1, &payload).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let result = delete(1).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+}

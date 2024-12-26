@@ -8,3 +8,17 @@ pub async fn exists(href: &str, method: &str) -> Result<bool, ServiceError> {
 
     Ok(true)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_exists_success() {
+        let href = "";
+        let method = "";
+        let result = exists(href, method).await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), true);
+    }
+}

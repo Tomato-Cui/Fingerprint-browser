@@ -67,3 +67,59 @@ pub async fn delete(user_uuid: &str, environment_uuid: &str) -> Result<bool, Ser
 
     Ok(ok)
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_query_by_id() {
+        let environment_uuid = "test-env-uuid";
+        let result = query_by_id(environment_uuid).await;
+        assert!(result.is_ok());
+        let transfer_history = result.unwrap();
+        assert_eq!(transfer_history.environment_uuid, environment_uuid);
+    }
+
+    #[tokio::test]
+    async fn test_query() {
+        let user_uuid = "test-user-uuid";
+        let page_num = 1;
+        let page_size = 10;
+        let result = query(user_uuid, page_num, page_size).await;
+        assert!(result.is_ok());
+        let value: Value = result.unwrap();
+        assert!(value["total"].is_number());
+        assert!(value["data"].is_array());
+    }
+
+    #[tokio::test]
+    async fn test_create() {
+        let payloads = vec![EnvironmentTransferHistory {
+            ..Default::default()
+        }];
+        let result = create(payloads).await;
+        assert!(result.is_ok());
+        let res: HashMap<String, bool> = result.unwrap();
+        assert!(res.contains_key("test-env-uuid"));
+        assert!(res["test-env-uuid"]);
+    }
+
+    #[tokio::test]
+    async fn test_modify() {
+        let payload = EnvironmentTransferHistory {
+            ..Default::default()
+        };
+        let result = modify(&payload).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let user_uuid = "test-user-uuid";
+        let environment_uuid = "test-env-uuid";
+        let result = delete(user_uuid, environment_uuid).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+}
