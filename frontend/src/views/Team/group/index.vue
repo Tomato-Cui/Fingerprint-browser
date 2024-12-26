@@ -201,7 +201,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter } from "vue-router";
 import { buttonVariants } from "@/components/ui/button";
-import { team_group_query_all } from "@/commands/team";
+// import { team_group_query_all } from "@/commands/team";
+import { team_query } from "@/commands/team";
 
 const router = useRouter()
 const searchQuery = ref("");
@@ -387,11 +388,14 @@ const authPri = () => {
 }
 
 onMounted(async () => {
-  team_group_query_all(currentPage, 10).then(res => {
-    // console.log("res----:", res);
-    groups.value = res
-    // console.log("groups----:", groups.value);
+  team_query(1, 10).then(res => {
+    console.log("rerere:", res);
   })
+  // team_group_query_all(currentPage, 10).then(res => {
+  //   // console.log("res----:", res);
+  //   groups.value = res
+  //   // console.log("groups----:", groups.value);
+  // })
 })
 </script>
 
