@@ -38,6 +38,7 @@ import { environment_delete } from "@/commands/environment";
 export interface Payment {
   id: number;
   name: string;
+  uuid: string;
   description: string;
   country: string;
   group: string;
@@ -99,7 +100,7 @@ const columns = [
     enableHiding: false,
     enablePinning: true,
   }),
-  columnHelper.accessor("id", {}),
+  columnHelper.accessor("uuid", {}),
   columnHelper.accessor("name", {
     header: ({ column }) => {
       return h(
@@ -217,7 +218,7 @@ const columns = [
         h("div", { class: "whitespace-nowrap px-2" }, "更多"),
       ]),
     cell: ({ row }) => {
-      let id = row.getValue("id") as number;
+      let id = row.getValue("uuid") as string;
 
       return h("div", { class: "flex gap-x-4" }, [
         h(

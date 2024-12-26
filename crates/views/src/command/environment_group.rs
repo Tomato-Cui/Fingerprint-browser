@@ -26,6 +26,7 @@ pub async fn environment_group_query(
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
         Some(format!("查询失败: {}", v))
     });
+    println!("{:?}", user_uuid);
 
     match services::environment_group::query(&user_uuid, page_num, page_size).await {
         Ok(data) => Ok(AppResponse::<Value>::success(success_msg, Some(data))),
@@ -35,14 +36,22 @@ pub async fn environment_group_query(
 
 #[tauri::command]
 pub async fn environment_group_create(
-    payload: EnvironmentGroup,
+    name: String,
+    description: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
-    let _ = get_user_id().await?;
+    let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
         Some(format!("创建失败: {}", v))
     });
 
-    match services::environment_group::create(&payload).await {
+    let group = EnvironmentGroup {
+        user_uuid,
+        name,
+        description: Some(description),
+        ..Default::default()
+    };
+
+    match services::environment_group::create(&group).await {
         Ok(data) => {
             if data {
                 Ok(AppResponse::<bool>::success(success_msg, Some(data)))
@@ -57,7 +66,8 @@ pub async fn environment_group_create(
 #[tauri::command]
 pub async fn environment_group_modify(
     id: u32,
-    payload: EnvironmentGroup,
+    name: String,
+    description: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let _ = get_user_id().await?;
 
@@ -65,8 +75,14 @@ pub async fn environment_group_modify(
         Some(format!("更新失败: {}", v))
     });
 
+    let group = EnvironmentGroup {
+        name,
+        description: Some(description),
+        ..Default::default()
+    };
+
     Ok(
-        match services::environment_group::modify(id, &payload).await {
+        match services::environment_group::modify(id, &group).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))

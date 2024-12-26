@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, watchEffect } from 'vue'
 
 interface BrowserStatus {
-    id: number
+    id: string
     status: boolean
 }
 
@@ -22,7 +22,7 @@ export const useBrowserStatusStore = defineStore('browserStatus', () => {
         })
     })
 
-    const updateStatus = (id: number, status: boolean) => {
+    const updateStatus = (id: string, status: boolean) => {
         const index = browserStatus.value.findIndex((item) => item.id === id)
         if (index !== -1) {
             browserStatus.value[index].status = status
@@ -32,7 +32,7 @@ export const useBrowserStatusStore = defineStore('browserStatus', () => {
         localStorage.setItem('browser-status', JSON.stringify(browserStatus.value))
     }
 
-    const getStatus = (id: number): boolean | undefined => {
+    const getStatus = (id: string): boolean | undefined => {
         const browser = browserStatus.value.find((item) => item.id === id)
         return browser?.status
     }

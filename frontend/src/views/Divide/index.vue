@@ -39,7 +39,7 @@ import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import { environment_delete } from "@/commands/environment";
-// import CreateGroup from "./com/create-group.vue"
+import CreateGroup from "./com/create-group.vue"
 import EditAccount from "./com/edit-account.vue"
 import EditProxy from "./com/edit-proxy.vue";
 
@@ -68,9 +68,9 @@ const pagination = reactive({
   total: 0,
 });
 
-const loadData = (groupId: number, index: number, size: number) => {
-  // console.log("加载数据", groupId, index, size);
-  environment_query_by_group(groupId, index, size).then((res) => {
+const loadData = (groupUuid: number, index: number, size: number) => {
+  // console.log("加载数据", groupUuid, index, size);
+  environment_query_by_group(groupUuid, index, size).then((res) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
     data.value = data_;
@@ -194,55 +194,57 @@ watch(groupSelect, (newVal) => {
 });
 
 //下拉菜单中的的按钮
-var groupId = 0
+var groupUuid = ""
 // ----编辑环境
-const editEnvBtn = (id: number) => {
+const editEnvBtn = (id: string) => {
   console.log("编辑环境:", id);
-  groupId = id
+  groupUuid = id
   router.push({ path: '/environment-action/create', query: { id: id } })
 };
 // ----编辑账号
-const editAccountBtn = (id: number) => {
+const editAccountBtn = (id: string) => {
   console.log("编辑账号:", id);
-  groupId = id
+  groupUuid = id
   editAccountDialog.value = true
 };
 // ----修改代理
-const editProxyBtn = (id: number) => {
+const editProxyBtn = (id: string) => {
   console.log("修改代理:", id);
-  groupId = id
+  groupUuid = id
   editProxyDialog.value = true
 };
 // ----授权成员
-const authMemberBtn = (id: number) => {
-  groupId = id
+const authMemberBtn = (id: string) => {
+  groupUuid = id
   console.log("授权成员:", id);
 };
 // ----转移环境
-const transferEnvBtn = (id: number) => {
-  groupId = id
+const transferEnvBtn = (id: string) => {
+  groupUuid = id
   console.log("转移环境:", id);
 };
 // ----设为常用
-const setCommonBtn = (id: number) => {
-  groupId = id
+const setCommonBtn = (id: string) => {
+  groupUuid = id
   console.log("设为常用:", id);
 };
 // ----删除
-const removeEnv = (id: number) => {
+const removeEnv = (id: string) => {
   console.log("删除:", id);
-  groupId = id
+  groupUuid = id
   clickDel.value = true
 };
 
 // 删除
 const clickDel = ref(false)
 const handleSubmitDel = () => {
-  environment_delete(groupId).then((res) => {
+  console.log("uuid:", groupUuid);
+  
+  environment_delete(groupUuid).then((res) => {
     if (res.message && (res.message as string).includes("删除成功")) {
       toast.success("删除成功");
       //过滤当前被删除的一行
-      data.value = data.value.filter((item) => item.id !== groupId);
+      data.value = data.value.filter((item) => item.uuid !== groupUuid);
     } else {
       toast.warning("删除失败");
     }
@@ -259,9 +261,9 @@ const handleSubmitDel = () => {
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
             <!-- 创建分组 -->
-            <!-- <PrimaryButton class="flex gap-x-2" @click="createGroup">
+            <PrimaryButton class="flex gap-x-2" @click="createGroup">
               创建分组
-            </PrimaryButton> -->
+            </PrimaryButton>
             <SearchInput :search-current-type="searchType" @update:searchType="(value: any) => (searchType = value)"
               @update:searchValue="searchValueHandle" />
           </div>
@@ -338,9 +340,9 @@ const handleSubmitDel = () => {
   <!-- 创建分组 -->
   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
   <!-- 修改账号 -->
-  <EditAccount v-model:editAccountDialog="editAccountDialog" :groupId="groupId"/>
+  <EditAccount v-model:editAccountDialog="editAccountDialog" :groupUuid="groupUuid"/>
   <!-- 修改代理 -->
-  <EditProxy v-model:editProxyDialog="editProxyDialog" :groupId="groupId"/>
+  <EditProxy v-model:editProxyDialog="editProxyDialog" :groupUuid="groupUuid"/>
   <!-- 删除 -->
   <Teleport to="body" class="z-30">
     <div class="fixed inset-0 bg-black/20 flex items-center justify-center z-30" v-if="clickDel">

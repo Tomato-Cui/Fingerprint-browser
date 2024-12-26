@@ -19,7 +19,7 @@ const route = useRoute();
 const menus = ref([])
 
 onMounted(() => {
-    environment_group_query(0, 1000).then(res => {
+    environment_group_query(1, 1000).then(res => {
         //获取到的数组依次添加到props.menu中
         res.data.data.forEach(item => {
             menus.value.push(item)

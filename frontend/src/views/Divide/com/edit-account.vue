@@ -9,7 +9,7 @@ import Input from "@/components/ui/input/Input.vue";
 
 const props = defineProps({
     editAccountDialog: Boolean,
-    groupId: Number
+    groupUuid: Number
 })
 const emit = defineEmits(['update:editAccountDialog'])
 
@@ -76,7 +76,7 @@ onUnmounted(() => {
                     <div class="flex items-center">
                         <label class="text-gray-600 w-[100px]">环境序号</label>
                         <div class="bg-blue-50 px-4 py-2 rounded-md">
-                            <span class="text-blue-600">{{ props.groupId }}</span>
+                            <span class="text-blue-600">{{ props.groupUuid }}</span>
                         </div>
                     </div>
 

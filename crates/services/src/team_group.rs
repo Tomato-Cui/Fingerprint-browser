@@ -39,3 +39,44 @@ pub async fn delete(id: u32) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_query_by_id() {
+        let result = query_by_id(1).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_query_by_team_id() {
+        let result = query_by_team_id(1).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_create() {
+        let payload = TeamGroup {
+            ..Default::default()
+        };
+        let result = create(&payload).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_modify() {
+        let payload = TeamGroup {
+            ..Default::default()
+        };
+        let result = modify(&payload).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let result = delete(1).await;
+        assert!(result.is_ok());
+    }
+}

@@ -43,3 +43,43 @@ pub async fn delete(environmnet_uuid: &str) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_query_by_id() {
+        let result = query_by_id(1).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_query() {
+        let result = query("some_uuid").await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_create() {
+        let payload = EnvironmentCookie {
+            ..Default::default() // fill in the fields as necessary
+        };
+        let result = create(&payload).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_modify() {
+        let payload = EnvironmentCookie {
+            ..Default::default()
+        };
+        let result = modify("some_uuid", &payload).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let result = delete("some_uuid").await;
+        assert!(result.is_ok());
+    }
+}
