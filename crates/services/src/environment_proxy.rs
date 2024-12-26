@@ -70,3 +70,109 @@ pub async fn delete(user_uuid: &str, id: u32) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     fn setup() -> Runtime {
+//         Runtime::new().unwrap()
+//     }
+
+//     #[test]
+//     fn test_query_by_id() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let user_uuid = "test_user_uuid";
+//             let id = 1;
+//             let result = query_by_id(user_uuid, id).await;
+//             assert!(result.is_ok());
+//         });
+//     }
+
+//     #[test]
+//     fn test_query_by_uuid() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let user_uuid = "test_user_uuid";
+//             let page_num = 1;
+//             let page_size = 10;
+//             let result = query_by_uuid(user_uuid, page_num, page_size).await;
+//             assert!(result.is_ok());
+//             let value: Value = result.unwrap();
+//             assert!(value["total"].is_number());
+//             assert!(value["data"].is_array());
+//         });
+//     }
+
+//     #[test]
+//     fn test_query() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let user_uuid = "test_user_uuid";
+//             let page_num = 1;
+//             let page_size = 10;
+//             let result = query(user_uuid, page_num, page_size).await;
+//             assert!(result.is_ok());
+//             let value: Value = result.unwrap();
+//             assert!(value["total"].is_number());
+//             assert!(value["data"].is_array());
+//         });
+//     }
+
+//     #[test]
+//     fn test_create() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let user_uuid = "test_user_uuid";
+//             let payload = Proxy {
+//                 id: 0,
+//                 user_uuid: user_uuid.to_string(),
+//                 // other fields initialization
+//             };
+//             let result = create(user_uuid, payload).await;
+//             assert!(result.is_ok());
+//             assert!(result.unwrap());
+//         });
+//     }
+
+//     #[test]
+//     fn test_update() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let user_uuid = "test_user_uuid";
+//             let id = 1;
+//             let payload = Proxy {
+//                 id,
+//                 user_uuid: user_uuid.to_string(),
+//                 // other fields initialization
+//             };
+//             let result = update(user_uuid, id, payload).await;
+//             assert!(result.is_ok());
+//             assert!(result.unwrap());
+//         });
+//     }
+
+//     #[test]
+//     fn test_move_to_proxy_group() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let proxy_id = 1;
+//             let proxy_group_id = 2;
+//             let result = move_to_proxy_group(proxy_id, proxy_group_id).await;
+//             assert!(result.is_ok());
+//             assert!(result.unwrap());
+//         });
+//     }
+
+//     #[test]
+//     fn test_delete() {
+//         let rt = setup();
+//         rt.block_on(async {
+//             let user_uuid = "test_user_uuid";
+//             let id = 1;
+//             let result = delete(user_uuid, id).await;
+//             assert!(result.is_ok());
+//             assert!(result.unwrap());
+//         });
+//     }
+// }

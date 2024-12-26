@@ -10,7 +10,7 @@ use serde_json::Value;
 
 pub fn build_router() -> Router {
     Router::new().nest(
-        "/proxies",
+        "/environmnet-transfer-historys",
         Router::new()
             .route("/:uuid", get(query_id::handle))
             .route("/query", get(query::handle))
