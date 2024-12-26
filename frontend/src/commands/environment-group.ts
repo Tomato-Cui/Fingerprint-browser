@@ -13,6 +13,10 @@ export const environment_group_query = async (pageNum: number, pageSize: number)
     return await invoke('environment_group_query', { pageNum, pageSize })
 };
 
+export const environment_group_create = async (payload: EnvironmentGroup): Promise<any> => {
+    return await invoke('environment_group_create', { payload })
+};
+
 export const environment_group_modify = async (id: number, payload: EnvironmentGroup): Promise<any> => {
     return await invoke('environment_group_modify', { id, payload })
 };
