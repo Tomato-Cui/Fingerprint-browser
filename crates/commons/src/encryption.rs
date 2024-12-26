@@ -34,7 +34,7 @@ pub fn generate_token(user_uuid: &str) -> Result<String, jwt::Error> {
     claims.sign_with_key(&key)
 }
 
-pub fn verify_token(token_str: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub fn verify_token(token_str: &str) -> Result<String, anyhow::Error> {
     use aes_gcm::KeyInit;
     use hmac::Hmac;
     use jwt::VerifyWithKey;
@@ -43,9 +43,11 @@ pub fn verify_token(token_str: &str) -> Result<String, Box<dyn std::error::Error
 
     let key: Hmac<Sha256> = Hmac::new_from_slice(b"some-secret")?;
     let claims: BTreeMap<String, String> = token_str.verify_with_key(&key)?;
-    claims["uuid"]
-        .parse()
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+    let uuid = claims.get("uuid");
+    match uuid {
+        Some(uuid) => return Ok(uuid.to_string()),
+        None => Err(anyhow::anyhow!("token parse failed.")),
+    }
 }
 
 use crate::win_imports::*;

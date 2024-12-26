@@ -145,7 +145,7 @@ mod tests {
     async fn test_delete() {
         crate::setup().await;
         let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let id = 2;
+        let id = 1;
         let result = delete(user_uuid, id).await;
         println!("{:?}", result);
     }

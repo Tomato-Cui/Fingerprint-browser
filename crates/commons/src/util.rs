@@ -34,6 +34,8 @@ pub fn get_proxy_from_registry() -> Option<String> {
     }
 }
 
+use serde::Serialize;
+use serde_json::Value;
 #[cfg(windows)]
 use std::{ffi::CString, ptr};
 use winapi::um::{
@@ -137,4 +139,11 @@ pub async fn delete_data_file(path: PathBuf) -> Result<(), std::io::Error> {
         }
     }
     Ok(())
+}
+
+pub fn struct_to_json_value(value: impl Serialize) -> Value {
+    match serde_json::to_value(value) {
+        Ok(v) => v,
+        Err(_) => serde_json::to_value("").unwrap_or_default(),
+    }
 }

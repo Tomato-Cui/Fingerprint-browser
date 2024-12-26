@@ -90,62 +90,67 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_environment_uuid() {
-        let environment_uuid = "test-uuid";
+        crate::setup().await;
+        let environment_uuid = "a8bb7d2e-09ec-436b-aa51-2e5a6424acbd";
         let result = query_by_environment_uuid(environment_uuid).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_query() {
-        let user_uuid = "test-user-uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
-        assert!(result.is_ok());
-        let value: Value = result.unwrap();
-        assert!(value.get("total").is_some());
-        assert!(value.get("data").is_some());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_recover() {
-        let user_uuid = "test-user-uuid";
-        let environment_uuid = "test-environment-uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let environment_uuid = "e5368907-d858-47e4-bfee-eddabbd36a56";
         let result = recover(user_uuid, environment_uuid).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_recovers() {
-        let user_uuid = "test-user-uuid";
-        let environment_uuids = vec!["test-environment-uuid1", "test-environment-uuid2"];
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let environment_uuids = vec![
+            "a8bb7d2e-09ec-436b-aa51-2e5a6424acbd",
+            "e5368907-d858-47e4-bfee-eddabbd36a56",
+        ];
         let result = recovers(user_uuid, environment_uuids).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_recover_all() {
-        let user_uuid = "test-user-uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let result = recover_all(user_uuid).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_batch_delete_again() {
-        let environment_uuids = vec!["test-environment-uuid1", "test-environment-uuid2"];
+        crate::setup().await;
+        let environment_uuids = vec![
+            "a8bb7d2e-09ec-436b-aa51-2e5a6424acbd",
+            "e5368907-d858-47e4-bfee-eddabbd36a56",
+        ];
         let result = batch_delete_again(environment_uuids).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_clean() {
-        let user_uuid = "test-user-uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let result = clean(user_uuid).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 }

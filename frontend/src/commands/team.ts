@@ -8,6 +8,18 @@ export const team_query = async (pageNum: number, pageSize: number): Promise<any
     return await invoke('team_query', { pageNum, pageSize })
 };
 
+export const query_team_all_user = async (teamId: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('query_team_all_user', { teamId, pageNum, pageSize })
+};
+
+export const query_team_all_blocked_user = async (taemId: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('query_team_all_blocked_user', { taemId, pageNum, pageSize })
+};
+
+export const query_team_group_all_user = async (teamId: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('query_team_group_all_user', { teamId, pageNum, pageSize })
+};
+
 export const team_create = async (name: string, description: string): Promise<any> => {
     return await invoke('team_create', { name, description })
 };

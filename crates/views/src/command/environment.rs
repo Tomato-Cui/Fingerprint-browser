@@ -7,16 +7,17 @@ use super::user::get_user_id;
 #[tauri::command]
 pub async fn environment_query_id(
     environment_uuid: String,
-) -> Result<AppResponse<Environment>, tauri::Error> {
-    let _ = get_user_id().await?;
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
         Some(format!("查询失败: {}", v))
     });
 
     Ok(
-        match services::environment::query_by_uuid(&environment_uuid).await {
-            Ok(data) => AppResponse::<Environment>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<Environment>::fail(warn_msg(r.to_string())),
+        match services::environment::query_environment_details(&user_uuid, &environment_uuid).await
+        {
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         },
     )
 }
@@ -43,6 +44,7 @@ pub async fn environment_query_by_group(
     page_num: u32,
     page_size: u32,
 ) -> Result<AppResponse<Value>, tauri::Error> {
+    let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
         Some(format!("查询失败: {}", v))
     });
@@ -50,6 +52,44 @@ pub async fn environment_query_by_group(
     match services::environment::query_by_group_id(id, page_num, page_size).await {
         Ok(data) => Ok(AppResponse::<Value>::success(success_msg, Some(data))),
         Err(r) => Ok(AppResponse::<Value>::fail(warn_msg(r.to_string()))),
+    }
+}
+
+#[tauri::command]
+pub async fn environment_query_by_team(
+    id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    match services::environment::query_by_team_id(&user_uuid, id, page_num, page_size).await {
+        Ok(data) => Ok(AppResponse::<Value>::success(success_msg, Some(data))),
+        Err(r) => Ok(AppResponse::<Value>::fail(warn_msg(r.to_string()))),
+    }
+}
+
+#[tauri::command]
+pub async fn environment_detail_create(
+    payload: models::environment::EnvironmentInfo,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
+        Some(format!("创建失败: {}", v))
+    });
+
+    match services::environment::create_and_other_info(&user_uuid, payload).await {
+        Ok(data) => {
+            if data {
+                Ok(AppResponse::<bool>::success(success_msg, Some(data)))
+            } else {
+                Ok(AppResponse::<bool>::fail(warn_msg("未知错误".to_string())))
+            }
+        }
+        Err(r) => Ok(AppResponse::<bool>::fail(warn_msg(r.to_string()))),
     }
 }
 
@@ -89,6 +129,29 @@ pub async fn environment_batch_create(
 
 #[tauri::command]
 pub async fn environment_modify_info(
+    payload: models::environment::EnvironmentInfo,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::environment::modify_info(&user_uuid, payload).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn environment_modify_basic_info(
     environment_uuid: String,
     payload: Environment,
 ) -> Result<AppResponse<bool>, tauri::Error> {
@@ -98,7 +161,7 @@ pub async fn environment_modify_info(
     });
 
     Ok(
-        match services::environment::modify_info(
+        match services::environment::modify_basic_info(
             &environment_uuid,
             &payload.name,
             payload.description,

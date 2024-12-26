@@ -81,32 +81,17 @@ impl UserTeamTemp {
 
     pub async fn query_team_apply(
         pool: &Pool<Sqlite>,
-        user_uuid: &str,
+        team_id: u32,
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<UserTeamTemp>), Error> {
         let mut tx = pool.begin().await?;
 
-        let team_ids: Vec<i32> = sqlx::query_scalar(
-            "SELECT team_id FROM user_team_relation 
-         WHERE user_uuid = ? 
-         AND is_leader = 1 AND deleted_at IS NULL",
-        )
-        .bind(user_uuid)
-        .fetch_all(&mut *tx)
-        .await?;
-
         let (total,): (i64,) = sqlx::query_as(
             "SELECT count(1) FROM user_team_temps 
-         WHERE team_id IN (?) AND deleted_at IS NULL",
+         WHERE team_id = ?",
         )
-        .bind(
-            team_ids
-                .iter()
-                .map(|v| v.to_string())
-                .collect::<Vec<String>>()
-                .join(","),
-        )
+        .bind(team_id)
         .fetch_one(&mut *tx)
         .await?;
 
@@ -119,16 +104,10 @@ impl UserTeamTemp {
 
         let user_team_temps: Vec<UserTeamTemp> = sqlx::query_as(
             "SELECT * FROM user_team_temps 
-         WHERE team_id IN (?) AND deleted_at IS NULL and allow_2 = 0
+         WHERE team_id = ? and allow_2 = 0
          LIMIT ? OFFSET ?",
         )
-        .bind(
-            team_ids
-                .iter()
-                .map(|v| v.to_string())
-                .collect::<Vec<String>>()
-                .join(","),
-        )
+        .bind(team_id)
         .bind(page_size)
         .bind(offset)
         .fetch_all(&mut *tx)
@@ -148,7 +127,7 @@ impl UserTeamTemp {
         let sql = "
             UPDATE user_team_temps
             SET user_uuid = ?, team_id = ?, allow_1 = ?, allow_2 = ?, description = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ? AND deleted_at IS NULL
+            WHERE id = ?
         ";
 
         let row = sqlx::query(sql)

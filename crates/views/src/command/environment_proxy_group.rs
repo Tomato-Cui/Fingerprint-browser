@@ -13,10 +13,12 @@ pub async fn environment_proxy_group_query_id(
         Some(format!("查询失败: {}", v))
     });
 
-    Ok(match services::environment_proxy_group::query_by_group_id(id).await {
-        Ok(data) => AppResponse::<ProxyGroup>::success(success_msg, Some(data)),
-        Err(r) => AppResponse::<ProxyGroup>::fail(warn_msg(r.to_string())),
-    })
+    Ok(
+        match services::environment_proxy_group::query_by_group_id(id).await {
+            Ok(data) => AppResponse::<ProxyGroup>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<ProxyGroup>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -39,12 +41,12 @@ pub async fn environment_proxy_group_query(
 pub async fn environment_proxy_group_create(
     payload: ProxyGroup,
 ) -> Result<AppResponse<bool>, tauri::Error> {
-    let _ = get_user_id().await?;
+    let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
         Some(format!("创建失败: {}", v))
     });
 
-    match services::environment_proxy_group::create(payload).await {
+    match services::environment_proxy_group::create(&user_uuid, payload).await {
         Ok(data) => {
             if data {
                 Ok(AppResponse::<bool>::success(success_msg, Some(data)))

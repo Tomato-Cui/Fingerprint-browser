@@ -18,7 +18,7 @@ impl EnvironmentCookie {
             INSERT INTO environment_cookies (
                 value, environment_uuid
             ) VALUES (
-                ?, ?, ?
+                ?, ?
             )";
 
         let row = sqlx::query(sql)

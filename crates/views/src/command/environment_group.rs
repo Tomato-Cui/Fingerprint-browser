@@ -26,7 +26,6 @@ pub async fn environment_group_query(
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
         Some(format!("查询失败: {}", v))
     });
-    println!("{:?}", user_uuid);
 
     match services::environment_group::query(&user_uuid, page_num, page_size).await {
         Ok(data) => Ok(AppResponse::<Value>::success(success_msg, Some(data))),

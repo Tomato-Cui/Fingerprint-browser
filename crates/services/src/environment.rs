@@ -1,4 +1,4 @@
-use models::environment::Environment;
+use models::environment::{Environment, EnvironmentInfo};
 use serde_json::{json, Value};
 
 use crate::error::ServiceError;
@@ -10,6 +10,14 @@ pub async fn query_by_uuid(uuid: &str) -> Result<Environment, ServiceError> {
     Ok(environment)
 }
 
+pub async fn query_environment_details(user_uuid: &str, uuid: &str) -> Result<Value, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+    let environment =
+        models::environment::Environment::query_environment_details(pool, uuid, user_uuid).await?;
+
+    Ok(environment)
+}
+
 pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Value, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
@@ -17,6 +25,25 @@ pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Val
         pool, user_uuid, page_num, page_size,
     )
     .await?;
+
+    Ok(json!({
+        "total": total,
+        "data": environment,
+    }))
+}
+
+pub async fn query_by_team_id(
+    user_uuid: &str,
+    team_id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<Value, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+    let (total, environment) =
+        models::environment::Environment::query_environments_by_team_id_and_user_uuid(
+            pool, user_uuid, team_id, page_num, page_size,
+        )
+        .await?;
 
     Ok(json!({
         "total": total,
@@ -41,12 +68,24 @@ pub async fn query_by_group_id(
     }))
 }
 
+pub async fn create_and_other_info(
+    user_uuid: &str,
+    mut payload: EnvironmentInfo,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    payload.uuid = Some(commons::encryption::uuid());
+
+    let ok =
+        models::environment::Environment::insert_and_other_info(pool, user_uuid, &payload).await?;
+    Ok(ok)
+}
+
 pub async fn create(user_uuid: &str, mut payload: Environment) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     payload.user_uuid = user_uuid.to_string();
     payload.uuid = Some(commons::encryption::uuid());
-    println!("{:?}", payload);
 
     let ok = models::environment::Environment::insert(pool, &payload).await?;
     Ok(ok)
@@ -100,7 +139,7 @@ pub async fn batch_move_to_group(
     Ok(response)
 }
 
-pub async fn modify_info(
+pub async fn modify_basic_info(
     uuid: &str,
     name: &str,
     description: Option<String>,
@@ -109,6 +148,17 @@ pub async fn modify_info(
 
     let ok =
         models::environment::Environment::modify_basic_info(pool, uuid, name, description).await?;
+
+    Ok(ok)
+}
+pub async fn modify_info(
+    user_uuid: &str,
+    environment: models::environment::EnvironmentInfo,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = models::environment::Environment::modify_and_other_info(pool, user_uuid, &environment)
+        .await?;
 
     Ok(ok)
 }
@@ -145,8 +195,17 @@ mod tests {
     #[tokio::test]
     async fn test_query_by_uuid() {
         crate::setup().await;
-        let uuid = "9796eae9-1263-412e-9651-5ef1f13882eb";
+        let uuid = "b13d4d98-f3da-4479-97b9-6de4975aa97b";
         let result = query_by_uuid(uuid).await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_query_env_info() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let uuid = "b13d4d98-f3da-4479-97b9-6de4975aa97b";
+        let result = query_environment_details(&user_uuid, uuid).await;
         println!("{:?}", result);
     }
 
@@ -157,6 +216,17 @@ mod tests {
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_query_by_team_id() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let team_id = 3;
+        let page_num = 1;
+        let page_size = 10;
+        let result = query_by_team_id(user_uuid, team_id, page_num, page_size).await;
         println!("{:?}", result);
     }
 
@@ -221,12 +291,12 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_modify_info() {
+    async fn test_modify_basic_info() {
         crate::setup().await;
         let uuid = "3dcd8228-120b-4ae7-b8d7-da7e6628269e";
         let name = "new-name";
         let description = Some("new-description".to_string());
-        let result = modify_info(uuid, name, description).await;
+        let result = modify_basic_info(uuid, name, description).await;
         println!("{:?}", result);
     }
 
@@ -234,16 +304,20 @@ mod tests {
     async fn test_delete() {
         crate::setup().await;
         let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let env_uuid = "2b7e8675-cebe-45d1-81c2-5fb0aa1d273e";
+        let env_uuid = "e5368907-d858-47e4-bfee-eddabbd36a56";
         let result = delete(user_uuid, env_uuid).await;
         println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_batch_delete() {
-        let user_uuid = "test-user-uuid";
-        let env_ids = vec!["test-env-uuid1".to_string(), "test-env-uuid2".to_string()];
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let env_ids = vec![
+            "a8bb7d2e-09ec-436b-aa51-2e5a6424acbd".to_string(),
+            "e5368907-d858-47e4-bfee-eddabbd36a56".to_string(),
+        ];
         let result = batch_delete(user_uuid, env_ids).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 }

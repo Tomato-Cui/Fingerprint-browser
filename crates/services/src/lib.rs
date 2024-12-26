@@ -23,13 +23,13 @@ pub(crate) async fn setup() {
     migration_path.pop();
     migration_path.pop();
 
-    let migration_path = migration_path.join("migrations");
+    // let migration_path = migration_path.join("migrations");
     states::database::init_sqlite_database().await.unwrap();
 
-    let pool = states::database::get_database_pool().unwrap();
-    commons::database::Database::migrator(pool, migration_path)
-        .await
-        .unwrap();
+    // let pool = states::database::get_database_pool().unwrap();
+    // commons::database::Database::migrator(pool, migration_path)
+    //     .await
+    //     .unwrap();
 }
 
 #[tokio::test]
