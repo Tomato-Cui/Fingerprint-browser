@@ -1,3 +1,5 @@
+use models::team::Team;
+
 use crate::error::ServiceError;
 
 pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceError> {
@@ -26,6 +28,10 @@ pub async fn regsiter(email: &str, nickname: &str, password: &str) -> Result<boo
     let pool = states::database::get_database_pool()?;
     let password = commons::encryption::md5(password);
 
+    if email.is_empty() {
+        return Err(ServiceError::Error("邮箱不能为空".to_string()));
+    }
+
     let user_info = models::user_info::UserInfo {
         email: email.to_string(),
         nickname: nickname.to_string(),
@@ -34,7 +40,20 @@ pub async fn regsiter(email: &str, nickname: &str, password: &str) -> Result<boo
     };
 
     let uuid = commons::encryption::uuid();
-    let ok = models::user::User::insert(pool, &uuid, &user_info).await?;
+    let mut ok = models::user::User::insert(pool, &uuid, &user_info).await?;
+
+    if ok {
+        ok = models::team::Team::insert(
+            pool,
+            &uuid,
+            &Team {
+                name: email.to_string(),
+                ..Default::default()
+            },
+            None,
+        )
+        .await?;
+    }
 
     Ok(ok)
 }
@@ -96,14 +115,35 @@ mod tests {
     #[tokio::test]
     async fn test_register() {
         crate::setup().await;
-        let ok = super::regsiter("abc@abc.com", "abc", "abc").await;
+        let ok = super::regsiter("thisistes", "2342", "123").await;
         println!("{:?}", ok)
     }
 
     #[tokio::test]
     async fn test_reset_password() {
         crate::setup().await;
-        let ok = super::reset_password("abc@abc.com", "123", "123").await;
+        let ok = super::reset_password("abc@abc.abc", "abc", "abc").await;
         println!("{:?}", ok)
+    }
+
+    #[tokio::test]
+    async fn test_logout() {
+        crate::setup().await;
+        let result = super::logout().await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_register_send() {
+        crate::setup().await;
+        let result = super::register_send("abc@abc.com", "abc", "abc").await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_reset_password_send() {
+        crate::setup().await;
+        let result = super::reset_password_send("abc@abc.com", "abc", "abc").await;
+        println!("{:?}", result);
     }
 }

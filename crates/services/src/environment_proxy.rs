@@ -70,3 +70,86 @@ pub async fn delete(user_uuid: &str, id: u32) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_query_by_id() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let id = 1;
+        let result = query_by_id(user_uuid, id).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_query_by_uuid() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let page_num = 1;
+        let page_size = 10;
+        let result = query_by_uuid(user_uuid, page_num, page_size).await;
+        assert!(result.is_ok());
+        let value: Value = result.unwrap();
+        assert!(value["total"].is_number());
+        assert!(value["data"].is_array());
+    }
+
+    #[tokio::test]
+    async fn test_query() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let page_num = 1;
+        let page_size = 10;
+        let result = query(user_uuid, page_num, page_size).await;
+        assert!(result.is_ok());
+        let value: Value = result.unwrap();
+        assert!(value["total"].is_number());
+        assert!(value["data"].is_array());
+    }
+
+    #[tokio::test]
+    async fn test_create() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let payload = Proxy {
+            ..Default::default()
+        };
+        let result = create(user_uuid, payload).await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_update() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let id = 1;
+        let payload = Proxy {
+            ..Default::default()
+        };
+        let result = update(user_uuid, id, payload).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_move_to_proxy_group() {
+        crate::setup().await;
+        let proxy_id = 1;
+        let proxy_group_id = 2;
+        let result = move_to_proxy_group(proxy_id, proxy_group_id).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let id = 1;
+        let result = delete(user_uuid, id).await;
+        assert!(result.is_ok());
+        assert!(result.unwrap());
+    }
+}

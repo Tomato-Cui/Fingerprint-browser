@@ -3,8 +3,8 @@ create table environments
 (
     id           INTEGER
         primary key autoincrement,
-    uuid         INTEGER unique,
-    user_uuid    INTEGER,
+    uuid         TEXT unique,
+    user_uuid    TEXT,
     team_id      integer,
     proxy_id     integer,
     fp_info_id   integer,
@@ -12,8 +12,7 @@ create table environments
     name         TEXT               not null,
     description  TEXT,
     default_urls TEXT,
-    proxy_enable INTEGER  default 0 not null,
-    status       INTEGER  default 1 not null,
+    proxy_enable INTEGER  default 1 not null,
     created_at   DATETIME default CURRENT_TIMESTAMP,
     updated_at   DATETIME default CURRENT_TIMESTAMP,
     lasted_at    DATETIME default CURRENT_TIMESTAMP,

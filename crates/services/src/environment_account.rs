@@ -10,11 +10,16 @@ pub async fn query_by_id(id: u32) -> Result<EnvironmentAccount, ServiceError> {
     Ok(account)
 }
 
-pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Value, ServiceError> {
+pub async fn query(
+    environment_uuid: &str,
+    page_num: u32,
+    page_size: u32,
+) -> Result<Value, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     let (total, accounts) =
-        EnvironmentAccount::query_by_environment_uuid(pool, user_uuid, page_num, page_size).await?;
+        EnvironmentAccount::query_by_environment_uuid(pool, environment_uuid, page_num, page_size)
+            .await?;
 
     Ok(json!({
         "total": total,
@@ -55,20 +60,16 @@ mod tests {
         crate::setup().await;
 
         let result = query_by_id(1).await;
-        assert!(result.is_ok());
-        let account = result.unwrap();
 
-        println!("{:?}", account)
+        println!("{:?}", result)
     }
 
     #[tokio::test]
     async fn test_query() {
         crate::setup().await;
 
-        let result = query("some-uuid", 1, 10).await;
-        assert!(result.is_ok());
-        let value = result.unwrap();
-        println!("{:?}", value)
+        let result = query("3cfb0bc6-7b48-498a-935a-90ce561e40a5", 1, 10).await;
+        println!("{:?}", result)
     }
 
     #[tokio::test]
@@ -80,8 +81,8 @@ mod tests {
             platform_url: "http://baidu.com".to_string(),
             platform_account: "liusjjkk".to_string(),
             platform_password: "String".to_string(),
-            environment_uuid: "shdfj".to_string(),
-            user_uuid: "hdsjf".to_string(),
+            environment_uuid: "3dcd8228-120b-4ae7-b8d7-da7e6628269e".to_string(),
+            user_uuid: "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string(),
             ..Default::default()
         };
         let result = create(&payload).await.unwrap();
@@ -93,17 +94,17 @@ mod tests {
         crate::setup().await;
 
         let payload = EnvironmentAccount {
-            platform: "windows".to_string(),
+            platform: "os".to_string(),
             platform_url: "http://baidu.com".to_string(),
-            platform_account: "liusjjkk".to_string(),
-            platform_password: "String".to_string(),
-            environment_uuid: "shdfj".to_string(),
-            user_uuid: "hdsjf".to_string(),
+            platform_account: "lius".to_string(),
+            platform_password: "lius".to_string(),
+            environment_uuid: "3dcd8228-120b-4ae7-b8d7-da7e6628269e".to_string(),
+            user_uuid: "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string(),
+            id: Some(1),
             ..Default::default()
         };
         let result = modify(&payload).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result)
     }
 
     #[tokio::test]

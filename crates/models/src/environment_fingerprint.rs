@@ -4,7 +4,7 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct EnvironmentFingerprint {
     pub id: Option<i32>,                  // 自增ID
-    pub user_uuid: Option<i32>,           // 用户UUID
+    pub user_uuid: Option<String>,           // 用户UUID
     pub browser: String,                  // 浏览器
     pub ua: String,                       // 自定义UA
     pub os: String,                       // 操作系统
@@ -58,7 +58,7 @@ impl EnvironmentFingerprint {
                 width, fonts_type, fonts, font_fingerprint, web_rtc, web_rtc_local_ip, canvas, webgl, hardware_acceleration,
                 webgl_info, audio_context, speech_voices, media, cpu, memory, do_not_track, battery, port_scan, white_list
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )";
 
         let row = sqlx::query(sql)
@@ -143,6 +143,11 @@ impl EnvironmentFingerprint {
             .fetch_one(pool)
             .await?;
 
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
         let offset = page_num * page_size;
 
         let fingerprints: Vec<EnvironmentFingerprint> = sqlx::query_as("SELECT * FROM environment_fingerprints WHERE user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?")

@@ -10,7 +10,7 @@ use serde_json::Value;
 
 pub fn build_router() -> Router {
     Router::new().nest(
-        "/groups",
+        "/environmnet-groups",
         Router::new()
             .route("/:id", get(query_id::handle))
             .route("/query", get(query::handle))
@@ -70,12 +70,16 @@ mod create {
         pub description: Option<String>,
     }
 
-    pub async fn handle(payload: Json<Payload>) -> impl IntoResponse {
+    pub async fn handle(
+        state: Extension<middlewares::CurrentUser>,
+        payload: Json<Payload>,
+    ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
 
         let group = EnvironmentGroup {
+            user_uuid: state.user_uuid.to_string(),
             name: payload.name.clone(),
             description: payload.description.clone(),
             ..Default::default()

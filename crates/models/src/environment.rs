@@ -6,7 +6,7 @@ pub struct Environment {
     pub id: i32,                      // 自增ID
     pub uuid: Option<String>,         // UUID
     pub user_uuid: String,            // 用户UUID
-    pub team_id: Option<i32>,                 // 团队ID
+    pub team_id: Option<i32>,         // 团队ID
     pub proxy_id: Option<i32>,        // 代理ID
     pub fp_info_id: Option<i32>,      // 指纹信息ID
     pub group_id: Option<i32>,        // 分组ID
@@ -14,7 +14,6 @@ pub struct Environment {
     pub description: Option<String>,  // 环境描述
     pub default_urls: Option<String>, // 默认打开网页
     pub proxy_enable: i8,             // 代理启用
-    pub status: i8,                   // 状态
     pub created_at: Option<String>,   // 创建时间
     pub updated_at: Option<String>,   // 更新时间
     pub lasted_at: Option<String>,    // 最近时间
@@ -27,8 +26,8 @@ impl Environment {
         let sql = r#"
         INSERT INTO environments (
             uuid, user_uuid, team_id, proxy_id, fp_info_id, group_id, name, description, default_urls, 
-            proxy_enable, status, created_at, updated_at, lasted_at, deleted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
+            proxy_enable
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
 
         let row = sqlx::query(sql)
             .bind(&environment.uuid)
@@ -41,11 +40,6 @@ impl Environment {
             .bind(&environment.description)
             .bind(&environment.default_urls)
             .bind(environment.proxy_enable)
-            .bind(environment.status)
-            .bind(&environment.created_at)
-            .bind(&environment.updated_at)
-            .bind(&environment.lasted_at)
-            .bind(&environment.deleted_at)
             .execute(pool)
             .await?;
 

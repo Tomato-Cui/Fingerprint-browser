@@ -6,7 +6,7 @@ create table user_infos
     nickname    TEXT not null unique,
     password    TEXT not null,
     description TEXT,
-    email       TEXT not null,
+    email       TEXT not null UNIQUE,
     phone       TEXT,
     created_at  DATETIME default CURRENT_TIMESTAMP,
     updated_at  DATETIME default CURRENT_TIMESTAMP,

@@ -3,7 +3,7 @@ create table users
 (
     id             INTEGER
         primary key autoincrement,
-    uuid           integer not null unique,
+    uuid           text not null unique,
     user_info_id   integer not null,
     user_avatar_id integer,
     created_at     DATETIME default CURRENT_TIMESTAMP,

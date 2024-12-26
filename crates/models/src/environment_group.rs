@@ -6,6 +6,7 @@ pub struct EnvironmentGroup {
     pub id: i32,
     pub name: String,
     pub description: Option<String>,
+    pub user_uuid: String,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
     pub deleted_at: Option<String>,
@@ -14,11 +15,14 @@ pub struct EnvironmentGroup {
 impl EnvironmentGroup {
     #[allow(dead_code)]
     pub async fn insert(pool: &Pool<Sqlite>, group: &EnvironmentGroup) -> Result<bool, Error> {
-        let row = sqlx::query("INSERT INTO environment_groups (name, description) VALUES (?, ?)")
-            .bind(&group.name)
-            .bind(&group.description)
-            .execute(pool)
-            .await?;
+        let row = sqlx::query(
+            "INSERT INTO environment_groups (name, description, user_uuid) VALUES (?, ?, ?)",
+        )
+        .bind(&group.name)
+        .bind(&group.description)
+        .bind(&group.user_uuid)
+        .execute(pool)
+        .await?;
 
         Ok(row.rows_affected() == 1)
     }
@@ -33,7 +37,6 @@ impl EnvironmentGroup {
 
         Ok(group)
     }
-
     #[allow(dead_code)]
     pub async fn query_groups_by_user_uuid(
         pool: &Pool<Sqlite>,
@@ -41,11 +44,14 @@ impl EnvironmentGroup {
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<EnvironmentGroup>), Error> {
+        let mut tx = pool.begin().await?;
+
         let (total,): (i64,) = sqlx::query_as(
-        "SELECT count(DISTINCT group_id) FROM environments WHERE user_uuid = ? AND deleted_at IS NULL"
+            "SELECT count(1) FROM environment_groups 
+         WHERE user_uuid = ? AND deleted_at IS NULL",
         )
         .bind(user_uuid)
-        .fetch_one(pool)
+        .fetch_one(&mut *tx)
         .await?;
 
         let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
@@ -55,32 +61,21 @@ impl EnvironmentGroup {
         };
         let offset = page_num * page_size;
 
-        let group_ids: Vec<i32> = sqlx::query_as(
-            "SELECT DISTINCT group_id FROM environments WHERE user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?",
+        // 获取分页的环境组列表
+        let environment_groups: Vec<EnvironmentGroup> = sqlx::query_as(
+            "SELECT * FROM environment_groups 
+         WHERE user_uuid = ? AND deleted_at IS NULL 
+         LIMIT ? OFFSET ?",
         )
         .bind(user_uuid)
         .bind(page_size)
         .bind(offset)
-        .fetch_all(pool)
-        .await?
-        .into_iter()
-        .map(|(group_id,)| group_id)
-        .collect();
-
-        let groups: Vec<EnvironmentGroup> = sqlx::query_as(
-            "SELECT * FROM environment_groups WHERE id IN (?) AND deleted_at IS NULL",
-        )
-        .bind(
-            group_ids
-                .iter()
-                .map(|v| v.to_string())
-                .collect::<Vec<String>>()
-                .join(","),
-        )
-        .fetch_all(pool)
+        .fetch_all(&mut *tx)
         .await?;
 
-        Ok((total, groups))
+        tx.commit().await?;
+
+        Ok((total, environment_groups))
     }
 
     #[allow(dead_code)]

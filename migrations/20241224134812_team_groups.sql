@@ -4,7 +4,7 @@ create table team_groups
     id                       INTEGER
         primary key autoincrement,
     name                     TEXT,
-    description              INTEGER,
+    description              TEXT,
     team_id                  integer,
     team_group_permission_id integer,
     created_at               DATETIME default CURRENT_TIMESTAMP,
