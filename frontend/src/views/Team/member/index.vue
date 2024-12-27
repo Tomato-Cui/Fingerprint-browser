@@ -133,29 +133,36 @@
         数据为空，没有成员
       </div>
       <!-- Pagination -->
-      <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
-        <PaginationList v-slot="{ items }" class="flex items-center gap-1">
-          <PaginationFirst @click="() => paginationClickHandle(0)" />
-          <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
+      <div class="flex items-center justify-end space-x-2 py-1">
+        <div class="flex-1 text-sm text-muted-foreground">
+          共{{ pagination.total }}条.
+        </div>
+        <div class="space-x-2">
+          <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+              <PaginationFirst @click="() => paginationClickHandle(0)" />
+              <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
-          <template v-for="(item, index) in items">
-            <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-              <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
-                ">
-                {{ item.value }}
-              </Button>
-            </PaginationListItem>
-            <PaginationEllipsis v-else :key="item.type" :index="index" />
-          </template>
+              <template v-for="(item, index) in items">
+                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                  <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                    ">
+                    {{ item.value }}
+                  </Button>
+                </PaginationListItem>
+                <PaginationEllipsis v-else :key="item.type" :index="index" />
+              </template>
 
-          <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
-          <PaginationLast @click="() =>
-            paginationClickHandle(
-              Math.ceil(pagination.total / pagination.pageSize) - 1
-            )
-            " />
-        </PaginationList>
-      </Pagination>
+              <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+              <PaginationLast @click="() =>
+                paginationClickHandle(
+                  Math.ceil(pagination.total / pagination.pageSize) - 1
+                )
+                " />
+            </PaginationList>
+          </Pagination>
+        </div>
+      </div>
     </div>
 
     <!-- Detail Slide Panel -->
@@ -228,19 +235,34 @@
 
               </div>
               <!-- Pagination -->
-              <div class="flex items-center justify-between mt-4 text-sm">
-                <div class="text-gray-500">共1条记录</div>
-                <div class="flex items-center gap-2">
-                  <button class="p-1 text-gray-400 disabled:opacity-50" disabled>
-                    <ChevronLeftIcon class="w-5 h-5" />
-                  </button>
-                  <div class="flex items-center gap-1">
-                    <input type="text" value="1" class="w-12 text-center border border-gray-200 rounded px-2 py-1" />
-                    <span class="text-gray-500">/ 1</span>
-                  </div>
-                  <button class="p-1 text-gray-400 disabled:opacity-50" disabled>
-                    <ChevronRightIcon class="w-5 h-5" />
-                  </button>
+              <div class="flex items-center justify-end space-x-2 py-1">
+                <div class="flex-1 text-sm text-muted-foreground">
+                  共{{ pagination.total }}条.
+                </div>
+                <div class="space-x-2">
+                  <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+                    <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+                      <PaginationFirst @click="() => paginationClickHandle(0)" />
+                      <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
+
+                      <template v-for="(item, index) in items">
+                        <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                          <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                            ">
+                            {{ item.value }}
+                          </Button>
+                        </PaginationListItem>
+                        <PaginationEllipsis v-else :key="item.type" :index="index" />
+                      </template>
+
+                      <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+                      <PaginationLast @click="() =>
+                        paginationClickHandle(
+                          Math.ceil(pagination.total / pagination.pageSize) - 1
+                        )
+                        " />
+                    </PaginationList>
+                  </Pagination>
                 </div>
               </div>
             </div>
@@ -296,6 +318,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { user_receive_query } from "@/commands/user-team-temp";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 
 const route = useRoute()
@@ -453,6 +476,6 @@ const handlePageChange = (page) => {
 };
 
 onMounted(async () => {
-
+  user_receive_query(1, 10)
 })
 </script>

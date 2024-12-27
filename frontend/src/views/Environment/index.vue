@@ -53,13 +53,13 @@ const searchType = ref<{ title: keyof Payment; value: string }>({
 const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
-  pageIndex: 0,
-  pageSize: 16,
+  pageIndex: 1,
+  pageSize: 3,
   total: 0,
 });
 
 const loadData = (index: number, size: number) => {
-  environment_query(index, size).then((res) => {
+  environment_query(index-1, size).then((res) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
     data.value = data_;
@@ -68,6 +68,8 @@ const loadData = (index: number, size: number) => {
 
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 const paginationClickHandle = (index: number) => {
+  console.log("index:", index);
+  
   loadData(index, pagination.pageSize);
   pagination.pageIndex = index;
 };
@@ -254,7 +256,7 @@ watch(groupSelect, (newVal) => {
                 v-slot="{ items }"
                 class="flex items-center gap-1"
               >
-                <PaginationFirst @click="() => paginationClickHandle(0)" />
+                <PaginationFirst @click="() => paginationClickHandle(1)" />
                 <PaginationPrev
                   @click="() => paginationClickHandle(pagination.pageIndex - 1)"
                 />
@@ -266,11 +268,12 @@ watch(groupSelect, (newVal) => {
                     :value="item.value"
                     as-child
                   >
+                  <!-- {{ index }} -->
                     <Button
                       class="w-10 h-10 p-0"
-                      @click="() => paginationClickHandle(index)"
+                      @click="() => paginationClickHandle(item.value)"
                       :variant="
-                        item.value === pagination.pageIndex + 1
+                        item.value === pagination.pageIndex
                           ? 'default'
                           : 'outline'
                       "
@@ -288,7 +291,7 @@ watch(groupSelect, (newVal) => {
                   @click="
                     () =>
                       paginationClickHandle(
-                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                        Math.ceil(pagination.total / pagination.pageSize)
                       )
                   "
                 />

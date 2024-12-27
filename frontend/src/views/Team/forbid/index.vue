@@ -62,46 +62,40 @@
           <!-- <div class="text-gray-400">/</div>
           <div class="text-gray-400">/</div> -->
           <div class="flex gap-2 text-sm bg-red">
-            <!-- <button class="text-blue-500 hover:underline" @click="enAbleUser(user)">启用</button>
-            <span class="text-gray-300">|</span> -->
             <button class="text-blue-500 hover:underline" @click="recoverUser(user)">恢复</button>
-            <!-- <button class="text-gray-400 hover:text-gray-600">
-              <MoreVerticalIcon class="w-5 h-5" />
-            </button> -->
           </div>
           <!-- <div></div> -->
         </div>
       </div>
       <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4 px-2">
-        <div class="text-sm text-gray-500">共 {{ total }} 项数据</div>
-        <div class="flex items-center gap-2">
-          <!-- Previous button -->
-          <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage === 1"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            ←
-          </button>
+      <div class="flex items-center justify-end space-x-2 py-1">
+        <div class="flex-1 text-sm text-muted-foreground">
+          共{{ pagination.total }}条.
+        </div>
+        <div class="space-x-2">
+          <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+              <PaginationFirst @click="() => paginationClickHandle(0)" />
+              <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
-          <!-- Page numbers -->
-          <template v-for="number in displayedPages" :key="number">
-            <button v-if="number !== '...'" @click="handlePageChange(number)" :class="[
-              'w-10 h-10 rounded-md border flex items-center justify-center',
-              currentPage === number
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'hover:bg-gray-50',
-            ]">
-              {{ number }}
-            </button>
-            <span v-else class="w-10 h-10 flex items-center justify-center">
-              ...
-            </span>
-          </template>
+              <template v-for="(item, index) in items">
+                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                  <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                    ">
+                    {{ item.value }}
+                  </Button>
+                </PaginationListItem>
+                <PaginationEllipsis v-else :key="item.type" :index="index" />
+              </template>
 
-          <!-- Next button -->
-          <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage === totalPages"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            →
-          </button>
+              <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+              <PaginationLast @click="() =>
+                paginationClickHandle(
+                  Math.ceil(pagination.total / pagination.pageSize) - 1
+                )
+                " />
+            </PaginationList>
+          </Pagination>
         </div>
       </div>
       <!-- </div> -->
@@ -121,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, reactive } from "vue";
 import {
   SearchIcon,
   ChevronDownIcon,
@@ -135,7 +129,25 @@ import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { Settings2Icon, SquarePenIcon, Trash2Icon } from "lucide-vue-next";
 import { AlertModel } from "@/components/alert-model";
 import { onMounted, defineProps, defineEmits } from "vue";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
 
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 16,
+  total: 0,
+});
+const paginationClickHandle = (index) => {
+  pagination.pageIndex = index;
+};
 const users = ref([
   {
     id: 1,

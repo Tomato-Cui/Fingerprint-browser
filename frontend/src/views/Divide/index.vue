@@ -85,8 +85,10 @@ const paginationClickHandle = (index: number) => {
 };
 const openGroup = async () => {
   let ids = [...selectData.value].map(
-    (item) => ({ environment_id: item } as any)
+    (item) => ( item  as any)
   );
+  console.log("ids:::", ids);
+  
   try {
     let data = await browser_starts(ids);
     data = await data.data;
@@ -103,7 +105,7 @@ const openGroup = async () => {
   }
 };
 const closeGroup = () => {
-  let ids = [...selectData.value].map((item) => item) as number[];
+  let ids = [...selectData.value].map((item) => item) as string[];
   browser_stops(ids).then((res: any) => {
     if (res.message && (res.message as string).includes("关闭成功")) {
       ids.forEach((item) => browserStatusStore.updateStatus(item, false));

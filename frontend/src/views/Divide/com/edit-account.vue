@@ -15,12 +15,15 @@ const emit = defineEmits(['update:editAccountDialog'])
 
 const editAccount = reactive({
     environmentNumber: 7,
-    selectedPlatform: "火狐"
+    selectedPlatform: "火狐",
+    username: '',
+    password: ''
 })
 //清空表单
 const clearForm = () => {
-    // editAccount.environmentNumber = 7
     editAccount.selectedPlatform = "火狐"
+    username: ''
+    password: ''
 }
 //确认
 const subMit = () => {
@@ -31,8 +34,6 @@ watch(() => props.editAccountDialog, (val) => {
     clearForm()
 })
 
-// const environmentNumber = ref(7)  // 环境序号
-// const selectedPlatform = ref('火狐')  // 选中的平台
 const isOpen = ref(false)
 const platforms = ref(['火狐', '谷歌', '微软边缘'])
 
@@ -111,15 +112,18 @@ onUnmounted(() => {
 
                     <div class="flex items-center">
                         <label class="text-gray-600 w-[100px]">用户名</label>
-                        <div class="px-4 py-2 rounded-md flex-1 border focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <input class="w-full outline-none" placeholder="请输入用户名"/>
+                        <div
+                            class="px-4 py-2 rounded-md flex-1 border focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input class="w-full outline-none" placeholder="请输入用户名" v-model="editAccount.username" />
                         </div>
                     </div>
 
                     <div class="flex items-center">
                         <label class="text-gray-600 w-[100px]">密码</label>
-                        <div class="px-4 py-2 rounded-md flex-1 border focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <input class="w-full outline-none" placeholder="请输入密码" type="password"/>
+                        <div
+                            class="px-4 py-2 rounded-md flex-1 border focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input class="w-full outline-none" placeholder="请输入密码" type="password"
+                                v-model="editAccount.password" />
                         </div>
                     </div>
                 </div>

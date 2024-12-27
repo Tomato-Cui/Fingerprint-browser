@@ -109,37 +109,36 @@
       <!-- </div> -->
 
       <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4 px-2">
-        <div class="text-sm text-gray-500">共 {{ groupTotal }} 项数据</div>
-        <div class="flex items-center gap-2">
-          <!-- Previous button -->
-          <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage === 1"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            ←
-          </button>
-
-          <!-- Page numbers -->
-          <template v-for="number in displayedPages" :key="number">
-            <button v-if="number !== '...'" @click="handlePageChange(number)" :class="[
-              'w-10 h-10 rounded-md border flex items-center justify-center',
-              currentPage === number
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'hover:bg-gray-50',
-            ]">
-              {{ number }}
-            </button>
-            <span v-else class="w-10 h-10 flex items-center justify-center">
-              ...
-            </span>
-          </template>
-
-          <!-- Next button -->
-          <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage === totalPages"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            →
-          </button>
+      <!-- <div class="flex items-center justify-end space-x-2 py-1">
+        <div class="flex-1 text-sm text-muted-foreground">
+          共{{ pagination.total }}条.
         </div>
-      </div>
+        <div class="space-x-2">
+          <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+              <PaginationFirst @click="() => paginationClickHandle(0)" />
+              <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
+
+              <template v-for="(item, index) in items">
+                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                  <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                    ">
+                    {{ item.value }}
+                  </Button>
+                </PaginationListItem>
+                <PaginationEllipsis v-else :key="item.type" :index="index" />
+              </template>
+
+              <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+              <PaginationLast @click="() =>
+                paginationClickHandle(
+                  Math.ceil(pagination.total / pagination.pageSize) - 1
+                )
+                " />
+            </PaginationList>
+          </Pagination>
+        </div>
+      </div> -->
       <!-- </div> -->
     </div>
   </div>
@@ -181,7 +180,7 @@
 import addGroup from "./addGroup.vue";
 import auth from "./auth.vue";
 import addMember from "./addMember.vue";
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, reactive } from "vue";
 import { More, MoreContent, MoreItem, MoreTrigger } from '@/components/more'
 import {
   SearchIcon,
@@ -201,8 +200,18 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter } from "vue-router";
 import { buttonVariants } from "@/components/ui/button";
-// import { team_group_query_all } from "@/commands/team";
+import { team_group_query_all } from "@/commands/team-group";
 import { team_query } from "@/commands/team";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
 
 const router = useRouter()
 const searchQuery = ref("");
@@ -231,71 +240,19 @@ const filteredGroups = computed(() => {
     group.name?.includes(searchQuery.value)  //分组名称筛选
   );
 });
-const props = defineProps({ //分页
-  totalPages: {  //总页数
-    type: Number,  //类型
-    required: true,  //必填
-    default: 20,  //默认值
-  },
-  initialPage: {  //初始页
-    type: Number,  //类型
-    default: 1,  //默认值
-  },
-  maxPageNumbers: {  //最大显示页数
-    type: Number,  //类型
-    default: 5,  //默认值
-  },
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 16,
+  total: 0,
 });
 
 watch(() => showAddModal.value, async (newVal) => {
 });
 
-const emit = defineEmits(["page-change"]);  //分页
-
-const currentPage = ref(props.initialPage);  //当前页
-const totalPages = ref(props.totalPages); // 本地存储总页数
-
-const displayedPages = computed(() => {  //显示页数
-  const pages = []; // 用于存放要显示的页码
-  const maxPageNumbers = props.maxPageNumbers;  //最大显示页数
-
-  pages.push(1);  //第一页
-
-  if (currentPage.value <= Math.ceil(maxPageNumbers / 2)) { //当前页小于最大显示页数的一半
-    for (let i = 2; i <= Math.min(maxPageNumbers, totalPages.value); i++) { //显示2到最大显示页数
-      pages.push(i); //添加页数
-    }
-    if (totalPages.value > maxPageNumbers) { //总页数大于最大显示页数
-      pages.push("...");  //添加...
-      pages.push(totalPages.value);  //添加总页数
-    }
-  } else if (currentPage.value >= totalPages.value - Math.floor(maxPageNumbers / 2)) { //当前页大于等于总页数减去最大显示页数的一半
-    pages.push("...");//添加...
-    for (let i = totalPages.value - maxPageNumbers + 1; i <= totalPages.value; i++) {  //显示总页数减去最大显示页数加1到总页数
-      pages.push(i);  //添加页数
-    }
-  } else { //当前页在中间
-    pages.push("..."); //添加...
-    for (let i = currentPage.value - Math.floor(maxPageNumbers / 2); i <= currentPage.value + Math.floor(maxPageNumbers / 2); i++) {  //显示当前页减去最大显示页数的一半到当前页加上最大显示页数的一半
-      pages.push(i);  //添加页数
-    }
-    pages.push("...");  //添加...
-    pages.push(totalPages.value);  //添加总页数
-  }
-
-  return pages;
-});
-
-const handlePageChange = async (page) => {
-  if (page < 1 || page > totalPages.value || page === currentPage.value) {
-    return;
-  }
-  currentPage.value = page;
-  emit("page-change", page);
-
-  selectAll.value = false  //全选置空
+const paginationClickHandle = (index) => {
+  loadData(Number(route.params.id), index, pagination.pageSize);
+  pagination.pageIndex = index;
 };
-
 //添加成员
 const addMem = (group) => {
   groupObj.value = group
@@ -387,15 +344,17 @@ const authPri = () => {
 
 }
 
-onMounted(async () => {
+const localData = () => {
   team_query(1, 10).then(res => {
-    console.log("rerere:", res);
+    team_group_query_all(res.data.data[0].id).then(res => {
+      groups.value = res.data
+      // pagination.total
+    })
   })
-  // team_group_query_all(currentPage, 10).then(res => {
-  //   // console.log("res----:", res);
-  //   groups.value = res
-  //   // console.log("groups----:", groups.value);
-  // })
+}
+
+onMounted(async () => {
+  localData()
 })
 </script>
 
