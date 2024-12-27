@@ -38,6 +38,7 @@ import {
 import { IconFilter, groupIcons } from "@/assets/icons/index";
 import {
   environment_proxies_create,
+  environment_proxies_delete,
   environment_proxies_query,
 } from "@/commands/environment-proxy";
 
@@ -80,7 +81,7 @@ const data = ref<Array<Payment>>([]);
 
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 1,
+  pageSize: 2,
   total: 0,
 });
 
@@ -115,6 +116,14 @@ const form = reactive({
   parseUrl: "",
 });
 
+const deleteAll = () => {
+  for (let i = 0; i < data.value.length; i++) {
+    if (data.value[i].selected) {
+      environment_proxies_delete(data.value[i].id);
+    }
+  }
+  loadData(pagination.pageIndex, pagination.pageSize);
+};
 // 打开弹窗
 const openSetModal = () => {
   showSetModal.value = true;
@@ -155,13 +164,6 @@ const adddaili = () => {
   router.push("/adddaili");
 };
 
-// 切换全选
-const toggleSelectAll = () => {
-  agents.value.forEach((agent) => {
-    agent.selected = selectAll.value;
-  });
-};
-
 const toggleDropdown = (id) => {
   if (activeDropdown.value === id) {
     activeDropdown.value = null;
@@ -172,8 +174,9 @@ const toggleDropdown = (id) => {
 
 const deleteModel = ref(false);
 
-const deleteOpenHandle = () => {
-  deleteModel.value = true;
+const deleteOpenHandle = (id: number) => {
+  environment_proxies_delete(id);
+  loadData(pagination.pageIndex, pagination.pageSize);
 };
 
 const deleteCloseHandle = () => {
@@ -200,13 +203,6 @@ const timeRange = ref({
   end: "",
 });
 
-const updateFilter = (key, value) => {
-  const filter = filters.value.find((f) => f.key === key);
-  if (filter) {
-    filter.value = value;
-  }
-};
-
 const filtersisOpen = ref(false);
 const applyFilters = () => {
   const filterValues = {
@@ -231,6 +227,10 @@ const resetFilters = () => {
   filtersisOpen.value = false; // 关闭弹窗
 };
 
+const toggleRowSelection = (row: Payment) => {
+  row.selected = !row.selected;
+};
+
 //分组
 const groupisOpen = ref(false);
 const newGroupName = ref("");
@@ -242,6 +242,12 @@ const groups = ref([
   "分组五",
   "分组六",
 ]);
+
+const toggleAll = () => {
+  data.value.forEach((row) => {
+    row.selected = selectAll.value;
+  });
+};
 const editingIndex = ref(-1);
 const editingName = ref("");
 
@@ -519,7 +525,7 @@ const paginationClickHandle = (index: number) => {
 
           <TooltipButton
             title="删除"
-            @click="deleteOpenHandle"
+            @click="deleteAll()"
             class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
           >
             <TrashIcon class="w-5 h-5" />
@@ -548,33 +554,33 @@ const paginationClickHandle = (index: number) => {
         <table class="w-full">
           <thead class="sticky top-0 z-10 bg-gray-50">
             <tr>
-              <th class="p-4 text-center">
+              <th class="p-4 text-left">
                 <input
                   type="checkbox"
                   class="rounded border-gray-300"
                   v-model="selectAll"
-                  @change="toggleSelectAll"
+                  @change="toggleAll"
                 />
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 代理ID
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 代理信息
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 出口IP
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 关联环境数
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 备注
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 IP查询通道
               </th>
-              <th class="p-4 text-sm font-medium text-center text-gray-600">
+              <th class="p-4 text-sm font-medium text-left text-gray-600">
                 操作
               </th>
             </tr>
@@ -582,33 +588,32 @@ const paginationClickHandle = (index: number) => {
 
           <tbody>
             <tr
-              v-for="agent in data"
-              :key="agent.id"
-              :class="{
-                'border-t border-gray-100': true,
-                'bg-blue-50 hover:bg-blue-100': agent.selected,
-                'hover:bg-blue-100': !agent.selected,
-              }"
+              v-for="(row, index) in data"
+              :key="index"
+              class="hover:bg-blue-100 h-[20px]"
+              :class="{ 'bg-blue-50': row.selected }"
+              @click="toggleRowSelection(row)"
             >
-              <td class="p-4 text-center">
-                <div class="flex justify-center">
-                  <input
-                    type="checkbox"
-                    class="rounded border-gray-300"
-                    v-model="agent.selected"
-                  />
-                </div>
+              <td class="p-4 text-left">
+                <input
+                  type="checkbox"
+                  class="rounded border-gray-300"
+                  v-model="row.selected"
+                />
               </td>
+              <!-- <td class="px-4 py-3">
+                <input type="checkbox" class="rounded" v-model="row.selected" />
+              </td> -->
 
-              <td class="p-4 text-sm text-center">{{ agent.id }}</td>
-              <td class="p-4 text-sm text-center">{{ agent.info }}</td>
-              <td class="p-4 text-sm text-center">{{ agent.ip }}</td>
-              <td class="p-4 text-sm text-center">{{ agent.envCount }}</td>
-              <td class="p-4 text-sm text-center">{{ agent.notes }}</td>
-              <td class="p-4 text-sm text-center">{{ agent.ipChannel }}</td>
+              <td class="p-4 text-sm text-left">{{ row.id }}</td>
+              <td class="p-4 text-sm text-left">{{ row.info }}</td>
+              <td class="p-4 text-sm text-left">{{ row.ip }}</td>
+              <td class="p-4 text-sm text-left">{{ row.envCount }}</td>
+              <td class="p-4 text-sm text-left">{{ row.notes }}</td>
+              <td class="p-4 text-sm text-left">{{ row.ipChannel }}</td>
 
-              <td class="p-4 text-center">
-                <div class="flex relative gap-2 justify-center items-center">
+              <td class="p-4 text-left">
+                <div class="flex relative gap-2 justify-left">
                   <!-- 给父容器添加relative定位 -->
                   <!-- 刷新按钮 -->
                   <button
@@ -622,7 +627,7 @@ const paginationClickHandle = (index: number) => {
                   <More>
                     <MoreTrigger>
                       <MoreVerticalIcon
-                        @click="toggleDropdown(agent.id)"
+                        @click="toggleDropdown(row.id)"
                         class="w-4 h-4 text-gray-600 cursor-pointer hover:text-gray-900"
                       />
                     </MoreTrigger>
@@ -635,7 +640,7 @@ const paginationClickHandle = (index: number) => {
                       </MoreItem>
                       <MoreItem
                         class="cursor-pointer"
-                        @click="deleteOpenHandle"
+                        @click="deleteOpenHandle(row.id)"
                       >
                         <Trash2Icon class="w-4 h-4" />删除
                       </MoreItem>
@@ -936,53 +941,4 @@ const paginationClickHandle = (index: number) => {
       </div>
     </div>
   </div>
-
-  <AlertModel
-    title="删除代理"
-    :open="deleteModel"
-    @close="deleteCloseHandle"
-    @cancel="deleteCloseHandle"
-    @submit="deleteCloseHandle"
-  >
-    <div class="flex flex-col gap-y-4 py-4 text-sm">
-      <!-- Content -->
-      <div class="p-4">
-        <div class="flex justify-between items-center mb-4">
-          <p class="text-gray-700">你确定要删除以下代理吗？</p>
-          <button
-            @click="isExpanded = !isExpanded"
-            class="flex items-center text-sm text-blue-600 hover:text-blue-700"
-          >
-            共{{ selectedAgentslen }}个代理
-            <ChevronDown
-              class="ml-1 w-4 h-4 transition-transform duration-200"
-              :class="{ 'transform rotate-180': isExpanded }"
-            />
-          </button>
-        </div>
-
-        <div class="mb-6">
-          <p class="mb-2 text-sm text-gray-600">代理名称</p>
-          <div
-            class="grid gap-2 max-h-[300px] overflow-y-auto"
-            :class="isExpanded ? 'grid-cols-3' : 'grid-cols-3'"
-          >
-            <div
-              v-for="(agent, index) in displayedAgents"
-              :key="agent.id"
-              class="flex justify-between items-center px-3 py-2 text-sm bg-blue-50 rounded-md"
-            >
-              <span class="text-gray-700">{{ agent.ipChannel }}</span>
-              <button
-                @click="removeAgent(agent.id)"
-                class="text-gray-400 hover:text-gray-600"
-              >
-                <XCircle class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </AlertModel>
 </template>

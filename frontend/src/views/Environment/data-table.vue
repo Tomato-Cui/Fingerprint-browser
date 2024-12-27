@@ -36,6 +36,7 @@ import { useBrowserStatusStore } from "@/stores/browser";
 
 export interface Payment {
   id: number;
+  uuid: string;
   name: string;
   description: string;
   country: string;
@@ -43,6 +44,7 @@ export interface Payment {
   proxy: string;
   open_urls: string;
   os: string;
+  selected?: boolean;
 }
 
 interface TableProps {

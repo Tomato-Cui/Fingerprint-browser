@@ -23,8 +23,6 @@ const username = ref("");
 const password = ref("");
 const refreshUrl = ref("");
 
-
-
 const singleForm = ref({
   url: "",
   proxyType: "IPv4",

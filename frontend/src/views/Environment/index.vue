@@ -50,6 +50,10 @@ const searchType = ref<{ title: keyof Payment; value: string }>({
   value: "名称",
 });
 
+const selectedData = computed(() => {
+  return data.value.filter((item) => item.selected);
+});
+
 const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
@@ -101,10 +105,12 @@ const closeGroup = () => {
   });
 };
 const batchDelete = () => {
-  let ids = [...selectData.value].map((item) => item) as number[];
+  let ids = selectedData.value.map((item) => item.uuid);
+  console.log("ids", ids);
+  console.log("data", selectedData.value);
   environment_batch_delete(ids)
     .then((_: any) => {
-      data.value = data.value.filter((item) => !ids.includes(item.id));
+      data.value = data.value.filter((item) => !ids.includes(item.uuid));
     })
     .catch((err) => {
       toast.warning(err);

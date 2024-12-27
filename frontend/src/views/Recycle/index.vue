@@ -73,10 +73,6 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 // 全选复选框的状态
 const selectAll = ref(false);
 
-const visible = ref(false);
-
-const environmentId = ref<number>();
-
 // 切换所有行的选择状态
 const toggleAll = () => {
   data.value.forEach((row) => {
@@ -107,11 +103,6 @@ const handleDelete = (uuid: string) => {
 };
 
 const handleRecover = (uuid: string) => {
-  // console.log("uuid", index.uuid);
-  // environment_trash_recover(data.value[0].uuid).then(() => {
-  //   loadData(pagination.pageIndex, pagination.pageSize);
-  // });
-
   environment_trash_recover(uuid).then(() => {
     loadData(pagination.pageIndex, pagination.pageSize);
   });
@@ -228,60 +219,6 @@ const searchValueHandle = (value: string) => {
           </div>
         </div>
       </div>
-
-      <!-- 弹出窗遮罩层 -->
-      <!-- <div
-        v-if="visible"
-        @click="closePopup"
-        class="flex fixed inset-0 justify-center items-center bg-gray-800 bg-opacity-50"
-      >
-     
-        <div class="bg-white rounded-lg w-[400px] p-6 shadow-lg">
-         
-          <div class="flex items-center mb-4">
-            <div
-              class="flex justify-center items-center mr-2 w-8 h-8 text-yellow-500 bg-yellow-100 rounded-full"
-            >
-              <span class="text-lg font-bold">!</span>
-            </div>
-            <h2 class="text-lg font-semibold text-gray-700">删除环境</h2>
-            <button
-              @click="closePopup"
-              class="ml-auto text-gray-400 hover:text-gray-600"
-            >
-              &#x2715;
-            </button>
-          </div>
-
-          <p class="mb-4 text-gray-600">你确定要彻底删除以下序号的环境吗？</p>
-
-       
-          <div class="flex items-center mb-6">
-            <label class="mr-4 text-gray-600">环境序号</label>
-            <span
-              class="w-12 text-lg font-semibold text-center text-blue-600 bg-gray-100 rounded border"
-            >
-              {{ environmentId }}
-            </span>
-          </div>
-
-    
-          <div class="flex justify-end space-x-4">
-            <button
-              @click="confirmDelete"
-              class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-            >
-              确定
-            </button>
-            <button
-              @click="closePopup"
-              class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              取消
-            </button>
-          </div>
-        </div>
-      </div> -->
 
       <!-- Table -->
       <table class="overflow-auto overflow-x-auto min-w-[900px]">
