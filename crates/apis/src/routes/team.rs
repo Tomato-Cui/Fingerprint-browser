@@ -14,6 +14,7 @@ pub fn build_router() -> Router {
         Router::new()
             .route("/:id", get(query_id::handle))
             .route("/query", get(query::handle))
+            .route("/query/current-team", get(query_current_team::handle))
             .route("/query/team-all-user", post(query_team_all_user::handle))
             .route(
                 "/query/team-all-blocked-user",
@@ -63,6 +64,20 @@ mod query {
         match services::team::query(&state.user_uuid, payload.page_num, payload.page_size).await {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+mod query_current_team {
+    use super::*;
+
+    pub async fn handle(state: Extension<CurrentUser>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::team::query_current_team_info(&state.user_uuid).await {
+            Ok(data) => AppResponse::<Team>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Team>::fail(warn_msg(r.to_string())),
         }
     }
 }
@@ -174,7 +189,7 @@ mod blocked {
 
     #[derive(serde::Deserialize)]
     pub struct Payload {
-        current_user_email: String,
+        current_user_uuid: String,
         team_id: u32,
     }
 
@@ -188,7 +203,7 @@ mod blocked {
 
         match services::team::blocked(
             &state.user_uuid,
-            &payload.current_user_email,
+            &payload.current_user_uuid,
             payload.team_id,
         )
         .await
@@ -205,7 +220,7 @@ mod unblocked {
 
     #[derive(serde::Deserialize)]
     pub struct Payload {
-        current_user_email: String,
+        current_user_uuid: String,
         team_id: u32,
     }
 
@@ -219,7 +234,7 @@ mod unblocked {
 
         match services::team::un_blocked(
             &state.user_uuid,
-            &payload.current_user_email,
+            &payload.current_user_uuid,
             payload.team_id,
         )
         .await

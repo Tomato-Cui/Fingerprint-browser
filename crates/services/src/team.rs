@@ -116,38 +116,25 @@ pub async fn create(user_uuid: &str, payload: &Team) -> Result<bool, ServiceErro
 
 pub async fn blocked(
     user_uuid: &str,
-    current_user_email: &str,
+    current_user_uuid: &str,
     team_id: u32,
 ) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    match models::user::User::query_uuid_by_email(pool, current_user_email).await {
-        Ok(current_user_uuid) => {
-            let ok =
-                Team::blocked_action(pool, user_uuid, team_id, &current_user_uuid, true).await?;
+    let ok = Team::blocked_action(pool, user_uuid, team_id, current_user_uuid, true).await?;
 
-            Ok(ok)
-        }
-        Err(_e) => Ok(false),
-    }
+    Ok(ok)
 }
 
 pub async fn un_blocked(
     user_uuid: &str,
-    current_user_email: &str,
+    current_user_uuid: &str,
     team_id: u32,
 ) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
+    let ok = Team::blocked_action(pool, user_uuid, team_id, &current_user_uuid, false).await?;
 
-    match models::user::User::query_uuid_by_email(pool, current_user_email).await {
-        Ok(current_user_uuid) => {
-            let ok =
-                Team::blocked_action(pool, user_uuid, team_id, &current_user_uuid, true).await?;
-
-            Ok(ok)
-        }
-        Err(_e) => Ok(false),
-    }
+    Ok(ok)
 }
 
 pub async fn modify(id: u32, payload: &Team) -> Result<bool, ServiceError> {

@@ -80,6 +80,7 @@ pub fn run() {
             environment_command::environment_batch_delete,
             team_command::team_query_id,
             team_command::team_query,
+            team_command::query_current_team_info,
             team_command::query_team_all_user,
             team_command::query_team_all_blocked_user,
             team_command::query_team_group_all_user,
