@@ -7,7 +7,7 @@ import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
 
 const props = defineProps({
     editProxyDialog: Boolean,
-    groupUuid: Number
+    environmentUuid: String
 })
 const emit = defineEmits(['update:editProxyDialog'])
 
@@ -74,7 +74,7 @@ const handleClickOutside = (event) => {  // 点击外部关闭下拉框
                 <div class="mb-6">
                     <label class="text-gray-600">环境序号</label>
                     <div class="inline-block ml-4 bg-blue-50 px-4 py-1 rounded">
-                        <span class="text-blue-600">{{ props.groupUuid }}</span>
+                        <span class="text-blue-600">{{ props.environmentUuid }}</span>
                     </div>
                 </div>
 

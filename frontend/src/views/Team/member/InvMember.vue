@@ -22,11 +22,10 @@
                         <div class="mb-6 flex items-center justify-between gap-5">
                             <label class="block text-sm text-gray-600 mb-2">分组:</label>
                             <div class="relative flex-1">
-                                <Select v-model="selectedTeam" class="">
+                                <Select v-model="selectedTeam" class="" @click="searchGroup">
                                     <!-- 修改宽度 -->
-                                    <!-- <SelectTrigger class="w-32"> -->
                                     <SelectTrigger>
-                                        <SelectValue placeholder="请选择分组" class="w-full p-2 rounded-lg outline-none" />
+                                        <SelectValue placeholder="请选择分组" class="w-full p-2 rounded-lg outline-none"/>
                                     </SelectTrigger>
                                     <SelectContent class="z-[80]">
                                         <SelectGroup>
@@ -97,6 +96,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/select";
+import { team_group_query_all } from "@/commands/team-group";
+import { team_query } from "@/commands/team";
 
 const props = defineProps({
     invMember: Boolean
@@ -172,6 +173,17 @@ const choseSelect2 = () => {
         isClicked1.value = false
     }
     // console.log("选择当前项---:", isClicked2.value);
+}
+
+const searchGroup = () => {
+    console.log("?????????????????????");
+    
+  team_query(1, 10).then(res => {
+    // 查询团队下所有分组
+    team_group_query_all(res.data.data[0].id).then(res => {
+        teams.value = res.data
+    })
+  })
 }
 </script>
 

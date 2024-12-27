@@ -6,43 +6,63 @@ import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
 import { toast } from "vue-sonner";
 import Input from "@/components/ui/input/Input.vue";
+import { environment_account_modify } from '@/commands/environment-account'
 
 const props = defineProps({
     editAccountDialog: Boolean,
-    groupUuid: Number
+    environmentUuid: String
 })
 const emit = defineEmits(['update:editAccountDialog'])
 
 const editAccount = reactive({
-    environmentNumber: 7,
-    selectedPlatform: "火狐",
+    environment_uuid: '',
+    selectedPlatform: "youtube",
+    selectPlatformUrl: 'https://www.youtube.com',
     username: '',
     password: ''
 })
 //清空表单
 const clearForm = () => {
-    editAccount.selectedPlatform = "火狐"
+    environment_uuid: ''
+    selectedPlatform: "youtube"
+    selectPlatformUrl: 'https://www.youtube.com'
     username: ''
     password: ''
 }
 //确认
 const subMit = () => {
+    editAccount.environment_uuid = props.environmentUuid    
     emit('update:editAccountDialog', false)
     console.log("submit:", editAccount);
+    environment_account_modify
 }
 watch(() => props.editAccountDialog, (val) => {
     clearForm()
 })
 
 const isOpen = ref(false)
-const platforms = ref(['火狐', '谷歌', '微软边缘'])
+const platforms = ref([
+    {
+        platform: 'youtube',
+        platform_url: 'https://www.youtube.com'
+    },
+    {
+        platform: '推特',
+        platform_url: 'https://twitter.com'
+    },
+    {
+        platform: '脸书',
+        platform_url: 'https://www.facebook.com'
+    }
+])
 
 const toggleDropdown = () => {
     isOpen.value = !isOpen.value
 }
 
 const selectPlatform = (platform) => {
-    editAccount.selectedPlatform = platform
+    editAccount.selectedPlatform = platform.platform
+    editAccount.selectPlatformUrl = platform.platform_url
     isOpen.value = false
 }
 
@@ -77,7 +97,7 @@ onUnmounted(() => {
                     <div class="flex items-center">
                         <label class="text-gray-600 w-[100px]">环境序号</label>
                         <div class="bg-blue-50 px-4 py-2 rounded-md">
-                            <span class="text-blue-600">{{ props.groupUuid }}</span>
+                            <span class="text-blue-600">{{ props.environmentUuid }}</span>
                         </div>
                     </div>
 
@@ -104,7 +124,7 @@ onUnmounted(() => {
                             <div v-if="isOpen" class="absolute w-full mt-1 bg-white border rounded-md shadow-lg z-10">
                                 <div v-for="platform in platforms" :key="platform" @click="selectPlatform(platform)"
                                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                    {{ platform }}
+                                    {{ platform.platform }}
                                 </div>
                             </div>
                         </div>

@@ -35,22 +35,23 @@
 
       <!-- Table -->
       <!-- <div class="bg-white rounded-lg flex flex-col flex-1">  -->
+      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
+        数据为空，没有成员
+      </div>
       <!-- Table Header -->
-      <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500">
+      <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500" v-else>
         <div>姓名</div>
         <div>分组</div>
         <div>备注</div>
         <div>手机号/邮箱</div>
         <div>授权环境</div>
-        <!-- <div>授权云手机</div>
-        <div>授权云号码</div> -->
         <div>操作</div>
         <!-- <div></div> -->
       </div>
 
       <!-- <div class="flex flex-col flex-1 justify-between"> -->
       <!-- Table Body -->
-      <div class="divide-y overflow-auto flex-1">
+      <div class="divide-y overflow-auto flex-1" v-else>
         <div v-for="user in filterUsers" :key="user.id"
           class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
           :class="{ 'border-t border-gray-100': true }">
@@ -67,6 +68,9 @@
           <!-- <div></div> -->
         </div>
       </div>
+
+
+
       <!-- Pagination -->
       <div class="flex items-center justify-end space-x-2 py-1">
         <div class="flex-1 text-sm text-muted-foreground">
@@ -139,6 +143,7 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
+import { team_query, query_team_all_blocked_user } from "@/commands/team";
 
 const pagination = reactive({
   pageIndex: 1,
@@ -295,5 +300,11 @@ const handlePageChange = (page) => {
   emit("page-change", page);
 };
 onMounted(async () => {
+  team_query(1, 10).then(res => {
+    query_team_all_blocked_user(res.data.data[0].id, pagination.pageIndex, pagination.pageSize).then(res => {
+      users.value = res.data.data
+      pagination.total = res.data.total
+    })
+  })
 });
 </script>

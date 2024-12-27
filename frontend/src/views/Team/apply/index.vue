@@ -60,8 +60,11 @@
         </div>
       </div>
 
+      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
+        数据为空，没有成员
+      </div>
       <!-- Table -->
-      <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg">
+      <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg" v-else>
         <!-- Table Header -->
         <div class="grid grid-cols-8 px-6 py-3 bg-gray-50 text-sm text-gray-500">
           <div>姓名</div>
@@ -221,16 +224,16 @@ const selectStatus = (label) => {
 
 
 const users = ref([
-  {
-    audit_id: 1,
-    created_at: "2024-02-22 14:30:00",
-    description: "备注",
-    email: "123",
-    group_name: "123",
-    owner_name: "123",
-    phone: "123",
-    status: "pending",
-  }
+  // {
+  //   audit_id: 1,
+  //   created_at: "2024-02-22 14:30:00",
+  //   description: "备注",
+  //   email: "123",
+  //   group_name: "123",
+  //   owner_name: "123",
+  //   phone: "123",
+  //   status: "pending",
+  // }
 ]);
 const sortUsersByApplyTime = (order = "asc") => {  //数组按时间排序
   users.value.sort((a, b) => {

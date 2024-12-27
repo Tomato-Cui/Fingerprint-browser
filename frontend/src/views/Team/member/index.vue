@@ -320,6 +320,8 @@ import {
 } from "@/components/ui/tooltip";
 import { user_receive_query } from "@/commands/user-team-temp";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+import { query_team_all_user, team_query, query_team_group_all_user } from "@/commands/team"
+import { team_group_query_all } from "@/commands/team-group";
 
 const route = useRoute()
 const selectedMember = ref(null);
@@ -410,72 +412,24 @@ const editMember = (member) => {
   memberObj.value = member
   addMemModel.value = true
 }
-// 分页
-const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-    default: 20,
-  },
-  initialPage: {
-    type: Number,
-    default: 1,
-  },
-});
-
-const paginationClickHandle = (index) => {
-  // loadData(Number(route.params.id), index, pagination.pageSize);
-  pagination.pageIndex = index;
-};
-
-const emit = defineEmits(["page-change"]);
-
-const currentPage = ref(props.initialPage);
-
-const displayedPages = computed(() => {
-  const pages = [];
-  const totalPages = props.totalPages;
-
-  // Always show first page
-  pages.push(1);
-
-  if (currentPage.value <= 4) {
-    // Show first 5 pages
-    for (let i = 2; i <= Math.min(5, totalPages); i++) {
-      pages.push(i);
-    }
-    if (totalPages > 5) {
-      pages.push("...");
-      pages.push(totalPages);
-    }
-  } else if (currentPage.value >= totalPages - 3) {
-    // Show last 5 pages
-    pages.push("...");
-    for (let i = totalPages - 4; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Show current page and surrounding pages
-    pages.push("...");
-    for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
-      pages.push(i);
-    }
-    pages.push("...");
-    pages.push(totalPages);
-  }
-
-  return pages;
-});
-
-const handlePageChange = (page) => {
-  if (page < 1 || page > props.totalPages || page === currentPage.value) {
-    return;
-  }
-  currentPage.value = page;
-  emit("page-change", page);
-};
 
 onMounted(async () => {
-  user_receive_query(1, 10)
+  //查询用户团队
+  team_query(0, 1).then(res => {
+    if (route.query.groupId !== undefined) {
+      //查询分组下成员
+      query_team_group_all_user(res.data.data[0].id, +route.query.groupId, pagination.pageIndex, pagination.pageSize).then(res => {
+        members.value = res.data.data
+        pagination.total = res.data.total
+      })
+    } else {
+      //查询该团队下所有成员
+      query_team_all_user(res.data.data[0].id, pagination.pageIndex, pagination.pageSize).then(res2 => {
+        members.value = res2.data.data
+        pagination.total = res.data.total
+      })
+    }
+  })
+
 })
 </script>

@@ -68,9 +68,9 @@ const pagination = reactive({
   total: 0,
 });
 
-const loadData = (groupUuid: number, index: number, size: number) => {
-  // console.log("加载数据", groupUuid, index, size);
-  environment_query_by_group(groupUuid, index, size).then((res) => {
+const loadData = (groupId: number, index: number, size: number) => {
+  // console.log("加载数据", environmentUuid, index, size);
+  environment_query_by_group(groupId, index, size).then((res) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
     data.value = data_;
@@ -199,57 +199,57 @@ watch(groupSelect, (newVal) => {
 });
 
 //下拉菜单中的的按钮
-var groupUuid = ""
+var environmentUuid = ""
 // ----编辑环境
 const editEnvBtn = (id: string) => {
   console.log("编辑环境:", id);
-  groupUuid = id
+  environmentUuid = id
   router.push({ path: '/environment-action/create', query: { id: id } })
 };
 // ----编辑账号
 const editAccountBtn = (id: string) => {
   console.log("编辑账号:", id);
-  groupUuid = id
+  environmentUuid = id
   editAccountDialog.value = true
 };
 // ----修改代理
 const editProxyBtn = (id: string) => {
   console.log("修改代理:", id);
-  groupUuid = id
+  environmentUuid = id
   editProxyDialog.value = true
 };
 // ----授权成员
 const authMemberBtn = (id: string) => {
-  groupUuid = id
+  environmentUuid = id
   console.log("授权成员:", id);
 };
 // ----转移环境
 const transferEnvBtn = (id: string) => {
-  groupUuid = id
+  environmentUuid = id
   console.log("转移环境:", id);
 };
 // ----设为常用
 const setCommonBtn = (id: string) => {
-  groupUuid = id
+  environmentUuid = id
   console.log("设为常用:", id);
 };
 // ----删除
 const removeEnv = (id: string) => {
   console.log("删除:", id);
-  groupUuid = id
+  environmentUuid = id
   clickDel.value = true
 };
 
 // 删除
 const clickDel = ref(false)
 const handleSubmitDel = () => {
-  console.log("uuid:", groupUuid);
+  console.log("uuid:", environmentUuid);
   
-  environment_delete(groupUuid).then((res) => {
+  environment_delete(environmentUuid).then((res) => {
     if (res.message && (res.message as string).includes("删除成功")) {
       toast.success("删除成功");
       //过滤当前被删除的一行
-      data.value = data.value.filter((item) => item.uuid !== groupUuid);
+      data.value = data.value.filter((item) => item.uuid !== environmentUuid);
     } else {
       toast.warning("删除失败");
     }
@@ -345,9 +345,9 @@ const handleSubmitDel = () => {
   <!-- 创建分组 -->
   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
   <!-- 修改账号 -->
-  <EditAccount v-model:editAccountDialog="editAccountDialog" :groupUuid="groupUuid"/>
+  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentUuid="environmentUuid"/>
   <!-- 修改代理 -->
-  <EditProxy v-model:editProxyDialog="editProxyDialog" :groupUuid="groupUuid"/>
+  <EditProxy v-model:editProxyDialog="editProxyDialog" :environmentUuid="environmentUuid"/>
   <!-- 删除 -->
   <Teleport to="body" class="z-30">
     <div class="fixed inset-0 bg-black/20 flex items-center justify-center z-30" v-if="clickDel">

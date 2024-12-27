@@ -4,16 +4,16 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-3">
-          <button @click="() => { showAddModal = true; groupObj = null }"
+          <!-- <button @click="() => { showAddModal = true; groupObj = null }"
             class="flex items-center gap-2 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors bg-primary">
             <FolderPlusIcon class="w-5" />
             创建分组
-          </button>
+          </button> -->
 
           <!-- <TooltipButton title="删除" @click="() => console.log('abc')">
             <IconTeamGroupRefresh class="w-[25px] h-[25px]" />
           </TooltipButton> -->
-          <Tooltip class="relative">
+          <!-- <Tooltip class="relative">
             <TooltipTrigger>
               <div
                 class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
@@ -26,7 +26,7 @@
               class="absolute mt-[50px] w-[55px] -translate-x-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded shadow-lg">
               <p>授权</p>
             </TooltipContent>
-          </Tooltip>
+          </Tooltip> -->
         </div>
 
         <div class="relative">
@@ -42,32 +42,32 @@
       <!-- Table -->
       <!-- <div class="bg-white rounded-lg shadow"> -->
       <!-- Table Header -->
-      <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 text-base text-gray-500 h-[60px] sticky top-0 z-10">
-        <div class="flex items-center justify-center">
+      <div class="grid grid-cols-4 px-6 py-3 bg-gray-50 text-base text-gray-500 h-[60px] sticky top-0 z-10">
+        <!-- <div class="flex items-center justify-center">
           <input type="checkbox" class="rounded border-gray-300" v-model="selectAll" @change="toggleSelectAll"
             :indeterminate="isIndeterminate" :checked="isChecked">
-        </div>
+        </div> -->
         <div class="">分组</div>
         <div class="">成员数量</div>
         <div class="">备注</div>
         <div class="">操作</div>
-        <div class="">更多</div>
+        <!-- <div class="">更多</div> -->
       </div>
 
       <!-- Table Body -->
       <div class="divide-y overflow-auto flex-1">
         <div v-for="(group, index) in filteredGroups" :key="group.id"
-          class="grid grid-cols-6 px-6 py-4 items-center text-sm hover:bg-custom-light-blue" :class="{
+          class="grid grid-cols-4 px-6 py-4 items-center text-sm hover:bg-custom-light-blue" :class="{
             'border-t border-gray-100': true,
             'bg-blue-50 hover:bg-blue-100': group.selected,
             'hover:bg-blue-100': !group.selected,
           }">
-          <div class="p-4 text-center">
+          <!-- <div class="p-4 text-center">
             <div class="flex justify-center">
               <input type="checkbox" class="rounded border-gray-300" v-model="group.selected"
                 :disabled="group.is_delete === 0" @change="selectGroup(group)" />
             </div>
-          </div>
+          </div> -->
           <div class="text-gray-900 ">
             {{ group.name }}
           </div>
@@ -78,14 +78,16 @@
             {{ group.description || "\\" }}
           </div>
           <div class="flex gap-2">
-            <button
+            <button class="text-blue-500 hover:underline" @click="toAllMem(group.id)">查看成员</button>
+
+            <!-- <button
               class="flex items-center gap-1 text-blue-500 border border-blue-500 px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors"
               @click="addMem(group)">
               <PlusIcon class="w-4 h-4" />
               添加成员
-            </button>
+            </button> -->
           </div>
-          <div class="flex items-center">
+          <!-- <div class="flex items-center">
             <button class="text-blue-500 hover:underline" @click="toAllMem(group.id)">查看成员</button>
             <More>
               <MoreTrigger>
@@ -103,8 +105,12 @@
                 </MoreItem>
               </MoreContent>
             </More>
-          </div>
+          </div> -->
         </div>
+      </div>
+
+      <div class="flex items-center justify-center w-full h-full" v-if="groups?.length === 0">
+        数据为空，没有成员
       </div>
       <!-- </div> -->
 
