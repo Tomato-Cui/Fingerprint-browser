@@ -9,6 +9,10 @@ export const team_query = async (pageNum: number, pageSize: number): Promise<any
 };
 
 
+export const query_current_team_info = async (): Promise<any> => {
+    return await invoke('query_current_team_info', {})
+};
+
 export const blocked = async (
     currentUserUuid: string,
     teamId: number,
