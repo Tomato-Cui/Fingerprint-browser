@@ -13,15 +13,20 @@
 </template>
 
 <script setup>
-import Layout from '@/components/layout/index.vue'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { useRoute } from 'vue-router';
-import { Toaster } from '@/components/ui/sonner'
-import { isLogin } from '@/commands/user'
-import { onMounted, ref, watch } from 'vue';
-import Login from '@/views/Login/index.vue';
+import Layout from "@/components/layout/index.vue";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useRoute } from "vue-router";
+import { Toaster } from "@/components/ui/sonner";
+import { isLogin } from "@/commands/user";
+import { onMounted, ref, watch } from "vue";
+import Login from "@/views/Login/index.vue";
+import { environment_account_query } from "@/commands/environment-account";
 
 const route = useRoute();
+
+onMounted(() => {
+  environment_account_query(1, 10);
+});
 </script>
 
 <style style>

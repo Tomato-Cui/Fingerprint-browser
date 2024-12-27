@@ -89,6 +89,8 @@ pub fn run() {
             team_command::query_team_group_all_user,
             team_command::team_create,
             team_command::team_modify,
+            team_command::remove_current_user,
+            team_command::team_modify_team_user_info,
             team_command::team_delete,
             team_group_command::team_group_query_id,
             team_group_command::team_group_query_all,

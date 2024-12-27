@@ -231,10 +231,10 @@ impl Team {
         if !(is_leader > 0) {
             return Ok((0, vec![]));
         }
-
         let blocked = if blocked { 1 } else { 0 };
+
         let (total,): (i64,) =
-            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader = 0 and blocked = ?")
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader is null and blocked = ?")
                 .bind(team_id)
                 .bind(blocked)
                 .fetch_one(pool)
@@ -251,7 +251,7 @@ impl Team {
             "SELECT user_infos.* FROM user_infos 
          JOIN users ON user_infos.id = users.user_info_id 
          JOIN user_team_relation ON users.uuid = user_team_relation.user_uuid 
-         WHERE user_team_relation.team_id = ? and user_team_relation.is_leader = 0 and user_team_relation.blocked = ?
+         WHERE user_team_relation.team_id = ? and user_team_relation.is_leader is null and user_team_relation.blocked = ?
          LIMIT ? OFFSET ?",
         )
         .bind(team_id)
