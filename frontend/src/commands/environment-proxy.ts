@@ -32,3 +32,7 @@ export const environment_proxies_modify = async (id: number, payload: Proxy): Pr
 export const environment_proxies_delete = async (id: number): Promise<any> => {
     return await invoke('environment_proxies_delete', { id })
 };
+
+export const environment_proxies_batch_delete = async (ids: number[]) => {
+    return await invoke('environment_proxies_batch_delete', { ids })
+}

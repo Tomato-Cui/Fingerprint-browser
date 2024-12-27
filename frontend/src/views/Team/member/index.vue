@@ -334,7 +334,7 @@ const invMember = ref(false)  //邀请成员
 const forbidMem = ref(false) //禁用成员
 const delM = ref(false)  //删除成员
 const pagination = reactive({
-  pageIndex: 1,
+  pageIndex: 0,
   pageSize: 16,
   total: 0,
 });

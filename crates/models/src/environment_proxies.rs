@@ -5,7 +5,7 @@ use crate::environment_proxy_group::ProxyGroup;
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Proxy {
-    pub id: Option<i32>,                           // 自增ID
+    pub id: Option<i32>,                   // 自增ID
     pub kind: String,                      // 类型
     pub host: String,                      // 主机
     pub port: String,                      // 端口
@@ -205,5 +205,26 @@ impl Proxy {
             .await?;
 
         Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn delete_proxys(
+        pool: &Pool<Sqlite>,
+        id: Vec<u32>,
+        user_uuid: &str,
+    ) -> Result<bool, Error> {
+        let ids = id
+            .iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        let sql = format!(
+            "UPDATE environment_proxies SET deleted_at = CURRENT_TIMESTAMP WHERE id IN ({}) AND user_uuid = ?",
+            ids
+        );
+
+        let row = sqlx::query(&sql).bind(user_uuid).execute(pool).await?;
+
+        Ok(row.rows_affected() >= 1)
     }
 }

@@ -70,6 +70,15 @@ pub async fn delete(user_uuid: &str, id: u32) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+
+pub async fn batch_delete(user_uuid: &str, ids: Vec<u32>) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = Proxy::delete_proxys(pool, ids, user_uuid).await?;
+
+    Ok(ok)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

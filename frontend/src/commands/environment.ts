@@ -9,7 +9,6 @@ export interface Environment {
     proxy_id?: number;               // 代理ID
     fp_info_id?: number;             // 指纹信息ID
     group_id?: number;               // 分组ID
-    status: number;                  // 状态
 }
 
 export interface EnvironmentInfo {
@@ -99,16 +98,18 @@ export const environment_query_by_team = async (id: number, pageNum: number, pag
     return await invoke('environment_query_by_team', { id, pageNum, pageSize })
 };
 
-export const environment_detail_create = async (payload: EnvironmentInfo): Promise<any> => {
-    return await invoke('environment_detail_create', { payload })
+export const environment_detail_create = async (environmentName: string): Promise<any> => {
+    return await invoke('environment_detail_create', { environmentName })
 };
 
-export const environment_create = async (payload: Environment): Promise<any> => {
-    return await invoke('environment_create', { payload })
+export const environment_create = async (environmentName: String): Promise<any> => {
+    console.log(environmentName);
+
+    return await invoke('environment_create', { environmentName })
 };
 
-export const environment_batch_create = async (payload: Array<Environment>): Promise<any> => {
-    return await invoke('environment_batch_create', { payload })
+export const environment_batch_create = async (environmentNames: Array<String>): Promise<any> => {
+    return await invoke('environment_batch_create', { environmentNames })
 }
 
 export const environment_modify_info = async (payload: EnvironmentInfo): Promise<any> => {

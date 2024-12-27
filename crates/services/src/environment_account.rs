@@ -10,7 +10,19 @@ pub async fn query_by_id(id: u32) -> Result<EnvironmentAccount, ServiceError> {
     Ok(account)
 }
 
-pub async fn query(
+pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Value, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let (total, accounts) =
+        EnvironmentAccount::query_by_user_uuid(pool, user_uuid, page_num, page_size).await?;
+
+    Ok(json!({
+        "total": total,
+        "data": accounts,
+    }))
+}
+
+pub async fn account_query_current_environment(
     environment_uuid: &str,
     page_num: u32,
     page_size: u32,
@@ -51,6 +63,14 @@ pub async fn delete(id: u32) -> Result<bool, ServiceError> {
     Ok(ok)
 }
 
+pub async fn batch_delete(ids: Vec<u32>) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = EnvironmentAccount::deletes(pool, ids).await?;
+
+    Ok(ok)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -68,7 +88,7 @@ mod tests {
     async fn test_query() {
         crate::setup().await;
 
-        let result = query("3cfb0bc6-7b48-498a-935a-90ce561e40a5", 1, 10).await;
+        let result = query("d3129a09-5473-4b1e-915b-bba0af78d752", 1, 10).await;
         println!("{:?}", result)
     }
 

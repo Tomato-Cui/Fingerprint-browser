@@ -31,6 +31,19 @@ pub async fn team_query(page_num: u32, page_size: u32) -> Result<AppResponse<Val
 }
 
 #[tauri::command]
+pub async fn query_current_team_info() -> Result<AppResponse<Team>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    match services::team::query_current_team_info(&user_uuid).await {
+        Ok(data) => Ok(AppResponse::<Team>::success(success_msg, Some(data))),
+        Err(r) => Ok(AppResponse::<Team>::fail(warn_msg(r.to_string()))),
+    }
+}
+
+#[tauri::command]
 pub async fn query_team_all_user(
     team_id: u32,
     page_num: u32,
@@ -42,7 +55,7 @@ pub async fn query_team_all_user(
     });
 
     Ok(
-        match services::team::query_team_all_blocked_user(&user_uuid, team_id, page_num, page_size)
+        match services::team::query_team_all_user(&user_uuid, team_id, page_num, page_size)
             .await
         {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
@@ -126,6 +139,54 @@ pub async fn team_create(
         }
         Err(r) => Ok(AppResponse::<bool>::fail(warn_msg(r.to_string()))),
     }
+}
+
+#[tauri::command]
+pub async fn un_blocked(
+    current_uuid: String,
+    team_id: u32,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::team::blocked(&user_uuid, &current_uuid, team_id).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn blocked(
+    current_uuid: String,
+    team_id: u32,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::team::un_blocked(&user_uuid, &current_uuid, team_id).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
