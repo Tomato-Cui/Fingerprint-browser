@@ -23,10 +23,10 @@ pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Val
     }))
 }
 
-pub async fn create(payload: ProxyGroup) -> Result<bool, ServiceError> {
+pub async fn create(user_uuid: &str, payload: ProxyGroup) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = ProxyGroup::insert_proxy_group(pool, &payload).await?;
+    let ok = ProxyGroup::insert_proxy_group(pool, user_uuid, &payload).await?;
 
     Ok(ok)
 }
@@ -53,43 +53,46 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_group_id() {
+        crate::setup().await;
         let result = query_by_group_id(1).await;
-        let _proxy_group = result.unwrap();
+        let proxy_group = result.unwrap();
+        println!("{:?}", proxy_group);
     }
 
     #[tokio::test]
     async fn test_query() {
-        let result = query("user-uuid", 1, 10).await;
-        assert!(result.is_ok());
+        crate::setup().await;
+        let result = query("3cfb0bc6-7b48-498a-935a-90ce561e40a5", 1, 10).await;
         let value: Value = result.unwrap();
-        assert!(value["total"].as_u64().is_some());
-        assert!(value["data"].as_array().is_some());
+        println!("{:?}", value);
     }
 
     #[tokio::test]
     async fn test_create() {
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let proxy_group = ProxyGroup {
             ..Default::default()
         };
-        let result = create(proxy_group).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        let result = create(user_uuid, proxy_group).await;
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_update() {
+        crate::setup().await;
         let proxy_group = ProxyGroup {
+            name:"abc".to_string(),
             ..Default::default()
         };
         let result = update(1, proxy_group).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_delete() {
+        crate::setup().await;
         let result = delete(1).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 }

@@ -115,7 +115,7 @@ mod tests {
     #[tokio::test]
     async fn test_register() {
         crate::setup().await;
-        let ok = super::regsiter("thisistes", "2342", "123").await;
+        let ok = super::regsiter("thisiste", "242", "123").await;
         println!("{:?}", ok)
     }
 

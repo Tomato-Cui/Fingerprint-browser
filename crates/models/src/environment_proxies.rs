@@ -5,7 +5,7 @@ use crate::environment_proxy_group::ProxyGroup;
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Proxy {
-    pub id: i32,                           // 自增ID
+    pub id: Option<i32>,                           // 自增ID
     pub kind: String,                      // 类型
     pub host: String,                      // 主机
     pub port: String,                      // 端口
@@ -66,7 +66,6 @@ impl Proxy {
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<Proxy>), Error> {
-        // 获取总数
         let (total,): (i64,) = sqlx::query_as(
             "SELECT count(1) FROM environment_proxies WHERE user_uuid = ? AND deleted_at IS NULL",
         )
@@ -81,7 +80,6 @@ impl Proxy {
         };
         let offset = page_num * page_size;
 
-        // 获取分页的代理列表
         let proxies: Vec<Proxy> = sqlx::query_as(
         "SELECT * FROM environment_proxies WHERE user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?"
             )

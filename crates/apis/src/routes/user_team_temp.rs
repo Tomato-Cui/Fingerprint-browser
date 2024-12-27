@@ -53,16 +53,20 @@ mod team_receive_query {
 
     use super::*;
 
-    pub async fn handle(
-        state: Extension<CurrentUser>,
-        Json(payload): Json<Pagination>,
-    ) -> impl IntoResponse {
+    #[derive(Deserialize)]
+    pub struct Payload {
+        team_id: u32,
+        page_num: u32,
+        page_size: u32,
+    }
+
+    pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
             Some(format!("查询失败: {}", v))
         });
 
         match services::user_team_temp::query_team_apply(
-            &state.user_uuid,
+            payload.team_id,
             payload.page_num,
             payload.page_size,
         )

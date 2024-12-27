@@ -3,14 +3,14 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct TeamGroup {
-    pub id: i32,                               // 自增ID
-    pub name: String,                          // 组名称
-    pub description: Option<String>,           // 组描述
-    pub team_id: Option<i32>,                  // 团队ID
-    pub team_group_permission_id: Option<i32>, // 团队组权限ID
-    pub created_at: Option<String>,            // 创建时间
-    pub updated_at: Option<String>,            // 更新时间
-    pub deleted_at: Option<String>,            // 删除时间
+    pub id: i32,
+    pub name: String,
+    pub description: Option<String>,
+    pub team_id: Option<i32>,
+    pub team_group_permission_id: Option<i32>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub deleted_at: Option<String>,
 }
 
 impl TeamGroup {

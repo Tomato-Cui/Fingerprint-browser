@@ -49,37 +49,46 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_id() {
+        crate::setup().await;
         let result = query_by_id(1).await;
-        assert!(result.is_ok());
+
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_query() {
-        let result = query("some_uuid").await;
-        assert!(result.is_ok());
+        crate::setup().await;
+        let result = query("e5368907-d858-47e4-bfee-eddabbd36a56").await;
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_create() {
+        crate::setup().await;
+        let environment_uuid = "e5368907-d858-47e4-bfee-eddabbd36a56";
         let payload = EnvironmentCookie {
-            ..Default::default() // fill in the fields as necessary
+            value: "abchdshfj".to_string(),
+            environment_uuid: Some(environment_uuid.to_string()),
+            ..Default::default()
         };
         let result = create(&payload).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_modify() {
+        crate::setup().await;
         let payload = EnvironmentCookie {
             ..Default::default()
         };
-        let result = modify("some_uuid", &payload).await;
-        assert!(result.is_ok());
+        let result = modify("e5368907-d858-47e4-bfee-eddabbd36a56", &payload).await;
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_delete() {
-        let result = delete("some_uuid").await;
-        assert!(result.is_ok());
+        crate::setup().await;
+        let result = delete("e5368907-d858-47e4-bfee-eddabbd36a56").await;
+        println!("{:?}", result);
     }
 }

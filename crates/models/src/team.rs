@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
+use crate::user_info::UserInfo;
+
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Team {
     pub id: i32,                     // 自增ID
@@ -35,10 +37,10 @@ impl Team {
             .await?;
 
         let default_groups = vec![
-            ("管理组", "管理组描述", 4), 
-            ("编辑组", "编辑组描述", 2), 
-            ("权限组", "权限组描述", 3), 
-            ("默认组", "默认组描述", 1), 
+            ("管理组", "管理组描述", 4),
+            ("编辑组", "编辑组描述", 2),
+            ("权限组", "权限组描述", 3),
+            ("默认组", "默认组描述", 1),
         ];
 
         let mut group_ids = Vec::new();
@@ -107,6 +109,113 @@ impl Team {
         .await?;
 
         Ok(team)
+    }
+
+    #[allow(dead_code)]
+    pub async fn query_team_all_user_by_group_id(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+        group_id: u32,
+        page_num: u32,
+        page_size: u32,
+    ) -> Result<(i64, Vec<UserInfo>), Error> {
+        let (is_leader,): (i64,) =
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ? and is_leader = 1")
+                .bind(team_id)
+                .bind(user_uuid)
+                .fetch_one(pool)
+                .await?;
+
+        if !(is_leader > 0) {
+            return Ok((0, vec![]));
+        }
+
+        let user_uuids: Vec<String> =
+            sqlx::query_scalar("SELECT user_uuid FROM user_team_relation WHERE team_group_id = ? and is_leader = 0 and blocked = 0")
+                .bind(group_id)
+                .fetch_all(pool)
+                .await?;
+
+        let total = user_uuids.len() as i64;
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
+        let offset = page_num * page_size;
+
+        let select_sql = &format!(
+            "SELECT user_infos.* FROM user_infos 
+         JOIN users ON user_infos.id = users.user_info_id 
+         JOIN user_team_relation ON users.uuid = user_team_relation.user_uuid 
+         WHERE user_team_relation.user_uuid in ({}) LIMIT ? OFFSET ?",
+            user_uuids
+                .iter()
+                .map(|v| format!("'{}'", v))
+                .collect::<Vec<String>>()
+                .join(",")
+        );
+
+        let user_infos: Vec<UserInfo> = sqlx::query_as(&select_sql)
+            .bind(page_size)
+            .bind(offset)
+            .fetch_all(pool)
+            .await?;
+
+        Ok((total, user_infos))
+    }
+
+    #[allow(dead_code)]
+    pub async fn query_team_all_user_by_team_id(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+        blocked: bool,
+        page_num: u32,
+        page_size: u32,
+    ) -> Result<(i64, Vec<UserInfo>), Error> {
+        let (is_leader,): (i64,) =
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ? and is_leader = 1")
+                .bind(team_id)
+                .bind(user_uuid)
+                .fetch_one(pool)
+                .await?;
+
+        if !(is_leader > 0) {
+            return Ok((0, vec![]));
+        }
+
+        let blocked = if blocked { 1 } else { 0 };
+        let (total,): (i64,) =
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader = 0 and blocked = ?")
+                .bind(team_id)
+                .bind(blocked)
+                .fetch_one(pool)
+                .await?;
+
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
+        let offset = page_num * page_size;
+
+        let user_infos: Vec<UserInfo> = sqlx::query_as(
+            "SELECT user_infos.* FROM user_infos 
+         JOIN users ON user_infos.id = users.user_info_id 
+         JOIN user_team_relation ON users.uuid = user_team_relation.user_uuid 
+         WHERE user_team_relation.team_id = ? and user_team_relation.is_leader = 0 and user_team_relation.blocked = ?
+         LIMIT ? OFFSET ?",
+        )
+        .bind(team_id)
+        .bind(blocked)
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(pool)
+        .await?;
+
+        Ok((total, user_infos))
     }
 
     #[allow(dead_code)]

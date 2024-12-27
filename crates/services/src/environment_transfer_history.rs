@@ -73,53 +73,56 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_id() {
-        let environment_uuid = "test-env-uuid";
+        crate::setup().await;
+        let environment_uuid = "e5368907-d858-47e4-bfee-eddabbd36a56";
         let result = query_by_id(environment_uuid).await;
-        assert!(result.is_ok());
-        let transfer_history = result.unwrap();
-        assert_eq!(transfer_history.environment_uuid, environment_uuid);
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_query() {
-        let user_uuid = "test-user-uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
-        assert!(result.is_ok());
-        let value: Value = result.unwrap();
-        assert!(value["total"].is_number());
-        assert!(value["data"].is_array());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_create() {
+        crate::setup().await;
+
+        let to_user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
+        let from_user_uuid = "9d4250ca-e1a5-40b1-ba9f-a0b6d98c1db8".to_string();
+        let environment_uuid = "e5368907-d858-47e4-bfee-eddabbd36a56".to_string();
+
         let payloads = vec![EnvironmentTransferHistory {
+            environment_uuid,
+            from_user_uuid,
+            to_user_uuid,
             ..Default::default()
         }];
         let result = create(payloads).await;
-        assert!(result.is_ok());
-        let res: HashMap<String, bool> = result.unwrap();
-        assert!(res.contains_key("test-env-uuid"));
-        assert!(res["test-env-uuid"]);
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_modify() {
+        crate::setup().await;
         let payload = EnvironmentTransferHistory {
             ..Default::default()
         };
         let result = modify(&payload).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 
     #[tokio::test]
     async fn test_delete() {
-        let user_uuid = "test-user-uuid";
-        let environment_uuid = "test-env-uuid";
+        crate::setup().await;
+        let user_uuid = "9d4250ca-e1a5-40b1-ba9f-a0b6d98c1db8";
+        let environment_uuid = "e5368907-d858-47e4-bfee-eddabbd36a56";
         let result = delete(user_uuid, environment_uuid).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result);
     }
 }

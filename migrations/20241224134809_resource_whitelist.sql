@@ -13,3 +13,10 @@ create table resource_whitelist
 );
 
 
+INSERT INTO resource_whitelist (path, method, description, can_use) VALUES
+('/api/v1/users/login', 'POST', '用户登录', 1),
+('/api/v1/users/register', 'POST', '用户注册', 1),
+('/api/v1/users/reset-password', 'POST', '重置密码', 1),
+('/api/v1/status', 'GET', '查看状态', 1);
+
+
