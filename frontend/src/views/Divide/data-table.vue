@@ -100,7 +100,10 @@ const columns = [
     enableHiding: false,
     enablePinning: true,
   }),
-  columnHelper.accessor("uuid", {}),
+  columnHelper.accessor("uuid", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
   columnHelper.accessor("name", {
     header: ({ column }) => {
       return h(
