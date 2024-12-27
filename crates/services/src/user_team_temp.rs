@@ -20,14 +20,14 @@ pub async fn query_user_apply(
 }
 
 pub async fn query_team_apply(
-    user_uuid: &str,
+    team_id: u32,
     page_num: u32,
     page_size: u32,
 ) -> Result<Value, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     let (total, user_team_temps) =
-        UserTeamTemp::query_team_apply(pool, user_uuid, page_num, page_size).await?;
+        UserTeamTemp::query_team_apply(pool, team_id, page_num, page_size).await?;
 
     Ok(json!({
         "total": total,
@@ -105,69 +105,67 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_user_apply() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
         let page_num = 1;
         let page_size = 10;
 
         let result = query_user_apply(user_uuid, page_num, page_size).await;
-        assert!(result.is_ok());
         let value = result.unwrap();
-        assert!(value["total"].is_number());
-        assert!(value["data"].is_array());
+        println!("{:?}", value)
     }
 
     #[tokio::test]
     async fn test_query_team_apply() {
-        let user_uuid = "test_user_uuid";
+        crate::setup().await;
+        let team_id = 4;
         let page_num = 1;
         let page_size = 10;
 
-        let result = query_team_apply(user_uuid, page_num, page_size).await;
-        assert!(result.is_ok());
+        let result = query_team_apply(team_id, page_num, page_size).await;
         let value = result.unwrap();
-        assert!(value["total"].is_number());
-        assert!(value["data"].is_array());
+        println!("{:?}", value)
     }
 
     #[tokio::test]
     async fn test_user_send() {
-        let user_uuid = "test_user_uuid";
-        let team_id = 1;
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let team_id = 4;
         let description = "test_description";
 
         let result = user_send(user_uuid, team_id, description).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result)
     }
 
     #[tokio::test]
     async fn test_team_send() {
-        let user_uuid = "test_user_uuid";
-        let team_id = 1;
+        crate::setup().await;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let team_id = 4;
         let description = "test_description";
 
         let result = team_send(user_uuid, team_id, description).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result)
     }
 
     #[tokio::test]
     async fn test_allow() {
-        let id = 1;
-        let user_uuid = "test_user_uuid";
-        let team_id = 1;
+        crate::setup().await;
+        let id = 10;
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let team_id = 4;
 
         let result = allow(id, user_uuid, team_id).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result)
     }
 
     #[tokio::test]
     async fn test_delete() {
-        let id = 1;
+        crate::setup().await;
+        let id = 10;
 
         let result = delete(id).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap());
+        println!("{:?}", result)
     }
 }

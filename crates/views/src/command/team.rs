@@ -31,6 +31,76 @@ pub async fn team_query(page_num: u32, page_size: u32) -> Result<AppResponse<Val
 }
 
 #[tauri::command]
+pub async fn query_team_all_user(
+    team_id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(
+        match services::team::query_team_all_blocked_user(&user_uuid, team_id, page_num, page_size)
+            .await
+        {
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn query_team_all_blocked_user(
+    team_id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(
+        match services::team::query_team_all_blocked_user(&user_uuid, team_id, page_num, page_size)
+            .await
+        {
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn query_team_group_all_user(
+    team_id: u32,
+    team_group_id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(
+        match services::team::query_team_group_all_user(
+            &user_uuid,
+            team_id,
+            team_group_id,
+            page_num,
+            page_size,
+        )
+        .await
+        {
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
 pub async fn team_create(
     name: String,
     description: String,

@@ -5,7 +5,7 @@ use crate::environment_proxy_group::ProxyGroup;
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Proxy {
-    pub id: i32,                           // 自增ID
+    pub id: Option<i32>,                           // 自增ID
     pub kind: String,                      // 类型
     pub host: String,                      // 主机
     pub port: String,                      // 端口

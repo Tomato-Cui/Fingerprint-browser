@@ -16,18 +16,20 @@ impl ProxyGroup {
     #[allow(dead_code)]
     pub async fn insert_proxy_group(
         pool: &Pool<Sqlite>,
+        user_uuid: &str,
         proxy_group: &ProxyGroup,
     ) -> Result<bool, Error> {
         let sql = "
             INSERT INTO environment_proxy_groups (
-                name, description
+                name, description, user_uuid
             ) VALUES (
-                ?, ?
+                ?, ?, ?
             )";
 
         let row = sqlx::query(sql)
             .bind(&proxy_group.name)
             .bind(&proxy_group.description)
+            .bind(user_uuid)
             .execute(pool)
             .await?;
 

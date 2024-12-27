@@ -4,7 +4,7 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct EnvironmentFingerprint {
     pub id: Option<i32>,                  // 自增ID
-    pub user_uuid: Option<String>,           // 用户UUID
+    pub user_uuid: Option<String>,        // 用户UUID
     pub browser: String,                  // 浏览器
     pub ua: String,                       // 自定义UA
     pub os: String,                       // 操作系统

@@ -26,7 +26,7 @@ pub async fn is_active(environment_uuid: &str) -> Result<bool, anyhow::Error> {
 
 pub async fn stop(environmnet_uuiids: Vec<String>) -> Result<HashMap<String, i32>, anyhow::Error> {
     let mut data = HashMap::new();
-    for id in environmnet_uuiids{
+    for id in environmnet_uuiids {
         let statu = ACTUATOR.lock().await.stop_browser(&id).await?;
         let code = statu.code();
         data.insert(id, code.unwrap_or_default());

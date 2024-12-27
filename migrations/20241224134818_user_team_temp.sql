@@ -5,7 +5,7 @@ create table user_team_temps
     id            INTEGER
         primary key autoincrement,
     user_uuid     TEXT not null,
-    team_id       TEXT not null,
+    team_id       integer not null,
     allow_1       integer,
     allow_2       INTEGER,
     description   TEXT,

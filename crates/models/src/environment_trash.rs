@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
 use crate::environment::Environment;
@@ -19,29 +20,30 @@ impl EnvironmentTrash {
         pool: &Pool<Sqlite>,
         environment_uuid: &str,
     ) -> Result<Environment, Error> {
-        let environment: Environment = sqlx::query_as(
-            "SELECT * FROM environments WHERE environment_uuid  = ? AND deleted_at IS NOT NULL",
-        )
-        .bind(environment_uuid)
-        .fetch_one(pool)
-        .await?;
+        let environment: Environment =
+            sqlx::query_as("SELECT * FROM environments WHERE uuid = ? AND deleted_at IS NOT NULL")
+                .bind(environment_uuid)
+                .fetch_one(pool)
+                .await?;
 
         Ok(environment)
     }
 
-    #[allow(dead_code)]
     pub async fn query_deleted_environments_by_user_uuid(
         pool: &Pool<Sqlite>,
         user_uuid: &str,
         page_num: u32,
         page_size: u32,
-    ) -> Result<(i64, Vec<Environment>), Error> {
+    ) -> Result<(i64, Vec<Value>), Error> {
         let (total,): (i64,) = sqlx::query_as(
-            "SELECT count(1) FROM environments WHERE user_uuid = ? AND deleted_at IS NOT NULL",
+            "SELECT count(1) FROM environment_trash WHERE from_user_uuid = ? AND deleted_at IS NULL",
         )
         .bind(user_uuid)
         .fetch_one(pool)
         .await?;
+        if total == 0 {
+            return Ok((0, vec![]));
+        }
 
         let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
             0
@@ -50,8 +52,8 @@ impl EnvironmentTrash {
         };
         let offset = page_num * page_size;
 
-        let environments: Vec<Environment> = sqlx::query_as(
-        "SELECT * FROM environments WHERE user_uuid = ? AND deleted_at IS NOT NULL LIMIT ? OFFSET ?",
+        let environment_uuids: Vec<(String,)> = sqlx::query_as(
+        "SELECT environment_uuid FROM environment_trash WHERE from_user_uuid = ? AND deleted_at IS NULL LIMIT ? OFFSET ?"
         )
         .bind(user_uuid)
         .bind(page_size)
@@ -59,7 +61,35 @@ impl EnvironmentTrash {
         .fetch_all(pool)
         .await?;
 
-        Ok((total, environments))
+        let nickname: String =  sqlx::query_scalar("
+            select user_infos.nickname from user_infos join users u on user_infos.id = u.user_info_id where uuid = ?;
+        ")
+        .bind(user_uuid)
+        .fetch_one(pool).await?;
+
+        let environments: Vec<Environment> = sqlx::query_as(&format!(
+            "SELECT * FROM environments WHERE uuid IN ({}) AND deleted_at IS NOT NULL",
+            environment_uuids
+                .iter()
+                .map(|v| format!("'{}'", v.0))
+                .collect::<Vec<String>>()
+                .join(",")
+        ))
+        .fetch_all(pool)
+        .await?;
+
+        Ok((
+            total,
+            environments
+                .into_iter()
+                .map(|env| {
+                    let mut env_json = serde_json::to_value(env).unwrap();
+                    env_json["delete_from_user_nickname"] = nickname.clone().into();
+
+                    env_json
+                })
+                .collect(),
+        ))
     }
 
     #[allow(dead_code)]
@@ -70,13 +100,11 @@ impl EnvironmentTrash {
     ) -> Result<bool, Error> {
         let mut tx = pool.begin().await?;
 
-        let update_row = sqlx::query(
-            "UPDATE environments SET deleted_at = NULL WHERE uuid = ? and from_user_uuid = ?",
-        )
-        .bind(environment_uuid)
-        .bind(user_uuid)
-        .execute(&mut *tx)
-        .await?;
+        let update_row = sqlx::query("UPDATE environments SET deleted_at = NULL WHERE uuid = ?")
+            .bind(environment_uuid)
+            .bind(user_uuid)
+            .execute(&mut *tx)
+            .await?;
 
         let delete_row = sqlx::query(
             "DELETE FROM environment_trash WHERE environment_uuid = ? and from_user_uuid = ?",
@@ -100,7 +128,7 @@ impl EnvironmentTrash {
         let mut tx = pool.begin().await?;
 
         let update_query = format!(
-            "UPDATE environments SET deleted_at = NULL WHERE uuid IN ({}) where from_user_uuid = ?",
+            "UPDATE environments SET deleted_at = NULL WHERE uuid IN ({})",
             environment_uuids
                 .iter()
                 .map(|_| "?")

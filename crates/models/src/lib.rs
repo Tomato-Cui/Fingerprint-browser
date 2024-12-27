@@ -16,6 +16,8 @@ pub mod user_avatar;
 pub mod user_info;
 pub mod user_team_temp;
 
+pub mod dto;
+
 #[allow(dead_code)]
 pub(crate) async fn setup() {
     states::init_config_state(r#"../../config.toml"#).await;

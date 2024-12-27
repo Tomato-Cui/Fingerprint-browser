@@ -14,11 +14,14 @@ pub fn build_router() -> Router {
         Router::new()
             .route("/:uuid", get(query_id::handle))
             .route("/query", get(query::handle))
-            .route("/query-by-group/:uuid", get(query_by_group::handle))
+            .route("/query-by-group/:id", get(query_by_group::handle))
+            .route("/query-by-team/:id", get(query_by_team::handle))
             .route("/create", post(create::handle))
+            .route("/detail/create", post(detail_create::handle))
             .route("/batch", post(batch::handle))
             .route("/batch-import", post(batch::handle))
             .route("/batch-export", post(query::handle))
+            .route("/modify-basic-info/:uuid", put(modify_basic_info::handle))
             .route("/modify-info/:uuid", put(modify_info::handle))
             .route("/move-to-group", put(move_to_group::handle))
             .route("/batch/move-to-group", put(batch_move_to_group::handle))
@@ -32,16 +35,18 @@ pub fn build_router() -> Router {
 mod query_id {
     use super::*;
     use axum::extract::Path;
-    use models::environment::Environment;
 
-    pub async fn handle(Path(uuid): Path<String>) -> impl IntoResponse {
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        Path(uuid): Path<String>,
+    ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::environment::query_by_uuid(&uuid).await {
-            Ok(data) => AppResponse::<Environment>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<Environment>::fail(warn_msg(r.to_string())),
+        match services::environment::query_environment_details(&state.user_uuid, &uuid).await {
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
     }
 }
@@ -86,6 +91,34 @@ mod query_by_group {
     }
 }
 
+mod query_by_team {
+
+    use super::*;
+    use crate::routes::Pagination;
+
+    pub async fn handle(
+        state: Extension<middlewares::CurrentUser>,
+        Path(id): Path<u32>,
+        payload: Query<Pagination>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::environment::query_by_team_id(
+            &state.user_uuid,
+            id,
+            payload.page_num,
+            payload.page_size,
+        )
+        .await
+        {
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
 mod create {
     use super::*;
 
@@ -99,6 +132,30 @@ mod create {
         let user_id = &state.user_uuid;
 
         match services::environment::create(user_id, payload).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<()>::success(success_msg, Some(()))
+                } else {
+                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod detail_create {
+    use super::*;
+
+    pub async fn handle(
+        state: Extension<middlewares::CurrentUser>,
+        Json(payload): Json<models::environment::EnvironmentInfo>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
+            Some(format!("创建失败: {}", v))
+        });
+
+        match services::environment::create_and_other_info(&state.user_uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -134,13 +191,39 @@ mod modify_info {
 
     pub async fn handle(
         Path(uuid): Path<String>,
+        Json(payload): Json<models::environment::EnvironmentInfo>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+            Some(format!("更新失败: {}", v))
+        });
+
+        match services::environment::modify_info(&uuid, payload).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<()>::success(success_msg, Some(()))
+                } else {
+                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod modify_basic_info {
+    use super::*;
+
+    pub async fn handle(
+        Path(uuid): Path<String>,
         Json(payload): Json<models::environment::Environment>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment::modify_info(&uuid, &payload.name, payload.description).await {
+        match services::environment::modify_basic_info(&uuid, &payload.name, payload.description)
+            .await
+        {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

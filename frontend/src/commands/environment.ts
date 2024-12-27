@@ -11,8 +11,80 @@ export interface Environment {
     group_id?: number;               // 分组ID
     status: number;                  // 状态
 }
+
+export interface EnvironmentInfo {
+    id: number;
+    uuid?: string;
+    user_uuid: string;
+    team_id?: number;
+    proxy?: Proxy;
+    fp_info: EnvironmentFingerprint;
+    name: string;
+    description?: string;
+    default_urls?: string;
+    proxy_enable: number;
+}
+
+export interface Proxy {
+    id: number;
+    kind: string;
+    host: string;
+    port: string;
+    username?: string;
+    password?: string;
+    user_uuid?: string;
+    environment_group_id?: number;
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string;
+}
+
+export interface EnvironmentFingerprint {
+    id: number;
+    user_uuid?: number;
+    browser: string;
+    ua: string;
+    os: string;
+    country?: string;
+    region?: string;
+    city?: string;
+    language_type: number;
+    languages: string;
+    gmt: string;
+    geography: string;
+    geo_tips: number;
+    geo_rule: number;
+    longitude?: string;
+    latitude?: string;
+    radius?: number;
+    height?: number;
+    width?: number;
+    fonts_type: number;
+    fonts?: string;
+    font_fingerprint: number;
+    web_rtc: number;
+    web_rtc_local_ip?: string;
+    canvas: number;
+    webgl: number;
+    hardware_acceleration: number;
+    webgl_info: number;
+    audio_context: number;
+    speech_voices: number;
+    media: number;
+    cpu: number;
+    memory: number;
+    do_not_track: number;
+    battery: number;
+    port_scan: number;
+    white_list?: string;
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string;
+}
+
+
 export const environment_query_id = async (environmentUuid: string): Promise<any> => {
-    return await invoke('environment_query_id', { environmentUuid})
+    return await invoke('environment_query_id', { environmentUuid })
 };
 
 export const environment_query = async (pageNum: number, pageSize: number): Promise<any> => {
@@ -23,6 +95,14 @@ export const environment_query_by_group = async (id: number, pageNum: number, pa
     return await invoke('environment_query_by_group', { id, pageNum, pageSize })
 };
 
+export const environment_query_by_team = async (id: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('environment_query_by_team', { id, pageNum, pageSize })
+};
+
+export const environment_detail_create = async (payload: EnvironmentInfo): Promise<any> => {
+    return await invoke('environment_detail_create', { payload })
+};
+
 export const environment_create = async (payload: Environment): Promise<any> => {
     return await invoke('environment_create', { payload })
 };
@@ -31,8 +111,12 @@ export const environment_batch_create = async (payload: Array<Environment>): Pro
     return await invoke('environment_batch_create', { payload })
 }
 
-export const environment_modify_info = async (environmentUuid: string, payload: Environment): Promise<any> => {
-    return await invoke('environment_modify_info ', {environmentUuid, payload })
+export const environment_modify_info = async (payload: EnvironmentInfo): Promise<any> => {
+    return await invoke('environment_modify_info ', { payload })
+};
+
+export const environment_modify_basic_info = async (environmentUuid: string, payload: Environment): Promise<any> => {
+    return await invoke('environment_modify_basic_info', { environmentUuid, payload })
 };
 
 export const environment_move_to_group = async (
@@ -52,7 +136,7 @@ export const environment_batch_move_to_group = async (
 };
 
 export const environment_delete = async (environmentUuid: String,): Promise<any> => {
-    return await invoke('environment_delete', { environmentUuid})
+    return await invoke('environment_delete', { environmentUuid })
 };
 
 export const environment_batch_delete = async (
