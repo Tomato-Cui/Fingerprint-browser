@@ -22,6 +22,18 @@ pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Val
     }))
 }
 
+pub async fn query_current_team_info(user_uuid: &str) -> Result<Team, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let current_team_id =
+        models::user_use_team::UserUseTeam::query_current_team_id_by_user_uuid(pool, user_uuid)
+            .await?;
+
+    let team = Team::query_team_by_id(pool, current_team_id).await?;
+
+    Ok(team)
+}
+
 pub async fn query_team_all_user(
     user_uuid: &str,
     team_id: u32,
@@ -100,6 +112,42 @@ pub async fn create(user_uuid: &str, payload: &Team) -> Result<bool, ServiceErro
     let ok = Team::insert(pool, user_uuid, payload, None).await?;
 
     Ok(ok)
+}
+
+pub async fn blocked(
+    user_uuid: &str,
+    current_user_email: &str,
+    team_id: u32,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    match models::user::User::query_uuid_by_email(pool, current_user_email).await {
+        Ok(current_user_uuid) => {
+            let ok =
+                Team::blocked_action(pool, user_uuid, team_id, &current_user_uuid, true).await?;
+
+            Ok(ok)
+        }
+        Err(_e) => Ok(false),
+    }
+}
+
+pub async fn un_blocked(
+    user_uuid: &str,
+    current_user_email: &str,
+    team_id: u32,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    match models::user::User::query_uuid_by_email(pool, current_user_email).await {
+        Ok(current_user_uuid) => {
+            let ok =
+                Team::blocked_action(pool, user_uuid, team_id, &current_user_uuid, true).await?;
+
+            Ok(ok)
+        }
+        Err(_e) => Ok(false),
+    }
 }
 
 pub async fn modify(id: u32, payload: &Team) -> Result<bool, ServiceError> {

@@ -88,7 +88,7 @@ pub async fn allow(id: u32, user_uuid: &str, team_id: u32) -> Result<bool, Servi
         ..Default::default()
     };
 
-    let ok = UserTeamTemp::update_user_team_temp(pool, id, &user_team_temp).await?;
+    let ok = UserTeamTemp::agree_join(pool, id, &user_team_temp).await?;
     Ok(ok)
 }
 

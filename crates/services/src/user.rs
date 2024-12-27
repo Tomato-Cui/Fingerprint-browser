@@ -21,6 +21,10 @@ pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceErro
 
     states::auth::set_token(&token).await;
 
+    let default_team =
+        models::team::Team::query_default_team_by_user_uuid(pool, &user.uuid).await?;
+
+    models::user_use_team::UserUseTeam::create(pool, &user.uuid, default_team.id as u32).await?;
     Ok(token)
 }
 

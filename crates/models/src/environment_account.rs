@@ -119,4 +119,21 @@ impl EnvironmentAccount {
 
         Ok(row.rows_affected() == 1)
     }
+
+    #[allow(dead_code)]
+    pub async fn deletes(pool: &Pool<Sqlite>, id: Vec<u32>) -> Result<bool, Error> {
+        let ids = id
+            .iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        let sql = format!(
+            "UPDATE environment_accounts SET deleted_at = CURRENT_TIMESTAMP WHERE id IN ({})",
+            ids
+        );
+
+        let row = sqlx::query(&sql).execute(pool).await?;
+
+        Ok(row.rows_affected() >= 1)
+    }
 }

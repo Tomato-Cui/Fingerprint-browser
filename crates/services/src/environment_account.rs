@@ -51,6 +51,14 @@ pub async fn delete(id: u32) -> Result<bool, ServiceError> {
     Ok(ok)
 }
 
+pub async fn batch_delete(ids: Vec<u32>) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = EnvironmentAccount::deletes(pool, ids).await?;
+
+    Ok(ok)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

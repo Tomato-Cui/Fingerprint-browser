@@ -84,8 +84,14 @@ pub async fn create_and_other_info(
 pub async fn create(user_uuid: &str, name: String) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
+    // 查询所在的团队
+    let team_id =
+        models::user_use_team::UserUseTeam::query_current_team_id_by_user_uuid(pool, user_uuid)
+            .await?;
+
     let mut environment = Environment {
         name: name.clone(),
+        team_id: Some(team_id as i32),
         ..Default::default()
     };
     environment.user_uuid = user_uuid.to_string();

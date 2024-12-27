@@ -16,7 +16,8 @@ pub fn build_router() -> Router {
             .route("/query", get(query::handle))
             .route("/create", post(create::handle))
             .route("/modify/:id", put(modify::handle))
-            .route("/delete/:id", delete(delete::handle)),
+            .route("/delete/:id", delete(delete::handle))
+            .route("/batch/delete", delete(batch_delete::handle)),
     )
 }
 
@@ -116,6 +117,32 @@ mod delete {
         });
 
         match services::environment_account::delete(id).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<()>::success(success_msg, Some(()))
+                } else {
+                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod batch_delete {
+    use super::*;
+
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        pub ids: Vec<u32>,
+    }
+
+    pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("删除成功".to_string()), |v| {
+            Some(format!("删除失败: {}", v))
+        });
+
+        match services::environment_account::batch_delete(payload.ids).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
