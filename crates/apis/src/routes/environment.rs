@@ -122,16 +122,21 @@ mod query_by_team {
 mod create {
     use super::*;
 
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        pub name: String,
+    }
+
     pub async fn handle(
         state: Extension<middlewares::CurrentUser>,
-        Json(payload): Json<models::environment::Environment>,
+        Json(payload): Json<Payload>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
         let user_id = &state.user_uuid;
 
-        match services::environment::create(user_id, payload).await {
+        match services::environment::create(user_id, payload.name).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -171,15 +176,20 @@ mod detail_create {
 mod batch {
     use super::*;
 
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        pub names: Vec<String>,
+    }
+
     pub async fn handle(
         state: Extension<middlewares::CurrentUser>,
-        Json(payload): Json<Vec<models::environment::Environment>>,
+        Json(payload): Json<Payload>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
 
-        match services::environment::create_batch(&state.user_uuid, payload).await {
+        match services::environment::create_batch(&state.user_uuid, payload.names).await {
             Ok(data) => AppResponse::<Vec<Value>>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Vec<Value>>::fail(warn_msg(r.to_string())),
         }

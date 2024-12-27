@@ -94,13 +94,15 @@ pub async fn environment_detail_create(
 }
 
 #[tauri::command]
-pub async fn environment_create(payload: Environment) -> Result<AppResponse<bool>, tauri::Error> {
+pub async fn environment_create(
+    environment_name: String,
+) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
         Some(format!("创建失败: {}", v))
     });
 
-    match services::environment::create(&user_uuid, payload).await {
+    match services::environment::create(&user_uuid, environment_name).await {
         Ok(data) => {
             if data {
                 Ok(AppResponse::<bool>::success(success_msg, Some(data)))
@@ -114,14 +116,14 @@ pub async fn environment_create(payload: Environment) -> Result<AppResponse<bool
 
 #[tauri::command]
 pub async fn environment_batch_create(
-    payload: Vec<Environment>,
+    environment_names: Vec<String>,
 ) -> Result<AppResponse<Vec<Value>>, tauri::Error> {
     let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
         Some(format!("创建失败: {}", v))
     });
 
-    match services::environment::create_batch(&user_uuid, payload).await {
+    match services::environment::create_batch(&user_uuid, environment_names).await {
         Ok(data) => Ok(AppResponse::<Vec<Value>>::success(success_msg, Some(data))),
         Err(r) => Ok(AppResponse::<Vec<Value>>::fail(warn_msg(r.to_string()))),
     }

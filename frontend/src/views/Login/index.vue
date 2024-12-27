@@ -18,6 +18,7 @@
                 class="w-full"
                 v-model="loginForm.username"
                 placeholder="请输入账号"
+                autocomplete="off"
               />
             </div>
             <div class="space-y-2">
@@ -28,6 +29,7 @@
                 class="w-full"
                 v-model="loginForm.password"
                 type="password"
+                autocomplete="off"
                 placeholder="请输入密码"
               />
             </div>
@@ -86,6 +88,7 @@
                 class="w-full"
                 v-model="registerForm.username"
                 placeholder="请输入账号"
+                autocomplete="off"
               />
             </div>
             <div class="space-y-2">
@@ -95,6 +98,7 @@
                 class="w-full"
                 v-model="registerForm.password"
                 type="password"
+                autocomplete="off"
                 placeholder="请输入密码"
               />
             </div>
@@ -104,6 +108,7 @@
                 id="register-email"
                 class="w-full"
                 v-model="registerForm.email"
+                autocomplete="off"
                 placeholder="请输入邮箱"
               />
             </div>

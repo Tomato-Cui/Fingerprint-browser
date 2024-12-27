@@ -8,7 +8,7 @@ use crate::{environment_fingerprint::EnvironmentFingerprint, environment_proxies
 pub struct EnvironmentInfo {
     pub id: i32,
     pub uuid: Option<String>,
-    pub user_uuid: String,
+    pub user_uuid: Option<String>,
     pub team_id: Option<i32>,
     pub proxy: Option<Proxy>,
     pub fp_info: EnvironmentFingerprint,
@@ -22,7 +22,7 @@ pub struct EnvironmentInfo {
 pub struct Environment {
     pub id: i32,                      // 自增ID
     pub uuid: Option<String>,         // UUID
-    pub user_uuid: String,            // 用户UUID
+    pub user_uuid: String,    // 用户UUID
     pub team_id: Option<i32>,         // 团队ID
     pub proxy_id: Option<i32>,        // 代理ID
     pub fp_info_id: Option<i32>,      // 指纹信息ID
