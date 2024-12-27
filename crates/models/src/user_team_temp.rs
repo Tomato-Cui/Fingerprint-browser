@@ -119,26 +119,43 @@ impl UserTeamTemp {
     }
 
     #[allow(dead_code)]
-    pub async fn update_user_team_temp(
+    pub async fn agree_join(
         pool: &Pool<Sqlite>,
         id: u32,
         user_team_temp: &UserTeamTemp,
     ) -> Result<bool, Error> {
+        let mut tx = pool.begin().await?;
         let sql = "
             UPDATE user_team_temps
             SET user_uuid = ?, team_id = ?, allow_1 = ?, allow_2 = ?, description = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         ";
 
-        let row = sqlx::query(sql)
+        sqlx::query(sql)
             .bind(&user_team_temp.user_uuid)
             .bind(&user_team_temp.team_id)
             .bind(&user_team_temp.allow_1)
             .bind(&user_team_temp.allow_2)
             .bind(&user_team_temp.description)
             .bind(id)
-            .execute(pool)
+            .fetch_one(&mut *tx)
             .await?;
+
+        let sql = "
+            INSERT INTO user_team_relation (
+            user_uuid, team_id, team_group_id, is_leader, blocked
+            ) VALUES (
+            ?, ?, (SELECT id FROM team_groups WHERE team_id = ? AND deleted_at IS NULL ORDER BY id DESC LIMIT 1), 0, 0
+            )";
+
+        let row = sqlx::query(sql)
+            .bind(&user_team_temp.user_uuid)
+            .bind(&user_team_temp.team_id)
+            .bind(&user_team_temp.team_id)
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
 
         Ok(row.rows_affected() == 1)
     }

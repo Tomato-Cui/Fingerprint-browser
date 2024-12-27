@@ -15,6 +15,7 @@ pub mod user;
 pub mod user_avatar;
 pub mod user_info;
 pub mod user_team_temp;
+pub mod user_use_team;
 
 pub mod dto;
 

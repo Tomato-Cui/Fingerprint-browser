@@ -46,7 +46,23 @@ impl User {
     }
 
     #[allow(dead_code)]
-    pub async fn query_uuid(pool: &Pool<Sqlite>, uuid: i32) -> Result<UserInfo, Error> {
+    pub async fn query_uuid_by_email(pool: &Pool<Sqlite>, email: &str) -> Result<String, Error> {
+        let user_uuid: String = sqlx::query_scalar(
+            r#"
+            SELECT u.uuid
+            FROM users u
+            JOIN user_infos ui ON u.user_info_id = ui.id
+            WHERE ui.email = ?;"#,
+        )
+        .bind(email)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(user_uuid)
+    }
+
+    #[allow(dead_code)]
+    pub async fn query_info_by_uuid(pool: &Pool<Sqlite>, uuid: i32) -> Result<UserInfo, Error> {
         let user: UserInfo = sqlx::query_as(
             r#"
             SELECT ui.*

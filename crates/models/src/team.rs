@@ -93,6 +93,52 @@ impl Team {
     }
 
     #[allow(dead_code)]
+    pub async fn query_default_team_by_user_uuid(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+    ) -> Result<Team, Error> {
+        let team: Team = sqlx::query_as(
+            "SELECT t.* FROM teams t
+             JOIN user_team_relation utr ON t.id = utr.team_id
+             WHERE utr.user_uuid = ? AND t.deleted_at IS NULL AND utr.deleted_at IS NULL
+             ORDER BY utr.created_at ASC
+             LIMIT 1",
+        )
+        .bind(user_uuid)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(team)
+    }
+
+    #[allow(dead_code)]
+    pub async fn query_all_team_by_user_uuid(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+    ) -> Result<Vec<Team>, Error> {
+        let team_ids: Vec<i32> = sqlx::query_scalar(
+            "SELECT DISTINCT team_id FROM user_team_relation WHERE user_uuid = ? AND deleted_at IS NULL"
+        )
+        .bind(user_uuid)
+        .fetch_all(pool)
+        .await?;
+
+        let teams: Vec<Team> =
+            sqlx::query_as("SELECT * FROM teams WHERE id IN (?) AND deleted_at IS NULL")
+                .bind(
+                    team_ids
+                        .iter()
+                        .map(|v| v.to_string())
+                        .collect::<Vec<String>>()
+                        .join(","),
+                )
+                .fetch_all(pool)
+                .await?;
+
+        Ok(teams)
+    }
+
+    #[allow(dead_code)]
     pub async fn query_team_by_id_and_user_uuid(
         pool: &Pool<Sqlite>,
         user_uuid: &str,
@@ -272,6 +318,114 @@ impl Team {
             .await?;
 
         Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn blocked_action(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+        current_user_uuid: &str,
+        blocked: bool,
+    ) -> Result<bool, Error> {
+        let blocked = if blocked { 1 } else { 0 };
+        let user_uuids: Vec<String> = sqlx::query_scalar(
+        "select user_uuid from user_team_relation where user_uuid = ? and team_id = ? and is_leader = 1"
+            )
+            .bind(user_uuid)
+            .bind(team_id)
+            .fetch_all(pool)
+            .await?;
+        if user_uuids.is_empty() {
+            return Ok(false);
+        }
+
+        let sql = "
+            UPDATE user_team_relation
+                SET blocked = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE user_uuid = ? AND team_id = ? AND deleted_at IS NULL;
+            ";
+
+        let row = sqlx::query(sql)
+            .bind(blocked)
+            .bind(current_user_uuid)
+            .bind(team_id)
+            .execute(pool)
+            .await?;
+
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn remove_user(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+        current_user_uuid: &str,
+    ) -> Result<bool, Error> {
+        let user_uuids: Vec<String> = sqlx::query_scalar(
+        "select user_uuid from user_team_relation where user_uuid = ? and team_id = ? and is_leader = 1"
+            )
+            .bind(user_uuid)
+            .bind(team_id)
+            .fetch_all(pool)
+            .await?;
+        if user_uuids.is_empty() {
+            return Ok(false);
+        }
+
+        let sql = "
+            UPDATE user_team_relation
+                SET deleted_at = CURRENT_TIMESTAMP
+            WHERE user_uuid = ? AND team_id = ? AND deleted_at IS NULL;
+            ";
+
+        let row = sqlx::query(sql)
+            .bind(current_user_uuid)
+            .bind(team_id)
+            .execute(pool)
+            .await?;
+
+        Ok(row.rows_affected() == 1)
+    }
+
+    pub async fn update_team_user_info(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+        description: Option<String>,
+        team_group_id: u32,
+        current_user_uuid: &str,
+    ) -> Result<bool, Error> {
+        let mut tx = pool.begin().await?;
+
+        let user_uuids: Vec<String> = sqlx::query_scalar(
+        "select user_uuid from user_team_relation where user_uuid = ? and team_id = ? and is_leader = 1"
+            )
+            .bind(user_uuid)
+            .bind(team_id)
+            .fetch_all(pool)
+            .await?;
+        if user_uuids.is_empty() {
+            return Ok(false);
+        }
+
+        let sql = "
+            UPDATE user_team_relation
+            SET description = ?, team_group_id = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE user_uuid = ? AND and team_id = ? and is_leader = 0 deleted_at IS NULL;
+        ";
+
+        sqlx::query(sql)
+            .bind(description)
+            .bind(team_group_id)
+            .bind(current_user_uuid)
+            .bind(team_id)
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+        Ok(true)
     }
 
     #[allow(dead_code)]
