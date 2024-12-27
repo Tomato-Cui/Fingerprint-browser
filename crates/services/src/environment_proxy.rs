@@ -40,7 +40,7 @@ pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Val
 pub async fn create(user_uuid: &str, mut payload: Proxy) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    payload.user_uuid = user_uuid.to_string();
+    payload.user_uuid = Some(user_uuid.to_string());
 
     let ok = Proxy::insert_proxy(pool, &payload).await?;
 
