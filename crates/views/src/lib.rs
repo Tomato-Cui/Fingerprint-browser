@@ -25,6 +25,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             environment_account_command::environment_account_query_id,
             environment_account_command::environment_account_query,
+            environment_account_command::environment_account_query_current,
             environment_account_command::environment_account_create,
             environment_account_command::environment_account_modify,
             environment_account_command::environment_account_delete,
@@ -81,6 +82,8 @@ pub fn run() {
             team_command::team_query_id,
             team_command::team_query,
             team_command::query_current_team_info,
+            team_command::blocked,
+            team_command::un_blocked,
             team_command::query_team_all_user,
             team_command::query_team_all_blocked_user,
             team_command::query_team_group_all_user,
