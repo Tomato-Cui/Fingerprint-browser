@@ -35,3 +35,7 @@ export const environment_account_modify = async (id: number, payload: Environmen
 export const environment_account_delete = async (id: number) => {
     return await invoke('environment_account_delete', { id })
 }
+
+export const environment_account_batch_delete = async (ids: number[]) => {
+    return await invoke('environment_account_batch_delete ', { ids })
+}

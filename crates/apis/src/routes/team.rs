@@ -14,6 +14,7 @@ pub fn build_router() -> Router {
         Router::new()
             .route("/:id", get(query_id::handle))
             .route("/query", get(query::handle))
+            .route("/query/current-team", get(query_current_team::handle))
             .route("/query/team-all-user", post(query_team_all_user::handle))
             .route(
                 "/query/team-all-blocked-user",
@@ -23,6 +24,8 @@ pub fn build_router() -> Router {
                 "/query/team-group-all-user",
                 post(query_team_group_all_user::handle),
             )
+            .route("/blocked", put(blocked::handle))
+            .route("/un-blocked", put(unblocked::handle))
             .route("/create", post(create::handle))
             .route("/modify/:id", put(modify::handle))
             .route("/delete/:id", delete(delete::handle)),
@@ -64,6 +67,20 @@ mod query {
         }
     }
 }
+mod query_current_team {
+    use super::*;
+
+    pub async fn handle(state: Extension<CurrentUser>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::team::query_current_team_info(&state.user_uuid).await {
+            Ok(data) => AppResponse::<Team>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Team>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
 
 mod query_team_all_user {
 
@@ -84,7 +101,7 @@ mod query_team_all_user {
             Some(format!("查询失败: {}", v))
         });
 
-        match services::team::query_team_all_blocked_user(
+        match services::team::query_team_all_user(
             &state.user_uuid,
             payload.team_id,
             payload.page_num,
@@ -162,6 +179,68 @@ mod query_team_group_all_user {
         {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod blocked {
+
+    use super::*;
+
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        current_user_uuid: String,
+        team_id: u32,
+    }
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        payload: Json<Payload>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("拉黑成功".to_string()), |v| {
+            Some(format!("拉黑失败: {}", v))
+        });
+
+        match services::team::blocked(
+            &state.user_uuid,
+            &payload.current_user_uuid,
+            payload.team_id,
+        )
+        .await
+        {
+            Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod unblocked {
+
+    use super::*;
+
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        current_user_uuid: String,
+        team_id: u32,
+    }
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        payload: Json<Payload>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("取消拉黑成功".to_string()), |v| {
+            Some(format!("取消拉黑失败: {}", v))
+        });
+
+        match services::team::un_blocked(
+            &state.user_uuid,
+            &payload.current_user_uuid,
+            payload.team_id,
+        )
+        .await
+        {
+            Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         }
     }
 }
