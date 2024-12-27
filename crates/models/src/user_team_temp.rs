@@ -5,7 +5,7 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 pub struct UserTeamTemp {
     pub id: Option<i32>,             // 自增ID
     pub user_uuid: String,           // 用户UUID 1
-    pub team_id: u32,                // 用户UUID 2
+    pub team_id: u32,                // team_id
     pub allow_1: Option<i32>,        // 允许1
     pub allow_2: Option<i32>,        // 允许2
     pub description: Option<String>, // 描述

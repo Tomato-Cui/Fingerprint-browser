@@ -45,3 +45,4 @@ cd zonghu-fingerprint-frontend/frontend && npm i && npm run dev
 # 执行客户端代码
 cd zonghu-fingerprint-frontend/clients && cargo run --bin clients
 ```
+// 恢复成员、拉黑成员、删除成员、编辑成员信息

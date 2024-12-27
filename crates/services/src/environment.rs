@@ -81,30 +81,39 @@ pub async fn create_and_other_info(
     Ok(ok)
 }
 
-pub async fn create(user_uuid: &str, mut payload: Environment) -> Result<bool, ServiceError> {
+pub async fn create(user_uuid: &str, name: String) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    payload.user_uuid = user_uuid.to_string();
-    payload.uuid = Some(commons::encryption::uuid());
+    let mut environment = Environment {
+        name: name.clone(),
+        ..Default::default()
+    };
+    environment.user_uuid = user_uuid.to_string();
+    environment.uuid = Some(commons::encryption::uuid());
 
-    let ok = models::environment::Environment::insert(pool, &payload).await?;
+    let ok = models::environment::Environment::insert(pool, &environment).await?;
     Ok(ok)
 }
 
 pub async fn create_batch(
     user_uuid: &str,
-    payload: Vec<Environment>,
+    payload: Vec<String>,
 ) -> Result<Vec<Value>, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     let mut response = vec![];
-    for mut env_ in payload {
-        env_.uuid = Some(commons::encryption::uuid());
-        env_.user_uuid = user_uuid.to_string();
+    for environmnet_name in payload {
+        let mut environment = Environment {
+            name: environmnet_name.clone(),
+            ..Default::default()
+        };
 
-        let ok = models::environment::Environment::insert(pool, &env_).await?;
+        environment.uuid = Some(commons::encryption::uuid());
+        environment.user_uuid = user_uuid.to_string();
+
+        let ok = models::environment::Environment::insert(pool, &environment).await?;
         response.push(json!({
-            "name": env_.name,
+            "name": environmnet_name,
             "success": ok
         }));
     }
@@ -244,12 +253,7 @@ mod tests {
     async fn test_create() {
         crate::setup().await;
         let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
-        let payload = Environment {
-            name: "123".to_string(),
-            ..Default::default()
-        };
-
-        let result = create(&user_uuid, payload).await;
+        let result = create(&user_uuid, "133".to_string()).await;
         println!("{:?}", result);
     }
 
@@ -257,14 +261,7 @@ mod tests {
     async fn test_create_batch() {
         crate::setup().await;
         let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
-        let payload = vec![
-            Environment {
-                ..Default::default()
-            },
-            Environment {
-                ..Default::default()
-            },
-        ];
+        let payload = vec!["abc".to_string(), "a1bc".to_string()];
         let result = create_batch(&user_uuid, payload).await;
         assert!(result.is_ok());
     }
