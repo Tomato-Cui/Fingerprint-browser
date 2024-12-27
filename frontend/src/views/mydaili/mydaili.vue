@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, reactive, nextTick } from "vue";
+import { ref, computed, reactive, nextTick, onMounted } from "vue";
 import { AlertModel } from "@/components/alert-model";
 import { useRouter } from "vue-router";
 import {
@@ -18,6 +18,8 @@ import {
   XCircle,
   ChevronRight,
 } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
+
 import {
   Popover,
   PopoverContent,
@@ -38,6 +40,19 @@ import {
   environment_proxies_create,
   environment_proxies_query,
 } from "@/commands/environment-proxy";
+
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
+
+import { useRoute } from "vue-router";
 
 interface Payment {
   id: number;
@@ -65,7 +80,7 @@ const data = ref<Array<Payment>>([]);
 
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 2,
+  pageSize: 1,
   total: 0,
 });
 
@@ -76,6 +91,8 @@ const loadData = (index: number, size: number) => {
     data.value = data_;
   });
 };
+
+onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
 const router = useRouter();
 const selectAll = ref(false);
@@ -132,14 +149,6 @@ for (let i = 0; i < 30; i++) {
   };
   agents.value.push(newAgentsData);
 }
-
-const visiblePages = computed(() => {
-  const pages = [];
-  for (let i = 1; i <= 20; i++) {
-    pages.push(i);
-  }
-  return pages;
-});
 
 // 跳转到新增代理页面
 const adddaili = () => {
@@ -292,6 +301,12 @@ const removeAgent = (id) => {
   if (index !== -1) {
     agents.value.splice(index, 1); // 从数组中删除指定代理
   }
+};
+
+const paginationClickHandle = (index: number) => {
+  console.log(index);
+  loadData(index, pagination.pageSize);
+  pagination.pageIndex = index;
 };
 </script>
 
@@ -633,33 +648,63 @@ const removeAgent = (id) => {
         </table>
       </div>
 
-      <!-- Pagination fixed at the bottom -->
+      <!-- Pagination -->
       <div class="flex justify-between items-center p-4 mt-auto bg-white">
-        <div class="text-sm text-gray-600">共 {{ totalItems }} 项数据</div>
-        <div class="flex gap-2 items-center">
-          <button
-            class="p-2 rounded hover:bg-gray-100"
-            :disabled="currentPage === 1"
-          >
-            <ChevronLeftIcon class="w-5 h-5" />
-          </button>
-          <div class="flex gap-1">
-            <button
-              v-for="page in visiblePages"
-              :key="page"
-              class="px-3 py-1 rounded"
-              :class="
-                page === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-gray-100'
-              "
-            >
-              {{ page }}
-            </button>
+        <div class="flex justify-end items-center py-1 space-x-2 w-full">
+          <div class="flex-1 text-sm text-muted-foreground">
+            共{{ pagination.total }}条.
           </div>
-          <button class="p-2 rounded hover:bg-gray-100">
-            <ChevronRightIcon class="w-5 h-5" />
-          </button>
+          <div class="space-x-2">
+            <Pagination
+              :total="pagination.total"
+              :itemsPerPage="pagination.pageSize"
+              :default-page="1"
+            >
+              <PaginationList
+                v-slot="{ items }"
+                class="flex gap-1 items-center"
+              >
+                <PaginationFirst @click="() => paginationClickHandle(0)" />
+                <PaginationPrev
+                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
+                />
+
+                <template v-for="(item, index) in items">
+                  <PaginationListItem
+                    v-if="item.type === 'page'"
+                    :key="index"
+                    :value="item.value"
+                    as-child
+                  >
+                    <Button
+                      class="p-0 w-10 h-10"
+                      @click="() => paginationClickHandle(index)"
+                      :variant="
+                        item.value === pagination.pageIndex + 1
+                          ? 'default'
+                          : 'outline'
+                      "
+                    >
+                      {{ item.value }}
+                    </Button>
+                  </PaginationListItem>
+                  <PaginationEllipsis v-else :key="item.type" :index="index" />
+                </template>
+
+                <PaginationNext
+                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
+                />
+                <PaginationLast
+                  @click="
+                    () =>
+                      paginationClickHandle(
+                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                      )
+                  "
+                />
+              </PaginationList>
+            </Pagination>
+          </div>
         </div>
       </div>
     </div>

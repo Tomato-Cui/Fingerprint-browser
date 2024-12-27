@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 
 export interface Proxy {
-    id: number;
+    id?: number;
     kind: string;
     host: string;
     port: string;

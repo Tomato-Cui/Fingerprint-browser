@@ -36,6 +36,7 @@ import {
 
 interface Payment {
   id: number;
+  uuid: string;
   name: string;
   group: string;
   location: string;
@@ -99,28 +100,19 @@ const recoverAll = () => {
   // loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-const confirmDelete = () => {
-  if (environmentId.value) {
-    console.log(environmentId.value);
-    environment_trash_delete_batch(environmentId.value).then(() => {
-      loadData(pagination.pageIndex, pagination.pageSize);
-      visible.value = false;
-    });
-  }
+const handleDelete = (uuid: string) => {
+  console.log("uuid", uuid);
+  environment_trash_delete_batch([uuid]);
+  loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-const closePopup = () => {
-  visible.value = false;
-};
+const handleRecover = (uuid: string) => {
+  // console.log("uuid", index.uuid);
+  // environment_trash_recover(data.value[0].uuid).then(() => {
+  //   loadData(pagination.pageIndex, pagination.pageSize);
+  // });
 
-const deleteVisible = (id?: number) => {
-  environmentId.value = id;
-  visible.value = true;
-};
-
-const handleRecover = (id: number) => {
-  console.log(id);
-  environment_trash_recover(id).then(() => {
+  environment_trash_recover(uuid).then(() => {
     loadData(pagination.pageIndex, pagination.pageSize);
   });
 };
@@ -139,7 +131,8 @@ const groupOperationBtns = computed(() => [
     title: "多选恢复",
     icon: PackageIcon,
     click: () => {
-      let ids = selectData.value.map((item) => item.id);
+      let ids = selectData.value.map((item) => item.uuid);
+
       environment_trash_recovers(ids);
       pagination.total = pagination.total - selectData.value.length;
       loadData(pagination.pageIndex, pagination.pageSize);
@@ -151,7 +144,8 @@ const groupOperationBtns = computed(() => [
     title: "多选删除",
     icon: TrashIcon,
     click: () => {
-      let ids = selectData.value.map((item) => item.id);
+      let ids = selectData.value.map((item) => item.uuid);
+      console.log("idsdele", ids);
       environment_trash_delete_batch(ids);
       pagination.total = pagination.total - selectData.value.length;
       loadData(pagination.pageIndex, pagination.pageSize);
@@ -236,14 +230,14 @@ const searchValueHandle = (value: string) => {
       </div>
 
       <!-- 弹出窗遮罩层 -->
-      <div
+      <!-- <div
         v-if="visible"
         @click="closePopup"
         class="flex fixed inset-0 justify-center items-center bg-gray-800 bg-opacity-50"
       >
-        <!-- 弹出窗主体 -->
+     
         <div class="bg-white rounded-lg w-[400px] p-6 shadow-lg">
-          <!-- 标题栏 -->
+         
           <div class="flex items-center mb-4">
             <div
               class="flex justify-center items-center mr-2 w-8 h-8 text-yellow-500 bg-yellow-100 rounded-full"
@@ -259,10 +253,9 @@ const searchValueHandle = (value: string) => {
             </button>
           </div>
 
-          <!-- 提示文本 -->
           <p class="mb-4 text-gray-600">你确定要彻底删除以下序号的环境吗？</p>
 
-          <!-- 环境序号展示 -->
+       
           <div class="flex items-center mb-6">
             <label class="mr-4 text-gray-600">环境序号</label>
             <span
@@ -272,7 +265,7 @@ const searchValueHandle = (value: string) => {
             </span>
           </div>
 
-          <!-- 按钮区域 -->
+    
           <div class="flex justify-end space-x-4">
             <button
               @click="confirmDelete"
@@ -288,7 +281,7 @@ const searchValueHandle = (value: string) => {
             </button>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Table -->
       <table class="overflow-auto overflow-x-auto min-w-[900px]">
@@ -344,14 +337,14 @@ const searchValueHandle = (value: string) => {
               <div class="flex items-center">
                 <button
                   class="flex items-center px-2 py-1 text-sm text-blue-600 rounded-md hover:bg-green-50"
-                  @click="handleRecover(row.id)"
+                  @click="handleRecover(row.uuid)"
                 >
                   <RotateCcw class="mr-1 w-4 h-4" />
                   恢复
                 </button>
                 <button
                   class="flex items-center px-2 py-1 text-sm text-blue-600 rounded-md hover:bg-red-50"
-                  @click="deleteVisible(row.id)"
+                  @click="handleDelete(row.uuid)"
                 >
                   <Trash2Icon class="mr-1 w-4 h-4" />
                   删除

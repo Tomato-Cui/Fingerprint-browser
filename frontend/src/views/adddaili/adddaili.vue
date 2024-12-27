@@ -9,10 +9,21 @@ import {
   SelectValue,
 } from "@/components/select";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+// import { pageId } from "../mydaili/mydaili.vue";
 
 const activeTab = ref("single");
 const router = useRouter();
+const route = useRoute();
+const proxyType = ref("IPV4");
+const proxyInfo = ref("");
+const host = ref("");
+const port = ref("");
+const username = ref("");
+const password = ref("");
+const refreshUrl = ref("");
+
+
 
 const singleForm = ref({
   url: "",
@@ -23,16 +34,32 @@ const singleForm = ref({
   username: "",
 });
 
+interface Proxy {
+  id?: number;
+  kind: string;
+  host: string;
+  port: string;
+  username?: string;
+  password?: string;
+  user_uuid?: string;
+  environment_group_id?: number;
+}
+
 // 跳转到新增代理页面
-const save = () => {
-  environment_proxies_create(
-    proxyType.value,
-    host.value,
-    port.value,
-    username.value,
-    password.value
-  );
-  router.push("/mydaili");
+const SaveOne = () => {
+  const proxy: Proxy = {
+    id: 0,
+    kind: proxyType.value,
+    host: host.value,
+    port: port.value,
+    user_uuid: "1231",
+    username: username.value,
+    password: password.value,
+  };
+  environment_proxies_create(proxy);
+
+  // router.push("/mydaili?id=" + proxyId.value);
+  router.go(-1);
 };
 
 // 跳转到新增代理页面
@@ -45,25 +72,8 @@ const batchForm = ref({
   autoRefresh: false,
 });
 
-const proxyType = ref("IPV4");
-const proxyInfo = ref("");
-const host = ref("");
-const port = ref("");
-const username = ref("");
-const password = ref("");
-const refreshUrl = ref("");
-
 const handleSubmit = () => {
   // Handle form submission
-  console.log({
-    proxyType: proxyType.value,
-    proxyInfo: proxyInfo.value,
-    host: host.value,
-    port: port.value,
-    username: username.value,
-    password: password.value,
-    refreshUrl: refreshUrl.value,
-  });
 };
 
 const handleCancel = () => {
@@ -252,7 +262,7 @@ const handleCancel = () => {
           style="min-height: 50px"
         >
           <button
-            @click="save"
+            @click="SaveOne"
             class="px-8 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
           >
             确定
