@@ -113,7 +113,7 @@ mod user_send {
 
     #[derive(Deserialize)]
     pub struct Payload {
-        team_id: u32,
+        team_name: String,
         description: String,
     }
 
@@ -127,7 +127,7 @@ mod user_send {
 
         match services::user_team_temp::user_send(
             &state.user_uuid,
-            payload.team_id,
+            &payload.team_name,
             &payload.description,
         )
         .await

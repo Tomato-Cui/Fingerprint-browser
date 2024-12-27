@@ -72,14 +72,12 @@ const paginationClickHandle = (index: number) => {
   pagination.pageIndex = index;
 };
 const openGroup = async () => {
-  let ids = [...selectData.value].map(
-    (item) => ({ environment_id: item } as any)
-  );
+  let ids = [...selectData.value].map((item) => item) as any[];
   try {
     let data = await browser_starts(ids);
     data = await data.data;
     let status = Object.values(data).map((item: any) => ({
-      id: item.environment_id,
+      id: item.environment_uuid,
       status: item.status,
     }));
 
@@ -91,7 +89,7 @@ const openGroup = async () => {
   }
 };
 const closeGroup = () => {
-  let ids = [...selectData.value].map((item) => item) as number[];
+  let ids = [...selectData.value].map((item) => item) as any[];
   browser_stops(ids).then((res: any) => {
     if (res.message && (res.message as string).includes("关闭成功")) {
       ids.forEach((item) => browserStatusStore.updateStatus(item, false));
@@ -101,7 +99,7 @@ const closeGroup = () => {
   });
 };
 const batchDelete = () => {
-  let ids = [...selectData.value].map((item) => item) as number[];
+  let ids = [...selectData.value].map((item) => item) as any[];
   environment_batch_delete(ids)
     .then((_: any) => {
       data.value = data.value.filter((item) => !ids.includes(item.id));
@@ -268,7 +266,7 @@ watch(groupSelect, (newVal) => {
                   >
                     <Button
                       class="w-10 h-10 p-0"
-                      @click="() => paginationClickHandle(index)"
+                      @click="() => paginationClickHandle(item.value -1)"
                       :variant="
                         item.value === pagination.pageIndex + 1
                           ? 'default'
