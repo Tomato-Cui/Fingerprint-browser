@@ -220,7 +220,7 @@ impl Team {
         blocked: bool,
         page_num: u32,
         page_size: u32,
-    ) -> Result<(i64, Vec<UserInfo>), Error> {
+    ) -> Result<(i64, Vec<crate::dto::team_info::UserInfoWithGroup>), Error> {
         let (is_leader,): (i64,) =
             sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ? and is_leader = 1")
                 .bind(team_id)
@@ -247,19 +247,33 @@ impl Team {
         };
         let offset = page_num * page_size;
 
-        let user_infos: Vec<UserInfo> = sqlx::query_as(
-            "SELECT user_infos.* FROM user_infos 
-         JOIN users ON user_infos.id = users.user_info_id 
-         JOIN user_team_relation ON users.uuid = user_team_relation.user_uuid 
-         WHERE user_team_relation.team_id = ? and user_team_relation.is_leader is null and user_team_relation.blocked = ?
-         LIMIT ? OFFSET ?",
-        )
-        .bind(team_id)
-        .bind(blocked)
-        .bind(page_size)
-        .bind(offset)
-        .fetch_all(pool)
-        .await?;
+        let query_sql = "
+            SELECT 
+                user_infos.*, 
+                user_team_relation.team_group_id, 
+                team_groups.name AS group_name 
+            FROM 
+                user_infos 
+            JOIN 
+                users ON user_infos.id = users.user_info_id 
+            JOIN 
+                user_team_relation ON users.uuid = user_team_relation.user_uuid 
+            LEFT JOIN 
+                team_groups ON user_team_relation.team_group_id = team_groups.id 
+            WHERE 
+                user_team_relation.team_id = ? 
+                AND user_team_relation.is_leader IS NULL 
+                AND user_team_relation.blocked = ? 
+            LIMIT ? OFFSET ?
+        ";
+
+        let user_infos: Vec<crate::dto::team_info::UserInfoWithGroup> = sqlx::query_as(&query_sql)
+            .bind(team_id)
+            .bind(blocked)
+            .bind(page_size)
+            .bind(offset)
+            .fetch_all(pool)
+            .await?;
 
         Ok((total, user_infos))
     }
