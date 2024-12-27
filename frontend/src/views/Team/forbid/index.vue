@@ -35,11 +35,11 @@
 
       <!-- Table -->
       <!-- <div class="bg-white rounded-lg flex flex-col flex-1">  -->
-      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
+      <!-- <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
         数据为空，没有成员
-      </div>
+      </div> -->
       <!-- Table Header -->
-      <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500" v-else>
+      <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500">
         <div>姓名</div>
         <div>分组</div>
         <div>备注</div>
@@ -51,13 +51,13 @@
 
       <!-- <div class="flex flex-col flex-1 justify-between"> -->
       <!-- Table Body -->
-      <div class="divide-y overflow-auto flex-1" v-else>
+      <div class="divide-y overflow-auto flex-1">
         <div v-for="user in filterUsers" :key="user.id"
           class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
           :class="{ 'border-t border-gray-100': true }">
-          <div class="text-gray-900">{{ user.username }}</div>
+          <div class="text-gray-900">{{ user.nickname }}</div>
           <div class="text-gray-600">{{ user.group_name }}</div>
-          <div class="text-gray-600">{{ user.group_description }}</div>
+          <div class="text-gray-600">{{ user.description || '\\' }}</div>
           <div class="text-gray-600">{{ user.email }}</div>
           <div class="text-gray-400">/</div>
           <!-- <div class="text-gray-400">/</div>

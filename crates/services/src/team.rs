@@ -137,10 +137,44 @@ pub async fn un_blocked(
     Ok(ok)
 }
 
+pub async fn remove_user(
+    user_uuid: &str,
+    team_id: u32,
+    current_user_uuid: &str,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = Team::remove_user(pool, user_uuid, team_id, current_user_uuid).await?;
+
+    Ok(ok)
+}
+
 pub async fn modify(id: u32, payload: &Team) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     let ok = Team::update(pool, id, payload).await?;
+
+    Ok(ok)
+}
+
+pub async fn update_team_user_info(
+    user_uuid: &str,
+    team_id: u32,
+    description: Option<String>,
+    team_group_id: u32,
+    current_user_uuid: &str,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = Team::update_team_user_info(
+        pool,
+        user_uuid,
+        team_id,
+        description,
+        team_group_id,
+        current_user_uuid,
+    )
+    .await?;
 
     Ok(ok)
 }
@@ -205,9 +239,20 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_remove_user() {
+        crate::setup().await;
+        let user_uuid = "";
+        let team_id = 1;
+        let crrent_user_uuid = "";
+        let result = remove_user(user_uuid, team_id, crrent_user_uuid).await;
+
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
     async fn test_query_team_all_user() {
         crate::setup().await;
-        let result = query_team_all_user("3cfb0bc6-7b48-498a-935a-90ce561e40a5", 4, 1, 10).await;
+        let result = query_team_all_user("d3129a09-5473-4b1e-915b-bba0af78d752", 1, 1, 10).await;
 
         println!("{:?}", result);
     }

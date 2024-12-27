@@ -92,7 +92,7 @@
               'border-t border-gray-100': true,
             }">
               <td class="px-6 py-4 text-sm text-gray-900">{{ index + 1 }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ member.username }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">{{ member.nickname }}</td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.group_name }} </td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.group_description }} </td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.email }} </td>
@@ -129,9 +129,9 @@
           <!-- </table> -->
         </table>
       </div>
-      <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
+      <!-- <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
         数据为空，没有成员
-      </div>
+      </div> -->
       <!-- Pagination -->
       <div class="flex items-center justify-end space-x-2 py-1">
         <div class="flex-1 text-sm text-muted-foreground">

@@ -55,9 +55,7 @@ pub async fn query_team_all_user(
     });
 
     Ok(
-        match services::team::query_team_all_user(&user_uuid, team_id, page_num, page_size)
-            .await
-        {
+        match services::team::query_team_all_user(&user_uuid, team_id, page_num, page_size).await {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         },
@@ -143,7 +141,7 @@ pub async fn team_create(
 
 #[tauri::command]
 pub async fn un_blocked(
-    current_uuid: String,
+    current_user_uuid: String,
     team_id: u32,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
@@ -152,7 +150,7 @@ pub async fn un_blocked(
     });
 
     Ok(
-        match services::team::blocked(&user_uuid, &current_uuid, team_id).await {
+        match services::team::blocked(&user_uuid, &current_user_uuid, team_id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))
@@ -167,7 +165,7 @@ pub async fn un_blocked(
 
 #[tauri::command]
 pub async fn blocked(
-    current_uuid: String,
+    current_user_uuid: String,
     team_id: u32,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
@@ -176,7 +174,7 @@ pub async fn blocked(
     });
 
     Ok(
-        match services::team::un_blocked(&user_uuid, &current_uuid, team_id).await {
+        match services::team::un_blocked(&user_uuid, &current_user_uuid, team_id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))
@@ -195,6 +193,7 @@ pub async fn team_modify(
     name: String,
     description: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
+    let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
         Some(format!("更新失败: {}", v))
     });
@@ -216,6 +215,64 @@ pub async fn team_modify(
         }
         Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
     })
+}
+
+#[tauri::command]
+pub async fn remove_current_user(
+    team_id: u32,
+    current_user_uuid: String,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::team::remove_user(&user_uuid, team_id, &current_user_uuid).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn team_modify_team_user_info(
+    team_id: u32,
+    description: Option<String>,
+    team_group_id: u32,
+    current_user_uuid: String,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::team::update_team_user_info(
+            &user_uuid,
+            team_id,
+            description.clone(),
+            team_group_id,
+            &current_user_uuid,
+        )
+        .await
+        {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
