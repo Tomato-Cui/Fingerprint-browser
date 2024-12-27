@@ -63,7 +63,7 @@ const editAccountDialog = ref(false)  // 编辑账号
 const editProxyDialog = ref(false)  // 修改代理
 const onSyncColumns = (value: any) => (columns.value = value);
 const pagination = reactive({
-  pageIndex: 1,
+  pageIndex: 0,
   pageSize: 16,
   total: 0,
 });
@@ -93,7 +93,7 @@ const openGroup = async () => {
     let data = await browser_starts(ids);
     data = await data.data;
     let status = Object.values(data).map((item: any) => ({
-      id: item.environment_id,
+      id: item.environment_uuid,
       status: item.status,
     }));
 

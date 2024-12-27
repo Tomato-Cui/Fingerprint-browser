@@ -10,8 +10,8 @@ export const user_receive_query = async (
     })
 };
 
-export const team_receive_query = async (pageNum: number, pageSize: number): Promise<any> => {
-    return await invoke('team_receive_query', { pageNum, pageSize })
+export const team_receive_query = async (teamId: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('team_receive_query', { teamId, pageNum, pageSize })
 };
 
 export const team_send = async (

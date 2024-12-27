@@ -77,11 +77,11 @@
                 备注
               </th>
               <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                手机号/邮箱
+                邮箱
               </th>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              <!-- <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 授权环境
-              </th>
+              </th> -->
               <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 操作
               </th>
@@ -94,13 +94,13 @@
               <td class="px-6 py-4 text-sm text-gray-900">{{ index + 1 }}</td>
               <td class="px-6 py-4 text-sm text-gray-900">{{ member.nickname }}</td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.group_name }} </td>
-              <td class="px-6 py-4 text-sm text-gray-900"> {{ member.group_description }} </td>
+              <td class="px-6 py-4 text-sm text-gray-900"> {{ member.description || '\\' }} </td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.email }} </td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ member.environment }}</td>
+              <!-- <td class="px-6 py-4 text-sm text-gray-900">{{ member.environment }}</td> -->
               <td class="px-6 py-4 text-sm flex items-center">
-                <button @click="openDetail(member)" class="text-blue-600 hover:text-blue-800 mr-4">
+                <!-- <button @click="openDetail(member)" class="text-blue-600 hover:text-blue-800 mr-4">
                   详情
-                </button>
+                </button> -->
                 <button @click="editMember(member)" class="text-blue-600 hover:text-blue-800 mr-4">
                   编辑
                 </button>
@@ -195,20 +195,20 @@
               <div class="h-[100px]">
                 <label class="block text-sm font-medium text-gray-700 mb-1">备注名</label>
                 <div class="text-sm">
-                  {{ selectedMember.nickname || "BOSS" }}
+                  {{ selectedMember.nickname || "\\" }}
                 </div>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
-                <div class="text-sm">{{ selectedMember.name }}</div>
+                <div class="text-sm">{{ selectedMember.nickname }}</div>
               </div>
               <div class="h-[100px]">
                 <label class="block text-sm font-medium text-gray-700 mb-1">分组</label>
-                <div class="text-sm">{{ selectedMember.group }}</div>
+                <div class="text-sm">{{ selectedMember.group_name }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">手机号/邮箱</label>
-                <div class="text-sm">{{ selectedMember.contact }}</div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                <div class="text-sm">{{ selectedMember.email }}</div>
               </div>
             </div>
 
@@ -320,7 +320,7 @@ import {
 } from "@/components/ui/tooltip";
 import { user_receive_query } from "@/commands/user-team-temp";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-import { query_team_all_user, team_query, query_team_group_all_user } from "@/commands/team"
+import { query_team_all_user, team_query, query_team_group_all_user, query_current_team_info } from "@/commands/team"
 import { team_group_query_all } from "@/commands/team-group";
 
 const route = useRoute()
@@ -360,8 +360,10 @@ const delMember = (member) => {  //删除
 }
 const subForbid = () => {  //确定禁用
   forbidMem.value = false
-  members.value = members.value.filter((member) => member.id !== memberObj.value.id)
-  filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
+  console.log("memberObj:", memberObj.value);
+  
+  // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
+  // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
 }
 const subDel = () => { //确认删除
   delM.value = false
@@ -399,7 +401,8 @@ const groups = ref([
 const filterMember = computed(() => {
 
   return members.value?.filter((member) => {
-    // return member.username.includes(searchName.value)
+    // return true
+    return member.nickname?.includes(searchName.value)
   });
 });
 
@@ -415,16 +418,18 @@ const editMember = (member) => {
 
 onMounted(async () => {
   //查询用户团队
-  team_query(0, 1).then(res => {
+  query_current_team_info().then(res => {
     if (route.query.groupId !== undefined) {
       //查询分组下成员
-      query_team_group_all_user(res.data.data[0].id, +route.query.groupId, pagination.pageIndex, pagination.pageSize).then(res => {
+      query_team_group_all_user(res.data.id, +route.query.groupId, pagination.pageIndex, pagination.pageSize).then(res => {
         members.value = res.data.data
         pagination.total = res.data.total
       })
     } else {
       //查询该团队下所有成员
-      query_team_all_user(res.data.data[0].id, pagination.pageIndex, pagination.pageSize).then(res2 => {
+      query_team_all_user(res.data.id, pagination.pageIndex, pagination.pageSize).then(res2 => {
+        console.log("aaa:", res2.data.data);
+
         members.value = res2.data.data
         pagination.total = res.data.total
       })

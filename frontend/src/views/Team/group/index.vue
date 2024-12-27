@@ -135,16 +135,16 @@
                 <PaginationEllipsis v-else :key="item.type" :index="index" />
               </template>
 
-              <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
-              <PaginationLast @click="() =>
+<PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+<PaginationLast @click="() =>
                 paginationClickHandle(
                   Math.ceil(pagination.total / pagination.pageSize) - 1
                 )
                 " />
-            </PaginationList>
-          </Pagination>
-        </div>
-      </div> -->
+</PaginationList>
+</Pagination>
+</div>
+</div> -->
       <!-- </div> -->
     </div>
   </div>
@@ -207,7 +207,7 @@ import {
 import { useRouter } from "vue-router";
 import { buttonVariants } from "@/components/ui/button";
 import { team_group_query_all } from "@/commands/team-group";
-import { team_query } from "@/commands/team";
+import { team_query, query_current_team_info } from "@/commands/team";
 import {
   Pagination,
   PaginationEllipsis,
@@ -351,12 +351,12 @@ const authPri = () => {
 }
 
 const localData = () => {
-  team_query(1, 10).then(res => {
-    team_group_query_all(res.data.data[0].id).then(res => {
+  query_current_team_info().then(res => {
+    team_group_query_all(res.data.id).then(res => {
       groups.value = res.data
       // pagination.total
     })
-  })
+  });
 }
 
 onMounted(async () => {

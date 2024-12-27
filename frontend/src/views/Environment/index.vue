@@ -54,7 +54,7 @@ const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
   pageIndex: 1,
-  pageSize: 3,
+  pageSize: 16,
   total: 0,
 });
 

@@ -113,7 +113,7 @@
   </AlertModel>
   <!-- 删除消息弹出框 -->
   <AlertModel :title="'恢复成员'" :open="alertDelUser" @close="() => (alertDelUser = false)"
-    @cancel="() => (alertDelUser = false)" @submit="subDelUser">
+    @cancel="() => (alertDelUser = false)" @submit="subRecoverUser">
     确定恢复成员 "{{ userObj.name }}" 吗？
   </AlertModel>
 </template>
@@ -144,6 +144,7 @@ import {
   PaginationPrev,
 } from "@/components/ui/pagination";
 import { team_query, query_team_all_blocked_user } from "@/commands/team";
+// import { un_blocked } from '@/commands/user-team-temp'
 
 const pagination = reactive({
   pageIndex: 1,
@@ -217,13 +218,14 @@ const subEnAbleUser = () => { //确认启用成员
   users.value = users.value.filter((user) => user.id !== userObj.value.id)
   filterUsers.value = filterUsers.value.filter((user) => user.id !== userObj.value.id)
 }
-const recoverUser = (user) => {  //删除提示框
+const recoverUser = (user) => {  //恢复提示框
   alertDelUser.value = true
   userObj.value = user
 }
-const subDelUser = () => {  //确认删除成员
+const subRecoverUser = () => {  //确认恢复成员
   alertDelUser.value = false
-  // console.log("----!!!:", userObj.value.id);
+  console.log("----!!!:", userObj.value);
+
 
   users.value = users.value.filter((user) => user.id !== userObj.value.id)
   filterUsers.value = filterUsers.value.filter((user) => user.id !== userObj.value.id)

@@ -13,6 +13,7 @@ export const query_current_team_info = async (): Promise<any> => {
     return await invoke('query_current_team_info', {})
 };
 
+// 拉黑
 export const blocked = async (
     currentUserUuid: string,
     teamId: number,
@@ -23,6 +24,7 @@ export const blocked = async (
     })
 };
 
+// 恢复
 export const un_blocked = async (
     currentUserUuid: string,
     teamId: number,
@@ -61,7 +63,7 @@ export const team_modify = async (
     })
 };
 
-
+//删除
 export const remove_current_user = async (
     currentUserUuid: string,
     teamId: number,

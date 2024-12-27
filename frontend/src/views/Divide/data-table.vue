@@ -237,7 +237,7 @@ const columns = [
                     browser_start(id)
                       .then((res) => {
                         let data = res.data;
-                        browserStatusStore.updateStatus(data.environment_id, data.status);
+                        browserStatusStore.updateStatus(data.environment_uuid, data.status);
                       })
                       .catch((_) => toast.warning("启动失败"));
                   }

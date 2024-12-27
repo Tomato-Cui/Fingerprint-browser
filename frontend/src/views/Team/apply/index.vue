@@ -170,6 +170,8 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
+import { team_receive_query } from '@/commands/user-team-temp'
+import { query_current_team_info } from "@/commands/team"
 
 //搜索条件
 const selectType = ref(1);
@@ -358,5 +360,10 @@ const refApply = (user) => {
 }
 
 onMounted(() => {
+  query_current_team_info().then(res => {
+    team_receive_query(res.data.id, pagination.pageIndex, pagination.pageSize).then(res => {
+      users.value = res.data.data
+    })
+  })
 })
 </script>
