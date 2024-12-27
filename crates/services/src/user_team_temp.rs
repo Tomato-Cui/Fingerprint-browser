@@ -138,10 +138,10 @@ mod tests {
     async fn test_user_send() {
         crate::setup().await;
         let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let team_id = 4;
+        let team_name = "";
         let description = "test_description";
 
-        let result = user_send(user_uuid, "", description).await;
+        let result = user_send(user_uuid, team_name, description).await;
         println!("{:?}", result)
     }
 

@@ -83,6 +83,7 @@ pub struct EnvironmentWithInfo {
     proxy_id: Option<i32>,
     fp_info_id: Option<i32>,
     group_id: Option<i32>,
+    group_name: Option<String>,
     name: String,
     description: Option<String>,
     default_urls: Option<String>,

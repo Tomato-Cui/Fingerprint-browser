@@ -227,7 +227,7 @@ mod tests {
     #[tokio::test]
     async fn test_query() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let user_uuid = "d3129a09-5473-4b1e-915b-bba0af78d752";
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
