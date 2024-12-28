@@ -7,6 +7,7 @@ pub mod environment_proxy_group;
 pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod environmnet_cookie;
+pub mod extension;
 pub mod resource_whitelist;
 pub mod team;
 pub mod team_group;

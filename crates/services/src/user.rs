@@ -87,6 +87,14 @@ pub async fn logout() -> Result<bool, ServiceError> {
     Ok(true)
 }
 
+pub async fn query_user_uuid_by_email(user_email: &str) -> Result<String, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let user_uuid = models::user::User::query_uuid_by_email(pool, user_email).await?;
+
+    Ok(user_uuid)
+}
+
 #[allow(unused_variables)]
 pub async fn register_send(
     email: &str,
@@ -119,7 +127,7 @@ mod tests {
     #[tokio::test]
     async fn test_register() {
         crate::setup().await;
-        let ok = super::regsiter("thisiste", "242", "123").await;
+        let ok = super::regsiter("this", "42", "23").await;
         println!("{:?}", ok)
     }
 

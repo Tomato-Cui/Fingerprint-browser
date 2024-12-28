@@ -239,6 +239,32 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_blocked() {
+        crate::setup().await;
+        let result = blocked(
+            "6c16972f-fcdf-46ad-9c62-e799377eb108",
+            "6c16972f-fcdf-46ad--e799377eb10",
+            1,
+        )
+        .await;
+
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_un_blocked() {
+        crate::setup().await;
+        let result = un_blocked(
+            "6c16972f-fcdf-46ad-9c62-e799377eb108",
+            "6c16972f-fcdf-46ad--e799377eb10",
+            1,
+        )
+        .await;
+
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
     async fn test_remove_user() {
         crate::setup().await;
         let user_uuid = "";

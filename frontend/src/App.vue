@@ -20,7 +20,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { isLogin } from "@/commands/user";
 import { onMounted, ref, watch } from "vue";
 import Login from "@/views/Login/index.vue";
-import { invoke } from "@tauri-apps/api/core";
 const route = useRoute();
 </script>
 

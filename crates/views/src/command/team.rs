@@ -150,7 +150,7 @@ pub async fn un_blocked(
     });
 
     Ok(
-        match services::team::blocked(&user_uuid, &current_user_uuid, team_id).await {
+        match services::team::un_blocked(&user_uuid, &current_user_uuid, team_id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))
@@ -174,7 +174,7 @@ pub async fn blocked(
     });
 
     Ok(
-        match services::team::un_blocked(&user_uuid, &current_user_uuid, team_id).await {
+        match services::team::blocked(&user_uuid, &current_user_uuid, team_id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))

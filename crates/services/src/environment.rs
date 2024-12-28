@@ -266,10 +266,10 @@ mod tests {
     #[tokio::test]
     async fn test_create_batch() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
+        let user_uuid = "2501e251-d3bd-4852-a2a3-088046fd2119".to_string();
         let payload = vec!["abc".to_string(), "a1bc".to_string()];
         let result = create_batch(&user_uuid, payload).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]

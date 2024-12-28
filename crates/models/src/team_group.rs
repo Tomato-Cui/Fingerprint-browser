@@ -55,14 +55,14 @@ impl TeamGroup {
         team_id: u32,
     ) -> Result<Value, Error> {
         let query_sql = r#"
-            SELECT COUNT(*) as count, tg.*
-            FROM user_team_relation utr
-                    join team_groups tg on utr.team_group_id = tg.id
-            WHERE utr.team_id = ?
-            and utr.blocked = 0
-            and is_leader = 0
-            AND deleted_at IS NULL
-            GROUP BY utr.team_group_id;
+            SELECT tg.*, COUNT(utr.team_group_id) as count
+            FROM team_groups tg
+                    LEFT JOIN user_team_relation utr ON tg.id = utr.team_group_id
+                and utr.blocked = 0
+                and utr.is_leader = 0
+            where tg.team_id = ?
+            AND utr.deleted_at IS NULL
+            GROUP BY tg.id, tg.name;
         "#;
 
         let team_groups: Vec<crate::dto::team_group::TeamGroupList> = sqlx::query_as(&query_sql)

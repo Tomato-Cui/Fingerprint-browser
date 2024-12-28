@@ -186,7 +186,7 @@ impl Team {
         }
 
         let user_uuids: Vec<String> =
-            sqlx::query_scalar("SELECT user_uuid FROM user_team_relation WHERE team_group_id = ? and is_leader = 0 and blocked = 0")
+            sqlx::query_scalar("SELECT user_uuid FROM user_team_relation WHERE team_group_id = ? and is_leader = 0 and blocked = 0 and deleted_at is null")
                 .bind(group_id)
                 .fetch_all(pool)
                 .await?;
@@ -226,6 +226,7 @@ impl Team {
                 and user_team_relation.user_uuid in ({})
                 AND user_team_relation.is_leader = 0 
                 AND user_team_relation.blocked = 0 
+                and deleted_at is null
             LIMIT ? OFFSET ?
         ",
             user_uuid_str
@@ -263,7 +264,7 @@ impl Team {
         let blocked = if blocked { 1 } else { 0 };
 
         let (total,): (i64,) =
-            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader = 0 and blocked = ?")
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader = 0 and blocked = ? and deleted_at is null")
                 .bind(team_id)
                 .bind(blocked)
                 .fetch_one(pool)
@@ -297,6 +298,7 @@ impl Team {
                 user_team_relation.team_id = ? 
                 AND user_team_relation.is_leader = 0 
                 AND user_team_relation.blocked = ? 
+                and deleted_at is null
             LIMIT ? OFFSET ?
         ";
 
@@ -460,7 +462,7 @@ impl Team {
         let sql = "
             UPDATE user_team_relation
             SET description = ?, team_group_id = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_uuid = ? AND and team_id = ? and is_leader = 0 deleted_at IS NULL;
+            WHERE user_uuid = ? AND and team_id = ? and is_leader = 0 and deleted_at IS NULL;
         ";
 
         sqlx::query(sql)
