@@ -31,6 +31,8 @@ mod query_id {
 }
 
 mod query {
+    use serde_json::Value;
+
     use super::*;
 
     #[derive(serde::Deserialize)]
@@ -44,8 +46,8 @@ mod query {
         });
 
         match services::team_group::query_by_team_id(payload.team_id).await {
-            Ok(data) => AppResponse::<Vec<TeamGroup>>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<Vec<TeamGroup>>::fail(warn_msg(r.to_string())),
+            Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
     }
 }

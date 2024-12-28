@@ -209,6 +209,7 @@ impl Team {
                 users.uuid as user_uuid,
                 user_infos.nickname,
                 user_infos.email,
+                user_team_relation.team_id, 
                 user_team_relation.team_group_id, 
                 user_team_relation.description, 
                 team_groups.name AS group_name 
@@ -281,6 +282,7 @@ impl Team {
                 user_infos.nickname,
                 user_infos.email,
                 user_team_relation.team_group_id, 
+                user_team_relation.team_id, 
                 user_team_relation.description, 
                 team_groups.name AS group_name 
             FROM 
