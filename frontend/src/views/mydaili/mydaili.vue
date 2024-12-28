@@ -227,25 +227,17 @@ const addGroup = () => {
 };
 
 const startEdit = async (index: number) => {
-  console.log("editingIndex.value", editingIndex.value);
-  console.log("editingName.value", editingName.value);
   console.log("index", index);
-
   const payload = {
     name: editingName.value,
   };
-  console.log("payload", payload);
   await environment_proxy_group_modify(index, payload);
 };
 
-const saveEdit = (index: number) => {
-  console.log("index", index);
-  console.log("editingName.value", editingName.value);
-
-  editingIndex.value = index;
-
-  groups.value[index] = editingName.value;
-
+const saveEdit = () => {
+  if (editingIndex.value !== -1 && editingName.value.trim()) {
+    groups.value[editingIndex.value] = editingName.value;
+  }
   editingIndex.value = -1;
 };
 
@@ -352,7 +344,7 @@ const paginationClickHandle = (index: number) => {
                         v-if="editingIndex === index"
                         v-model="editingName"
                         @blur="saveEdit"
-                        @keyup.enter="saveEdit(index)"
+                        @keyup.enter="saveEdit"
                         ref="editInput"
                         class="w-full text-sm outline-none"
                       />
@@ -431,7 +423,7 @@ const paginationClickHandle = (index: number) => {
                 />
               </th>
               <th class="p-4 text-sm font-medium text-left text-gray-600">
-                代理ID
+                序号
               </th>
               <th class="p-4 text-sm font-medium text-left text-gray-600">
                 代理信息
@@ -470,12 +462,12 @@ const paginationClickHandle = (index: number) => {
                 />
               </td>
 
-              <td class="p-4 text-sm text-left">{{ row.id }}</td>
-              <td class="p-4 text-sm text-left">{{ row.kind }}</td>
-              <td class="p-4 text-sm text-left">{{ row.port }}</td>
-              <td class="p-4 text-sm text-left">{{ row.envCount }}</td>
-              <td class="p-4 text-sm text-left">{{ row.notes }}</td>
-              <td class="p-4 text-sm text-left">{{ row.ipChannel }}</td>
+              <td class="p-4 text-sm text-left">{{ index + 1 }}</td>
+              <td class="p-4 text-sm text-left">{{ row.kind || "\\" }}</td>
+              <td class="p-4 text-sm text-left">{{ row.port || "\\" }}</td>
+              <td class="p-4 text-sm text-left">{{ row.envCount || "\\" }}</td>
+              <td class="p-4 text-sm text-left">{{ row.notes || "\\" }}</td>
+              <td class="p-4 text-sm text-left">{{ row.ipChannel || "\\" }}</td>
 
               <td class="p-4 text-left">
                 <div class="flex relative gap-2 justify-left">

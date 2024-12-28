@@ -41,6 +41,8 @@ interface Payment {
   name: string;
   group: string;
   location: string;
+  description: string;
+  delete_from_user_nickname: string;
   domain_name: string;
   remark: string;
   deleted_username: string;
@@ -239,7 +241,7 @@ const searchValueHandle = (value: string) => {
             <th class="px-4 py-3 text-sm font-medium text-left">序号</th>
             <th class="px-4 py-3 text-sm font-medium text-left">名称</th>
             <th class="px-4 py-3 text-sm font-medium text-left">账号平台</th>
-            <th class="px-4 py-3 text-sm font-medium text-left">备注</th>
+            <th class="px-4 py-3 text-sm font-medium text-left">描述</th>
             <th class="px-4 py-3 text-sm font-medium text-left">操作者</th>
             <th class="px-4 py-3 text-sm font-medium text-left">删除时间</th>
             <th class="px-4 py-3 text-sm font-medium text-left">操作</th>
@@ -256,7 +258,7 @@ const searchValueHandle = (value: string) => {
             <td class="px-4 py-3">
               <input type="checkbox" class="rounded" v-model="row.selected" />
             </td>
-            <td class="px-4 py-3 text-sm">{{ row.id }}</td>
+            <td class="px-4 py-3 text-sm">{{ index + 1 }}</td>
             <td class="px-4 py-3 text-sm">{{ row.name }}</td>
 
             <td class="px-4 py-3">
@@ -271,8 +273,10 @@ const searchValueHandle = (value: string) => {
               </div>
             </td>
 
-            <td class="px-4 py-3 text-sm">{{ row.remark }}</td>
-            <td class="px-4 py-3 text-sm">{{ row.deleted_username }}</td>
+            <td class="px-4 py-3 text-sm">{{ row.description }}</td>
+            <td class="px-4 py-3 text-sm">
+              {{ row.delete_from_user_nickname }}
+            </td>
             <td class="px-4 py-3 text-sm">{{ row.deleted_at }}</td>
             <td class="px-4 py-3 text-sm">
               <div class="flex items-center">

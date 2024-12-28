@@ -43,6 +43,7 @@ import SearchInput from "./search-input.vue";
 import TooltipButton from "@/components/tooltip-button.vue";
 
 import { PrimaryButton } from "@/components/button";
+import { environment_transfer_history_query } from "@/commands/environment-transfer-history";
 
 interface Payment {
   id: number;
@@ -50,8 +51,9 @@ interface Payment {
   group: string;
   location: string;
   description: string;
-  remark: string;
   browser: string;
+  remark: string;
+
   domain_name: string;
   transferTime: string;
   transferType: string;
@@ -77,7 +79,7 @@ const pagination = reactive({
 });
 
 const loadData = (index: number, size: number) => {
-  environment_transfer_query(index, size).then((res) => {
+  environment_transfer_history_query(index, size).then((res) => {
     console.log("res", res);
     let { data: data_, total } = res.data;
 
@@ -156,7 +158,7 @@ const searchValueHandle = (value: string) => {
                 账号平台
               </th>
               <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                备注
+                描述
               </th>
               <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
                 浏览器
@@ -205,7 +207,7 @@ const searchValueHandle = (value: string) => {
               v-model="row.selected"
             />
           </td> -->
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.id }}</td>
+              <td class="px-4 py-3 text-sm min-w-48">{{ index + 1 }}</td>
               <td class="px-4 py-3 text-sm min-w-48">
                 <div class="flex items-center">
                   <span class="text-gray-500">{{ row.name }}</span>
@@ -222,25 +224,28 @@ const searchValueHandle = (value: string) => {
                     class="mr-1 w-4 h-4"
                   />
                   {{ row.ip }}
-                  <span class="ml-1 text-gray-500">{{ row.location }}</span>
+                  <!-- <span class="ml-1 text-gray-500">{{ row.location }}</span> -->
                 </div>
               </td>
               <td class="px-4 py-3 min-w-48">
                 <div class="flex items-center space-x-2">
-                  <span v-if="row.platform" class="flex items-center">
+                  <span class="flex items-center">
                     <span
                       class="flex justify-center items-center mr-1 w-6 h-6 text-xs text-blue-800 bg-blue-100 rounded-full"
                       >b</span
                     >
-                    {{ row.domain_name }}
+                    {{ row.domain_name || "\\" }}
                   </span>
-                  <span v-else class="text-gray-400">\</span>
                 </div>
               </td>
 
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.description }}</td>
+              <td class="px-4 py-3 text-sm min-w-48">
+                {{ row.description || "\\" }}
+              </td>
 
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.browser }}</td>
+              <td class="px-4 py-3 text-sm min-w-48">
+                {{ row.browser || "\\" }}
+              </td>
               <td class="px-4 py-3 text-sm min-w-48">{{ row.transferTime }}</td>
               <td class="px-4 py-3 text-sm min-w-48">{{ row.transferType }}</td>
               <td class="px-4 py-3 text-sm min-w-48">
