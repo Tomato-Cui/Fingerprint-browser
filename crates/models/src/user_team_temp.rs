@@ -66,7 +66,7 @@ impl UserTeamTemp {
         let offset = page_num * page_size;
 
         let query_sql = "
-            SELECT utt.id, utt.allow_1, utt.allow_2, u.uuid as user_uuid, ui.nickname, ui.email, utt.description, utt.created_at, utt.updated_at, utt.deleted_at
+            SELECT utt.id, utt.team_id, utt.allow_1, utt.allow_2, u.uuid as user_uuid, ui.nickname, ui.email, utt.description, utt.created_at, utt.updated_at, utt.deleted_at
             FROM user_team_temps utt
             JOIN users u ON utt.user_uuid = u.uuid
             JOIN user_infos ui ON u.user_info_id = ui.id
@@ -110,7 +110,7 @@ impl UserTeamTemp {
         let offset = page_num * page_size;
 
         let query_sql = "
-            SELECT utt.id, utt.allow_1, utt.allow_2, u.uuid as user_uuid, ui.nickname, ui.email, utt.description, utt.created_at, utt.updated_at, utt.deleted_at
+            SELECT utt.id, utt.team_id, utt.allow_1, utt.allow_2, u.uuid as user_uuid, ui.nickname, ui.email, utt.description, utt.created_at, utt.updated_at, utt.deleted_at
             FROM user_team_temps utt
             JOIN users u ON utt.user_uuid = u.uuid
             JOIN user_infos ui ON u.user_info_id = ui.id
