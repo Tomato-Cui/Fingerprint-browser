@@ -9,6 +9,8 @@ import {
 } from "../ui/sidebar/index";
 import { environment_group_query } from '@/commands/environment-group';
 import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as ComponentIcon } from 'lucide-vue-next'
+import { PrimaryButton } from "@/components/button";
+import CreateGroup from "@/views/Divide/com/create-group.vue"
 
 const props = defineProps({
     menu: [],
@@ -17,6 +19,11 @@ const props = defineProps({
 const hsSortable = ref(null);
 const route = useRoute();
 const menus = ref([])
+const createGroupDialog = ref(false)  // 创建分组
+
+const createGroup = () => {
+    createGroupDialog.value = true
+};
 
 onMounted(() => {
     environment_group_query(1, 1000).then(res => {
@@ -61,5 +68,11 @@ onMounted(() => {
                 </router-link>
             </SidebarMenuButton>
         </SidebarMenuItem>
+        <!-- 创建分组 -->
+        <PrimaryButton class="flex gap-x-2" @click="createGroup" v-if="menus.length === 0">
+            创建分组
+        </PrimaryButton>
     </ul>
+    <!-- 创建分组 -->
+    <CreateGroup v-model:createGroupDialog="createGroupDialog" />
 </template>

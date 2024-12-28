@@ -8,7 +8,7 @@
         <div
           class="relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500 ">
           <input v-model="selectVal" type="text"
-            :placeholder="'请输入' + (selectType === 1 ? '名称' : selectType === 2 ? '备注' : '手机号或邮箱')"
+            :placeholder="'请输入' + (selectType === 1 ? '名称' : selectType === 2 ? '备注' : '邮箱')"
             class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none" />
           <SearchIcon class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
           <More>
@@ -25,7 +25,7 @@
                 <SquarePenIcon class="w-4 h-4" />备注
               </MoreItem>
               <MoreItem class="cursor-pointer" @click="selectT(3)">
-                <Trash2Icon class="w-4 h-4" />手机号/邮箱
+                <Trash2Icon class="w-4 h-4" />邮箱
               </MoreItem>
             </MoreContent>
           </More>
@@ -39,12 +39,12 @@
         数据为空，没有成员
       </div> -->
       <!-- Table Header -->
-      <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500">
+      <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500">
         <div>姓名</div>
         <div>分组</div>
         <div>备注</div>
-        <div>手机号/邮箱</div>
-        <div>授权环境</div>
+        <div>邮箱</div>
+        <!-- <div>授权环境</div> -->
         <div>操作</div>
         <!-- <div></div> -->
       </div>
@@ -53,13 +53,13 @@
       <!-- Table Body -->
       <div class="divide-y overflow-auto flex-1">
         <div v-for="user in filterUsers" :key="user.id"
-          class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
+          class="grid grid-cols-5 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
           :class="{ 'border-t border-gray-100': true }">
           <div class="text-gray-900">{{ user.nickname }}</div>
           <div class="text-gray-600">{{ user.group_name }}</div>
           <div class="text-gray-600">{{ user.description || '\\' }}</div>
           <div class="text-gray-600">{{ user.email }}</div>
-          <div class="text-gray-400">/</div>
+          <!-- <div class="text-gray-400">/</div> -->
           <!-- <div class="text-gray-400">/</div>
           <div class="text-gray-400">/</div> -->
           <div class="flex gap-2 text-sm bg-red">
@@ -196,13 +196,13 @@ const users = ref([
 ]);
 const filterUsers = computed(() => {  //过滤数组
   return users.value.filter((user) => {
-    // if (selectType.value === 1) {
-    //   return user.name.includes(selectVal.value);
-    // } else if (selectType.value === 2) {
-    //   return user.name.includes(selectVal.value);
-    // } else {
-    //   return user.contact.includes(selectVal.value);
-    // }
+    if (selectType.value === 1) {
+      return user.nickname?.includes(selectVal.value);
+    } else if (selectType.value === 2) {
+      return user.description?.includes(selectVal.value);
+    } else {
+      return user.email?.includes(selectVal.value);
+    }
     return true
   })
 })
@@ -243,64 +243,7 @@ const total = ref(filterUsers.value.length)  //数据总条数
 watch(() => filterUsers.value, (newVal) => {
   total.value = filterUsers.value.length
 })
-const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-    default: 20,
-  },
-  initialPage: {
-    type: Number,
-    default: 1,
-  },
-});
 
-const emit = defineEmits(["page-change"]);
-
-const currentPage = ref(props.initialPage);
-
-const displayedPages = computed(() => {
-  const pages = [];
-  const totalPages = props.totalPages;
-
-  // Always show first page
-  pages.push(1);
-
-  if (currentPage.value <= 4) {
-    // Show first 5 pages
-    for (let i = 2; i <= Math.min(5, totalPages); i++) {
-      pages.push(i);
-    }
-    if (totalPages > 5) {
-      pages.push("...");
-      pages.push(totalPages);
-    }
-  } else if (currentPage.value >= totalPages - 3) {
-    // Show last 5 pages
-    pages.push("...");
-    for (let i = totalPages - 4; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Show current page and surrounding pages
-    pages.push("...");
-    for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
-      pages.push(i);
-    }
-    pages.push("...");
-    pages.push(totalPages);
-  }
-
-  return pages;
-});
-
-const handlePageChange = (page) => {
-  if (page < 1 || page > props.totalPages || page === currentPage.value) {
-    return;
-  }
-  currentPage.value = page;
-  emit("page-change", page);
-};
 onMounted(async () => {
   team_query(1, 10).then(res => {
     query_team_all_blocked_user(res.data.data[0].id, pagination.pageIndex, pagination.pageSize).then(res => {

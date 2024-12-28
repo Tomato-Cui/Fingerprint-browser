@@ -26,12 +26,12 @@ const createForm = reactive({
     remark: ""
 })
 const cleanForm = () => {
-    teamCode: ""
-    teamLink: ""
-    teamName: ""
-    description: ""
-    teamName: ""
-    remark: ""
+    joinForm.teamCode = ""
+    joinForm.teamLink = ""
+    joinForm.teamName = ""
+    joinForm.description = ""
+    createForm.teamName = ""
+    createForm.remark = ""
 }
 //确认加入团队
 const subJoinTeam = () => {
@@ -130,7 +130,7 @@ const subJoinTeam = () => {
                     <input v-model="joinForm.teamCode" type="text" placeholder="请输入团队码"
                         class="border border-gray-400 rounded-sm h-[40px] px-5" />
                 </div>
-                <div class="flex justify-center items-center gap-4">
+                <div class="flex justify-center items-center gap-4"> 
                     <label class="w-[80px] flex justify-end">团队链接</label>
                     <input v-model="joinForm.teamLink" type="text" placeholder="请输入团队链接"
                         class="border border-gray-400 rounded-sm h-[40px] px-5" />
