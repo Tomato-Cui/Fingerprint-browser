@@ -83,7 +83,7 @@
             class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
             :class="{ 'border-t border-gray-100': true }">
 
-            <div class="text-gray-900 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.username }}</div>
+            <div class="text-gray-900 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.nickname }}</div>
             <!-- <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.group_name }}</div> -->
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.description }}</div>
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.email }}</div>
