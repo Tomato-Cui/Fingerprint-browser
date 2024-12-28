@@ -47,7 +47,7 @@ sqlx = { version = "0.8", features = [
   "tls-native-tls",
 ] }
 log = "0.4"
-tauri = { version = "2.1.0", features = ["isolation", "default"] }
+tauri = { version = "2.1.0" }
 tauri-plugin-log = { version = "2.0.0-rc" }
 dirs = "5.0.1"
 thirtyfour = "0.35.0"

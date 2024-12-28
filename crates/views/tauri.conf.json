@@ -20,12 +20,7 @@
       }
     ],
     "security": {
-      "pattern": {
-        "use": "isolation",
-        "options": {
-          "dir": "../../frontend/src"
-        }
-      }
+      "csp": null
     }
   },
   "bundle": {
