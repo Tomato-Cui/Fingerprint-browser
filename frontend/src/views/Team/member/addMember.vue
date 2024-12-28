@@ -304,7 +304,8 @@ import { Model } from "@/components/model/index";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { team_group_query_all } from "@/commands/team-group";
-import { team_query } from "@/commands/team";
+import { team_query, query_current_team_info } from "@/commands/team";
+import { team_send } from '@/commands/user-team-temp'
 
 const emailError = ref(""); // 存储错误信息
 const router = useRouter()
@@ -381,6 +382,9 @@ const handleSubmit = () => {  //提交添加成员
   //重新赋值环境id数组，防止中途删除的数据
   refreshList()
   console.log("Form submitted:", formData.value);
+  query_current_team_info().then(res => {
+    team_send(res.data.id, formData.value.account, formData.value.remarkName);
+  })
   emit("update:addMemModel", false);
   // closeModal();
 };

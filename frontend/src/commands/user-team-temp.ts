@@ -16,23 +16,30 @@ export const team_receive_query = async (teamId: number, pageNum: number, pageSi
 
 export const team_send = async (
     teamId: number,
-    userUuid: String,
+    currentUserEmail: String,
     description: String,
 ): Promise<any> => {
     return await invoke('team_send', {
         teamId,
-        userUuid,
+        currentUserEmail,
         description,
     })
 };
 
 export const user_send = async (
-    teamId: number,
+    teamName: string,
     description: String,
 ): Promise<any> => {
     return await invoke('user_send', {
-        teamId,
+        teamName,
         description,
+    })
+};
+
+
+export const reject = async (id: number): Promise<any> => {
+    return await invoke('reject', {
+        id
     })
 };
 

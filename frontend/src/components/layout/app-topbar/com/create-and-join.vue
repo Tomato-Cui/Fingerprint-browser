@@ -4,6 +4,7 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineEmits, defineProps, reactive } from 'vue'
 import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
+import { user_send } from '@/commands/user-team-temp'
 
 const props = defineProps({
     createAndJoin: Boolean
@@ -16,6 +17,7 @@ const createTeamDialog = ref(false) //创建团队
 const joinForm = reactive({
     teamCode: "",
     teamLink: "",
+    teamName: "",
     description: ""
 })
 const createForm = reactive({
@@ -25,6 +27,7 @@ const createForm = reactive({
 //确认加入团队
 const subJoinTeam = () => {
     joinTeamDialog.value = false
+    user_send(joinForm.teamName, joinForm.description);
 }
 </script>
 
@@ -106,7 +109,7 @@ const subJoinTeam = () => {
         <div class="space-x-4 pt-6 flex flex-col">
             <!-- 在这里书写弹出框主题内容代码 -->
             <div class="h-[150px] flex flex-col justify-between mb-6">
-                <div class="flex justify-center items-center gap-4">
+                <!-- <div class="flex justify-center items-center gap-4">
                     <label class="w-[80px] flex justify-end">团队码</label>
                     <input v-model="joinForm.teamCode" type="text" placeholder="请输入团队码"
                         class="border border-gray-400 rounded-sm h-[40px] px-5" />
@@ -114,6 +117,11 @@ const subJoinTeam = () => {
                 <div class="flex justify-center items-center gap-4">
                     <label class="w-[80px] flex justify-end">团队链接</label>
                     <input v-model="joinForm.teamLink" type="text" placeholder="请输入团队链接"
+                        class="border border-gray-400 rounded-sm h-[40px] px-5" />
+                </div> -->
+                <div class="flex justify-center items-center gap-4">
+                    <label class="w-[80px] flex justify-end">团队名称</label>
+                    <input v-model="joinForm.teamName" type="text" placeholder="请输入团队名称"
                         class="border border-gray-400 rounded-sm h-[40px] px-5" />
                 </div>
                 <div class="flex justify-center items-center gap-4">

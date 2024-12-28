@@ -270,7 +270,7 @@ mod tests {
     async fn test_query_team_group_all_user() {
         crate::setup().await;
         let result =
-            query_team_group_all_user("3cfb0bc6-7b48-498a-935a-90ce561e40a5", 4, 14, 1, 10).await;
+            query_team_group_all_user("d3129a09-5473-4b1e-915b-bba0af78d752", 1, 1, 1, 10).await;
 
         println!("{:?}", result);
     }

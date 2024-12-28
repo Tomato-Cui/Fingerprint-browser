@@ -66,12 +66,12 @@
       <!-- Table -->
       <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg" v-else>
         <!-- Table Header -->
-        <div class="grid grid-cols-8 px-6 py-3 bg-gray-50 text-sm text-gray-500">
+        <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 text-sm text-gray-500">
           <div>姓名</div>
-          <div>分组</div>
+          <!-- <div>分组</div> -->
           <div>备注</div>
-          <div>手机号/邮箱</div>
-          <div>邀请人</div>
+          <div>邮箱</div>
+          <!-- <div>邀请人</div> -->
           <div>申请时间</div>
           <div>状态</div>
           <div>操作</div>
@@ -80,32 +80,32 @@
         <!-- Table Body -->
         <div class="divide-y flex-1 flex flex-col overflow-auto">
           <div v-for="user in users" :key="user.id"
-            class="grid grid-cols-8 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
+            class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
             :class="{ 'border-t border-gray-100': true }">
 
             <div class="text-gray-900 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.username }}</div>
-            <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.group_name }}</div>
+            <!-- <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.group_name }}</div> -->
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.description }}</div>
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.email }}</div>
-            <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.owner_name }}</div>
+            <!-- <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.owner_name }}</div> -->
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.created_at }}</div>
             <div>
               <span class="px-4 py-2 text-sm rounded-sm" :class="{
-                'bg-emerald-50 text-emerald-500': user.status === 'approved',
-                'bg-yellow-50 text-yellow-500': user.status === 'pending',
-                'bg-red-50 text-red-500': user.status === 'rejected',
+                'bg-emerald-50 text-emerald-500': user.allow_2 === 1,
+                'bg-yellow-50 text-yellow-500': user.allow_2 === 0,
+                // 'bg-red-50 text-red-500': user.allow_2 === 'rejected',
               }">
-                {{ getStatusText(user.status) }}
+                {{ getStatusText(user.allow_2) }}
               </span>
             </div>
             <div class="flex gap-2 text-sm">
-              <template v-if="user.status === 'pending'">
+              <template v-if="user.allow_2 === 0">
                 <button class="text-blue-500 hover:underline" @click="agreeApplyM(user)">同意</button>
                 <span class="text-gray-300">|</span>
                 <button class="text-blue-500 hover:underline" @click="refApply(user)">拒绝</button>
               </template>
               <template v-else>
-                {{ getActionText(user.status) }}
+                {{ getActionText(user.allow_2) }}
               </template>
             </div>
           </div>
@@ -170,7 +170,7 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
-import { team_receive_query } from '@/commands/user-team-temp'
+import { team_receive_query, team_allow, reject } from '@/commands/user-team-temp'
 import { query_current_team_info } from "@/commands/team"
 
 //搜索条件
@@ -247,28 +247,29 @@ const sortUsersByApplyTime = (order = "asc") => {  //数组按时间排序
 const filterUsers = computed(() => {
   //过滤数组
   // 调用方法：升序排序
-  sortUsersByApplyTime("desc"); // 按时间从早到晚排序
+  // sortUsersByApplyTime("desc"); // 按时间从早到晚排序
 
-  const selectQuery = ref(true);
-  return users.value.filter((user) => {
-    if (selectType.value === 1) {
-      selectQuery.value = user.owner_name.includes(selectVal.value);
-    } else if (selectType.value === 2) {
-      selectQuery.value = user.name.includes(selectVal.value);
-    } else {
-      selectQuery.value = user.contact.includes(selectVal.value);
-    }
+  // const selectQuery = ref(true);
+  // return users.value.filter((user) => {
+  //   if (selectType.value === 1) {
+  //     selectQuery.value = user.owner_name.includes(selectVal.value);
+  //   } else if (selectType.value === 2) {
+  //     selectQuery.value = user.name.includes(selectVal.value);
+  //   } else {
+  //     selectQuery.value = user.contact.includes(selectVal.value);
+  //   }
 
-    const statusNum =
-      selectedLabel.value === "已同意"
-        ? 1
-        : selectedLabel.value === "待审核"
-          ? 2
-          : 3;
-    const selectStatus = user.status === statusNum;
+  //   const statusNum =
+  //     selectedLabel.value === "已同意"
+  //       ? 1
+  //       : selectedLabel.value === "待审核"
+  //         ? 2
+  //         : 3;
+  //   const selectStatus = user.status === statusNum;
 
-    return selectQuery && selectStatus;
-  });
+  //   return selectQuery && selectStatus;
+  // });
+  return true
 });
 const userTotal = ref(filterUsers.value.length)   //数据条数
 watch(() => filterUsers.value, () => {
@@ -276,87 +277,35 @@ watch(() => filterUsers.value, () => {
 })
 
 const getStatusText = (status) => {
-  const statusMap = {
-    'approved': "已同意",
-    'pending': "待审核",
-    'rejected': "已拒绝",
-  };
-  return statusMap[status];
+  // const statusMap = {
+  //   'approved': "已同意",
+  //   'pending': "待审核",
+  //   'rejected': "已拒绝",
+  // };
+  const stateMenu = ['已拒绝', '待审核', '已同意']
+
+  return stateMenu[status + 1];
 };
 
 const getActionText = (status) => {
-  const actionMap = {
-    'approved': "已同意",
-    'rejected': "已拒绝",
-  };
-  return actionMap[status];
+  // const actionMap = {
+  //   'approved': "已同意",
+  //   'rejected': "已拒绝",
+  // };
+  const stateMenu = ['已同意', '已拒绝']
+  return stateMenu[status];
 };
 
-const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-    default: 20,
-  },
-  initialPage: {
-    type: Number,
-    default: 1,
-  },
-});
-
-const emit = defineEmits(["page-change"]);
-
-const currentPage = ref(props.initialPage);
-
-const displayedPages = computed(() => {
-  const pages = [];
-  const totalPages = props.totalPages;
-
-  // Always show first page
-  pages.push(1);
-
-  if (currentPage.value <= 4) {
-    // Show first 5 pages
-    for (let i = 2; i <= Math.min(5, totalPages); i++) {
-      pages.push(i);
-    }
-    if (totalPages > 5) {
-      pages.push("...");
-      pages.push(totalPages);
-    }
-  } else if (currentPage.value >= totalPages - 3) {
-    // Show last 5 pages
-    pages.push("...");
-    for (let i = totalPages - 4; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Show current page and surrounding pages
-    pages.push("...");
-    for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
-      pages.push(i);
-    }
-    pages.push("...");
-    pages.push(totalPages);
-  }
-
-  return pages;
-});
-
-const handlePageChange = (page) => {
-  if (page < 1 || page > props.totalPages || page === currentPage.value) {
-    return;
-  }
-  currentPage.value = page;
-  emit("page-change", page);
-};
 //同意申请
 const agreeApplyM = (user) => {
   // user.status = 'approved'
+  // console.log("user:", user);
+  team_allow(user.id, user.user_uuid, user.team_id)
 }
 //拒绝申请
 const refApply = (user) => {
-  user.status = 'rejected'
+  // user.status = 'rejected'
+  reject(user.id)
 }
 
 onMounted(() => {

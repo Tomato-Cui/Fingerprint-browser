@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
-use crate::user_info::UserInfo;
-
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct Team {
     pub id: i32,                     // 自增ID
@@ -80,6 +78,16 @@ impl Team {
         tx.commit().await?;
 
         Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn query_team_by_name(pool: &Pool<Sqlite>, name: &str) -> Result<Team, Error> {
+        let team: Team = sqlx::query_as("SELECT * FROM teams WHERE name = ? AND deleted_at IS NULL")
+            .bind(name)
+            .fetch_one(pool)
+            .await?;
+
+        Ok(team)
     }
 
     #[allow(dead_code)]
@@ -165,7 +173,7 @@ impl Team {
         group_id: u32,
         page_num: u32,
         page_size: u32,
-    ) -> Result<(i64, Vec<UserInfo>), Error> {
+    ) -> Result<(i64, Vec<crate::dto::team_info::UserInfoWithGroup>), Error> {
         let (is_leader,): (i64,) =
             sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ? and is_leader = 1")
                 .bind(team_id)
@@ -190,20 +198,40 @@ impl Team {
             page_num
         };
         let offset = page_num * page_size;
-
-        let select_sql = &format!(
-            "SELECT user_infos.* FROM user_infos 
-         JOIN users ON user_infos.id = users.user_info_id 
-         JOIN user_team_relation ON users.uuid = user_team_relation.user_uuid 
-         WHERE user_team_relation.user_uuid in ({}) LIMIT ? OFFSET ?",
-            user_uuids
-                .iter()
-                .map(|v| format!("'{}'", v))
-                .collect::<Vec<String>>()
-                .join(",")
+        let user_uuid_str = user_uuids
+            .iter()
+            .map(|v| format!("'{}'", v))
+            .collect::<Vec<String>>()
+            .join(",");
+        let select_sql = format!(
+            "
+            SELECT 
+                users.uuid as user_uuid,
+                user_infos.nickname,
+                user_infos.email,
+                user_team_relation.team_group_id, 
+                user_team_relation.description, 
+                team_groups.name AS group_name 
+            FROM 
+                user_infos 
+            JOIN 
+                users ON user_infos.id = users.user_info_id 
+            JOIN 
+                user_team_relation ON users.uuid = user_team_relation.user_uuid 
+            LEFT JOIN 
+                team_groups ON user_team_relation.team_group_id = team_groups.id 
+            WHERE 
+                user_team_relation.team_group_id = ?
+                and user_team_relation.user_uuid in ({})
+                AND user_team_relation.is_leader = 0 
+                AND user_team_relation.blocked = 0 
+            LIMIT ? OFFSET ?
+        ",
+            user_uuid_str
         );
 
-        let user_infos: Vec<UserInfo> = sqlx::query_as(&select_sql)
+        let user_infos: Vec<crate::dto::team_info::UserInfoWithGroup> = sqlx::query_as(&select_sql)
+            .bind(group_id)
             .bind(page_size)
             .bind(offset)
             .fetch_all(pool)
@@ -234,7 +262,7 @@ impl Team {
         let blocked = if blocked { 1 } else { 0 };
 
         let (total,): (i64,) =
-            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader is null and blocked = ?")
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and is_leader = 0 and blocked = ?")
                 .bind(team_id)
                 .bind(blocked)
                 .fetch_one(pool)
@@ -249,8 +277,11 @@ impl Team {
 
         let query_sql = "
             SELECT 
-                user_infos.*, 
+                users.uuid as user_uuid,
+                user_infos.nickname,
+                user_infos.email,
                 user_team_relation.team_group_id, 
+                user_team_relation.description, 
                 team_groups.name AS group_name 
             FROM 
                 user_infos 
@@ -262,7 +293,7 @@ impl Team {
                 team_groups ON user_team_relation.team_group_id = team_groups.id 
             WHERE 
                 user_team_relation.team_id = ? 
-                AND user_team_relation.is_leader IS NULL 
+                AND user_team_relation.is_leader = 0 
                 AND user_team_relation.blocked = ? 
             LIMIT ? OFFSET ?
         ";
