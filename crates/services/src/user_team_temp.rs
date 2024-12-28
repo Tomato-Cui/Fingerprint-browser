@@ -68,10 +68,12 @@ pub async fn team_send(
 ) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let user_uuid = models::user::User::query_uuid_by_email(pool, current_user_email).await?;
+    let user_uuid = models::user::User::query_uuid_by_email(pool, current_user_email)
+        .await
+        .map_err(|_| ServiceError::Error("指定用户不存在".to_string()))?;
 
     let user_team_temp = UserTeamTemp {
-        user_uuid: user_uuid,
+        user_uuid,
         team_id,
         description: Some(description.to_string()),
         allow_1: Some(0),
@@ -113,7 +115,7 @@ mod tests {
     #[tokio::test]
     async fn test_query_user_apply() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
+        let user_uuid = "d3129a09-5473-4b1e-915b-bba0af78d752";
         let page_num = 1;
         let page_size = 10;
 
@@ -125,7 +127,7 @@ mod tests {
     #[tokio::test]
     async fn test_query_team_apply() {
         crate::setup().await;
-        let team_id = 4;
+        let team_id = 2;
         let page_num = 1;
         let page_size = 10;
 
@@ -137,8 +139,8 @@ mod tests {
     #[tokio::test]
     async fn test_user_send() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let team_name = "";
+        let user_uuid = "9bc584d5-68cb-43fd-b78e-618b28ff6f1a";
+        let team_name = "thisiste";
         let description = "test_description";
 
         let result = user_send(user_uuid, team_name, description).await;
@@ -148,20 +150,20 @@ mod tests {
     #[tokio::test]
     async fn test_team_send() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let team_id = 4;
+        let current_user_email = "1";
+        let team_id = 2;
         let description = "test_description";
 
-        let result = team_send(user_uuid, team_id, description).await;
+        let result = team_send(current_user_email, team_id, description).await;
         println!("{:?}", result)
     }
 
     #[tokio::test]
     async fn test_allow() {
         crate::setup().await;
-        let id = 10;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let team_id = 4;
+        let id = 1;
+        let user_uuid = "9bc584d5-68cb-43fd-b78e-618b28ff6f1a";
+        let team_id = 2;
 
         let result = allow(id, user_uuid, team_id).await;
         println!("{:?}", result)

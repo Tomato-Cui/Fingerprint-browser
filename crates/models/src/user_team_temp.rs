@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
+use crate::dto;
+
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct UserTeamTemp {
     pub id: Option<i32>,             // 自增ID
@@ -45,7 +47,7 @@ impl UserTeamTemp {
         user_uuid: &str,
         page_num: u32,
         page_size: u32,
-    ) -> Result<(i64, Vec<UserTeamTemp>), Error> {
+    ) -> Result<(i64, Vec<dto::user_team_temp::UserTeamTempInfo>), Error> {
         let mut tx = pool.begin().await?;
 
         let (total,): (i64,) = sqlx::query_as(
@@ -63,16 +65,21 @@ impl UserTeamTemp {
         };
         let offset = page_num * page_size;
 
-        let user_team_temps: Vec<UserTeamTemp> = sqlx::query_as(
-            "SELECT * FROM user_team_temps 
-         WHERE user_uuid = ? AND allow_2 = 1 AND deleted_at IS NULL 
-         LIMIT ? OFFSET ?",
-        )
-        .bind(user_uuid)
-        .bind(page_size)
-        .bind(offset)
-        .fetch_all(&mut *tx)
-        .await?;
+        let query_sql = "
+            SELECT utt.id, utt.allow_1, utt.allow_2, u.uuid as user_uuid, ui.nickname, ui.email, utt.description, utt.created_at, utt.updated_at, utt.deleted_at
+            FROM user_team_temps utt
+            JOIN users u ON utt.user_uuid = u.uuid
+            JOIN user_infos ui ON u.user_info_id = ui.id
+            WHERE utt.user_uuid = ? AND utt.allow_2 = 1 AND utt.deleted_at IS NULL 
+            LIMIT ? OFFSET ?
+        ";
+
+        let user_team_temps: Vec<dto::user_team_temp::UserTeamTempInfo> = sqlx::query_as(query_sql)
+            .bind(user_uuid)
+            .bind(page_size)
+            .bind(offset)
+            .fetch_all(&mut *tx)
+            .await?;
 
         tx.commit().await?;
 
@@ -84,7 +91,7 @@ impl UserTeamTemp {
         team_id: u32,
         page_num: u32,
         page_size: u32,
-    ) -> Result<(i64, Vec<UserTeamTemp>), Error> {
+    ) -> Result<(i64, Vec<dto::user_team_temp::UserTeamTempInfo>), Error> {
         let mut tx = pool.begin().await?;
 
         let (total,): (i64,) = sqlx::query_as(
@@ -102,16 +109,21 @@ impl UserTeamTemp {
         };
         let offset = page_num * page_size;
 
-        let user_team_temps: Vec<UserTeamTemp> = sqlx::query_as(
-            "SELECT * FROM user_team_temps 
-         WHERE team_id = ? and allow_2 = 0
-         LIMIT ? OFFSET ?",
-        )
-        .bind(team_id)
-        .bind(page_size)
-        .bind(offset)
-        .fetch_all(&mut *tx)
-        .await?;
+        let query_sql = "
+            SELECT utt.id, utt.allow_1, utt.allow_2, u.uuid as user_uuid, ui.nickname, ui.email, utt.description, utt.created_at, utt.updated_at, utt.deleted_at
+            FROM user_team_temps utt
+            JOIN users u ON utt.user_uuid = u.uuid
+            JOIN user_infos ui ON u.user_info_id = ui.id
+            WHERE utt.team_id = ? AND utt.allow_2 = 0
+            LIMIT ? OFFSET ?
+        ";
+
+        let user_team_temps: Vec<dto::user_team_temp::UserTeamTempInfo> = sqlx::query_as(query_sql)
+            .bind(team_id)
+            .bind(page_size)
+            .bind(offset)
+            .fetch_all(&mut *tx)
+            .await?;
 
         tx.commit().await?;
 
@@ -138,7 +150,7 @@ impl UserTeamTemp {
             .bind(&user_team_temp.allow_2)
             .bind(&user_team_temp.description)
             .bind(id)
-            .fetch_one(&mut *tx)
+            .execute(&mut *tx)
             .await?;
 
         let sql = "
