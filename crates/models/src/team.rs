@@ -226,7 +226,7 @@ impl Team {
                 and user_team_relation.user_uuid in ({})
                 AND user_team_relation.is_leader = 0 
                 AND user_team_relation.blocked = 0 
-                and deleted_at is null
+                and user_team_relation.deleted_at is null
             LIMIT ? OFFSET ?
         ",
             user_uuid_str
@@ -298,7 +298,7 @@ impl Team {
                 user_team_relation.team_id = ? 
                 AND user_team_relation.is_leader = 0 
                 AND user_team_relation.blocked = ? 
-                and deleted_at is null
+                and user_team_relation.deleted_at is null
             LIMIT ? OFFSET ?
         ";
 

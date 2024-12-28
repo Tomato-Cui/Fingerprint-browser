@@ -1,49 +1,187 @@
+<script setup>
+import { reactive, ref } from "vue";
+import {
+  UploadCloud as UploadCloudIcon,
+  Search as SearchIcon,
+  Settings2 as Settings2Icon,
+  SquarePen as SquarePenIcon,
+  CheckCircle as CheckCircleIcon,
+  Download,
+  Ellipsis,
+  Trash2 as Trash2Icon,
+  CircleAlert as CircleAlertIcon,
+} from "lucide-vue-next";
+import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+import { Switch } from "@/components/ui/switch";
+import Input from "@/components/input.vue";
+import UploadModel from "./upload-model.vue";
+import SettingModel from "./setting-model.vue";
+import UpdateModel from "./update-model.vue";
+import { AlertModel } from "@/components/alert-model";
+import EnableSoftwareSwitch from "./enable-software-switch.vue";
+import { extension_query } from "@/commands/extension";
+
+const uploadModelProps = reactive({
+  open: false,
+  title: "",
+});
+const settingModelProps = reactive({
+  open: false,
+  title: "",
+});
+const updateModelProps = reactive({
+  open: false,
+  title: "",
+});
+const alertModelProps = reactive({
+  open: false,
+  title: "",
+  message: "",
+  showWarn: false,
+});
+
+const activeTab = ref("team");
+const storeApps = ref(
+  [...new Array(20).keys()].map((item) => ({
+    id: item,
+    name: "AdsPower密码管理器",
+    version: "0.1.2",
+    description:
+      "用于生成2FA验证码和自动登录网站，与AdsPower浏览器一起使用更加安全。",
+    icon: "https://iph.href.lu/400x400?text=400x400&fg=666666&bg=cccccc",
+    enabled: true,
+    downloading: true,
+    downloaded: false,
+    installed: false,
+  }))
+);
+
+const removeApp = ref();
+const installedApps = ref([]);
+const installSoftwareHandle = (app) => {
+  if (app) {
+    uploadModelProps.open = true;
+    uploadModelProps.title = "下载应用";
+    app.installed = true;
+    installedApps.value.push(app);
+  }
+};
+const submitInstallSoftwareHandle = () => {
+  uploadModelProps.open = false;
+  activeTab.value = "team";
+};
+
+const uploadSoftwareHandle = () => {
+  uploadModelProps.open = true;
+  uploadModelProps.title = "上传应用";
+};
+
+const removeSoftwareHandle = (app) => {
+  alertModelProps.title = "移除应用";
+  alertModelProps.open = true;
+  alertModelProps.showWarn = true;
+  alertModelProps.message = "移除后，所有浏览器将不会安装此应用。";
+  removeApp.value = app;
+};
+const switchOpenHandle = () => {
+  alertModelProps.title = "开启应用";
+  alertModelProps.open = true;
+  alertModelProps.showWarn = false;
+  alertModelProps.message =
+    "开启后，如在新建浏览器环境时选择此应用，将安装到浏览器上使用。您确定开启以下应用吗？";
+};
+const settingOpenHandle = () => {
+  settingModelProps.title = "配置环境";
+  settingModelProps.open = true;
+};
+const updateOpenHandle = () => {
+  updateModelProps.title = "更新应用";
+  updateModelProps.open = true;
+};
+</script>
 <template>
   <div class="p-4 h-main rounded-md flex flex-col">
     <!-- Navigation Tabs -->
     <div class="flex flex-col gap-y-4 bg-white z-10 rounded-md pb-4">
       <nav class="flex gap-8 border-b px-4">
-        <button @click="activeTab = 'team'" class="px-1 py-4 -mb-px font-medium"
-          :class="activeTab === 'team' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'">
+        <button
+          @click="activeTab = 'team'"
+          class="px-1 py-4 -mb-px font-medium"
+          :class="
+            activeTab === 'team'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600'
+          "
+        >
           团队应用
         </button>
-        <button @click="activeTab = 'recommended'" class="px-1 py-4 -mb-px font-medium"
-          :class="activeTab === 'recommended' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600'">
+        <button
+          @click="activeTab = 'recommended'"
+          class="px-1 py-4 -mb-px font-medium"
+          :class="
+            activeTab === 'recommended'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600'
+          "
+        >
           推荐应用
         </button>
       </nav>
       <!-- Search Bar and Actions -->
-      <div :class="['flex px-4 gap-x-8', activeTab !== 'team' ? 'justify-between' : 'justify-start']">
+      <div
+        :class="[
+          'flex px-4 gap-x-8',
+          activeTab !== 'team' ? 'justify-between' : 'justify-start',
+        ]"
+      >
         <div v-if="activeTab === 'team'" class="flex gap-4">
           <!-- <UploadModel v-if="activeTab === 'team'"> -->
-          <button @click="uploadSoftwareHandle"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          <button
+            @click="uploadSoftwareHandle"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          >
             <UploadCloudIcon class="h-5 w-5" />
             上传应用
           </button>
           <!-- </UploadModel> -->
         </div>
         <div class="relative w-80">
-          <SearchIcon class="absolute left-3 top-2.5 h-5 w-5 text-gray-400 z-10" />
+          <SearchIcon
+            class="absolute left-3 top-2.5 h-5 w-5 text-gray-400 z-10"
+          />
           <Input type="text" placeholder="关键字搜索" class="pl-10" />
         </div>
         <!-- No Results Message (Only on Recommended Page) -->
-        <div v-if="activeTab === 'recommended'" class="h-full flex items-center justify-end mb-6 text-sm">
+        <div
+          v-if="activeTab === 'recommended'"
+          class="h-full flex items-center justify-end mb-6 text-sm"
+        >
           <span class="text-gray-500">没有找到你想要的应用？</span>
-          <a href="#" class="text-blue-600 hover:underline">前往Chrome 应用商店搜索</a>
+          <a href="#" class="text-blue-600 hover:underline"
+            >前往Chrome 应用商店搜索</a
+          >
         </div>
       </div>
     </div>
     <!-- Application Cards Grid -->
     <div class="flex-auto bg-white overflow-y-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 px-4 pb-8 ">
-        <div v-for="app in activeTab === 'team' ? installedApps : storeApps " :key="app.id"
-          class="bg-white rounded-lg p-4 border overflow-y-auto">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 px-4 pb-8"
+      >
+        <div
+          v-for="app in activeTab === 'team' ? installedApps : storeApps"
+          :key="app.id"
+          class="bg-white rounded-lg p-4 border overflow-y-auto"
+        >
           <div class="flex flex-col">
             <div class="flex justify-between items-start mb-2">
               <div class="flex gap-x-2">
                 <div>
-                  <img :src="app.icon" alt="App icon" class="w-16 h-16 rounded">
+                  <img
+                    :src="app.icon"
+                    alt="App icon"
+                    class="w-16 h-16 rounded"
+                  />
                 </div>
                 <div>
                   <h3 class="font-medium">{{ app.name }}</h3>
@@ -51,22 +189,37 @@
                 </div>
               </div>
 
-              <div v-if="activeTab !== 'recommended'" class="flex flex-col items-end gap-y-6">
+              <div
+                v-if="activeTab !== 'recommended'"
+                class="flex flex-col items-end gap-y-6"
+              >
                 <EnableSoftwareSwitch @click="switchOpenHandle" />
-                <Switch v-model:checked="switchStatus" @click="switchOpenHandle" />
+                <Switch
+                  v-model:checked="switchStatus"
+                  @click="switchOpenHandle"
+                />
                 <div class="flex gap-1">
-                  <p v-if="app.downloading" class="text-orange-500 text-xs whitespace-nowrap flex items-center gap-1">
+                  <p
+                    v-if="app.downloading"
+                    class="text-orange-500 text-xs whitespace-nowrap flex items-center gap-1"
+                  >
                     <Download class="h-4 w-4" />
                     下载中
                   </p>
-                  <p v-if="app.downloaded" class="text-green-500 text-xs whitespace-nowrap flex items-center gap-1">
+                  <p
+                    v-if="app.downloaded"
+                    class="text-green-500 text-xs whitespace-nowrap flex items-center gap-1"
+                  >
                     <CheckCircleIcon class="h-4 w-4" />
                     下载完成
                   </p>
                 </div>
               </div>
-              <button v-if="activeTab === 'recommended'" @click="() => installSoftwareHandle(app)"
-                class="flex items-center justify-center gap-2 px-2 py-1 bg-white rounded-sm border text-xs l: text-blue-600 border-blue-600 whitespace-nowrap">
+              <button
+                v-if="activeTab === 'recommended'"
+                @click="() => installSoftwareHandle(app)"
+                class="flex items-center justify-center gap-2 px-2 py-1 bg-white rounded-sm border text-xs l: text-blue-600 border-blue-600 whitespace-nowrap"
+              >
                 {{ app.installed ? "已添加" : "添加" }}
               </button>
             </div>
@@ -75,11 +228,16 @@
             <div class="mt-4 flex items-center justify-between">
               <div class="flex items-center gap-1 text-sm">
                 <span class="text-gray-500">提供方：</span>
-                <a href="#" class="text-blue-600 hover:underline">Chrome Web Store</a>
+                <a href="#" class="text-blue-600 hover:underline"
+                  >Chrome Web Store</a
+                >
               </div>
               <More>
                 <MoreTrigger>
-                  <Ellipsis v-if="activeTab !== 'recommended'" class="h-6 w-6 cursor-pointer" />
+                  <Ellipsis
+                    v-if="activeTab !== 'recommended'"
+                    class="h-6 w-6 cursor-pointer"
+                  />
                 </MoreTrigger>
                 <MoreContent>
                   <MoreItem class="cursor-pointer" @click="settingOpenHandle">
@@ -88,7 +246,10 @@
                   <MoreItem class="cursor-pointer" @click="updateOpenHandle">
                     <SquarePenIcon class="w-4 h-4" />更新
                   </MoreItem>
-                  <MoreItem class="cursor-pointer" @click="() => removeSoftwareHandle(app)">
+                  <MoreItem
+                    class="cursor-pointer"
+                    @click="() => removeSoftwareHandle(app)"
+                  >
                     <Trash2Icon class="w-4 h-4" />移除
                   </MoreItem>
                 </MoreContent>
@@ -97,22 +258,35 @@
           </div>
         </div>
       </div>
-      <div v-if="!(activeTab === 'team' ? installedApps : storeApps).length"
-        class="text-gray-400 text-center text-xs h-96 justify-center items-center flex">
+      <div
+        v-if="!(activeTab === 'team' ? installedApps : storeApps).length"
+        class="text-gray-400 text-center text-xs h-96 justify-center items-center flex"
+      >
         内容为空
       </div>
-      <AlertModel :title="alertModelProps.title" :open="alertModelProps.open"
-        @close="() => alertModelProps.open = false" @cancel="() => alertModelProps.open = false" @submit="() => {
-          alertModelProps.open = false;
+      <AlertModel
+        :title="alertModelProps.title"
+        :open="alertModelProps.open"
+        @close="() => (alertModelProps.open = false)"
+        @cancel="() => (alertModelProps.open = false)"
+        @submit="
+          () => {
+            alertModelProps.open = false;
 
-          if (alertModelProps.title == '移除应用' && removeApp) {
-            removeApp.installed = false;
-            installedApps = installedApps.filter(item => item.id != removeApp.id)
-            removeApp = undefined;
+            if (alertModelProps.title == '移除应用' && removeApp) {
+              removeApp.installed = false;
+              installedApps = installedApps.filter(
+                (item) => item.id != removeApp.id
+              );
+              removeApp = undefined;
+            }
           }
-        }">
-        <div v-if="alertModelProps.showWarn"
-          class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm">
+        "
+      >
+        <div
+          v-if="alertModelProps.showWarn"
+          class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm"
+        >
           <CircleAlertIcon />
           {{ alertModelProps.message }}
         </div>
@@ -120,126 +294,43 @@
           <p>
             {{ alertModelProps.message }}
           </p>
-          <p>应用名称 <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4">MetaMask</span></p>
+          <p>
+            应用名称
+            <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4"
+              >MetaMask</span
+            >
+          </p>
         </div>
       </AlertModel>
 
-      <UploadModel :disableTab="activeTab == 'recommended' && 'package'" :open="uploadModelProps.open"
-        :title="uploadModelProps.title" @close="() => uploadModelProps.open = false"
-        @submit="submitInstallSoftwareHandle" />
+      <UploadModel
+        :disableTab="activeTab == 'recommended' && 'package'"
+        :open="uploadModelProps.open"
+        :title="uploadModelProps.title"
+        @close="() => (uploadModelProps.open = false)"
+        @submit="submitInstallSoftwareHandle"
+      />
 
-      <SettingModel :open="settingModelProps.open" :title="settingModelProps.title"
-        @close="() => settingModelProps.open = false" />
-      <UpdateModel :open="updateModelProps.open" :title="updateModelProps.title"
-        @close="() => updateModelProps.open = false" />
+      <SettingModel
+        :open="settingModelProps.open"
+        :title="settingModelProps.title"
+        @close="() => (settingModelProps.open = false)"
+      />
+      <UpdateModel
+        :open="updateModelProps.open"
+        :title="updateModelProps.title"
+        @close="() => (updateModelProps.open = false)"
+      />
     </div>
   </div>
 </template>
-
-<script setup>
-import { reactive, ref } from 'vue'
-import {
-  UploadCloud as UploadCloudIcon,
-  Search as SearchIcon,
-  Settings2 as Settings2Icon,
-  SquarePen as SquarePenIcon,
-  CheckCircle as CheckCircleIcon, Download, Ellipsis, Trash2 as Trash2Icon,
-  CircleAlert as CircleAlertIcon
-} from 'lucide-vue-next'
-import { More, MoreContent, MoreItem, MoreTrigger } from '@/components/more'
-import { Switch } from '@/components/ui/switch'
-import Input from '@/components/input.vue'
-import UploadModel from './upload-model.vue'
-import SettingModel from './setting-model.vue'
-import UpdateModel from './update-model.vue'
-import { AlertModel } from '@/components/alert-model'
-import EnableSoftwareSwitch from './enable-software-switch.vue'
-
-
-const uploadModelProps = reactive({
-  open: false,
-  title: '',
-});
-const settingModelProps = reactive({
-  open: false,
-  title: '',
-});
-const updateModelProps = reactive({
-  open: false,
-  title: '',
-});
-const alertModelProps = reactive({
-  open: false,
-  title: '',
-  message: '',
-  showWarn: false,
-});
-
-const activeTab = ref('team')
-console.log(activeTab == 'recommended' && 'package');
-const storeApps = ref(
-  [...new Array(20).keys()].map(item => ({
-    id: item,
-    name: 'AdsPower密码管理器',
-    version: '0.1.2',
-    description: '用于生成2FA验证码和自动登录网站，与AdsPower浏览器一起使用更加安全。',
-    icon: 'https://iph.href.lu/400x400?text=400x400&fg=666666&bg=cccccc',
-    enabled: true,
-    downloading: true,
-    downloaded: false,
-    installed: false
-  }))
-);
-
-const removeApp = ref();
-const installedApps = ref([]);
-const installSoftwareHandle = (app) => {
-  if (app) {
-    uploadModelProps.open = true
-    uploadModelProps.title = '下载应用'
-    app.installed = true
-    installedApps.value.push(app)
-  }
-};
-const submitInstallSoftwareHandle = () => {
-  uploadModelProps.open = false
-  activeTab.value = 'team'
-}
-
-const uploadSoftwareHandle = () => {
-  uploadModelProps.open = true
-  uploadModelProps.title = '上传应用'
-};
-
-const removeSoftwareHandle = (app) => {
-  alertModelProps.title = '移除应用'
-  alertModelProps.open = true
-  alertModelProps.showWarn = true
-  alertModelProps.message = '移除后，所有浏览器将不会安装此应用。';
-  removeApp.value = app;
-}
-const switchOpenHandle = () => {
-  alertModelProps.title = '开启应用'
-  alertModelProps.open = true;
-  alertModelProps.showWarn = false;
-  alertModelProps.message = '开启后，如在新建浏览器环境时选择此应用，将安装到浏览器上使用。您确定开启以下应用吗？';
-}
-const settingOpenHandle = () => {
-  settingModelProps.title = '配置环境'
-  settingModelProps.open = true;
-}
-const updateOpenHandle = () => {
-  updateModelProps.title = '更新应用'
-  updateModelProps.open = true;
-}
-</script>
 
 <style scoped>
 .toggle-checkbox:checked {
   @apply right-0 border-blue-600;
 }
 
-.toggle-checkbox:checked+.toggle-label {
+.toggle-checkbox:checked + .toggle-label {
   @apply bg-blue-600;
 }
 </style>
