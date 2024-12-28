@@ -46,3 +46,5 @@ cd zonghu-fingerprint-frontend/frontend && npm i && npm run dev
 cd zonghu-fingerprint-frontend/clients && cargo run --bin clients
 ```
 
+
+1. 查询团队分组要有用户数量统计

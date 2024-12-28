@@ -5,7 +5,7 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 pub struct ProxyGroup {
     pub id: Option<i32>,             // 自增ID
     pub name: String,                // 分组名称
-    pub user_uuid: String,           // 用户uuid
+    pub user_uuid: Option<String>,           // 用户uuid
     pub description: Option<String>, // 分组描述
     pub created_at: Option<String>,  // 创建时间
     pub updated_at: Option<String>,  // 更新时间

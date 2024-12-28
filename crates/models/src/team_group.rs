@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
@@ -52,14 +53,26 @@ impl TeamGroup {
     pub async fn query_team_group_by_team_id(
         pool: &Pool<Sqlite>,
         team_id: u32,
-    ) -> Result<Vec<TeamGroup>, Error> {
-        let team_groups: Vec<TeamGroup> =
-            sqlx::query_as("SELECT * FROM team_groups WHERE team_id = ? AND deleted_at IS NULL")
-                .bind(team_id)
-                .fetch_all(pool)
-                .await?;
+    ) -> Result<Value, Error> {
+        let query_sql = r#"
+            SELECT COUNT(*) as count, tg.*
+            FROM user_team_relation utr
+                    join team_groups tg on utr.team_group_id = tg.id
+            WHERE utr.team_id = ?
+            and utr.blocked = 0
+            and is_leader = 0
+            AND deleted_at IS NULL
+            GROUP BY utr.team_group_id;
+        "#;
 
-        Ok(team_groups)
+        let team_groups: Vec<crate::dto::team_group::TeamGroupList> = sqlx::query_as(&query_sql)
+            .bind(team_id)
+            .fetch_all(pool)
+            .await?;
+
+        let result_value = commons::util::struct_to_json_value(team_groups);
+
+        Ok(result_value)
     }
 
     #[allow(dead_code)]
