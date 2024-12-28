@@ -14,6 +14,7 @@ use command::environment_proxies as environment_proxies_command;
 use command::environment_proxy_group as environment_proxy_group_command;
 use command::environment_transfer_history as environment_transfer_history_command;
 use command::environment_trash as environment_trash_command;
+use command::extension as extension_command;
 use command::team as team_command;
 use command::team_group as team_group_command;
 use command::user as user_command;
@@ -106,6 +107,15 @@ pub fn run() {
             user_command::register,
             user_command::reset_password,
             user_command::is_login,
+            extension_command::extension_user_create,
+            extension_command::extension_team_create,
+            extension_command::extension_query_by_team,
+            extension_command::extension_query_by_user,
+            extension_command::extension_query_by_environment,
+            extension_command::extension_query,
+            extension_command::extension_environmnet_use_extension,
+            extension_command::extension_update,
+            extension_command::extension_delete_by_uuid,
             browser_command::browser_start,
             browser_command::starts::browser_starts,
             browser_command::browser_stops,
