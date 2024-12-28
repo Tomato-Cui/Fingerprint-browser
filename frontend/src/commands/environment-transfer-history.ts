@@ -10,11 +10,11 @@ export const environment_transfer_history_query = async (pageNum: number, pageSi
 
 export const environment_transfer_history_batch_create = async (
     environmentUuids: Array<String>,
-    to_user_uuid: String,
+    currentUserEmail: String,
 ): Promise<any> => {
     return await invoke('environment_transfer_history_batch_create', {
         environmentUuids,
-        to_user_uuid,
+        currentUserEmail,
     })
 };
 

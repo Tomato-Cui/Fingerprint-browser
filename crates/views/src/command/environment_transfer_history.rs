@@ -41,25 +41,21 @@ pub async fn environment_transfer_history_query(
 
 #[tauri::command]
 pub async fn environment_transfer_history_batch_create(
+    current_user_email: &str,
     environment_uuids: Vec<String>,
-    to_user_uuid: String,
 ) -> Result<AppResponse<HashMap<String, bool>>, tauri::Error> {
     let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
         Some(format!("创建失败: {}", v))
     });
 
-    let environment_transfer_histories = environment_uuids
-        .iter()
-        .map(|v| EnvironmentTransferHistory {
-            environment_uuid: v.to_string(),
-            from_user_uuid: user_uuid.clone(),
-            to_user_uuid: to_user_uuid.clone(),
-            ..Default::default()
-        })
-        .collect::<Vec<EnvironmentTransferHistory>>();
-
-    match services::environment_transfer_history::create(environment_transfer_histories).await {
+    match services::environment_transfer_history::create(
+        &user_uuid,
+        current_user_email,
+        environment_uuids,
+    )
+    .await
+    {
         Ok(data) => Ok(AppResponse::<HashMap<String, bool>>::success(
             success_msg,
             Some(data),

@@ -68,7 +68,7 @@ mod batch_create {
     #[derive(serde::Deserialize)]
     pub struct Payload {
         pub environment_uuids: Vec<String>,
-        pub to_user_uuid: String,
+        pub user_email: String,
     }
     pub async fn handle(
         state: Extension<CurrentUser>,
@@ -78,18 +78,13 @@ mod batch_create {
             Some(format!("创建失败: {}", v))
         });
 
-        let environment_transfer_historys = payload
-            .environment_uuids
-            .iter()
-            .map(|v| EnvironmentTransferHistory {
-                environment_uuid: v.to_string(),
-                from_user_uuid: state.user_uuid.clone(),
-                to_user_uuid: payload.to_user_uuid.clone(),
-                ..Default::default()
-            })
-            .collect::<Vec<EnvironmentTransferHistory>>();
-
-        match services::environment_transfer_history::create(environment_transfer_historys).await {
+        match services::environment_transfer_history::create(
+            &state.user_uuid,
+            &payload.user_email,
+            payload.environment_uuids,
+        )
+        .await
+        {
             Ok(data) => AppResponse::<HashMap<String, bool>>::success(success_msg, Some(data)),
             Err(r) => AppResponse::<HashMap<String, bool>>::fail(warn_msg(r.to_string())),
         }
