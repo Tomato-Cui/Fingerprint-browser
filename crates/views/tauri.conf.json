@@ -20,9 +20,13 @@
       }
     ],
     "security": {
-      "csp": null
-    },
-    "withGlobalTauri": true
+      "pattern": {
+        "use": "isolation",
+        "options": {
+          "dir": "../../frontend/src"
+        }
+      }
+    }
   },
   "bundle": {
     "active": true,

@@ -61,7 +61,7 @@ impl TeamGroup {
             WHERE utr.team_id = ?
             and utr.blocked = 0
             and is_leader = 0
-            AND deleted_at IS NULL
+            AND utr.deleted_at IS NULL
             GROUP BY utr.team_group_id;
         "#;
 
