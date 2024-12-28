@@ -142,11 +142,11 @@
             <td class="p-4 w-32 text-sm text-center">
               {{ item.environment }}
             </td>
-            <td class="p-4 w-32 text-sm text-center">{{ item.createdAt }}</td>
-            <td class="p-4 w-32 text-sm text-center">{{ item.addedBy }}</td>
+            <td class="p-4 w-32 text-sm text-center">{{ item.created_at }}</td>
+            <td class="p-4 w-32 text-sm text-center">{{ item.platform_description }}</td>
             <td class="p-4 w-32 text-sm text-center">
               <div class="flex gap-4 justify-center items-center">
-                <button class="text-blue-600 hover:text-blue-700" @click="openupdateModal">
+                <button class="text-blue-600 hover:text-blue-700" @click="openupdateModal(item)">
                   编辑
                 </button>
                 <More>
@@ -221,11 +221,13 @@
     <ShowModel
         :open="showModelProps.open"
         :title="showModelProps.title"
+        :itemData="showModelProps.itemData"
         @close="() => (showModelProps.open = false)"
     />
     <updateModel
         :open="updateModelProps.open"
         :title="updateModelProps.title"
+        :itemData="updateModelProps.itemData"
         @close="() => (updateModelProps.open = false)"
     />
 
@@ -234,7 +236,7 @@
         title="删除账号"
         @cancel="deleteCloseHandle"
         @close="deleteCloseHandle"
-        @submit="deleteCloseHandle"
+        @submit="deleteSubmitHandle"
     >
       <div class="flex flex-col gap-y-4 py-4 text-sm">
         <!-- Content -->
@@ -280,7 +282,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup  lang="ts">
 import {computed, reactive, ref, watch} from "vue";
 import ShowModel from "./showModel.vue";
 import updateModel from "./updateModel.vue";
@@ -302,16 +304,20 @@ import {More, MoreContent, MoreItem, MoreTrigger} from "@/components/more";
 import {AlertModel} from "@/components/alert-model";
 import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
 import TooltipButton from "@/components/tooltip-button.vue";
-import { environment_account_query } from "@/commands/environment-account.ts";
+import {
+  environment_account_batch_delete,
+  environment_account_delete,
+  environment_account_query
+} from "@/commands/environment-account.ts";
 
 const selectAll = ref(false);
 const activeDropdown = ref(null);
 const selectedItem = ref(null);
 
-const currentPage = ref(0);  // 当前页
+const currentPage = ref(1);  // 当前页
 
-const totalItems = ref(110);   // 数据总数
-const itemsPerPage = ref(1); // 每页显示的数量
+const totalItems = ref(0);   // 数据总数
+const itemsPerPage = ref(10); // 每页显示的数量
 const tableData = ref([]);
 // 用于分页的总页数
 const totalPages = computed(() =>
@@ -336,11 +342,10 @@ const visiblePages = computed(() => {
 // 调用 API 获取数据
 const fetchData = async (pageNum, pageSize) => {
   try {
-    console.log(pageNum,pageSize)
-    const data = await environment_account_query(pageNum, pageSize);
-    console.log(data)
-    tableData.value = data.items;  // 假设 API 返回的数据是 { items: [...], total: number }
-    // totalItems.value = data.total; // 总项数
+    // console.log(pageNum,pageSize)
+    const data = await environment_account_query(pageNum-1, pageSize);
+    tableData.value = data.data.data;  // 假设 API 返回的数据是 { items: [...], total: number }
+    totalItems.value = data.data.total; // 总项数
   } catch (error) {
     console.error("Error fetching data", error);
   }
@@ -379,6 +384,9 @@ const toggleDropdown = (id) => {
 
 const showDetails = (item) => {
   selectedItem.value = item;
+
+  showModelProps.itemData = { ...item };  // 使用展开运算符确保 Vue 的响应式跟踪
+
   showModelProps.open = true;
   activeDropdown.value = null;
 };
@@ -386,14 +394,17 @@ const showDetails = (item) => {
 const showModelProps = reactive({
   open: false,
   title: "",
+  itemData: {} as Record<string, any>,
 });
 
 const updateModelProps = reactive({
   open: false,
   title: "",
+  itemData: {} as Record<string, any>,
 });
 
-const openupdateModal = () => {
+const openupdateModal = (item) => {
+  updateModelProps.itemData = { ...item };
   updateModelProps.open = true;
 };
 
@@ -406,6 +417,20 @@ const deleteOpenHandle = (item) => {
 const deleteCloseHandle = () => {
   deleteModel.value = false;
 };
+
+const deleteSubmitHandle = async () =>{
+  const selectedAgents = tableData.value.filter(agent => agent.selected);
+  // const selectedAgentIds = selectedAgents.map(agent => agent.id);
+  // console.log(selectedAgentIds)
+  // environment_account_batch_delete(selectedAgentIds)
+  for (let i = 0; i < selectedAgents.length; i++) {
+    await environment_account_delete(selectedAgents[i].id)
+  }
+
+  // 删除成功后，重新查询当前页面的数据
+  await fetchData(currentPage.value, pageSize.value);
+  deleteModel.value = false;
+}
 
 const menuItems = ref([
   {id: "environment", label: "所属环境"},

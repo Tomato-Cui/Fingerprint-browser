@@ -2,6 +2,7 @@
 import { XIcon } from "lucide-vue-next";
 
 const props = defineProps({
+  itemData: Object,
   open: false,
   title: "",
 });
@@ -53,7 +54,7 @@ const emit = defineEmits(["close"]);
               <!-- Platform -->
               <div class="space-y-1">
                 <h3 class="font-bold text-gray-500">所属平台：</h3>
-                <p>全球Gmail</p>
+                <p>{{ props.itemData.platform }}</p>
               </div>
 
               <!-- Environment -->
