@@ -14,7 +14,7 @@ impl From<sqlx::error::Error> for ServiceError {
         match value {
             sqlx::Error::PoolClosed => ServiceError::DatabasePoolFetchError,
             sqlx::Error::ColumnNotFound(e) => ServiceError::Error(format!("{e} column not found")),
-            sqlx::Error::RowNotFound => ServiceError::Error(format!("row not found")),
+            sqlx::Error::RowNotFound => ServiceError::Error(format!("数据不存在")),
             sqlx::error::Error::Database(e) => {
                 let message = e.message();
                 if message.contains("UNIQUE constraint failed") {

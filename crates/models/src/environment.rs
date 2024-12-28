@@ -233,13 +233,15 @@ impl Environment {
 
         let query = "
         SELECT 
-            e.id, e.uuid, e.user_uuid, e.team_id, e.proxy_id, e.fp_info_id, e.group_id, e.name, e.description, e.default_urls, e.proxy_enable, e.created_at, e.updated_at, e.lasted_at, e.deleted_at,
+            e.id, e.uuid, e.user_uuid, e.team_id, e.proxy_id, e.fp_info_id, e.group_id, eg.name as group_name, e.name, e.description, e.default_urls, e.proxy_enable, e.created_at, e.updated_at, e.lasted_at, e.deleted_at,
             ef.id AS fp_id, ef.browser, ef.ua, ef.os, ef.country, ef.region, ef.city, ef.language_type, ef.languages, ef.gmt, ef.geography, ef.geo_tips, ef.geo_rule, ef.longitude, ef.latitude, ef.radius, ef.height, ef.width, ef.fonts_type, ef.fonts, ef.font_fingerprint, ef.web_rtc, ef.web_rtc_local_ip, ef.canvas, ef.webgl, ef.hardware_acceleration, ef.webgl_info, ef.audio_context, ef.speech_voices, ef.media, ef.cpu, ef.memory, ef.do_not_track, ef.battery, ef.port_scan, ef.white_list, ef.created_at AS fp_created_at, ef.updated_at AS fp_updated_at, ef.deleted_at AS fp_deleted_at,
             p.kind AS proxy_kind, p.host AS proxy_host, p.port AS proxy_port, p.username AS proxy_username, p.password AS proxy_password, p.user_uuid AS proxy_user_uuid, p.environment_group_id AS proxy_environment_group_id, p.created_at AS proxy_created_at, p.updated_at AS proxy_updated_at, p.deleted_at AS proxy_deleted_at
         FROM 
             environments e
         LEFT JOIN 
             environment_fingerprints ef ON e.fp_info_id = ef.id
+        LEFT JOIN 
+            environment_groups eg ON e.group_id = eg.id
         LEFT JOIN 
             environment_proxies p ON e.proxy_id = p.id
         WHERE 
@@ -285,13 +287,15 @@ impl Environment {
 
         let query = "
         SELECT 
-            e.id, e.uuid, e.user_uuid, e.team_id, e.proxy_id, e.fp_info_id, e.group_id, e.name, e.description, e.default_urls, e.proxy_enable, e.created_at, e.updated_at, e.lasted_at, e.deleted_at,
+            e.id, e.uuid, e.user_uuid, e.team_id, e.proxy_id, e.fp_info_id, e.group_id, eg.name as group_name, e.name, e.description, e.default_urls, e.proxy_enable, e.created_at, e.updated_at, e.lasted_at, e.deleted_at,
             ef.id AS fp_id, ef.browser, ef.ua, ef.os, ef.country, ef.region, ef.city, ef.language_type, ef.languages, ef.gmt, ef.geography, ef.geo_tips, ef.geo_rule, ef.longitude, ef.latitude, ef.radius, ef.height, ef.width, ef.fonts_type, ef.fonts, ef.font_fingerprint, ef.web_rtc, ef.web_rtc_local_ip, ef.canvas, ef.webgl, ef.hardware_acceleration, ef.webgl_info, ef.audio_context, ef.speech_voices, ef.media, ef.cpu, ef.memory, ef.do_not_track, ef.battery, ef.port_scan, ef.white_list, ef.created_at AS fp_created_at, ef.updated_at AS fp_updated_at, ef.deleted_at AS fp_deleted_at,
             p.kind AS proxy_kind, p.host AS proxy_host, p.port AS proxy_port, p.username AS proxy_username, p.password AS proxy_password, p.user_uuid AS proxy_user_uuid, p.environment_group_id AS proxy_environment_group_id, p.created_at AS proxy_created_at, p.updated_at AS proxy_updated_at, p.deleted_at AS proxy_deleted_at
         FROM 
             environments e
         LEFT JOIN 
             environment_fingerprints ef ON e.fp_info_id = ef.id
+        LEFT JOIN 
+            environment_groups eg ON e.group_id = eg.id
         LEFT JOIN 
             environment_proxies p ON e.proxy_id = p.id
         WHERE 
