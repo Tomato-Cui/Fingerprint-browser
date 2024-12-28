@@ -10,11 +10,11 @@
             <UserPlusIcon class="w-5 h-5" />
             添加成员
           </button>
-          <button @click="invMember = true"
+          <!-- <button @click="invMember = true"
             class="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-50">
             <PlusIcon class="w-5 h-5" />
             邀请成员
-          </button>
+          </button> -->
         </div>
         <div class="flex items-center gap-4">
           <div class="relative">
@@ -52,7 +52,7 @@
             </ul> -->
           </div>
           <div class="relative">
-            <input type="text" placeholder="关键字搜索" v-model="searchName"
+            <input type="text" placeholder="请输入姓名" v-model="searchName"
               class="pl-10 pr-4 bg-[#f5f6fa] py-2 border border-gray-300 rounded-lg outline-none hover:ring-2 hover:ring-blue-500" />
             <SearchIcon class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
           </div>
@@ -348,6 +348,8 @@ const toggleDropdown = () => {
 const selectGroup = (groupName) => {
   //选择选项
   selectedGroup.value = groupName;
+  if (groupName === '全部')
+    selectedGroup.value = ''
 };
 const memberObj = ref()
 const forbidMethod = (member) => {  //禁用
@@ -361,7 +363,7 @@ const delMember = (member) => {  //删除
 const subForbid = () => {  //确定禁用
   forbidMem.value = false
   console.log("memberObj:", memberObj.value);
-  
+
   // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
   // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
 }
@@ -392,17 +394,20 @@ const members = ref([
 ]);
 const memberTotal = ref(members.value.length)
 const groups = ref([
-  { id: 1, groupName: "管理者" },
-  { id: 2, groupName: "编辑者" },
-  { id: 3, groupName: "查看者" },
-  { id: 4, groupName: "超级管理员" },
+  { id: 0, groupName: "全部" },
+  { id: 1, groupName: "管理组" },
+  { id: 2, groupName: "权限组" },
+  { id: 3, groupName: "编辑组" },
+  { id: 4, groupName: "默认组" },
 ]);
 //过滤成员
 const filterMember = computed(() => {
 
   return members.value?.filter((member) => {
     // return true
-    return member.nickname?.includes(searchName.value)
+    const selectGroupQuery = selectedGroup.value === "" || selectedGroup.value === member.group_name
+    const selectVal = member.nickname?.includes(searchName.value)
+    return selectGroupQuery && selectVal
   });
 });
 
@@ -434,6 +439,7 @@ onMounted(async () => {
         pagination.total = res.data.total
       })
     }
+    //查询分组
   })
 
 })

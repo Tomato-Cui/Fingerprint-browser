@@ -45,7 +45,7 @@
               </div>
 
               <!-- Group Name -->
-              <!-- <div class="flex items-start">
+              <div class="flex items-start" v-if="props.memberObj">
                 <label class="w-24 pt-2 pr-3 flex justify-end">
                   <span class="text-red-500">*</span> 分组名称:
                 </label>
@@ -67,14 +67,14 @@
                         </MoreItem>
                       </MoreContent>
                     </More>
-                    <button type="button" @click="handleAddGroup"
+                    <!-- <button type="button" @click="handleAddGroup"
                       class="text-blue-500 hover:text-blue-600 flex items-center hover:bg-gray-100 px-2">
                       <PlusIcon class="w-4 h-4 mr-1" />
                       添加分组
-                    </button>
+                    </button> -->
                   </div>
                 </div>
-              </div> -->
+              </div>
 
               <!-- Environment Authorization -->
                <!-- <div v-if="!props.memberObj" class="flex items-start">

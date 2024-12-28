@@ -5,6 +5,7 @@ import { ref, defineEmits, defineProps, reactive } from 'vue'
 import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
 import { user_send } from '@/commands/user-team-temp'
+import { toast } from "vue-sonner";
 
 const props = defineProps({
     createAndJoin: Boolean
@@ -24,10 +25,25 @@ const createForm = reactive({
     teamName: "",
     remark: ""
 })
+const cleanForm = () => {
+    teamCode: ""
+    teamLink: ""
+    teamName: ""
+    description: ""
+    teamName: ""
+    remark: ""
+}
 //确认加入团队
 const subJoinTeam = () => {
     joinTeamDialog.value = false
-    user_send(joinForm.teamName, joinForm.description);
+    user_send(joinForm.teamName, joinForm.description).then(res => {
+        if(res.data){
+            toast.success("发送成功")
+        }else{
+            toast.error('发送失败，请检查团队名称是否正确')
+        }
+    });
+    cleanForm()
 }
 </script>
 
@@ -105,7 +121,7 @@ const subJoinTeam = () => {
         </div>
     </Model>
     <!-- 加入团队 -->
-    <Model class="" :title="'加入团队'" :open="joinTeamDialog" @close="() => joinTeamDialog = false">
+    <Model class="" :title="'加入团队'" :open="joinTeamDialog" @close="() => {joinTeamDialog = false, cleanForm()}">
         <div class="space-x-4 pt-6 flex flex-col">
             <!-- 在这里书写弹出框主题内容代码 -->
             <div class="h-[150px] flex flex-col justify-between mb-6">
@@ -135,7 +151,7 @@ const subJoinTeam = () => {
                 <div class="flex justify-start py-8 gap-x-4">
                     <PrimaryButton class="px-8" @click="subJoinTeam">确定
                     </PrimaryButton>
-                    <CancelButton class="px-8" @click="() => joinTeamDialog = false">取消
+                    <CancelButton class="px-8" @click="() => {joinTeamDialog = false, cleanForm()}">取消
                     </CancelButton>
                 </div>
             </div>
