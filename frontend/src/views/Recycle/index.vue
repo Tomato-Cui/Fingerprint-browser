@@ -9,8 +9,8 @@ import {
   PackageIcon,
   RotateCcw,
 } from "lucide-vue-next";
+
 import {} from "@/components/select";
-import GroupSelect from "./group-select.vue";
 import SearchInput from "./search-input.vue";
 
 import {
@@ -21,6 +21,7 @@ import {
   environment_trash_recovers,
   environment_trash_delete_batch,
 } from "@/commands/environment-trash";
+
 import TooltipButton from "@/components/tooltip-button.vue";
 import { PrimaryButton } from "@/components/button";
 import {
@@ -56,7 +57,7 @@ const data = ref<Array<Payment>>([]);
 
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 2,
+  pageSize: 10,
   total: 0,
 });
 
@@ -96,14 +97,14 @@ const recoverAll = () => {
   // loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-const handleDelete = (uuid: string) => {
+const handleDelete = async (uuid: string) => {
   console.log("uuid", uuid);
-  environment_trash_delete_batch([uuid]);
+  await environment_trash_delete_batch([uuid]);
   loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-const handleRecover = (uuid: string) => {
-  environment_trash_recover(uuid).then(() => {
+const handleRecover = async (uuid: string) => {
+  await environment_trash_recover(uuid).then(() => {
     loadData(pagination.pageIndex, pagination.pageSize);
   });
 };
@@ -121,25 +122,28 @@ const groupOperationBtns = computed(() => [
   {
     title: "多选恢复",
     icon: PackageIcon,
-    click: () => {
+    click: async () => {
       let ids = selectData.value.map((item) => item.uuid);
 
-      environment_trash_recovers(ids);
+      await environment_trash_recovers(ids);
       pagination.total = pagination.total - selectData.value.length;
       loadData(pagination.pageIndex, pagination.pageSize);
+      selectAll.value = false;
     },
+
     disabled: selectData.value.length <= 0,
   },
 
   {
     title: "多选删除",
     icon: TrashIcon,
-    click: () => {
+    click: async () => {
       let ids = selectData.value.map((item) => item.uuid);
 
-      environment_trash_delete_batch(ids);
+      await environment_trash_delete_batch(ids);
       pagination.total = pagination.total - selectData.value.length;
       loadData(pagination.pageIndex, pagination.pageSize);
+      selectAll.value = false;
     },
     disabled: selectData.value.length <= 0,
   },

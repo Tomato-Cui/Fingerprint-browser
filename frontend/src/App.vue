@@ -20,18 +20,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { isLogin } from "@/commands/user";
 import { onMounted, ref, watch } from "vue";
 import Login from "@/views/Login/index.vue";
-<<<<<<< HEAD
-import { environment_group_query } from "@/commands/environment-group";
-=======
->>>>>>> 1c854e25943b7036742c42c49b1c99e8206f1df3
 
 const route = useRoute();
-
-onMounted(() => {
-  environment_group_query(1, 10).then((res) => {
-    console.log(res);
-  });
-});
 </script>
 
 <style style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, reactive, nextTick, onMounted } from "vue";
+import { ref, computed, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import {
   UserPlusIcon,
@@ -27,11 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-import { IconFilter, groupIcons } from "@/assets/icons/index";
+import { groupIcons } from "@/assets/icons/index";
 import {
   environment_proxies_delete,
   environment_proxies_query,
   environment_proxies_modify,
+  environment_proxies_batch_delete,
 } from "@/commands/environment-proxy";
 
 import {
@@ -72,7 +73,7 @@ const data = ref<Array<Payment>>([]);
 
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 2,
+  pageSize: 10,
   total: 0,
 });
 
@@ -91,7 +92,6 @@ const router = useRouter();
 const selectAll = ref(false);
 
 const activeDropdown = ref(null);
-const agents = ref([]);
 const isOpen = ref(false);
 const showPassword = ref(false);
 const showSetModal = ref(false); // 控制弹窗显示与隐藏
@@ -117,6 +117,7 @@ const deleteAll = async () => {
 
   loadData(pagination.pageIndex, pagination.pageSize);
   selectAll.value = false;
+  disabled: selectData.value.length <= 0;
 };
 
 // 打开弹窗
@@ -154,25 +155,6 @@ const saveModal = async () => {
   loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-const handleSubmit = () => {
-  // Handle form submission
-  console.log("Form submitted:", form);
-  closeModal();
-};
-
-for (let i = 0; i < 30; i++) {
-  const newAgentsData = {
-    id: i,
-    info: "\\",
-    ip: "112.17.242.11",
-    envCount: 90,
-    notes: "\\",
-    ipChannel: "十三香代理",
-    selected: false,
-  };
-  agents.value.push(newAgentsData);
-}
-
 // 跳转到新增代理页面
 const adddaili = () => {
   router.push("/adddaili");
@@ -193,10 +175,6 @@ const deleteOpenHandle = async (id: number) => {
   loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-const deleteCloseHandle = () => {
-  deleteModel.value = false;
-};
-
 const filters = ref([
   { key: "platform", label: "账号平台", placeholder: "请选择", value: "" },
   { key: "browser", label: "浏览器", placeholder: "请选择", value: "" },
@@ -211,35 +189,6 @@ const filters = ref([
     value: "",
   },
 ]);
-
-const timeRange = ref({
-  start: "",
-  end: "",
-});
-
-const filtersisOpen = ref(false);
-const applyFilters = () => {
-  const filterValues = {
-    ...filters.value.reduce(
-      (acc, filter) => ({
-        ...acc,
-        [filter.key]: filter.value,
-      }),
-      {}
-    ),
-    timeRange: timeRange.value,
-  };
-  filtersisOpen.value = false; // 关闭弹窗
-};
-
-const resetFilters = () => {
-  filters.value.forEach((filter) => (filter.value = ""));
-  timeRange.value = {
-    start: "",
-    end: "",
-  };
-  filtersisOpen.value = false; // 关闭弹窗
-};
 
 const toggleRowSelection = (row: Payment) => {
   row.selected = !row.selected;
@@ -277,20 +226,26 @@ const addGroup = () => {
   }
 };
 
-const uuidValue = ref("");
-
 const startEdit = async (index: number) => {
+  console.log("editingIndex.value", editingIndex.value);
+  console.log("editingName.value", editingName.value);
   console.log("index", index);
+
   const payload = {
     name: editingName.value,
   };
+  console.log("payload", payload);
   await environment_proxy_group_modify(index, payload);
 };
 
-const saveEdit = () => {
-  if (editingIndex.value !== -1 && editingName.value.trim()) {
-    groups.value[editingIndex.value] = editingName.value;
-  }
+const saveEdit = (index: number) => {
+  console.log("index", index);
+  console.log("editingName.value", editingName.value);
+
+  editingIndex.value = index;
+
+  groups.value[index] = editingName.value;
+
   editingIndex.value = -1;
 };
 
@@ -397,7 +352,7 @@ const paginationClickHandle = (index: number) => {
                         v-if="editingIndex === index"
                         v-model="editingName"
                         @blur="saveEdit"
-                        @keyup.enter="saveEdit"
+                        @keyup.enter="saveEdit(index)"
                         ref="editInput"
                         class="w-full text-sm outline-none"
                       />
@@ -408,7 +363,7 @@ const paginationClickHandle = (index: number) => {
                         :class="{ '!flex': editingIndex === index }"
                       >
                         <button
-                          title="编辑"
+                          title="修改"
                           @click="startEdit(index)"
                           class="p-1 text-blue-500 hover:text-blue-600"
                         >
@@ -445,7 +400,7 @@ const paginationClickHandle = (index: number) => {
           </Popover>
 
           <TooltipButton
-            title="删除"
+            title="多选删除"
             @click="deleteAll()"
             class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
           >
@@ -459,14 +414,6 @@ const paginationClickHandle = (index: number) => {
           >
             <SettingsIcon class="w-5 h-5" />
           </TooltipButton>
-
-          <!-- <TooltipButton
-            title="刷新"
-            @click="() => console.log('abc')"
-            class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
-          >
-            <RefreshCwIcon class="w-5 h-5" />
-          </TooltipButton> -->
         </div>
       </div>
 
@@ -522,9 +469,6 @@ const paginationClickHandle = (index: number) => {
                   v-model="row.selected"
                 />
               </td>
-              <!-- <td class="px-4 py-3">
-                <input type="checkbox" class="rounded" v-model="row.selected" />
-              </td> -->
 
               <td class="p-4 text-sm text-left">{{ row.id }}</td>
               <td class="p-4 text-sm text-left">{{ row.kind }}</td>
@@ -535,15 +479,6 @@ const paginationClickHandle = (index: number) => {
 
               <td class="p-4 text-left">
                 <div class="flex relative gap-2 justify-left">
-                  <!-- 给父容器添加relative定位 -->
-                  <!-- 刷新按钮 -->
-                  <!-- <button
-                    class="flex gap-1 items-center text-gray-600 hover:text-blue-600"
-                  >
-                    <RefreshCwIcon class="w-4 h-4" />
-                    刷新
-                  </button> -->
-
                   <!-- 更多按钮 -->
                   <More>
                     <MoreTrigger>

@@ -103,13 +103,7 @@ const closeGroup = () => {
   });
 };
 const batchDelete = () => {
-<<<<<<< HEAD
-  let ids = selectedData.value.map((item) => item.uuid);
-  console.log("ids", ids);
-  console.log("data", selectedData.value);
-=======
   let ids = [...selectData.value].map((item) => item) as any[];
->>>>>>> 1c854e25943b7036742c42c49b1c99e8206f1df3
   environment_batch_delete(ids)
     .then((_: any) => {
       data.value = data.value.filter((item) => !ids.includes(item.uuid));
@@ -275,13 +269,8 @@ watch(groupSelect, (newVal) => {
                     as-child
                   >
                     <Button
-<<<<<<< HEAD
                       class="p-0 w-10 h-10"
-                      @click="() => paginationClickHandle(index)"
-=======
-                      class="w-10 h-10 p-0"
-                      @click="() => paginationClickHandle(item.value -1)"
->>>>>>> 1c854e25943b7036742c42c49b1c99e8206f1df3
+                      @click="() => paginationClickHandle(item.value - 1)"
                       :variant="
                         item.value === pagination.pageIndex + 1
                           ? 'default'

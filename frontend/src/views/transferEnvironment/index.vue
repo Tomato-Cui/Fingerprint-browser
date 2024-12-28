@@ -72,14 +72,15 @@ const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
   pageIndex: 0,
-  pageSize: 2,
+  pageSize: 10,
   total: 0,
 });
 
 const loadData = (index: number, size: number) => {
   environment_transfer_query(index, size).then((res) => {
+    console.log("res", res);
     let { data: data_, total } = res.data;
-    console.log("res.data", res.data);
+
     pagination.total = total;
     data.value = data_;
   });
@@ -94,7 +95,6 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
 const searchValueHandle = (value: string) => {
   if (value.length != 0) {
-    console.log(value);
     data.value = data.value.filter((item) => {
       let current = item[searchType.value.title as keyof Payment] as string;
       return current ? current.includes(value) : false;
