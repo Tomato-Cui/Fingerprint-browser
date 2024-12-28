@@ -102,7 +102,8 @@ const batchDelete = () => {
   let ids = [...selectData.value].map((item) => item) as any[];
   environment_batch_delete(ids)
     .then((_: any) => {
-      data.value = data.value.filter((item) => !ids.includes(item.id));
+      data.value = data.value.filter((item) => !ids.includes(item.uuid));
+      toast.success("删除成功");
     })
     .catch((err) => {
       toast.warning(err);
@@ -266,7 +267,7 @@ watch(groupSelect, (newVal) => {
                   >
                     <Button
                       class="w-10 h-10 p-0"
-                      @click="() => paginationClickHandle(item.value -1)"
+                      @click="() => paginationClickHandle(item.value - 1)"
                       :variant="
                         item.value === pagination.pageIndex + 1
                           ? 'default'
