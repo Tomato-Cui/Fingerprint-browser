@@ -320,8 +320,9 @@ import {
 } from "@/components/ui/tooltip";
 import { user_receive_query } from "@/commands/user-team-temp";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-import { query_team_all_user, team_query, query_team_group_all_user, query_current_team_info } from "@/commands/team"
+import { query_team_all_user, team_query, query_team_group_all_user, query_current_team_info, remove_current_user, blocked } from "@/commands/team"
 import { team_group_query_all } from "@/commands/team-group";
+import { toast } from "vue-sonner";
 
 const route = useRoute()
 const selectedMember = ref(null);
@@ -364,13 +365,25 @@ const subForbid = () => {  //确定禁用
   forbidMem.value = false
   console.log("memberObj:", memberObj.value);
 
+  blocked(memberObj.value.user_uuid, memberObj.value.team_id).then(res => {
+    if(res.data){
+      toast.success('拉黑成功')
+    }else{
+      toast.error("失败失败失败！！！")
+    }
+  })
+
   // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
   // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
 }
 const subDel = () => { //确认删除
   delM.value = false
-  members.value = members.value.filter((member) => member.id !== memberObj.value.id)
-  filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
+
+  console.log("member:", memberObj.value);
+  
+  remove_current_user(memberObj.value.user_uuid, memberObj.value.team_id)
+  // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
+  // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
 }
 const members = ref([
   {

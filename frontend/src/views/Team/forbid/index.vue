@@ -144,7 +144,8 @@ import {
   PaginationPrev,
 } from "@/components/ui/pagination";
 import { team_query, query_team_all_blocked_user } from "@/commands/team";
-// import { un_blocked } from '@/commands/user-team-temp'
+import { un_blocked } from '@/commands/team'
+import { toast } from "vue-sonner";
 
 const pagination = reactive({
   pageIndex: 1,
@@ -226,7 +227,12 @@ const subRecoverUser = () => {  //确认恢复成员
   alertDelUser.value = false
   console.log("----!!!:", userObj.value);
 
-
+  un_blocked(userObj.value.user_uuid, userObj.value.team_id).then(res => {
+    if (res.data)
+      toast.success('恢复成功')
+    else
+      toast.error('恢复失败')
+  })
   users.value = users.value.filter((user) => user.id !== userObj.value.id)
   filterUsers.value = filterUsers.value.filter((user) => user.id !== userObj.value.id)
   // console.log("value----:", filterUsers.value);

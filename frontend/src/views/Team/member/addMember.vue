@@ -15,12 +15,12 @@
           <div class="p-6">
             <form @submit.prevent="handleSubmit" class="space-y-6">
               <!-- Login Account -->
-              <div class="flex items-start">
+              <div class="flex items-start" v-if="!props.memberObj">
                 <label class="w-24 pt-2 pr-3 flex justify-end">
-                  <span class="text-red-500">*</span> 登录账号:
+                  <span class="text-red-500">*</span> 账号:
                 </label>
                 <div class="flex flex-col flex-1">
-                  <input v-model="formData.account" type="text" placeholder="请输入手机号/邮箱号"
+                  <input v-model="formData.account" type="text" placeholder="请输入用户邮箱"
                     class="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required
                     @input="validateEmail" />
                   <p v-if="emailError" style="color: red;">{{ emailError }}</p>
@@ -77,7 +77,7 @@
               </div>
 
               <!-- Environment Authorization -->
-               <!-- <div v-if="!props.memberObj" class="flex items-start">
+              <!-- <div v-if="!props.memberObj" class="flex items-start">
                 <label class="w-24 pt-2 pr-3 flex justify-end">授权环境:</label>
                 <div class="flex-1">
                   <div v-if="formData.environments.length === 0">
@@ -140,7 +140,8 @@
             <button @click="closeModal" class="px-6 py-2 border rounded hover:bg-gray-50">
               取消
             </button>
-            <button type="submit" @click="handleSubmit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <button type="submit" @click="handleSubmit"
+              class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
               确定
             </button>
           </div>
@@ -304,7 +305,7 @@ import { Model } from "@/components/model/index";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { team_group_query_all } from "@/commands/team-group";
-import { team_query, query_current_team_info } from "@/commands/team";
+import { team_query, query_current_team_info, team_modify_team_user_info } from "@/commands/team";
 import { team_send } from '@/commands/user-team-temp'
 
 const emailError = ref(""); // 存储错误信息
@@ -316,10 +317,14 @@ const props = defineProps({
 const memberObj = ref(null)
 watch(() => props.memberObj, (val) => {
   memberObj.value = val    //赋值被编辑用户信息
+  console.log("_+_+_+_+_:", memberObj.value);
+  
   if (val) {
-    formData.value.name = val.name
+    // formData.value.name = val.name
     // formData.value.account = val.name
-    formData.value.remarkName = val.contact
+    formData.value.remarkName = val.description
+    teamGroupName.value = val.group_name
+    // formData.value.groupId = groups.value.find(item => item.name = val.group_name).id
   }
 })
 const emit = defineEmits(["update:addMemModel"]);
@@ -382,9 +387,17 @@ const handleSubmit = () => {  //提交添加成员
   //重新赋值环境id数组，防止中途删除的数据
   refreshList()
   console.log("Form submitted:", formData.value);
-  query_current_team_info().then(res => {
-    team_send(res.data.id, formData.value.account, formData.value.remarkName);
-  })
+  if (props.memberObj) {
+    //修改
+    // console.log("props.member:", props.memberObj);
+    // console.log("form::::::::::", formData.value);
+    
+    team_modify_team_user_info(props.memberObj.team_id, formData.value.groupId, props.memberObj.user_uuid, formData.value.remarkName);
+  } else {  //发送邀请
+    query_current_team_info().then(res => {
+      team_send(res.data.id, formData.value.account, formData.value.remarkName);
+    })
+  }
   emit("update:addMemModel", false);
   // closeModal();
 };

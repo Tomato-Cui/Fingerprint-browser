@@ -72,7 +72,7 @@
             {{ group.name }}
           </div>
           <div class="text-gray-600 ">
-            {{ group.member_count || 0 }}
+            {{ group.count || 0 }}
           </div>
           <div class="text-gray-600 ">
             {{ group.description || "\\" }}
