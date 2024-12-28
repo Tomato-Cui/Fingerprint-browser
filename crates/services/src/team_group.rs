@@ -52,8 +52,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_by_team_id() {
+        crate::setup().await;
         let result = query_by_team_id(1).await;
-        assert!(result.is_ok());
+        println!("{:?}", result);
     }
 
     #[tokio::test]

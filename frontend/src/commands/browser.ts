@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from './index'
 
 export const browser_start = async (environmentUuid: string): Promise<any> => {
     return await invoke('browser_start', { environmentUuid })
