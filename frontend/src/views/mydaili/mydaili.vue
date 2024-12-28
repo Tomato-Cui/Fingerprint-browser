@@ -1,22 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, reactive, nextTick, onMounted } from "vue";
-import { AlertModel } from "@/components/alert-model";
 import { useRouter } from "vue-router";
 import {
   UserPlusIcon,
   SearchIcon,
   TrashIcon,
   SettingsIcon,
-  RefreshCwIcon,
   MoreVerticalIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  XIcon,
   PlusIcon,
   PencilIcon,
-  ChevronDown,
-  XCircle,
-  ChevronRight,
 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 
@@ -37,9 +29,9 @@ import {
 } from "@/components/select";
 import { IconFilter, groupIcons } from "@/assets/icons/index";
 import {
-  environment_proxies_create,
   environment_proxies_delete,
   environment_proxies_query,
+  environment_proxies_modify,
 } from "@/commands/environment-proxy";
 
 import {
@@ -52,13 +44,17 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
-
-import { useRoute } from "vue-router";
+import {
+  environment_proxy_group_modify,
+  environment_proxy_group_query,
+} from "@/commands/environment-proxy-group";
 
 interface Payment {
   id: number;
   info: string;
   ip: string;
+  kind: string;
+  port: number;
   envCount: number;
   notes: string;
   ipChannel: string;
@@ -72,11 +68,6 @@ interface Payment {
   selected?: boolean;
 }
 
-const searchType = ref<{ title: keyof Payment; value: string }>({
-  title: "name",
-  value: "名称",
-});
-
 const data = ref<Array<Payment>>([]);
 
 const pagination = reactive({
@@ -86,6 +77,7 @@ const pagination = reactive({
 });
 
 const loadData = (index: number, size: number) => {
+  console.log("调用loadData", index, size);
   environment_proxies_query(index, size).then((res) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
@@ -97,8 +89,7 @@ onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
 const router = useRouter();
 const selectAll = ref(false);
-const currentPage = ref(1);
-const totalItems = ref(101);
+
 const activeDropdown = ref(null);
 const agents = ref([]);
 const isOpen = ref(false);
@@ -116,14 +107,18 @@ const form = reactive({
   parseUrl: "",
 });
 
-const deleteAll = () => {
-  for (let i = 0; i < data.value.length; i++) {
-    if (data.value[i].selected) {
-      environment_proxies_delete(data.value[i].id);
-    }
-  }
+const selectData = computed(() => {
+  return data.value.filter((item) => item.selected);
+});
+
+const deleteAll = async () => {
+  let ids = selectData.value.map((item) => item.id);
+  await environment_proxies_batch_delete(ids);
+
   loadData(pagination.pageIndex, pagination.pageSize);
+  selectAll.value = false;
 };
+
 // 打开弹窗
 const openSetModal = () => {
   showSetModal.value = true;
@@ -133,11 +128,30 @@ const handleConfirm = () => {
   showSetModal.value = false; // 关闭弹窗
 };
 
-const openModal = () => {
+const currentId = ref();
+const openModal = (row: any) => {
+  currentId.value = row;
   isOpen.value = true;
 };
 const closeModal = () => {
   isOpen.value = false;
+};
+
+const saveModal = async () => {
+  const payload = {
+    kind: form.proxyService,
+    host: form.host,
+    port: form.port,
+    username: form.username,
+    password: form.password,
+    user_uuid: currentId.value.user_uuid,
+  };
+  console.log("currentId.value", currentId.value);
+  console.log("payload", payload);
+
+  await environment_proxies_modify(currentId.value.id, payload);
+  isOpen.value = false;
+  loadData(pagination.pageIndex, pagination.pageSize);
 };
 
 const handleSubmit = () => {
@@ -174,8 +188,8 @@ const toggleDropdown = (id) => {
 
 const deleteModel = ref(false);
 
-const deleteOpenHandle = (id: number) => {
-  environment_proxies_delete(id);
+const deleteOpenHandle = async (id: number) => {
+  await environment_proxies_delete(id);
   loadData(pagination.pageIndex, pagination.pageSize);
 };
 
@@ -234,17 +248,22 @@ const toggleRowSelection = (row: Payment) => {
 //分组
 const groupisOpen = ref(false);
 const newGroupName = ref("");
-const groups = ref([
-  "分组一",
-  "分组二",
-  "分组三",
-  "分组四",
-  "分组五",
-  "分组六",
-]);
+const groups = ref([]);
+
+const groupData = async () => {
+  await environment_proxy_group_query(1, 1000000).then((res) => {
+    groups.value = res.data.data.map((item: any) => item.name);
+  });
+  console.log("groups", groups.value);
+};
+
+onMounted(() => {
+  groupData();
+});
 
 const toggleAll = () => {
   data.value.forEach((row) => {
+    console.log("asds", selectAll.value);
     row.selected = selectAll.value;
   });
 };
@@ -258,13 +277,14 @@ const addGroup = () => {
   }
 };
 
-const startEdit = async (index) => {
-  editingIndex.value = index;
-  editingName.value = groups.value[index];
-  await nextTick();
-  if (editingIndex.value !== -1) {
-    editInput.value?.focus();
-  }
+const uuidValue = ref("");
+
+const startEdit = async (index: number) => {
+  console.log("index", index);
+  const payload = {
+    name: editingName.value,
+  };
+  await environment_proxy_group_modify(index, payload);
 };
 
 const saveEdit = () => {
@@ -274,7 +294,7 @@ const saveEdit = () => {
   editingIndex.value = -1;
 };
 
-const deleteGroup = (index) => {
+const deleteGroup = (index: number) => {
   groups.value.splice(index, 1);
 };
 
@@ -291,23 +311,6 @@ const closePopover = () => {
 
 // 定义组件的事件
 const emit = defineEmits(["update:open", "update:groups"]);
-
-const isExpanded = ref(false);
-
-let selectedAgentslen = ref();
-// 计算显示的代理数据，根据是否展开显示不同数量的代理
-const displayedAgents = computed(() => {
-  const selectedAgents = agents.value.filter((agent) => agent.selected); // 只获取选中的代理
-  selectedAgentslen = selectedAgents.length;
-  return isExpanded.value ? selectedAgents : selectedAgents.slice(0, 5); // 展开时显示所有选中的代理，不展开时只显示前 5 个
-});
-
-const removeAgent = (id) => {
-  const index = agents.value.findIndex((agent) => agent.id === id);
-  if (index !== -1) {
-    agents.value.splice(index, 1); // 从数组中删除指定代理
-  }
-};
 
 const paginationClickHandle = (index: number) => {
   console.log(index);
@@ -341,90 +344,6 @@ const paginationClickHandle = (index: number) => {
           </button>
         </div>
         <div class="flex gap-4">
-          <Popover v-model:open="filtersisOpen">
-            <PopoverTrigger as-child>
-              <TooltipButton
-                title="筛选"
-                class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
-              >
-                <IconFilter class="w-5 h-5" />
-              </TooltipButton>
-            </PopoverTrigger>
-            <PopoverContent class="min-w-[500px] p-4" align="end">
-              <div class="space-y-4">
-                <h3 class="mb-4 text-base font-medium">筛选</h3>
-
-                <!-- Filter Options -->
-                <div
-                  v-for="(filter, index) in filters"
-                  :key="index"
-                  class="flex justify-between space-y-2"
-                >
-                  <div class="flex items-center group" style="min-width: 50px">
-                    <span class="ml-auto text-sm text-gray-700">{{
-                      filter.label
-                    }}</span>
-                  </div>
-                  <div class="flex items-center rounded-md border">
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue
-                          :placeholder="filter.placeholder"
-                          class="p-2 w-full rounded-lg outline-none"
-                          style="min-width: 360px"
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="扩展屏幕 (1920x1080)">
-                            选择1
-                          </SelectItem>
-                          <SelectItem value="内置屏幕 (1280x720)">
-                            选择2
-                          </SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <!-- Time Range -->
-                <div class="flex space-y-2">
-                  <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-700">转移时间</span>
-                    <input
-                      type="datetime-local"
-                      class="flex-1 px-3 py-2 text-sm rounded-md border outline-none focus:border-blue-500"
-                      v-model="timeRange.start"
-                    />
-                    <span class="text-gray-400">至</span>
-                    <input
-                      type="datetime-local"
-                      class="flex-1 px-3 py-2 text-sm rounded-md border outline-none focus:border-blue-500"
-                      v-model="timeRange.end"
-                    />
-                  </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex items-center pt-4 space-x-3">
-                  <button
-                    class="flex-1 px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                    @click="applyFilters"
-                  >
-                    确定
-                  </button>
-                  <button
-                    class="flex-1 px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-                    @click="resetFilters"
-                  >
-                    取消
-                  </button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
           <Popover v-model:open="groupisOpen">
             <PopoverTrigger as-child>
               <TooltipButton
@@ -489,12 +408,14 @@ const paginationClickHandle = (index: number) => {
                         :class="{ '!flex': editingIndex === index }"
                       >
                         <button
+                          title="编辑"
                           @click="startEdit(index)"
                           class="p-1 text-blue-500 hover:text-blue-600"
                         >
                           <PencilIcon class="w-4 h-4" />
                         </button>
                         <button
+                          title="删除"
                           @click="deleteGroup(index)"
                           class="p-1 text-blue-500 hover:text-blue-600"
                         >
@@ -539,13 +460,13 @@ const paginationClickHandle = (index: number) => {
             <SettingsIcon class="w-5 h-5" />
           </TooltipButton>
 
-          <TooltipButton
+          <!-- <TooltipButton
             title="刷新"
             @click="() => console.log('abc')"
             class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
           >
             <RefreshCwIcon class="w-5 h-5" />
-          </TooltipButton>
+          </TooltipButton> -->
         </div>
       </div>
 
@@ -606,8 +527,8 @@ const paginationClickHandle = (index: number) => {
               </td> -->
 
               <td class="p-4 text-sm text-left">{{ row.id }}</td>
-              <td class="p-4 text-sm text-left">{{ row.info }}</td>
-              <td class="p-4 text-sm text-left">{{ row.ip }}</td>
+              <td class="p-4 text-sm text-left">{{ row.kind }}</td>
+              <td class="p-4 text-sm text-left">{{ row.port }}</td>
               <td class="p-4 text-sm text-left">{{ row.envCount }}</td>
               <td class="p-4 text-sm text-left">{{ row.notes }}</td>
               <td class="p-4 text-sm text-left">{{ row.ipChannel }}</td>
@@ -616,12 +537,12 @@ const paginationClickHandle = (index: number) => {
                 <div class="flex relative gap-2 justify-left">
                   <!-- 给父容器添加relative定位 -->
                   <!-- 刷新按钮 -->
-                  <button
+                  <!-- <button
                     class="flex gap-1 items-center text-gray-600 hover:text-blue-600"
                   >
                     <RefreshCwIcon class="w-4 h-4" />
                     刷新
-                  </button>
+                  </button> -->
 
                   <!-- 更多按钮 -->
                   <More>
@@ -632,7 +553,7 @@ const paginationClickHandle = (index: number) => {
                       />
                     </MoreTrigger>
                     <MoreContent>
-                      <MoreItem class="cursor-pointer" @click="openModal">
+                      <MoreItem class="cursor-pointer" @click="openModal(row)">
                         <Settings2Icon class="w-4 h-4" />编辑
                       </MoreItem>
                       <MoreItem class="cursor-pointer">
@@ -807,7 +728,10 @@ const paginationClickHandle = (index: number) => {
         <!-- Header -->
         <div class="flex justify-between items-center p-4 border-b">
           <h2 class="text-lg font-medium">编辑代理</h2>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
+          <button
+            @click="closeModal()"
+            class="text-gray-400 hover:text-gray-600"
+          >
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -861,7 +785,7 @@ const paginationClickHandle = (index: number) => {
               >代理服务</label
             >
             <div class="flex space-x-2">
-              <Select>
+              <Select v-model="form.proxyService">
                 <SelectTrigger>
                   <SelectValue
                     placeholder="SOCKS5"
@@ -932,7 +856,7 @@ const paginationClickHandle = (index: number) => {
 
           <!-- Submit Button -->
           <button
-            @click="handleSubmit"
+            @click="saveModal()"
             class="px-4 py-2 w-full text-white bg-blue-500 rounded-md transition-colors hover:bg-blue-600"
           >
             保存

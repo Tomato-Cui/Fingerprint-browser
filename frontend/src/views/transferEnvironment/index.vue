@@ -49,6 +49,7 @@ interface Payment {
   name: string;
   group: string;
   location: string;
+  description: string;
   remark: string;
   browser: string;
   domain_name: string;
@@ -237,7 +238,7 @@ const searchValueHandle = (value: string) => {
                 </div>
               </td>
 
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.remark }}</td>
+              <td class="px-4 py-3 text-sm min-w-48">{{ row.description }}</td>
 
               <td class="px-4 py-3 text-sm min-w-48">{{ row.browser }}</td>
               <td class="px-4 py-3 text-sm min-w-48">{{ row.transferTime }}</td>

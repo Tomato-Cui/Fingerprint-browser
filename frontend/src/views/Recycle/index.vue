@@ -136,7 +136,7 @@ const groupOperationBtns = computed(() => [
     icon: TrashIcon,
     click: () => {
       let ids = selectData.value.map((item) => item.uuid);
-      console.log("idsdele", ids);
+
       environment_trash_delete_batch(ids);
       pagination.total = pagination.total - selectData.value.length;
       loadData(pagination.pageIndex, pagination.pageSize);
