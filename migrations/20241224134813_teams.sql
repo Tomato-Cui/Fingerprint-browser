@@ -3,7 +3,7 @@ create table teams
 (
     id          INTEGER
         primary key autoincrement,
-    name        TEXT,
+    name        TEXT NOT NULL,
     description TEXT,
     created_at  DATETIME default CURRENT_TIMESTAMP,
     updated_at  DATETIME default CURRENT_TIMESTAMP,

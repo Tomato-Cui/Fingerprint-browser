@@ -14,11 +14,24 @@ export const environment_account_query_id = async (id: number,) => {
     return await invoke('environment_account_query_id', { id })
 }
 
+
 export const environment_account_query = async (
     pageNum: number,
     pageSize: number,
 ) => {
     return await invoke('environment_account_query', {
+        pageNum,
+        pageSize
+    })
+}
+
+export const environment_account_query_current = async (
+    environmnet_uuid: string,
+    pageNum: number,
+    pageSize: number,
+) => {
+    return await invoke('environment_account_query_current', {
+        environmnet_uuid,
         pageNum,
         pageSize
     })

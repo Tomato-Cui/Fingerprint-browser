@@ -76,7 +76,7 @@ const columns = [
           table.toggleAllPageRowsSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("id"))
+            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select all",
@@ -89,7 +89,7 @@ const columns = [
           row.toggleSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("id"))
+            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select row",
@@ -100,7 +100,10 @@ const columns = [
     enableHiding: false,
     enablePinning: true,
   }),
-  columnHelper.accessor("id", {}),
+  columnHelper.accessor("uuid", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
   columnHelper.accessor("name", {
     header: ({ column }) => {
       return h(
@@ -228,7 +231,7 @@ const columns = [
         h("div", { class: "whitespace-nowrap px-2" }, "更多"),
       ]),
     cell: ({ row }) => {
-      let id = row.getValue("id") as number;
+      let uuid = row.getValue("uuid") as string;
       return h("div", { class: "flex gap-x-4" }, [
         h(
           "div",
@@ -238,25 +241,25 @@ const columns = [
             {
               class: "px-2 flex gap-x-2 items-center text-md w-32",
               onClick: () => {
-                if (!browserStatusStore.getStatus(id)) {
-                  if (id) {
-                    browser_start(id)
+                if (!browserStatusStore.getStatus(uuid)) {
+                  if (uuid) {
+                    browser_start(uuid)
                       .then((res) => {
                         let data = res.data;
                         browserStatusStore.updateStatus(
-                          data.environment_id,
+                          data.environment_uuid,
                           data.status
                         );
                       })
                       .catch((_) => toast.warning("启动失败"));
                   }
                 } else {
-                  browser_stops([id]).then((res: any) => {
+                  browser_stops([uuid]).then((res: any) => {
                     if (
                       res.message &&
                       (res.message as string).includes("关闭成功")
                     ) {
-                      browserStatusStore.updateStatus(id, false);
+                      browserStatusStore.updateStatus(uuid, false);
                     }
                   });
                 }
@@ -267,7 +270,9 @@ const columns = [
               h(
                 "span",
                 { class: "text-sm" },
-                !browserStatusStore.getStatus(id) ? "打开浏览器" : "关闭浏览器"
+                !browserStatusStore.getStatus(uuid)
+                  ? "打开浏览器"
+                  : "关闭浏览器"
               ),
             ]
           )

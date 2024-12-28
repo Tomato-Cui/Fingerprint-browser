@@ -11,7 +11,7 @@ pub struct Proxy {
     pub port: String,                      // 端口
     pub username: Option<String>,          // 用户名
     pub password: Option<String>,          // 密码
-    pub user_uuid: String,                 // 用户UUID
+    pub user_uuid: Option<String>,                 // 用户UUID
     pub environment_group_id: Option<i32>, // 环境组ID
     pub created_at: Option<String>,        // 创建时间
     pub updated_at: Option<String>,        // 更新时间

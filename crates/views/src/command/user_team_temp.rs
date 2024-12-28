@@ -39,14 +39,14 @@ pub async fn team_receive_query(
 #[tauri::command]
 pub async fn team_send(
     team_id: u32,
-    user_uuid: String,
+    current_user_email: String,
     description: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let (success_msg, warn_msg) = (Some("发送成功".to_string()), |v| {
         Some(format!("发送失败: {}", v))
     });
 
-    match services::user_team_temp::team_send(&user_uuid, team_id, &description).await {
+    match services::user_team_temp::team_send(&current_user_email, team_id, &description).await {
         Ok(data) => Ok(AppResponse::<bool>::success(success_msg, Some(data))),
         Err(r) => Ok(AppResponse::<bool>::fail(warn_msg(r.to_string()))),
     }
@@ -54,7 +54,7 @@ pub async fn team_send(
 
 #[tauri::command]
 pub async fn user_send(
-    team_id: u32,
+    team_name: String,
     description: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
@@ -62,7 +62,7 @@ pub async fn user_send(
         Some(format!("发送失败: {}", v))
     });
 
-    match services::user_team_temp::user_send(&user_uuid, team_id, &description).await {
+    match services::user_team_temp::user_send(&user_uuid, &team_name, &description).await {
         Ok(data) => Ok(AppResponse::<bool>::success(success_msg, Some(data))),
         Err(r) => Ok(AppResponse::<bool>::fail(warn_msg(r.to_string()))),
     }

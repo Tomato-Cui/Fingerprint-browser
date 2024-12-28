@@ -53,6 +53,51 @@ impl EnvironmentAccount {
     }
 
     #[allow(dead_code)]
+    pub async fn query_by_user_uuid(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        page_num: u32,
+        page_size: u32,
+    ) -> Result<(i64, Vec<EnvironmentAccount>), Error> {
+        let environment_uuids: Vec<String> =
+            sqlx::query_scalar("SELECT uuid FROM environments WHERE user_uuid = ?")
+                .bind(user_uuid)
+                .fetch_all(pool)
+                .await?;
+
+        let environmnet_uuids_str = environment_uuids
+            .iter()
+            .map(|v| format!("'{}'", v))
+            .collect::<Vec<String>>()
+            .join(",");
+
+        let (total,): (i64,) = 
+            sqlx::query_as(
+            &format!("SELECT count(1) FROM environment_accounts WHERE environment_uuid in ({}) AND deleted_at IS NULL",environmnet_uuids_str)
+            )
+            .fetch_one(pool)
+            .await?;
+
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
+        let offset = page_num * page_size;
+
+        let accounts: Vec<EnvironmentAccount> = 
+            sqlx::query_as(
+            &format!("SELECT * FROM environment_accounts WHERE environment_uuid in ({}) AND deleted_at IS NULL LIMIT ? OFFSET ?", environmnet_uuids_str)
+            )
+            .bind(page_size)
+            .bind(offset)
+            .fetch_all(pool)
+            .await?;
+
+        Ok((total, accounts))
+    }
+
+    #[allow(dead_code)]
     pub async fn query_by_environment_uuid(
         pool: &Pool<Sqlite>,
         environment_uuid: &str,

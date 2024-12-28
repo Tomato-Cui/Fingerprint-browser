@@ -28,6 +28,8 @@ pub fn build_router() -> Router {
             .route("/un-blocked", put(unblocked::handle))
             .route("/create", post(create::handle))
             .route("/modify/:id", put(modify::handle))
+            .route("/remove-current-user", put(remove_current_user::handle))
+            .route("/modify/team-user-info", put(modify_team_user_info::handle))
             .route("/delete/:id", delete(delete::handle)),
     )
 }
@@ -309,6 +311,82 @@ mod modify {
                 }
             }
             Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod remove_current_user {
+    use super::*;
+
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        team_id: u32,
+        current_user_uuid: String,
+    }
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        payload: Json<Payload>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("移除成功".to_string()), |v| {
+            Some(format!("移除失败: {}", v))
+        });
+
+        match services::team::remove_user(
+            &state.user_uuid,
+            payload.team_id,
+            &payload.current_user_uuid,
+        )
+        .await
+        {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod modify_team_user_info {
+    use super::*;
+
+    #[derive(serde::Deserialize)]
+    pub struct Payload {
+        team_id: u32,
+        description: Option<String>,
+        team_group_id: u32,
+        current_user_uuid: String,
+    }
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        payload: Json<Payload>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("移除成功".to_string()), |v| {
+            Some(format!("移除失败: {}", v))
+        });
+
+        match services::team::update_team_user_info(
+            &state.user_uuid,
+            payload.team_id,
+            payload.description.clone(),
+            payload.team_group_id,
+            &payload.current_user_uuid,
+        )
+        .await
+        {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         }
     }
 }
