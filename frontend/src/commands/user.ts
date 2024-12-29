@@ -4,8 +4,8 @@ export const login = async (account: String, password: String): Promise<any> => 
     return await invoke('login', { account, password })
 };
 
-export const register = async (email: String, account: String, password: String): Promise<any> => {
-    return await invoke('register', { email, account, password })
+export const register = async (email: String, code: String, account: String, password: String): Promise<any> => {
+    return await invoke('register', { email, code, account, password })
 };
 
 export const logout = async (): Promise<any> => {
@@ -15,4 +15,20 @@ export const logout = async (): Promise<any> => {
 
 export const isLogin = async (): Promise<boolean> => {
     return await invoke('is_login',)
+};
+
+export const reset_password = async (
+    email: string,
+    password1: string,
+    password2: string,
+): Promise<boolean> => {
+    return await invoke('reset_password', {
+        email,
+        password1,
+        password2
+    })
+};
+
+export const register_send = async (email: string): Promise<boolean> => {
+    return await invoke('register_send', { email })
 };

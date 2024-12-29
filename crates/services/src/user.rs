@@ -28,12 +28,21 @@ pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceErro
     Ok(token)
 }
 
-pub async fn regsiter(email: &str, nickname: &str, password: &str) -> Result<bool, ServiceError> {
+pub async fn regsiter(
+    email: &str,
+    code: &str,
+    nickname: &str,
+    password: &str,
+) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
     let password = commons::encryption::md5(password);
 
     if email.is_empty() {
         return Err(ServiceError::Error("邮箱不能为空".to_string()));
+    }
+    let (is_ok, message) = models::codes::Codes::is_ok(&pool, "register", email, code).await?;
+    if !is_ok {
+        return Err(ServiceError::Error(message));
     }
 
     let user_info = models::user_info::UserInfo {
@@ -95,13 +104,47 @@ pub async fn query_user_uuid_by_email(user_email: &str) -> Result<String, Servic
     Ok(user_uuid)
 }
 
-#[allow(unused_variables)]
-pub async fn register_send(
-    email: &str,
-    username: &str,
-    password: &str,
-) -> Result<String, ServiceError> {
-    todo!()
+pub async fn register_send(email: &str) -> Result<bool, ServiceError> {
+    if email.is_empty() {
+        return Err(ServiceError::Error("邮箱不能为空".to_string()));
+    }
+
+    let config = if let Some(config) = states::config::get_config() {
+        config
+    } else {
+        return Err(ServiceError::Error(
+            "email send failed, please resend.".to_string(),
+        ));
+    };
+
+    let code = commons::encryption::random_code();
+
+    let ok = commons::util::send_email(
+        &config.email.smtp_username,
+        &config.email.smtp_password,
+        &config.email.smtp_server,
+        email,
+        &format!("{} ,welcome", email),
+        &format!("code: {}", code),
+    );
+    if let Err(e) = ok {
+        return Err(ServiceError::Error(e.to_string()));
+    }
+
+    let pool = states::database::get_database_pool()?;
+    let t = models::codes::Codes::insert(
+        pool,
+        "register",
+        email,
+        &code,
+        &format!(
+            "{}",
+            (commons::time::get_system_time_mills()) + 1000 * 60 * 3
+        ),
+    )
+    .await?;
+
+    Ok(t)
 }
 
 #[allow(unused_variables)]
@@ -115,6 +158,8 @@ pub async fn reset_password_send(
 
 #[cfg(test)]
 mod tests {
+    use super::register_send;
+
     #[tokio::test]
     async fn test_login() {
         crate::setup().await;
@@ -127,7 +172,7 @@ mod tests {
     #[tokio::test]
     async fn test_register() {
         crate::setup().await;
-        let ok = super::regsiter("this", "42", "23").await;
+        let ok = super::regsiter("liushui_new@126.com", "578321", "42", "23").await;
         println!("{:?}", ok)
     }
 
@@ -146,16 +191,39 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_register_send() {
-        crate::setup().await;
-        let result = super::register_send("abc@abc.com", "abc", "abc").await;
-        println!("{:?}", result);
-    }
-
-    #[tokio::test]
     async fn test_reset_password_send() {
         crate::setup().await;
         let result = super::reset_password_send("abc@abc.com", "abc", "abc").await;
         println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_insert_code() {
+        crate::setup().await;
+
+        // let pool = states::database::get_database_pool().unwrap();
+
+        // let t = models::codes::Codes::insert(
+        //     pool,
+        //     "register",
+        //     "abc@abc.com",
+        //     "234822",
+        //     &format!(
+        //         "{}",
+        //         (commons::time::get_system_time_mills()) + 1000 * 60 * 3
+        //     ),
+        // )
+        // .await;
+        println!("{:?}", (commons::time::get_system_time_mills()),);
+
+        // let is_ok = models::codes::Codes::is_ok(pool, "register", "abc@abc.com", "234333").await;
+        // println!("{:?} {:?}", t, is_ok);
+    }
+
+    #[tokio::test]
+    async fn test_register_send() {
+        crate::setup().await;
+        let t = register_send("liushui_new@126.com").await;
+        println!("{:?}", t);
     }
 }

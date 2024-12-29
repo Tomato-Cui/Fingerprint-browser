@@ -1,10 +1,5 @@
 use std::path::PathBuf;
 
-#[allow(unused_variables)]
-pub fn send_email(to: &str, from: &str, subject: &str, text: &str) {
-    todo!()
-}
-
 pub fn cookie_file(path: &str) -> PathBuf {
     let path_str: PathBuf = PathBuf::from(path)
         .join("Default")
@@ -145,5 +140,41 @@ pub fn struct_to_json_value(value: impl Serialize) -> Value {
     match serde_json::to_value(value) {
         Ok(v) => v,
         Err(_) => serde_json::to_value("").unwrap_or_default(),
+    }
+}
+
+pub fn send_email(
+    smtp_username: &str,
+    smtp_password: &str,
+    smtp_server: &str,
+    to: &str,
+    title: &str,
+    body: &str,
+) -> Result<bool, anyhow::Error> {
+    use lettre::message::header::ContentType;
+    use lettre::transport::smtp::authentication::Credentials;
+    use lettre::{Message, SmtpTransport, Transport};
+
+    let email = Message::builder()
+        .from(
+            smtp_username
+                .parse()
+                .map_err(|_| anyhow::anyhow!("from email is failed."))?,
+        )
+        .to(to
+            .parse()
+            .map_err(|_| anyhow::anyhow!("receive email is failed."))?)
+        .subject(title)
+        .header(ContentType::TEXT_PLAIN)
+        .body(String::from(body))?;
+    let creds = Credentials::new(smtp_username.to_string(), smtp_password.to_string());
+    let mailer = SmtpTransport::relay(smtp_server)
+        .unwrap()
+        .credentials(creds)
+        .build();
+
+    match mailer.send(&email) {
+        Ok(_) => Ok(true),
+        Err(_e) => Err(anyhow::anyhow!("email send failed.")),
     }
 }

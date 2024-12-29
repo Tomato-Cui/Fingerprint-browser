@@ -29,10 +29,11 @@ pub async fn login(account: &str, password: &str) -> Result<AppResponse<Value>, 
 #[tauri::command]
 pub async fn register(
     email: &str,
+    code: &str,
     account: &str,
     password: &str,
 ) -> Result<AppResponse<bool>, tauri::Error> {
-    match services::user::regsiter(email, account, password).await {
+    match services::user::regsiter(email, code, account, password).await {
         Ok(v) => {
             if v {
                 Ok(AppResponse::success(Some("注册成功".to_string()), Some(v)))
@@ -40,7 +41,7 @@ pub async fn register(
                 Ok(AppResponse::success(Some("注册失败".to_string()), Some(v)))
             }
         }
-        Err(_) => Ok(AppResponse::<bool>::fail(Some("注册失败".to_string()))),
+        Err(e) => Ok(AppResponse::<bool>::fail(Some(e.to_string()))),
     }
 }
 
@@ -97,5 +98,19 @@ pub async fn logout() -> Result<AppResponse<bool>, tauri::Error> {
             }
         }
         Err(_) => Ok(AppResponse::<bool>::fail(Some("退出失败".to_string()))),
+    }
+}
+
+#[tauri::command]
+pub async fn register_send(email: &str) -> Result<AppResponse<bool>, tauri::Error> {
+    match services::user::register_send(email).await {
+        Ok(v) => {
+            if v {
+                Ok(AppResponse::success(Some("发送成功".to_string()), Some(v)))
+            } else {
+                Ok(AppResponse::success(Some("发送失败".to_string()), Some(v)))
+            }
+        }
+        Err(e) => Ok(AppResponse::<bool>::fail(Some(e.to_string()))),
     }
 }

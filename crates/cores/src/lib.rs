@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use states::config::APP_DATA;
+pub mod extensions;
 pub mod processor;
 pub mod request;
 pub mod requests;

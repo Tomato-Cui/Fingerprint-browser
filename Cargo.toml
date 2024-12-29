@@ -56,6 +56,8 @@ uuid = { version = "1.11.0", features = [
   "fast-rng",
   "macro-diagnostics",
 ] }
+regex = "1.5.4" 
+lettre = "0.11"
 
 # internal crate dependencies
 cores = { path = "./crates/cores" }

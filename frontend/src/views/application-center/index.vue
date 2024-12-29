@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import {
   UploadCloud as UploadCloudIcon,
   Search as SearchIcon,
@@ -19,7 +19,8 @@ import SettingModel from "./setting-model.vue";
 import UpdateModel from "./update-model.vue";
 import { AlertModel } from "@/components/alert-model";
 import EnableSoftwareSwitch from "./enable-software-switch.vue";
-import { extension_query } from "@/commands/extension";
+import { extension_query, extension_query_by_user } from "@/commands/extension";
+import { toast } from "vue-sonner";
 
 const uploadModelProps = reactive({
   open: false,
@@ -40,21 +41,58 @@ const alertModelProps = reactive({
   showWarn: false,
 });
 
+const loadStoreExtension = () => {
+  extension_query(1, 10)
+    .then((res) => {
+      if (res.code) {
+        storeApps.value = res.data.data.map((item) => ({
+          id: item.uuid,
+          name: item.name,
+          description: item.description,
+          icon: item.avatar_url,
+          enabled: true,
+          downloading: true,
+          downloaded: false,
+          installed: false,
+        }));
+      } else {
+        toast.warning(res.message);
+      }
+    })
+    .catch((err) => {
+      toast.warning(err);
+    });
+};
+const loadUserExtension = () => {
+  extension_query_by_user(1, 10)
+    .then((res) => {
+      if (res.code) {
+        installedApps.value = res.data.data.map((item) => ({
+          id: item.uuid,
+          name: item.name,
+          description: item.description,
+          icon: item.avatar_url,
+          enabled: true,
+          downloading: true,
+          downloaded: false,
+          installed: false,
+        }));
+      } else {
+        toast.warning(res.message);
+      }
+    })
+    .catch((err) => {
+      toast.warning(err);
+    });
+};
+onMounted(() => {
+  if (activeTab.value == "team") {
+    loadUserExtension();
+  }
+});
+
 const activeTab = ref("team");
-const storeApps = ref(
-  [...new Array(20).keys()].map((item) => ({
-    id: item,
-    name: "AdsPower密码管理器",
-    version: "0.1.2",
-    description:
-      "用于生成2FA验证码和自动登录网站，与AdsPower浏览器一起使用更加安全。",
-    icon: "https://iph.href.lu/400x400?text=400x400&fg=666666&bg=cccccc",
-    enabled: true,
-    downloading: true,
-    downloaded: false,
-    installed: false,
-  }))
-);
+const storeApps = ref([]);
 
 const removeApp = ref();
 const installedApps = ref([]);
@@ -98,7 +136,15 @@ const updateOpenHandle = () => {
   updateModelProps.title = "更新应用";
   updateModelProps.open = true;
 };
+const loadData = computed(() => {
+  return activeTab.value == "team" ? loadUserExtension : loadStoreExtension;
+});
+
+watch(activeTab, (newV) => {
+  loadData.value();
+});
 </script>
+
 <template>
   <div class="p-4 h-main rounded-md flex flex-col">
     <!-- Navigation Tabs -->
@@ -113,7 +159,7 @@ const updateOpenHandle = () => {
               : 'text-gray-600'
           "
         >
-          团队应用
+          应用
         </button>
         <button
           @click="activeTab = 'recommended'"
@@ -224,7 +270,10 @@ const updateOpenHandle = () => {
               </button>
             </div>
 
-            <p class="text-xs my-2 text-gray-600">{{ app.description }}</p>
+            <div
+              class="description-wrapper h-36 overflow-y-auto"
+              v-html="app.description"
+            />
             <div class="mt-4 flex items-center justify-between">
               <div class="flex items-center gap-1 text-sm">
                 <span class="text-gray-500">提供方：</span>
@@ -309,6 +358,7 @@ const updateOpenHandle = () => {
         :title="uploadModelProps.title"
         @close="() => (uploadModelProps.open = false)"
         @submit="submitInstallSoftwareHandle"
+        @load="() => loadData()"
       />
 
       <SettingModel
@@ -325,12 +375,18 @@ const updateOpenHandle = () => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .toggle-checkbox:checked {
   @apply right-0 border-blue-600;
 }
 
 .toggle-checkbox:checked + .toggle-label {
   @apply bg-blue-600;
+}
+.description-wrapper p:first-of-type {
+  @apply h-auto text-sm py-4 text-gray-800;
+}
+.description-wrapper p {
+  @apply text-xs h-32 text-gray-500;
 }
 </style>

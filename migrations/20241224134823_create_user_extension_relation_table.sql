@@ -8,5 +8,6 @@ CREATE TABLE
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         deleted_at DATETIME,
         FOREIGN KEY (user_uuid) REFERENCES users (uuid),
-        FOREIGN KEY (extension_uuid) REFERENCES extensions (uuid)
+        FOREIGN KEY (extension_uuid) REFERENCES extensions (uuid),
+        CONSTRAINT unique_environmnet_extension UNIQUE (user_uuid, extension_uuid)
     );

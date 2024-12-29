@@ -18,7 +18,7 @@ pub mod client {
     use states::auth::{clear_token, get_token};
     use std::{future::Future, pin::Pin, time::Duration};
 
-    const TIMEOUT_DURATION_SECS: u64 = 10;
+    pub const TIMEOUT_DURATION_SECS: u64 = 10;
 
     type BeforeCallFunction = fn(
         rb: reqwest::RequestBuilder,

@@ -116,3 +116,19 @@ pub async fn delete(extension_uuid: &str) -> Result<bool, ServiceError> {
 
     Ok(ok)
 }
+
+#[tokio::test]
+async fn test_user_insert() {
+    crate::setup().await;
+    let token = user_insert(
+        "aa0b0cab-ead1-4145-81b7-6603d48dd362",
+        Extension {
+            uuid: "abc".to_string(),
+            name: "abc".to_string(),
+            description: Some("ac".to_string()),
+            ..Default::default()
+        },
+    )
+    .await;
+    println!("{:?}", token);
+}
