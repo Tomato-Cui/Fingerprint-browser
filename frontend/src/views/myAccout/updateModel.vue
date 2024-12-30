@@ -8,25 +8,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-import {reactive, ref} from 'vue'
+import {reactive, ref, watch} from 'vue'
+import {environment_account_modify} from "@/commands/environment-account.ts";
 const showPassword = ref(false)
 const props = defineProps({
     open: false,
     title: '',
+    itemData:Object,
   });
 
 const form = reactive({
-  platform: 'Gmail',
-  accountName: 'GM1145',
-  email: '',
-  password: ''
+  platform: props.itemData.platform,
+  accountName:  "",
+  email: props.itemData.platform_account,
+  password: props.itemData.platform_password,
 })
+// 监听 itemData 的变化，更新 form
+watch(() => props.itemData, (newItemData) => {
+  form.platform = newItemData.platform;
+  form.email = newItemData.platform_account;
+  form.password = newItemData.platform_password;
+}, { immediate: true }); // immediate: true 使得在初始化时就更新 form
 
   const emit = defineEmits(['close']);
 
+const update =() =>{
+  let payload = {
+    platform: form.platform,              // 这里应该是 form 的 platform 属性
+    platform_url: "",                     // 这个值为空字符串，可能需要根据实际情况赋值
+    platform_account: form.email,  // 假设 form 中有 platform_account
+    platform_password: form.password, // 假设 form 中有 platform_password
+    platform_description: props.itemData.platform_description || "", // 可选属性
+    environment_uuid: props.itemData.environment_uuid, // 假设 form 中有 environment_uuid
+    user_uuid: props.itemData.user_uuid             // 假设 form 中有 user_uuid
+  };
+ console.log(payload)
+  environment_account_modify(props.itemData.id , payload)
+  emit('close')
+}
 </script>
 <template>
   <div v-if="props.open" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+
     <div class="bg-white rounded-lg w-full max-w-md mx-4">
       <!-- Header -->
       <div class="flex justify-between items-center p-4">
@@ -145,7 +168,7 @@ const form = reactive({
           </button>
           <button
               class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
-              @click="() => emit('close')"
+              @click="update"
           >
             确定
           </button>
