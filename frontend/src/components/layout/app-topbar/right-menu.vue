@@ -179,7 +179,7 @@ const subQuit = () => {
             <PopoverContent class=" w-48 rounded-xl p-2" align="end">
                 <div class="flex flex-col gap-y-2">
                     <div @click="router.push('/personal/account')"
-                        class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
+                        class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm hidden">
                         <User2Icon class="w-4 h-4" />
                         用户中心
                     </div>

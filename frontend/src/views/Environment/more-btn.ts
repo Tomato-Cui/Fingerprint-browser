@@ -24,18 +24,18 @@ export const MoreBtn = () => {
                     '修改代理'
                 ]),
                 h(MoreItem, { class: 'cursor-pointer' }, [
-                    h(UserCheck, { class: 'w-4 h-4' }),
-                    '授权成员'
-                ]),
-                h(MoreItem, { class: 'cursor-pointer' }, [
                     h(Rotate3d, { class: 'w-4 h-4' }),
                     '转移环境'
 
                 ]),
-                h(MoreItem, { class: 'cursor-pointer' }, [
-                    h(Star, { class: 'w-4 h-4' }),
-                    '设为常用'
-                ]),
+                // h(MoreItem, { class: 'cursor-pointer' }, [
+                //     h(UserCheck, { class: 'w-4 h-4' }),
+                //     '授权成员'
+                // ]),
+                // h(MoreItem, { class: 'cursor-pointer' }, [
+                //     h(Star, { class: 'w-4 h-4' }),
+                //     '设为常用'
+                // ]),
                 h(MoreItem, { class: 'cursor-pointer' }, [
                     h(Trash2Icon, { class: 'w-4 h-4' }),
                     '删除环境'
