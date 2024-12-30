@@ -19,8 +19,15 @@ import SettingModel from "./setting-model.vue";
 import UpdateModel from "./update-model.vue";
 import { AlertModel } from "@/components/alert-model";
 import EnableSoftwareSwitch from "./enable-software-switch.vue";
-import { extension_query, extension_query_by_user } from "@/commands/extension";
+import {
+  extension_query,
+  extension_query_by_user,
+  extension_remove_by_user_uuid,
+  extension_user_create,
+  user_toggle_extension,
+} from "@/commands/extension";
 import { toast } from "vue-sonner";
+import { app } from "@tauri-apps/api";
 
 const uploadModelProps = reactive({
   open: false,
@@ -29,6 +36,7 @@ const uploadModelProps = reactive({
 const settingModelProps = reactive({
   open: false,
   title: "",
+  extension_uuid: "",
 });
 const updateModelProps = reactive({
   open: false,
@@ -39,6 +47,18 @@ const alertModelProps = reactive({
   title: "",
   message: "",
   showWarn: false,
+  extension_title: "",
+  extension_uuid: "",
+});
+const addExtensionToUserModelProps = reactive({
+  open: false,
+  title: "",
+  message: "",
+  extension_uuid: "",
+  extension_title: "",
+  extension_avatar: "",
+  extension_description: "",
+  extension_release_url: "",
 });
 
 const loadStoreExtension = () => {
@@ -53,7 +73,8 @@ const loadStoreExtension = () => {
           enabled: true,
           downloading: true,
           downloaded: false,
-          installed: false,
+          installed:
+            installedApps.value.findIndex((i) => i.id == item.uuid) != -1,
         }));
       } else {
         toast.warning(res.message);
@@ -72,10 +93,11 @@ const loadUserExtension = () => {
           name: item.name,
           description: item.description,
           icon: item.avatar_url,
-          enabled: true,
+          release_url: item.release_url,
+          enabled: item.open == 1 ? true : false,
           downloading: true,
           downloaded: false,
-          installed: false,
+          installed: true,
         }));
       } else {
         toast.warning(res.message);
@@ -93,17 +115,35 @@ onMounted(() => {
 
 const activeTab = ref("team");
 const storeApps = ref([]);
-
 const removeApp = ref();
 const installedApps = ref([]);
-const installSoftwareHandle = (app) => {
+const switchStatus = ref(false);
+
+const addExtensionHandle = (app) => {
   if (app) {
-    uploadModelProps.open = true;
-    uploadModelProps.title = "下载应用";
-    app.installed = true;
-    installedApps.value.push(app);
+    addExtensionToUserModelProps.open = true;
+    addExtensionToUserModelProps.title = "下载应用";
+    addExtensionToUserModelProps.extension_title = app.name;
+    addExtensionToUserModelProps.extension_uuid = app.id;
+    addExtensionToUserModelProps.extension_avatar = app.icon;
+    addExtensionToUserModelProps.extension_description = app.description;
+    addExtensionToUserModelProps.extension_release_url = app.release_url;
   }
 };
+const addExtensionSubmitHandle = async () => {
+  let res = await extension_user_create(
+    addExtensionToUserModelProps.extension_uuid
+  );
+
+  if (res.code == 1) {
+    toast.success(res.message);
+  } else {
+    toast.warning(res.message);
+  }
+
+  addExtensionToUserModelProps.open = false;
+};
+
 const submitInstallSoftwareHandle = () => {
   uploadModelProps.open = false;
   activeTab.value = "team";
@@ -114,23 +154,62 @@ const uploadSoftwareHandle = () => {
   uploadModelProps.title = "上传应用";
 };
 
-const removeSoftwareHandle = (app) => {
+const removeSoftwareOpenHandle = (app) => {
   alertModelProps.title = "移除应用";
   alertModelProps.open = true;
   alertModelProps.showWarn = true;
   alertModelProps.message = "移除后，所有浏览器将不会安装此应用。";
   removeApp.value = app;
 };
-const switchOpenHandle = () => {
+
+const removeSoftwareHandle = async () => {
+  alertModelProps.open = false;
+
+  if (alertModelProps.title == "移除应用" && removeApp) {
+    removeApp.installed = false;
+
+    let id = removeApp.value.id;
+    if (id) {
+      let res = await extension_remove_by_user_uuid(removeApp.value.id);
+      if (res.code == 1) {
+        installedApps.value = installedApps.value.filter(
+          (item) => item.id != id
+        );
+      } else {
+        toast.warning(res.message);
+      }
+    } else {
+      toast.warning("应用不存在");
+    }
+  }
+  removeApp.value = undefined;
+};
+
+const switchOpenHandle = (app) => {
   alertModelProps.title = "开启应用";
   alertModelProps.open = true;
   alertModelProps.showWarn = false;
   alertModelProps.message =
     "开启后，如在新建浏览器环境时选择此应用，将安装到浏览器上使用。您确定开启以下应用吗？";
+  alertModelProps.extension_title = app.name;
+  alertModelProps.extension_uuid = app.id;
 };
-const settingOpenHandle = () => {
+
+const switcExtensionHandle = async () => {
+  let extension_uuid = alertModelProps.extension_uuid;
+  let current_app = installedApps.value.find(
+    (item) => item.id == extension_uuid
+  );
+  let res = await user_toggle_extension(extension_uuid, !current_app.enabled);
+  if (res.code == 1) {
+    current_app.enabled = !current_app.enabled;
+  }
+};
+
+const settingOpenHandle = (app) => {
   settingModelProps.title = "配置环境";
   settingModelProps.open = true;
+  settingModelProps.extension_uuid = app.id;
 };
 const updateOpenHandle = () => {
   updateModelProps.title = "更新应用";
@@ -239,10 +318,11 @@ watch(activeTab, (newV) => {
                 v-if="activeTab !== 'recommended'"
                 class="flex flex-col items-end gap-y-6"
               >
-                <EnableSoftwareSwitch @click="switchOpenHandle" />
+                <!-- <EnableSoftwareSwitch @click="() => switchOpenHandle(app)" /> -->
                 <Switch
-                  v-model:checked="switchStatus"
-                  @click="switchOpenHandle"
+                  :checked="app.enabled"
+                  @update="app.enabled = !app.enabled"
+                  @click="() => switchOpenHandle(app)"
                 />
                 <div class="flex gap-1">
                   <p
@@ -263,7 +343,7 @@ watch(activeTab, (newV) => {
               </div>
               <button
                 v-if="activeTab === 'recommended'"
-                @click="() => installSoftwareHandle(app)"
+                @click="() => addExtensionHandle(app)"
                 class="flex items-center justify-center gap-2 px-2 py-1 bg-white rounded-sm border text-xs l: text-blue-600 border-blue-600 whitespace-nowrap"
               >
                 {{ app.installed ? "已添加" : "添加" }}
@@ -289,15 +369,21 @@ watch(activeTab, (newV) => {
                   />
                 </MoreTrigger>
                 <MoreContent>
-                  <MoreItem class="cursor-pointer" @click="settingOpenHandle">
+                  <MoreItem
+                    class="cursor-pointer"
+                    @click="() => settingOpenHandle(app)"
+                  >
                     <Settings2Icon class="w-4 h-4" />配置
                   </MoreItem>
-                  <MoreItem class="cursor-pointer" @click="updateOpenHandle">
+                  <MoreItem
+                    class="cursor-pointer hidden"
+                    @click="false && updateOpenHandle"
+                  >
                     <SquarePenIcon class="w-4 h-4" />更新
                   </MoreItem>
                   <MoreItem
                     class="cursor-pointer"
-                    @click="() => removeSoftwareHandle(app)"
+                    @click="() => removeSoftwareOpenHandle(app)"
                   >
                     <Trash2Icon class="w-4 h-4" />移除
                   </MoreItem>
@@ -320,15 +406,10 @@ watch(activeTab, (newV) => {
         @cancel="() => (alertModelProps.open = false)"
         @submit="
           () => {
+            alertModelProps.title == '开启应用'
+              ? switcExtensionHandle()
+              : removeSoftwareHandle();
             alertModelProps.open = false;
-
-            if (alertModelProps.title == '移除应用' && removeApp) {
-              removeApp.installed = false;
-              installedApps = installedApps.filter(
-                (item) => item.id != removeApp.id
-              );
-              removeApp = undefined;
-            }
           }
         "
       >
@@ -345,9 +426,29 @@ watch(activeTab, (newV) => {
           </p>
           <p>
             应用名称
-            <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4"
-              >MetaMask</span
-            >
+            <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4">{{
+              alertModelProps.extension_title
+            }}</span>
+          </p>
+        </div>
+      </AlertModel>
+
+      <AlertModel
+        title="添加扩展到个人中心"
+        :open="addExtensionToUserModelProps.open"
+        @close="() => (addExtensionToUserModelProps.open = false)"
+        @cancel="() => (addExtensionToUserModelProps.open = false)"
+        @submit="addExtensionSubmitHandle"
+      >
+        <div class="text-sm flex flex-col gap-y-4 py-4">
+          <p>
+            {{ addExtensionToUserModelProps.message }}
+          </p>
+          <p>
+            应用名称
+            <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4">{{
+              addExtensionToUserModelProps.extension_title
+            }}</span>
           </p>
         </div>
       </AlertModel>
@@ -364,6 +465,7 @@ watch(activeTab, (newV) => {
       <SettingModel
         :open="settingModelProps.open"
         :title="settingModelProps.title"
+        :extensionUuid="settingModelProps.extension_uuid"
         @close="() => (settingModelProps.open = false)"
       />
       <UpdateModel

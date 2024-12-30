@@ -98,6 +98,11 @@ export const environment_query_by_team = async (id: number, pageNum: number, pag
     return await invoke('environment_query_by_team', { id, pageNum, pageSize })
 };
 
+
+export const environment_query_by_extension = async (extensionUuid: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('environment_query_by_extension', { extensionUuid, pageNum, pageSize })
+};
+
 export const environment_detail_create = async (environmentName: string): Promise<any> => {
     return await invoke('environment_detail_create', { environmentName })
 };

@@ -114,7 +114,7 @@ impl UserTeamTemp {
             FROM user_team_temps utt
             JOIN users u ON utt.user_uuid = u.uuid
             JOIN user_infos ui ON u.user_info_id = ui.id
-            WHERE utt.team_id = ? AND utt.allow_2 = 0
+            WHERE utt.team_id = ?
             LIMIT ? OFFSET ?
         ";
 
@@ -139,7 +139,7 @@ impl UserTeamTemp {
         let mut tx = pool.begin().await?;
         let sql = "
             UPDATE user_team_temps
-            SET user_uuid = ?, team_id = ?, allow_1 = ?, allow_2 = ?, description = ?, updated_at = CURRENT_TIMESTAMP
+            SET user_uuid = ?, team_id = ?, allow_1 = ?, allow_2 = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         ";
 
@@ -148,7 +148,6 @@ impl UserTeamTemp {
             .bind(&user_team_temp.team_id)
             .bind(&user_team_temp.allow_1)
             .bind(&user_team_temp.allow_2)
-            .bind(&user_team_temp.description)
             .bind(id)
             .execute(&mut *tx)
             .await?;

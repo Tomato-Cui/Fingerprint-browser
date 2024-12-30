@@ -16,6 +16,10 @@ pub fn build_router() -> Router {
             .route("/query", get(query::handle))
             .route("/query-by-group/:id", get(query_by_group::handle))
             .route("/query-by-team/:id", get(query_by_team::handle))
+            .route(
+                "/query-by-extension/:uuid",
+                post(query_by_extension::handle),
+            )
             .route("/create", post(create::handle))
             .route("/detail/create", post(detail_create::handle))
             .route("/batch", post(batch::handle))
@@ -86,6 +90,34 @@ mod query_by_group {
             .await
         {
             Ok(data) => AppResponse::<Value>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod query_by_extension {
+    use serde_json::Value;
+
+    use crate::routes::Pagination;
+
+    use super::*;
+
+    pub async fn handle(
+        Path(extension_uuid): Path<String>,
+        Json(payload): Json<Pagination>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::extension::query_environmnets_by_extension_uuid(
+            &extension_uuid,
+            payload.page_num,
+            payload.page_size,
+        )
+        .await
+        {
+            Ok(ok) => AppResponse::<Value>::success(success_msg, Some(ok)),
             Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
         }
     }

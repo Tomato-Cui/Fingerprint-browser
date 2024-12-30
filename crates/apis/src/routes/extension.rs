@@ -26,8 +26,14 @@ pub fn build_router() -> Router {
                 "/environmnet-use-extension",
                 post(environmnet_use_extension::handle),
             )
+            .route(
+                "/environmnet-remove-extension",
+                delete(environmnet_remove_extension::handle),
+            )
             .route("/update", put(update::handle))
-            .route("/delete-by-uuid", delete(delete_by_uuid::handle)),
+            .route("/user-toggle-extension", put(user_toggle_extension::handle))
+            .route("/delete-by-uuid", delete(delete_by_uuid::handle))
+            .route("/remove-by-user-uuid", delete(remove_by_user_uuid::handle)),
     )
 }
 
@@ -37,13 +43,13 @@ mod user_create {
 
     pub async fn handle(
         state: Extension<CurrentUser>,
-        Json(payload): Json<extension::Extension>,
+        Path(extension_uuid): Path<String>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
 
-        match services::extension::user_insert(&state.user_uuid, payload).await {
+        match services::extension::user_insert(&state.user_uuid, &extension_uuid).await {
             Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
             Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         }
@@ -56,7 +62,7 @@ mod team_create {
     #[derive(Deserialize)]
     pub struct Payload {
         team_id: String,
-        extension: extension::Extension,
+        extension_uuid: String,
     }
 
     pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
@@ -64,7 +70,7 @@ mod team_create {
             Some(format!("创建失败: {}", v))
         });
 
-        match services::extension::team_insert(&payload.team_id, payload.extension).await {
+        match services::extension::team_insert(&payload.team_id, &payload.extension_uuid).await {
             Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
             Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         }
@@ -168,6 +174,34 @@ mod query {
 }
 
 mod environmnet_use_extension {
+    use std::collections::HashMap;
+
+    use super::*;
+
+    #[derive(Deserialize)]
+    pub struct Payload {
+        extension_uuid: String,
+        environment_uuids: Vec<String>,
+    }
+
+    pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+            Some(format!("更新失败: {}", v))
+        });
+
+        match services::extension::environmnet_use_extension(
+            &payload.extension_uuid,
+            payload.environment_uuids,
+        )
+        .await
+        {
+            Ok(ok) => AppResponse::<HashMap<String, bool>>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<HashMap<String, bool>>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod environmnet_remove_extension {
     use super::*;
 
     #[derive(Deserialize)]
@@ -177,11 +211,11 @@ mod environmnet_use_extension {
     }
 
     pub async fn handle(Json(payload): Json<Payload>) -> impl IntoResponse {
-        let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
-            Some(format!("更新失败: {}", v))
+        let (success_msg, warn_msg) = (Some("移除成功".to_string()), |v| {
+            Some(format!("移除失败: {}", v))
         });
 
-        match services::extension::environmnet_use_extension(
+        match services::extension::environmnet_remove_extension(
             &payload.extension_uuid,
             &payload.environment_uuid,
         )
@@ -214,6 +248,37 @@ mod update {
     }
 }
 
+mod user_toggle_extension {
+
+    use super::*;
+
+    #[derive(Deserialize)]
+    pub struct Payload {
+        extension_uuid: String,
+        open: bool,
+    }
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        Path(payload): Path<Payload>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
+            Some(format!("创建失败: {}", v))
+        });
+
+        match services::extension::user_toggle_extension(
+            &state.user_uuid,
+            &payload.extension_uuid,
+            payload.open,
+        )
+        .await
+        {
+            Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
 mod delete_by_uuid {
     use super::*;
 
@@ -223,6 +288,24 @@ mod delete_by_uuid {
         });
 
         match services::extension::delete(&extension_uuid).await {
+            Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod remove_by_user_uuid {
+    use super::*;
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        Path(extension_uuid): Path<String>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("移除成功".to_string()), |v| {
+            Some(format!("移除失败: {}", v))
+        });
+
+        match services::extension::remove_by_user_uuid(&state.user_uuid, &extension_uuid).await {
             Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
             Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         }

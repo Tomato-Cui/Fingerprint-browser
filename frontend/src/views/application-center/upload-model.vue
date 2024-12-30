@@ -8,6 +8,7 @@ import { useExtensionCenterFromStore } from "@/stores/form/extension-center";
 import {
   extension_info_by_chrome_store_url,
   extension_user_create,
+  extension_create,
 } from "@/commands/extension";
 import Loading from "@/components/loading.vue";
 import { toast } from "vue-sonner";
@@ -34,6 +35,14 @@ const onSubmit = () => {
         let res = await extension_info_by_chrome_store_url(url);
         chromeSoftwareUrlInfo.value = res.data;
         loading.value = false;
+
+        await extension_create({
+          uuid: chromeSoftwareUrlInfo.value.extension_uuid,
+          name: chromeSoftwareUrlInfo.value.extension_title,
+          description: chromeSoftwareUrlInfo.value.extension_description,
+          avatar_url: chromeSoftwareUrlInfo.value.extension_avatar,
+          release_url: url,
+        });
       } catch (error) {
         loading.value = false;
         toast.warning("获取失败:" + error);
@@ -42,15 +51,9 @@ const onSubmit = () => {
   }
 };
 const addExtensionHandle = async () => {
-  let url = extensionCenterFrom.forms.url;
-  let res = await extension_user_create({
-    uuid: chromeSoftwareUrlInfo.value.extension_uuid,
-    name: chromeSoftwareUrlInfo.value.extension_title,
-    description: chromeSoftwareUrlInfo.value.extension_description,
-    avatar_url: chromeSoftwareUrlInfo.value.extension_avatar,
-    release_url: url,
-  });
-
+  let res = await extension_user_create(
+    chromeSoftwareUrlInfo.value.extension_uuid
+  );
   res.code == 1 ? toast.success(res.message) : toast.warning(res.message);
   emit("close");
   emit("load");

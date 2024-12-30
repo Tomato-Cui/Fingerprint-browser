@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 use crate::response::AppResponse;
-use models::extension;
+use models::extension::{self, Extension};
 use serde_json::Value;
 
 use super::user::get_user_id;
@@ -23,8 +25,22 @@ pub async fn extension_info_by_chrome_store_url(
 }
 
 #[tauri::command]
+pub async fn extension_create(extension: Extension) -> Result<AppResponse<bool>, tauri::Error> {
+    let _ = get_user_id().await?;
+
+    let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
+        Some(format!("创建失败: {}", v))
+    });
+
+    Ok(match services::extension::insert(extension).await {
+        Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
+        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+    })
+}
+
+#[tauri::command]
 pub async fn extension_user_create(
-    extension: extension::Extension,
+    extension_uuid: &str,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
 
@@ -33,7 +49,7 @@ pub async fn extension_user_create(
     });
 
     Ok(
-        match services::extension::user_insert(&user_uuid, extension).await {
+        match services::extension::user_insert(&user_uuid, extension_uuid).await {
             Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
             Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         },
@@ -43,7 +59,7 @@ pub async fn extension_user_create(
 #[tauri::command]
 pub async fn extension_team_create(
     team_id: String,
-    extension: extension::Extension,
+    extension_uuid: &str,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let _ = get_user_id().await?;
 
@@ -52,7 +68,7 @@ pub async fn extension_team_create(
     });
 
     Ok(
-        match services::extension::team_insert(&team_id, extension).await {
+        match services::extension::team_insert(&team_id, extension_uuid).await {
             Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
             Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
         },
@@ -142,6 +158,27 @@ pub async fn extension_query(
 #[tauri::command]
 pub async fn extension_environmnet_use_extension(
     extension_uuid: String,
+    environment_uuids: Vec<String>,
+) -> Result<AppResponse<HashMap<String, bool>>, tauri::Error> {
+    let _ = get_user_id().await?;
+
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::extension::environmnet_use_extension(&extension_uuid, environment_uuids)
+            .await
+        {
+            Ok(ok) => AppResponse::<HashMap<String, bool>>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<HashMap<String, bool>>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn extension_environmnet_remove_extension(
+    extension_uuid: String,
     environment_uuid: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let _ = get_user_id().await?;
@@ -151,7 +188,7 @@ pub async fn extension_environmnet_use_extension(
     });
 
     Ok(
-        match services::extension::environmnet_use_extension(&extension_uuid, &environment_uuid)
+        match services::extension::environmnet_remove_extension(&extension_uuid, &environment_uuid)
             .await
         {
             Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
@@ -180,6 +217,25 @@ pub async fn extension_update(
 }
 
 #[tauri::command]
+pub async fn user_toggle_extension(
+    extension_uuid: &str,
+    open: bool,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::extension::user_toggle_extension(&user_uuid, extension_uuid, open).await {
+            Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
 pub async fn extension_delete_by_uuid(
     extension_uuid: String,
 ) -> Result<AppResponse<bool>, tauri::Error> {
@@ -193,4 +249,22 @@ pub async fn extension_delete_by_uuid(
         Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
         Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
     })
+}
+
+#[tauri::command]
+pub async fn extension_remove_by_user_uuid(
+    extension_uuid: String,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+
+    let (success_msg, warn_msg) = (Some("移除成功".to_string()), |v| {
+        Some(format!("移除失败: {}", v))
+    });
+
+    Ok(
+        match services::extension::remove_by_user_uuid(&user_uuid, &extension_uuid).await {
+            Ok(ok) => AppResponse::<bool>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }

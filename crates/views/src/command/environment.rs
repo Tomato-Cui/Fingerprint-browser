@@ -73,6 +73,32 @@ pub async fn environment_query_by_team(
 }
 
 #[tauri::command]
+pub async fn environment_query_by_extension(
+    extension_uuid: &str,
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let _ = get_user_id().await?;
+
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(
+        match services::extension::query_environmnets_by_extension_uuid(
+            &extension_uuid,
+            page_num,
+            page_size,
+        )
+        .await
+        {
+            Ok(ok) => AppResponse::<Value>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
 pub async fn environment_detail_create(
     payload: models::environment::EnvironmentInfo,
 ) -> Result<AppResponse<bool>, tauri::Error> {

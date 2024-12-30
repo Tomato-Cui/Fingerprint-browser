@@ -462,7 +462,7 @@ impl Team {
         let sql = "
             UPDATE user_team_relation
             SET description = ?, team_group_id = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_uuid = ? AND and team_id = ? and is_leader = 0 and deleted_at IS NULL;
+            WHERE user_uuid = ? AND team_id = ? and is_leader = 0 and deleted_at IS NULL;
         ";
 
         sqlx::query(sql)

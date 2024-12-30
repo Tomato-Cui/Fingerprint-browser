@@ -16,20 +16,23 @@ export const extension_info_by_chrome_store_url = async (
     return await invoke('extension_info_by_chrome_store_url', { url })
 };
 
-export const extension_user_create = async (
+export const extension_create = async (
     extension: Extension,
 ): Promise<any> => {
-    return await invoke('extension_user_create', { extension })
+    return await invoke('extension_create', { extension })
+};
+
+export const extension_user_create = async (
+    extensionUuid: string,
+): Promise<any> => {
+    return await invoke('extension_user_create', { extensionUuid })
 };
 
 export const extension_team_create = async (
     teamId: String,
-    extension: Extension,
+    extensionUuid: string,
 ): Promise<any> => {
-    return await invoke('extension_team_create', {
-        teamId,
-        extension
-    })
+    return await invoke('extension_team_create', { teamId, extensionUuid })
 };
 
 export const extension_query_by_team = async (
@@ -79,9 +82,19 @@ export const extension_query = async (
 
 export const extension_environmnet_use_extension = async (
     extensionUuid: String,
-    environmentUuid: String,
+    environmentUuids: String[],
 ): Promise<any> => {
     return await invoke('extension_environmnet_use_extension', {
+        extensionUuid,
+        environmentUuids
+    })
+};
+
+export const extension_environmnet_remove_extension = async (
+    extensionUuid: String,
+    environmentUuid: String,
+): Promise<any> => {
+    return await invoke('extension_environmnet_remove_extension', {
         extensionUuid,
         environmentUuid
     })
@@ -97,10 +110,29 @@ export const extension_update = async (
     })
 };
 
+
+export const user_toggle_extension = async (
+    extensionUuid: String,
+    open: boolean,
+): Promise<any> => {
+    return await invoke('user_toggle_extension', {
+        extensionUuid,
+        open,
+    })
+}
+
 export const extension_delete_by_uuid = async (
     extensionUuid: string,
 ): Promise<any> => {
     return await invoke('extension_delete_by_uuid', {
+        extensionUuid,
+    })
+};
+
+export const extension_remove_by_user_uuid = async (
+    extensionUuid: string,
+): Promise<any> => {
+    return await invoke('extension_remove_by_user_uuid', {
         extensionUuid,
     })
 };

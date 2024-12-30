@@ -1,27 +1,28 @@
+use std::collections::HashMap;
+
 use models::extension::{self, Extension};
 use serde_json::{json, Value};
 
 use crate::error::ServiceError;
 
-pub async fn user_insert(
-    user_uuid: &str,
-    extension: extension::Extension,
-) -> Result<bool, ServiceError> {
+pub async fn insert(extension: extension::Extension) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok =
-        extension::Extension::insert(pool, "user_extension_relation", user_uuid, extension).await?;
+    let ok = extension::Extension::insert(pool, extension).await?;
     Ok(ok)
 }
 
-pub async fn team_insert(
-    team_id: &str,
-    extension: extension::Extension,
-) -> Result<bool, ServiceError> {
+pub async fn user_insert(user_uuid: &str, extnesion_uuid: &str) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok =
-        extension::Extension::insert(pool, "team_extension_relation", team_id, extension).await?;
+    let ok = extension::Extension::user_insert(pool, user_uuid, extnesion_uuid).await?;
+    Ok(ok)
+}
+
+pub async fn team_insert(team_id: &str, extension_uuid: &str) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = extension::Extension::team_insert(pool, team_id, extension_uuid).await?;
     Ok(ok)
 }
 
@@ -50,6 +51,27 @@ pub async fn query_by_user_uuid(
 
     let (total, extens) =
         extension::Extension::query_by_user_uuid(pool, user_uuid, page_num, page_size).await?;
+
+    Ok(json!({
+        "total":total,
+        "data": extens,
+    }))
+}
+
+pub async fn query_environmnets_by_extension_uuid(
+    extension_uuid: &str,
+    page_num: u32,
+    page_size: u32,
+) -> Result<Value, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let (total, extens) = extension::Extension::query_environmnet_uuid_by_extension_uuid(
+        pool,
+        extension_uuid,
+        page_num,
+        page_size,
+    )
+    .await?;
 
     Ok(json!({
         "total":total,
@@ -89,15 +111,50 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<Value, ServiceError>
     }))
 }
 
+pub async fn user_toggle_extension(
+    user_uuid: &str,
+    extension_uuid: &str,
+    open: bool,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok =
+        extension::Extension::user_toggle_extension(pool, user_uuid, extension_uuid, open).await?;
+
+    Ok(ok)
+}
+
 pub async fn environmnet_use_extension(
+    extension_uuid: &str,
+    environment_uuids: Vec<String>,
+) -> Result<HashMap<String, bool>, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let mut res = HashMap::new();
+    for environment_uuid in environment_uuids {
+        let ok = extension::Extension::environmnet_use_extension(
+            pool,
+            extension_uuid,
+            &environment_uuid,
+        )
+        .await?;
+
+        res.insert(environment_uuid, ok);
+    }
+
+    Ok(res)
+}
+
+pub async fn environmnet_remove_extension(
     extension_uuid: &str,
     environment_uuid: &str,
 ) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
     let ok =
-        extension::Extension::environmnet_use_extension(pool, extension_uuid, environment_uuid)
+        extension::Extension::environmnet_remove_extension(pool, extension_uuid, &environment_uuid)
             .await?;
+
     Ok(ok)
 }
 
@@ -117,18 +174,23 @@ pub async fn delete(extension_uuid: &str) -> Result<bool, ServiceError> {
     Ok(ok)
 }
 
+pub async fn remove_by_user_uuid(
+    user_uuid: &str,
+    extension_uuid: &str,
+) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = extension::Extension::remove_by_user_uuid(pool, user_uuid, extension_uuid).await?;
+
+    Ok(ok)
+}
+
 #[tokio::test]
-async fn test_user_insert() {
+async fn test_query_environmnets_by_extension_uuid() {
     crate::setup().await;
-    let token = user_insert(
-        "aa0b0cab-ead1-4145-81b7-6603d48dd362",
-        Extension {
-            uuid: "abc".to_string(),
-            name: "abc".to_string(),
-            description: Some("ac".to_string()),
-            ..Default::default()
-        },
-    )
-    .await;
-    println!("{:?}", token);
+    let res = query_environmnets_by_extension_uuid("iginnfkhmmfhlkagcmpgofnjhanpmklb", 1, 100)
+        .await
+        .unwrap();
+
+    println!("{:?}", res);
 }

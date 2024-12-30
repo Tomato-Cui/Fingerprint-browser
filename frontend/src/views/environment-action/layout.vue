@@ -43,8 +43,8 @@ const onSubmit = () => {
     environmentCreatesFrom.handleSubmit(async (values) => {
       try {
         let { name, numbers } = values;
-        let names = [...new Array(numbers).keys()].map(
-          (_, index) => name + "-" + index + 1
+        let names = [...new Array(numbers)].map(
+          (_, index) => name + "-" + (index + 1)
         );
 
         let res = await environment_batch_create(names);
