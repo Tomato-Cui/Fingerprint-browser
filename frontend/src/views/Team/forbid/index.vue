@@ -228,8 +228,10 @@ const subRecoverUser = () => {  //确认恢复成员
   console.log("----!!!:", userObj.value);
 
   un_blocked(userObj.value.user_uuid, userObj.value.team_id).then(res => {
-    if (res.data)
+    if (res.data){
       toast.success('恢复成功')
+      getList()
+    }
     else
       toast.error('恢复失败')
   })
@@ -250,12 +252,16 @@ watch(() => filterUsers.value, (newVal) => {
   total.value = filterUsers.value.length
 })
 
-onMounted(async () => {
+const getList = () => {
   team_query(1, 10).then(res => {
     query_team_all_blocked_user(res.data.data[0].id, pagination.pageIndex, pagination.pageSize).then(res => {
       users.value = res.data.data
       pagination.total = res.data.total
     })
   })
+}
+
+onMounted(async () => {
+  getList()
 });
 </script>

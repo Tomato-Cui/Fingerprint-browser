@@ -366,9 +366,10 @@ const subForbid = () => {  //确定禁用
   console.log("memberObj:", memberObj.value);
 
   blocked(memberObj.value.user_uuid, memberObj.value.team_id).then(res => {
-    if(res.data){
+    if (res.data) {
       toast.success('拉黑成功')
-    }else{
+      getList()
+    } else {
       toast.error("失败失败失败！！！")
     }
   })
@@ -380,10 +381,15 @@ const subDel = () => { //确认删除
   delM.value = false
 
   console.log("member:", memberObj.value);
-  
-  remove_current_user(memberObj.value.user_uuid, memberObj.value.team_id)
-  // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
-  // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
+
+  remove_current_user(memberObj.value.user_uuid, memberObj.value.team_id).then(res => {
+    if (res.data) {
+      toast.success('删除成功')
+      getList()
+    } else {
+      toast.error("失败失败失败！！！")
+    }
+  })
 }
 const members = ref([
   {
@@ -434,7 +440,7 @@ const editMember = (member) => {
   addMemModel.value = true
 }
 
-onMounted(async () => {
+const getList = () => {
   //查询用户团队
   query_current_team_info().then(res => {
     if (route.query.groupId !== undefined) {
@@ -454,6 +460,9 @@ onMounted(async () => {
     }
     //查询分组
   })
+}
 
+onMounted(async () => {
+  getList()
 })
 </script>

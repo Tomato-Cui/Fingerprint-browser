@@ -10,11 +10,14 @@ import { environment_account_modify } from '@/commands/environment-account'
 
 const props = defineProps({
     editAccountDialog: Boolean,
-    environmentUuid: String
+    environmentUuid: String,
+    environmentId: Number,
+    userUuid: String,
 })
 const emit = defineEmits(['update:editAccountDialog'])
 
 const editAccount = reactive({
+    id: 0,
     environment_uuid: '',
     selectedPlatform: "youtube",
     selectPlatformUrl: 'https://www.youtube.com',
@@ -23,20 +26,33 @@ const editAccount = reactive({
 })
 //清空表单
 const clearForm = () => {
-    environment_uuid: ''
-    selectedPlatform: "youtube"
-    selectPlatformUrl: 'https://www.youtube.com'
-    username: ''
-    password: ''
+    editAccount.environment_uuid = ''
+    editAccount.selectedPlatform = "youtube"
+    editAccount.selectPlatformUrl = 'https://www.youtube.com'
+    editAccount.username = ''
+    editAccount.password = ''
 }
 //确认
 const subMit = () => {
-    editAccount.environment_uuid = props.environmentUuid    
+    editAccount.id = props.environmentId
     emit('update:editAccountDialog', false)
     console.log("submit:", editAccount);
-    environment_account_modify
+    environment_account_modify(
+        0,  //传入被修改的账号id
+        {
+            platform: editAccount.selectedPlatform,
+            platform_url: editAccount.selectPlatformUrl,
+            platform_account: editAccount.username,
+            platform_password: editAccount.password,
+            environment_uuid: props.environmentUuid,
+            user_uuid: props.userUuid,
+        }).then(res => {
+            toast.warning(res.message)
+        })
 }
 watch(() => props.editAccountDialog, (val) => {
+    // console.log("关闭了编辑账号弹窗：", val);
+
     clearForm()
 })
 
@@ -97,7 +113,7 @@ onUnmounted(() => {
                     <div class="flex items-center">
                         <label class="text-gray-600 w-[100px]">环境序号</label>
                         <div class="bg-blue-50 px-4 py-2 rounded-md">
-                            <span class="text-blue-600">{{ props.environmentUuid }}</span>
+                            <span class="text-blue-600">{{ props.environmentId }}</span>
                         </div>
                     </div>
 

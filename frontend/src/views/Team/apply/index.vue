@@ -79,7 +79,7 @@
 
         <!-- Table Body -->
         <div class="divide-y flex-1 flex flex-col overflow-auto">
-          <div v-for="user in users" :key="user.id"
+          <div v-for="user in filterUsers" :key="user.id"
             class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
             :class="{ 'border-t border-gray-100': true }">
 
@@ -93,7 +93,7 @@
               <span class="px-4 py-2 text-sm rounded-sm" :class="{
                 'bg-emerald-50 text-emerald-500': user.allow_2 === 1,
                 'bg-yellow-50 text-yellow-500': user.allow_2 === 0,
-                // 'bg-red-50 text-red-500': user.allow_2 === 'rejected',
+                'bg-red-50 text-red-500': user.allow_2 === -1,
               }">
                 {{ getStatusText(user.allow_2) }}
               </span>
@@ -114,10 +114,10 @@
 
 
       <!-- Pagination -->
-
+       {{ pagination }}
       <div class="flex items-center justify-end space-x-2 py-1">
         <div class="flex-1 text-sm text-muted-foreground">
-          共{{ pagination.total }}条.
+          共{{ pagination.total }}条
         </div>
         <div class="space-x-2">
           <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
@@ -172,6 +172,7 @@ import {
 } from "@/components/ui/pagination";
 import { team_receive_query, team_allow, reject } from '@/commands/user-team-temp'
 import { query_current_team_info } from "@/commands/team"
+import { toast } from "vue-sonner";
 
 //搜索条件
 const selectType = ref(1);
@@ -180,10 +181,7 @@ const selectVal = ref(""); //搜索值
 const selectT = (type) => {
   selectType.value = type;
 };
-onMounted(() => {
-  // users.value.filter((user) => user.status === 2)  //默认查看待审核
-  // filterUsers.value.filter((user) => user.status === 2)
-});
+onMounted(() => {});
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 16,
@@ -195,8 +193,6 @@ const paginationClickHandle = (index) => {
 };
 // 审核筛选区--------------------------------
 const isOpen = ref(false); //审核筛选
-const x = ref(0);
-const y = ref(0);
 const selectFlag = ref(0);
 const selectedLabel = ref("待审核");
 const status = ref([
@@ -204,72 +200,37 @@ const status = ref([
   { id: 2, label: "已同意" },
   { id: 3, label: "已拒绝" },
 ]);
-function handleDocumentClick(event) {
-  x.value = event.clientX;
-  y.value = event.clientY;
-  if (!isOpen.value && selectFlag.value === 1) {
-    isOpen.value = true;
-  } else {
-    selectFlag.value = 0;
-    isOpen.value = false;
-  }
-}
+
 const toggleDropdown = () => {
   //打开选项
   // isOpen.value = !isOpen.value;
   selectFlag.value = 1; //开启下拉框标志
 };
+const seStuVal = ref(0)
 const selectStatus = (label) => {
   //选择选项
   selectedLabel.value = label;
+  seStuVal.value = label === '待审核' ? 0 : label === '已同意' ? 1 : -1  //当前数据审核状态
 };
 
 
-const users = ref([
-  // {
-  //   audit_id: 1,
-  //   created_at: "2024-02-22 14:30:00",
-  //   description: "备注",
-  //   email: "123",
-  //   group_name: "123",
-  //   owner_name: "123",
-  //   phone: "123",
-  //   status: "pending",
-  // }
-]);
-const sortUsersByApplyTime = (order = "asc") => {  //数组按时间排序
-  users.value.sort((a, b) => {
-    const timeA = new Date(a.applyTime).getTime();
-    const timeB = new Date(b.applyTime).getTime();
-    return order === "asc" ? timeA - timeB : timeB - timeA;
-  });
-};
+const users = ref([]);
 const filterUsers = computed(() => {
   //过滤数组
-  // 调用方法：升序排序
-  // sortUsersByApplyTime("desc"); // 按时间从早到晚排序
 
-  // const selectQuery = ref(true);
-  // return users.value.filter((user) => {
-  //   if (selectType.value === 1) {
-  //     selectQuery.value = user.owner_name.includes(selectVal.value);
-  //   } else if (selectType.value === 2) {
-  //     selectQuery.value = user.name.includes(selectVal.value);
-  //   } else {
-  //     selectQuery.value = user.contact.includes(selectVal.value);
-  //   }
+  const selectQuery = ref(true);   //查询搜索值
+  return users.value.filter((user) => {
+    if (selectType.value === 1) {
+      selectQuery.value = user.nickname?.includes(selectVal.value);
+    } else if (selectType.value === 2) {
+      selectQuery.value = user.description?.includes(selectVal.value);
+    } else {
+      selectQuery.value = user.email?.includes(selectVal.value);
+    }
 
-  //   const statusNum =
-  //     selectedLabel.value === "已同意"
-  //       ? 1
-  //       : selectedLabel.value === "待审核"
-  //         ? 2
-  //         : 3;
-  //   const selectStatus = user.status === statusNum;
-
-  //   return selectQuery && selectStatus;
-  // });
-  return true
+    const selectStatus = user.allow_2 === seStuVal.value;  //查询状态    
+    return selectQuery.value && selectStatus;
+  });
 });
 const userTotal = ref(filterUsers.value.length)   //数据条数
 watch(() => filterUsers.value, () => {
@@ -277,42 +238,50 @@ watch(() => filterUsers.value, () => {
 })
 
 const getStatusText = (status) => {
-  // const statusMap = {
-  //   'approved': "已同意",
-  //   'pending': "待审核",
-  //   'rejected': "已拒绝",
-  // };
   const stateMenu = ['已拒绝', '待审核', '已同意']
 
   return stateMenu[status + 1];
 };
 
 const getActionText = (status) => {
-  // const actionMap = {
-  //   'approved': "已同意",
-  //   'rejected': "已拒绝",
-  // };
   const stateMenu = ['已同意', '已拒绝']
   return stateMenu[status];
 };
 
 //同意申请
 const agreeApplyM = (user) => {
-  // user.status = 'approved'
-  // console.log("user:", user);
-  team_allow(user.id, user.user_uuid, user.team_id)
+  user.status = 1
+  team_allow(user.id, user.user_uuid, user.team_id).then(res => {
+    toast.message(res.message)
+    getList()
+  })
 }
 //拒绝申请
 const refApply = (user) => {
-  // user.status = 'rejected'
-  reject(user.id)
+  user.status = -1
+  reject(user.id).then(res => {
+    toast.message(res.message)
+    getList()
+  })
+}
+
+const getList = () => {
+  query_current_team_info().then(res => {
+    team_receive_query(res.data.id, pagination.pageIndex, pagination.pageSize).then(res => {
+      // users.value = res.data.data
+      users.value = res.data.data.map(item => {
+        // 判断delete_at是否为空，若不为空，则将allow_2设置为-1
+        if (item.deleted_at) {
+          item.allow_2 = -1;
+        }
+        return item;
+      })
+      pagination.total = res.data.total
+    })
+  })
 }
 
 onMounted(() => {
-  query_current_team_info().then(res => {
-    team_receive_query(res.data.id, pagination.pageIndex, pagination.pageSize).then(res => {
-      users.value = res.data.data
-    })
-  })
+  getList()
 })
 </script>

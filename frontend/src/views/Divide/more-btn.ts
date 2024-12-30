@@ -5,9 +5,6 @@ import { EllipsisIcon, Settings2Icon, SquarePenIcon, Trash2Icon, CircleUser, Act
 export const MoreBtn = (props: any) => {
 
     const { setCommonBtn, transferEnvBtn, authMemberBtn, editProxyBtn, editAccountBtn, editEnvBtn, removeEnv } = props;
-    // console.log("props:", props);
-
-    // const funremoveEnv  
 
     return h(More,
         [

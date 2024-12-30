@@ -200,43 +200,47 @@ watch(groupSelect, (newVal) => {
 
 //下拉菜单中的的按钮
 var environmentUuid = ""
+var environmentId = 0
+var userUuid = ""
 // ----编辑环境
-const editEnvBtn = (id: string) => {
-  console.log("编辑环境:", id);
-  environmentUuid = id
-  router.push({ path: '/environment-action/create', query: { id: id } })
+const editEnvBtn = (uuid: string, id: number) => {
+  console.log("编辑环境:", uuid + "-And-" + id);
+  environmentUuid = uuid
+  router.push({ path: '/environment-action/create', query: { id: uuid } })
 };
 // ----编辑账号
-const editAccountBtn = (id: string) => {
-  console.log("编辑账号:", id);
-  environmentUuid = id
+const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
+  console.log("编辑账号:", uuid + "-And-" + id + "  aaand  " + user_uuid);
+  environmentUuid = uuid
+  environmentId = id
+  userUuid = user_uuid
   editAccountDialog.value = true
 };
 // ----修改代理
-const editProxyBtn = (id: string) => {
-  console.log("修改代理:", id);
-  environmentUuid = id
+const editProxyBtn = (uuid: string, id: number) => {
+  console.log("修改代理:", uuid + "-And-" + id);
+  environmentUuid = uuid
   editProxyDialog.value = true
 };
 // ----授权成员
-const authMemberBtn = (id: string) => {
-  environmentUuid = id
-  console.log("授权成员:", id);
+const authMemberBtn = (uuid: string, id: number) => {
+  environmentUuid = uuid
+  console.log("授权成员:", uuid + "-And-" + id);
 };
 // ----转移环境
-const transferEnvBtn = (id: string) => {
-  environmentUuid = id
-  console.log("转移环境:", id);
+const transferEnvBtn = (uuid: string, id: number) => {
+  environmentUuid = uuid
+  console.log("转移环境:", uuid + "-And-" + id);
 };
 // ----设为常用
-const setCommonBtn = (id: string) => {
-  environmentUuid = id
-  console.log("设为常用:", id);
+const setCommonBtn = (uuid: string, id: number) => {
+  environmentUuid = uuid
+  console.log("设为常用:", uuid + "-And-" + id);
 };
 // ----删除
-const removeEnv = (id: string) => {
-  console.log("删除:", id);
-  environmentUuid = id
+const removeEnv = (uuid: string, id: number) => {
+  console.log("删除:", uuid + "-And-" + id);
+  environmentUuid = uuid
   clickDel.value = true
 };
 
@@ -345,7 +349,7 @@ const handleSubmitDel = () => {
   <!-- 创建分组 -->
   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
   <!-- 修改账号 -->
-  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentUuid="environmentUuid"/>
+  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentId="environmentId" :environmentUuid="environmentUuid" :userUuid="userUuid"/>
   <!-- 修改代理 -->
   <EditProxy v-model:editProxyDialog="editProxyDialog" :environmentUuid="environmentUuid"/>
   <!-- 删除 -->

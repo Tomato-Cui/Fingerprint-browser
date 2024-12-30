@@ -39,6 +39,7 @@ export interface Payment {
   id: number;
   name: string;
   uuid: string;
+  user_uuid: string;
   description: string;
   country: string;
   group: string;
@@ -101,6 +102,14 @@ const columns = [
     enablePinning: true,
   }),
   columnHelper.accessor("uuid", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
+  columnHelper.accessor("user_uuid", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
+  columnHelper.accessor("id", {
     header: () => h("div", { class: "hidden" }),
     cell: () => h("div", { class: "hidden" }),
   }),
@@ -221,7 +230,9 @@ const columns = [
         h("div", { class: "whitespace-nowrap px-2" }, "更多"),
       ]),
     cell: ({ row }) => {
-      let id = row.getValue("uuid") as string;
+      let uuid = row.getValue("uuid") as string;
+      let id = row.getValue("id") as number;
+      let user_uuid = row.getValue("user_uuid") as string;
 
       return h("div", { class: "flex gap-x-4" }, [
         h(
@@ -232,9 +243,9 @@ const columns = [
             {
               class: "px-2 flex gap-x-2 items-center text-md w-32",
               onClick: () => {
-                if (!browserStatusStore.getStatus(id)) {
-                  if (id) {
-                    browser_start(id)
+                if (!browserStatusStore.getStatus(uuid)) {
+                  if (uuid) {
+                    browser_start(uuid)
                       .then((res) => {
                         let data = res.data;
                         browserStatusStore.updateStatus(data.environment_uuid, data.status);
@@ -242,9 +253,9 @@ const columns = [
                       .catch((_) => toast.warning("启动失败"));
                   }
                 } else {
-                  browser_stops([id]).then((res: any) => {
+                  browser_stops([uuid]).then((res: any) => {
                     if (res.message && (res.message as string).includes("关闭成功")) {
-                      browserStatusStore.updateStatus(id, false);
+                      browserStatusStore.updateStatus(uuid, false);
                     }
                   });
                 }
@@ -255,22 +266,21 @@ const columns = [
               h(
                 "span",
                 { class: "text-sm" },
-                !browserStatusStore.getStatus(id) ? "打开浏览器" : "关闭浏览器"
+                !browserStatusStore.getStatus(uuid) ? "打开浏览器" : "关闭浏览器"
               ),
             ]
           )
         ),
         h("div", { class: "parent-container" }, [
-          
           MoreBtn({
-            'editEnvBtn':()=>emits('editEnvBtn', id),
-            'editAccountBtn':()=>emits('editAccountBtn', id),
-            'editProxyBtn':()=>emits('editProxyBtn', id),
-            'authMemberBtn':()=>emits('authMemberBtn', id),
-            'transferEnvBtn':()=>emits('transferEnvBtn', id),
-            'setCommonBtn':()=>emits('setCommonBtn', id),
-            'removeEnv':()=>emits('removeEnv', id)
-          }), 
+            'editEnvBtn': () => emits('editEnvBtn', uuid, id),
+            'editAccountBtn': () => emits('editAccountBtn', uuid, id, user_uuid),
+            'editProxyBtn': () => emits('editProxyBtn', uuid, id),
+            'authMemberBtn': () => emits('authMemberBtn', uuid, id),
+            'transferEnvBtn': () => emits('transferEnvBtn', uuid, id),
+            'setCommonBtn': () => emits('setCommonBtn', uuid, id),
+            'removeEnv': () => emits('removeEnv', uuid, id)
+          }),
         ]), //传入点击事件参数
       ]);
     },
@@ -336,24 +346,16 @@ const table = useVueTable({
   <Table>
     <TableHeader class="z-10 sticky top-0">
       <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-        <TableHead
-          v-for="header in headerGroup.headers"
-          :key="header.id"
-          :data-pinned="header.column.getIsPinned()"
-          :class="
-            cn(
-              {
-                'sticky bg-muted': header.column.getIsPinned(),
-              },
-              header.column.getIsPinned() === 'left' ? 'left-0' : 'right-0'
-            )
-          "
-        >
-          <FlexRender
-            v-if="!header.isPlaceholder"
-            :render="header.column.columnDef.header"
-            :props="header.getContext()"
-          />
+        <TableHead v-for="header in headerGroup.headers" :key="header.id" :data-pinned="header.column.getIsPinned()"
+          :class="cn(
+            {
+              'sticky bg-muted': header.column.getIsPinned(),
+            },
+            header.column.getIsPinned() === 'left' ? 'left-0' : 'right-0'
+          )
+            ">
+          <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+            :props="header.getContext()" />
         </TableHead>
       </TableRow>
     </TableHeader>
@@ -362,25 +364,17 @@ const table = useVueTable({
         <template v-for="row in table.getRowModel().rows" :key="row.id">
           <!-- {{ row }} -->
           <TableRow :data-state="row.getIsSelected() && 'selected'" class="group">
-            <TableCell
-              v-for="cell in row.getVisibleCells()"
-              :key="cell.id"
-              :data-pinned="cell.column.getIsPinned()"
-              :class="
-                cn(
-                  {
-                    'sticky bg-background/95': cell.column.getIsPinned(),
-                    'bg-muted': row.getIsSelected(),
-                  },
-                  cell.column.getIsPinned() === 'left' ? 'left-0' : 'right-0',
-                  'group-hover:bg-muted transition-colors'
-                )
-              "
-            >
-              <FlexRender
-                :render="cell.column.columnDef.cell"
-                :props="cell.getContext()"
-              />
+            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id" :data-pinned="cell.column.getIsPinned()"
+              :class="cn(
+                {
+                  'sticky bg-background/95': cell.column.getIsPinned(),
+                  'bg-muted': row.getIsSelected(),
+                },
+                cell.column.getIsPinned() === 'left' ? 'left-0' : 'right-0',
+                'group-hover:bg-muted transition-colors'
+              )
+                ">
+              <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
             </TableCell>
           </TableRow>
           <TableRow v-if="row.getIsExpanded()">

@@ -307,6 +307,7 @@ import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { team_group_query_all } from "@/commands/team-group";
 import { team_query, query_current_team_info, team_modify_team_user_info } from "@/commands/team";
 import { team_send } from '@/commands/user-team-temp'
+import { toast } from "vue-sonner";
 
 const emailError = ref(""); // 存储错误信息
 const router = useRouter()
@@ -392,10 +393,18 @@ const handleSubmit = () => {  //提交添加成员
     // console.log("props.member:", props.memberObj);
     // console.log("form::::::::::", formData.value);
     
-    team_modify_team_user_info(props.memberObj.team_id, formData.value.groupId, props.memberObj.user_uuid, formData.value.remarkName);
+    team_modify_team_user_info(props.memberObj.team_id, formData.value.groupId, props.memberObj.user_uuid, formData.value.remarkName).then(res => {
+      toast.message(res.message)
+    });
   } else {  //发送邀请
     query_current_team_info().then(res => {
-      team_send(res.data.id, formData.value.account, formData.value.remarkName);
+      team_send(res.data.id, formData.value.account, formData.value.remarkName).then(res => {
+        if(res.message.includes("发送失败")){
+          toast.warning(res.message)
+        }else{
+          toast.success("邀请发送成功")
+        }
+      });
     })
   }
   emit("update:addMemModel", false);
