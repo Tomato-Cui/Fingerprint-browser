@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 导入所需的Vue组件和工具
 import { ref, computed, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -13,7 +12,6 @@ import {
 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 
-// 导入UI组件
 import {
   Popover,
   PopoverContent,
@@ -30,8 +28,6 @@ import {
   SelectValue,
 } from "@/components/select";
 import { groupIcons } from "@/assets/icons/index";
-
-// 导入API请求函数
 import {
   environment_proxies_delete,
   environment_proxies_query,
@@ -39,7 +35,6 @@ import {
   environment_proxies_batch_delete,
 } from "@/commands/environment-proxy";
 
-// 导入分页组件
 import {
   Pagination,
   PaginationEllipsis,
@@ -55,7 +50,6 @@ import {
   environment_proxy_group_query,
 } from "@/commands/environment-proxy-group";
 
-// 定义代理数据接口
 interface Payment {
   id: number;
   info: string;
@@ -75,17 +69,14 @@ interface Payment {
   selected?: boolean;
 }
 
-// 代理数据列表
 const data = ref<Array<Payment>>([]);
 
-// 分页配置
 const pagination = reactive({
   pageIndex: 0,
   pageSize: 10,
   total: 0,
 });
 
-// 加载代理数据
 const loadData = (index: number, size: number) => {
   console.log("调用loadData", index, size);
   environment_proxies_query(index, size).then((res) => {
@@ -95,25 +86,16 @@ const loadData = (index: number, size: number) => {
   });
 };
 
-// 组件挂载时加载数据
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
 const router = useRouter();
-// 全选状态
 const selectAll = ref(false);
 
-// 下拉菜单状态
 const activeDropdown = ref(null);
-// 编辑弹窗状态
 const isOpen = ref(false);
-// 密码显示状态
 const showPassword = ref(false);
-// 设置弹窗状态
-const showSetModal = ref(false);
-// 代理选择类型
-const selectedAgentType = ref("random");
-
-// 表单数据
+const showSetModal = ref(false); // 控制弹窗显示与隐藏
+const selectedAgentType = ref("random"); // 代理选择类型
 const form = reactive({
   smartRecognition: "",
   proxyType: "IPv4",
@@ -125,12 +107,10 @@ const form = reactive({
   parseUrl: "",
 });
 
-// 计算选中的数据
 const selectData = computed(() => {
   return data.value.filter((item) => item.selected);
 });
 
-// 批量删除
 const deleteAll = async () => {
   let ids = selectData.value.map((item) => item.id);
   await environment_proxies_batch_delete(ids);
@@ -140,31 +120,24 @@ const deleteAll = async () => {
   disabled: selectData.value.length <= 0;
 };
 
-// 打开设置弹窗
+// 打开弹窗
 const openSetModal = () => {
   showSetModal.value = true;
 };
-
 // 关闭弹窗并处理确认事件
 const handleConfirm = () => {
-  showSetModal.value = false;
+  showSetModal.value = false; // 关闭弹窗
 };
 
-// 当前编辑的代理ID
 const currentId = ref();
-
-// 打开编辑弹窗
 const openModal = (row: any) => {
   currentId.value = row;
   isOpen.value = true;
 };
-
-// 关闭编辑弹窗
 const closeModal = () => {
   isOpen.value = false;
 };
 
-// 保存编辑的代理信息
 const saveModal = async () => {
   const payload = {
     kind: form.proxyService,
@@ -187,7 +160,6 @@ const adddaili = () => {
   router.push("/adddaili");
 };
 
-// 切换下拉菜单
 const toggleDropdown = (id) => {
   if (activeDropdown.value === id) {
     activeDropdown.value = null;
@@ -196,16 +168,13 @@ const toggleDropdown = (id) => {
   }
 };
 
-// 删除确认弹窗状态
 const deleteModel = ref(false);
 
-// 删除代理
 const deleteOpenHandle = async (id: number) => {
   await environment_proxies_delete(id);
   loadData(pagination.pageIndex, pagination.pageSize);
 };
 
-// 筛选条件
 const filters = ref([
   { key: "platform", label: "账号平台", placeholder: "请选择", value: "" },
   { key: "browser", label: "浏览器", placeholder: "请选择", value: "" },
@@ -221,17 +190,15 @@ const filters = ref([
   },
 ]);
 
-// 切换行选择状态
 const toggleRowSelection = (row: Payment) => {
   row.selected = !row.selected;
 };
 
-// 分组相关状态
+//分组
 const groupisOpen = ref(false);
 const newGroupName = ref("");
 const groups = ref([]);
 
-// 获取分组数据
 const groupData = async () => {
   await environment_proxy_group_query(1, 1000000).then((res) => {
     groups.value = res.data.data.map((item: any) => item.name);
@@ -243,19 +210,15 @@ onMounted(() => {
   groupData();
 });
 
-// 全选/取消全选
 const toggleAll = () => {
   data.value.forEach((row) => {
     console.log("asds", selectAll.value);
     row.selected = selectAll.value;
   });
 };
-
-// 分组编辑相关状态
 const editingIndex = ref(-1);
 const editingName = ref("");
 
-// 添加分组
 const addGroup = () => {
   if (newGroupName.value.trim()) {
     groups.value.push(newGroupName.value.trim());
@@ -263,7 +226,6 @@ const addGroup = () => {
   }
 };
 
-// 开始编辑分组
 const startEdit = async (index: number) => {
   console.log("index", index);
   const payload = {
@@ -272,7 +234,6 @@ const startEdit = async (index: number) => {
   await environment_proxy_group_modify(index, payload);
 };
 
-// 保存分组编辑
 const saveEdit = () => {
   if (editingIndex.value !== -1 && editingName.value.trim()) {
     groups.value[editingIndex.value] = editingName.value;
@@ -280,27 +241,24 @@ const saveEdit = () => {
   editingIndex.value = -1;
 };
 
-// 删除分组
 const deleteGroup = (index: number) => {
   groups.value.splice(index, 1);
 };
 
-// 确认分组更改
 const confirm = () => {
+  // 在这里处理确认逻辑，例如发送更新后的分组到父组件
   emit("update:groups", groups.value);
   closePopover();
 };
 
-// 关闭分组弹窗
 const closePopover = () => {
   groupisOpen.value = false;
   emit("update:open", false);
 };
 
-// 定义组件事件
+// 定义组件的事件
 const emit = defineEmits(["update:open", "update:groups"]);
 
-// 分页点击处理
 const paginationClickHandle = (index: number) => {
   console.log(index);
   loadData(index, pagination.pageSize);
