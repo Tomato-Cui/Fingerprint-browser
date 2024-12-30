@@ -25,6 +25,7 @@ axum = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true }
 sqlx = { workspace = true }
+regex = { workspace = true }
 
 states = { workspace = true }
 commons = { workspace = true }

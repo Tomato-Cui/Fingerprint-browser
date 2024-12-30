@@ -7,9 +7,8 @@ pub struct Extension {
     pub uuid: String,
     pub name: String,
     pub description: Option<String>,
-    pub cover_url: Option<String>,
+    pub avatar_url: Option<String>,
     pub release_url: Option<String>,
-    pub location_url: String,
     pub size: Option<i32>,
     pub all_can_use: Option<i32>,
     pub created_at: Option<String>,
@@ -24,43 +23,47 @@ impl Extension {
         current_id: &str,
         extension: Extension,
     ) -> Result<bool, Error> {
-        let mut tx = pool.begin().await?;
-        sqlx::query(
+        let _result = sqlx::query(
             r#"
-            INSERT INTO extensions (uuid, name, description, cover_url, release_url, location_url, size, all_can_use)
+            INSERT INTO extensions (uuid, name, description, avatar_url, release_url, size, all_can_use)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             "#
         )
         .bind(&extension.uuid)
         .bind(&extension.name)
         .bind(&extension.description)
-        .bind(&extension.cover_url)
+        .bind(&extension.avatar_url)
         .bind(&extension.release_url)
-        .bind(&extension.location_url)
         .bind(&extension.size)
         .bind(&extension.all_can_use)
-        .execute(&mut *tx)
-        .await?;
+        .execute(pool)
+        .await;
 
-        match current_table {
+        let res = match current_table {
             "user_extension_relation" => {
-                let row = sqlx::query("INSERT INTO user_extension_relation (user_uuid , extension_uuid) VALUES (?, ?) RETURNING id")
-                    .bind(current_id)
-                    .bind(extension.uuid)
-                    .execute(&mut *tx)
-                    .await?;
-                Ok(row.rows_affected() >= 1)
+                let row = sqlx::query(
+                    "INSERT INTO user_extension_relation (user_uuid, extension_uuid) VALUES (?, ?)",
+                )
+                .bind(current_id)
+                .bind(extension.uuid)
+                .execute(pool)
+                .await?;
+                row.rows_affected() >= 1
             }
             "team_extension_relation" => {
-                let row = sqlx::query("INSERT INTO team_extension_relation (team_id, extension_uuid) VALUES (?, ?) RETURNING id")
-                    .bind(current_id)
-                    .bind(extension.uuid)
-                    .execute(&mut *tx)
-                    .await?;
-                Ok(row.rows_affected() >= 1)
+                let row = sqlx::query(
+                    "INSERT INTO team_extension_relation (team_id, extension_uuid) VALUES (?, ?)",
+                )
+                .bind(current_id)
+                .bind(extension.uuid)
+                .execute(pool)
+                .await?;
+                row.rows_affected() >= 1
             }
-            _ => Ok(false),
-        }
+            _ => false,
+        };
+
+        Ok(res)
     }
 
     pub async fn query_by_team_id(
@@ -108,7 +111,7 @@ impl Extension {
         page_size: u32,
     ) -> Result<(i64, Vec<Extension>), Error> {
         let total: i64 = sqlx::query_scalar(
-            "SELECT count(1) FROM user_extension_relation ure WHERE uer.user_uuid = ? and deleted_at is null",
+            "SELECT count(1) FROM user_extension_relation WHERE user_uuid = ? and deleted_at is null",
         )
         .bind(user_uuid)
         .fetch_one(pool)
@@ -126,7 +129,7 @@ impl Extension {
             SELECT e.* FROM extensions e 
                 join user_extension_relation uer 
                     on e.uuid = uer.extension_uuid  
-                WHERE uer.user_uuid = ? and deleted_at is null
+                WHERE uer.user_uuid = ? and uer.deleted_at is null
                 LIMIT ? OFFSET ?
             "#,
         )
@@ -217,15 +220,14 @@ impl Extension {
         let result = sqlx::query(
             r#"
             UPDATE extensions
-            SET name = ?, description = ?, cover_url = ?, release_url = ?, location_url = ?, size = ?, updated_at = CURRENT_TIMESTAMP
+            SET name = ?, description = ?, avatar_url = ?, release_url = ?, size = ?, updated_at = CURRENT_TIMESTAMP
             WHERE uuid = ?
             "#
         )
         .bind(&extension.name)
         .bind(&extension.description)
-        .bind(&extension.cover_url)
+        .bind(&extension.avatar_url )
         .bind(&extension.release_url)
-        .bind(&extension.location_url)
         .bind(&extension.size)
         .bind(extension_uuid)
         .execute(pool)

@@ -107,6 +107,10 @@ const batchDelete = () => {
   environment_batch_delete(ids)
     .then((_: any) => {
       data.value = data.value.filter((item) => !ids.includes(item.uuid));
+<<<<<<< HEAD
+=======
+      toast.success("删除成功");
+>>>>>>> 90ffb10eeeabad1f833de7cdcc825f4717fcce40
     })
     .catch((err) => {
       toast.warning(err);
@@ -269,7 +273,11 @@ watch(groupSelect, (newVal) => {
                     as-child
                   >
                     <Button
+<<<<<<< HEAD
                       class="p-0 w-10 h-10"
+=======
+                      class="w-10 h-10 p-0"
+>>>>>>> 90ffb10eeeabad1f833de7cdcc825f4717fcce40
                       @click="() => paginationClickHandle(item.value - 1)"
                       :variant="
                         item.value === pagination.pageIndex + 1

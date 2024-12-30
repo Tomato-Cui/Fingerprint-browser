@@ -107,6 +107,8 @@ pub fn run() {
             user_command::register,
             user_command::reset_password,
             user_command::is_login,
+            user_command::register_send,
+            extension_command::extension_info_by_chrome_store_url,
             extension_command::extension_user_create,
             extension_command::extension_team_create,
             extension_command::extension_query_by_team,

@@ -35,3 +35,9 @@ impl From<sqlx::error::Error> for ServiceError {
         }
     }
 }
+
+impl From<anyhow::Error> for ServiceError {
+    fn from(value: anyhow::Error) -> Self {
+        ServiceError::Error(format!("{}", value.to_string()))
+    }
+}

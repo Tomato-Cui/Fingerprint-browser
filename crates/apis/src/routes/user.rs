@@ -14,9 +14,8 @@ pub fn build_router() -> Router {
             .route("/login", post(login::handle))
             .route("/logout", get(logout::handle))
             .route("/register", post(register::handle))
-            .route("/reset-password", post(reset_password::handle)),
-        // .route("/register/send", get(register_send::handle))
-        // .route("/reset_password/send", get(reset_password_send::handle)),
+            .route("/reset-password", post(reset_password::handle))
+            .route("/register/send", get(register_send::handle)), // .route("/reset_password/send", get(reset_password_send::handle)),
     )
 }
 
@@ -81,6 +80,7 @@ mod register {
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Payload {
         pub email: String,
+        pub code: String,
         pub username: String,
         pub password: String,
     }
@@ -89,7 +89,14 @@ mod register {
             Some(format!("注册失败: {}", v))
         });
 
-        match services::user::regsiter(&payload.email, &payload.username, &payload.password).await {
+        match services::user::regsiter(
+            &payload.email,
+            &payload.code,
+            &payload.username,
+            &payload.password,
+        )
+        .await
+        {
             Ok(ok) => {
                 if ok {
                     AppResponse::<()>::success(success_msg, Some(()))
@@ -131,18 +138,30 @@ mod reset_password {
     }
 }
 
-#[allow(dead_code)]
 mod register_send {
     use super::*;
 
     #[derive(Deserialize, Serialize, Debug)]
-    struct Payload {
-        pub code: String,
+    pub struct Payload {
         pub email: String,
-        pub username: String,
-        pub password: String,
     }
-    pub async fn handle() -> impl IntoResponse {}
+
+    pub async fn handle(payload: Json<Payload>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("发送成功".to_string()), |v| {
+            Some(format!("发送失败: {}", v))
+        });
+
+        match services::user::register_send(&payload.email).await {
+            Ok(ok) => {
+                if ok {
+                    AppResponse::<bool>::success(success_msg, Some(ok))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        }
+    }
 }
 
 #[allow(dead_code)]

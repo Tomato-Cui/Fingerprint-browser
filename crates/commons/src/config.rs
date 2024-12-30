@@ -25,10 +25,18 @@ pub struct Location {
     pub browser_extensions_location: String,
 }
 
+#[derive(Deserialize, Debug, Clone, Default)]
+pub struct Email {
+    pub smtp_username: String,
+    pub smtp_password: String,
+    pub smtp_server: String,
+}
+
 #[derive(Deserialize, Debug)]
 pub struct AppConfig {
     pub app: App,
     pub database: Database,
+    pub email: Email,
 }
 
 impl AppConfig {

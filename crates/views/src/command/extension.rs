@@ -5,6 +5,24 @@ use serde_json::Value;
 use super::user::get_user_id;
 
 #[tauri::command]
+pub async fn extension_info_by_chrome_store_url(
+    url: &str,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let _ = get_user_id().await?;
+
+    let (success_msg, warn_msg) = (Some("获取成功".to_string()), |v| {
+        Some(format!("获取失败: {}", v))
+    });
+
+    Ok(
+        match cores::extensions::chrome_extension_scrapy::extension_detail_by_url(url).await {
+            Ok(ok) => AppResponse::<Value>::success(success_msg, Some(ok)),
+            Err(r) => AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
 pub async fn extension_user_create(
     extension: extension::Extension,
 ) -> Result<AppResponse<bool>, tauri::Error> {
