@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-import { environment_group_query } from "@/commands/environment-group";
+import { group_query } from "@/commands/group";
 
 const groups = ref<any[]>([]);
 const emits = defineEmits(["select"]);
@@ -16,7 +16,7 @@ const emits = defineEmits(["select"]);
 const select = ref<string | undefined>(undefined);
 
 onMounted(() => {
-  environment_group_query(0, 100).then((res) => {
+  group_query(0, 100).then((res) => {
     groups.value = res.data.data;
   });
 });
@@ -30,7 +30,7 @@ watch(select, (newSelect) => {
     <SelectTrigger class="w-44 bg-[#f9f9f9]">
       <SelectValue
         placeholder="请选择环境分组"
-        class="p-2 w-full rounded-lg outline-none"
+        class="w-full p-2 rounded-lg outline-none"
       />
     </SelectTrigger>
     <SelectContent>

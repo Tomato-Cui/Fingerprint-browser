@@ -10,11 +10,11 @@
             <UserPlusIcon class="w-5 h-5" />
             添加成员
           </button>
-          <button @click="invMember = true"
+          <!-- <button @click="invMember = true"
             class="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-50">
             <PlusIcon class="w-5 h-5" />
             邀请成员
-          </button>
+          </button> -->
         </div>
         <div class="flex items-center gap-4">
           <div class="relative">
@@ -52,7 +52,7 @@
             </ul> -->
           </div>
           <div class="relative">
-            <input type="text" placeholder="关键字搜索" v-model="searchName"
+            <input type="text" placeholder="请输入姓名" v-model="searchName"
               class="pl-10 pr-4 bg-[#f5f6fa] py-2 border border-gray-300 rounded-lg outline-none hover:ring-2 hover:ring-blue-500" />
             <SearchIcon class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
           </div>
@@ -77,11 +77,11 @@
                 备注
               </th>
               <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
-                手机号/邮箱
+                邮箱
               </th>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
+              <!-- <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 授权环境
-              </th>
+              </th> -->
               <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
                 操作
               </th>
@@ -92,15 +92,15 @@
               'border-t border-gray-100': true,
             }">
               <td class="px-6 py-4 text-sm text-gray-900">{{ index + 1 }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ member.username }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">{{ member.nickname }}</td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.group_name }} </td>
-              <td class="px-6 py-4 text-sm text-gray-900"> {{ member.group_description }} </td>
+              <td class="px-6 py-4 text-sm text-gray-900"> {{ member.description || '\\' }} </td>
               <td class="px-6 py-4 text-sm text-gray-900"> {{ member.email }} </td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ member.environment }}</td>
+              <!-- <td class="px-6 py-4 text-sm text-gray-900">{{ member.environment }}</td> -->
               <td class="px-6 py-4 text-sm flex items-center">
-                <button @click="openDetail(member)" class="text-blue-600 hover:text-blue-800 mr-4">
+                <!-- <button @click="openDetail(member)" class="text-blue-600 hover:text-blue-800 mr-4">
                   详情
-                </button>
+                </button> -->
                 <button @click="editMember(member)" class="text-blue-600 hover:text-blue-800 mr-4">
                   编辑
                 </button>
@@ -129,39 +129,38 @@
           <!-- </table> -->
         </table>
       </div>
-      <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
+      <!-- <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
         数据为空，没有成员
-      </div>
+      </div> -->
       <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4 px-2">
-        <div class="text-sm text-gray-500">共 {{ memberTotal }} 项数据</div>
-        <div class="flex items-center gap-2">
-          <!-- Previous button -->
-          <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage === 1"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            ←
-          </button>
+      <div class="flex items-center justify-end space-x-2 py-1">
+        <div class="flex-1 text-sm text-muted-foreground">
+          共{{ pagination.total }}条.
+        </div>
+        <div class="space-x-2">
+          <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+              <PaginationFirst @click="() => paginationClickHandle(0)" />
+              <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
-          <!-- Page numbers -->
-          <template v-for="number in displayedPages" :key="number">
-            <button v-if="number !== '...'" @click="handlePageChange(number)" :class="[
-              'w-10 h-10 rounded-md border flex items-center justify-center',
-              currentPage === number
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'hover:bg-gray-50',
-            ]">
-              {{ number }}
-            </button>
-            <span v-else class="w-10 h-10 flex items-center justify-center">
-              ...
-            </span>
-          </template>
+              <template v-for="(item, index) in items">
+                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                  <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                    ">
+                    {{ item.value }}
+                  </Button>
+                </PaginationListItem>
+                <PaginationEllipsis v-else :key="item.type" :index="index" />
+              </template>
 
-          <!-- Next button -->
-          <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage === totalPages"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            →
-          </button>
+              <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+              <PaginationLast @click="() =>
+                paginationClickHandle(
+                  Math.ceil(pagination.total / pagination.pageSize) - 1
+                )
+                " />
+            </PaginationList>
+          </Pagination>
         </div>
       </div>
     </div>
@@ -196,20 +195,20 @@
               <div class="h-[100px]">
                 <label class="block text-sm font-medium text-gray-700 mb-1">备注名</label>
                 <div class="text-sm">
-                  {{ selectedMember.nickname || "BOSS" }}
+                  {{ selectedMember.nickname || "\\" }}
                 </div>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
-                <div class="text-sm">{{ selectedMember.name }}</div>
+                <div class="text-sm">{{ selectedMember.nickname }}</div>
               </div>
               <div class="h-[100px]">
                 <label class="block text-sm font-medium text-gray-700 mb-1">分组</label>
-                <div class="text-sm">{{ selectedMember.group }}</div>
+                <div class="text-sm">{{ selectedMember.group_name }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">手机号/邮箱</label>
-                <div class="text-sm">{{ selectedMember.contact }}</div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                <div class="text-sm">{{ selectedMember.email }}</div>
               </div>
             </div>
 
@@ -236,19 +235,34 @@
 
               </div>
               <!-- Pagination -->
-              <div class="flex items-center justify-between mt-4 text-sm">
-                <div class="text-gray-500">共1条记录</div>
-                <div class="flex items-center gap-2">
-                  <button class="p-1 text-gray-400 disabled:opacity-50" disabled>
-                    <ChevronLeftIcon class="w-5 h-5" />
-                  </button>
-                  <div class="flex items-center gap-1">
-                    <input type="text" value="1" class="w-12 text-center border border-gray-200 rounded px-2 py-1" />
-                    <span class="text-gray-500">/ 1</span>
-                  </div>
-                  <button class="p-1 text-gray-400 disabled:opacity-50" disabled>
-                    <ChevronRightIcon class="w-5 h-5" />
-                  </button>
+              <div class="flex items-center justify-end space-x-2 py-1">
+                <div class="flex-1 text-sm text-muted-foreground">
+                  共{{ pagination.total }}条.
+                </div>
+                <div class="space-x-2">
+                  <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+                    <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+                      <PaginationFirst @click="() => paginationClickHandle(0)" />
+                      <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
+
+                      <template v-for="(item, index) in items">
+                        <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                          <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                            ">
+                            {{ item.value }}
+                          </Button>
+                        </PaginationListItem>
+                        <PaginationEllipsis v-else :key="item.type" :index="index" />
+                      </template>
+
+                      <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+                      <PaginationLast @click="() =>
+                        paginationClickHandle(
+                          Math.ceil(pagination.total / pagination.pageSize) - 1
+                        )
+                        " />
+                    </PaginationList>
+                  </Pagination>
                 </div>
               </div>
             </div>
@@ -275,7 +289,17 @@
 <script setup>
 import InvMember from "./InvMember.vue"; //邀请成员
 import addMember from "./addMember.vue"; //添加成员
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
+import { ref, computed, onMounted, onBeforeUnmount, reactive } from "vue";
 import {
   UserPlusIcon,
   PlusIcon,
@@ -294,7 +318,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { user_receive_query } from "@/commands/user-team-temp";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+import { query_team_all_user, team_query, query_team_group_all_user, query_current_team_info, remove_current_user, blocked } from "@/commands/team"
+import { team_group_query_all } from "@/commands/team-group";
+import { toast } from "vue-sonner";
 
 const route = useRoute()
 const selectedMember = ref(null);
@@ -306,31 +334,10 @@ const addMemModel = ref(false); //添加成员
 const invMember = ref(false)  //邀请成员
 const forbidMem = ref(false) //禁用成员
 const delM = ref(false)  //删除成员
-
-const x = ref(0);
-const y = ref(0);
-const selectFlag = ref(0)
-function handleDocumentClick(event) {
-  x.value = event.clientX;
-  y.value = event.clientY;
-  // console.log("isopen1--:", isOpen.value);
-  // console.log("selectFlag--:", selectFlag.value);
-  if (!isOpen.value && selectFlag.value === 1) {
-    isOpen.value = true
-  } else {
-    selectFlag.value = 0
-    isOpen.value = false
-  }
-  // console.log("isopen2--:", isOpen.value);
-}
-onMounted(() => {
-  // console.log("查看分组成员，分组ID：", route.query.groupId);
-  document.addEventListener("click", handleDocumentClick);
-  // console.log("x-y", x.value + "--" + y.value);
-})
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleDocumentClick);
-  // console.log("x-y", x.value + "--" + y.value);
+const pagination = reactive({
+  pageIndex: 0,
+  pageSize: 16,
+  total: 0,
 });
 
 const toggleDropdown = () => {
@@ -342,6 +349,8 @@ const toggleDropdown = () => {
 const selectGroup = (groupName) => {
   //选择选项
   selectedGroup.value = groupName;
+  if (groupName === '全部')
+    selectedGroup.value = ''
 };
 const memberObj = ref()
 const forbidMethod = (member) => {  //禁用
@@ -354,13 +363,33 @@ const delMember = (member) => {  //删除
 }
 const subForbid = () => {  //确定禁用
   forbidMem.value = false
-  members.value = members.value.filter((member) => member.id !== memberObj.value.id)
-  filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
+  console.log("memberObj:", memberObj.value);
+
+  blocked(memberObj.value.user_uuid, memberObj.value.team_id).then(res => {
+    if (res.data) {
+      toast.success('拉黑成功')
+      getList()
+    } else {
+      toast.error("失败失败失败！！！")
+    }
+  })
+
+  // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
+  // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
 }
 const subDel = () => { //确认删除
   delM.value = false
-  members.value = members.value.filter((member) => member.id !== memberObj.value.id)
-  filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
+
+  console.log("member:", memberObj.value);
+
+  remove_current_user(memberObj.value.user_uuid, memberObj.value.team_id).then(res => {
+    if (res.data) {
+      toast.success('删除成功')
+      getList()
+    } else {
+      toast.error("失败失败失败！！！")
+    }
+  })
 }
 const members = ref([
   {
@@ -384,17 +413,21 @@ const members = ref([
 ]);
 const memberTotal = ref(members.value.length)
 const groups = ref([
-  { id: 1, groupName: "管理者" },
-  { id: 2, groupName: "编辑者" },
-  { id: 3, groupName: "查看者" },
-  { id: 4, groupName: "超级管理员" },
+  { id: 0, groupName: "全部" },
+  { id: 1, groupName: "管理组" },
+  { id: 2, groupName: "权限组" },
+  { id: 3, groupName: "编辑组" },
+  { id: 4, groupName: "默认组" },
 ]);
 //过滤成员
 const filterMember = computed(() => {
 
   return members.value?.filter((member) => {
-    // return member.username.includes(searchName.value)
-  } );
+    // return true
+    const selectGroupQuery = selectedGroup.value === "" || selectedGroup.value === member.group_name
+    const selectVal = member.nickname?.includes(searchName.value)
+    return selectGroupQuery && selectVal
+  });
 });
 
 const openDetail = (member) => {
@@ -406,67 +439,30 @@ const editMember = (member) => {
   memberObj.value = member
   addMemModel.value = true
 }
-// 分页
-const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-    default: 20,
-  },
-  initialPage: {
-    type: Number,
-    default: 1,
-  },
-});
 
-const emit = defineEmits(["page-change"]);
+const getList = () => {
+  //查询用户团队
+  query_current_team_info().then(res => {
+    if (route.query.groupId !== undefined) {
+      //查询分组下成员
+      query_team_group_all_user(res.data.id, +route.query.groupId, pagination.pageIndex, pagination.pageSize).then(res => {
+        members.value = res.data.data
+        pagination.total = res.data.total
+      })
+    } else {
+      //查询该团队下所有成员
+      query_team_all_user(res.data.id, pagination.pageIndex, pagination.pageSize).then(res2 => {
+        console.log("aaa:", res2.data.data);
 
-const currentPage = ref(props.initialPage);
-
-const displayedPages = computed(() => {
-  const pages = [];
-  const totalPages = props.totalPages;
-
-  // Always show first page
-  pages.push(1);
-
-  if (currentPage.value <= 4) {
-    // Show first 5 pages
-    for (let i = 2; i <= Math.min(5, totalPages); i++) {
-      pages.push(i);
+        members.value = res2.data.data
+        pagination.total = res.data.total
+      })
     }
-    if (totalPages > 5) {
-      pages.push("...");
-      pages.push(totalPages);
-    }
-  } else if (currentPage.value >= totalPages - 3) {
-    // Show last 5 pages
-    pages.push("...");
-    for (let i = totalPages - 4; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Show current page and surrounding pages
-    pages.push("...");
-    for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
-      pages.push(i);
-    }
-    pages.push("...");
-    pages.push(totalPages);
-  }
+    //查询分组
+  })
+}
 
-  return pages;
-});
-
-const handlePageChange = (page) => {
-  if (page < 1 || page > props.totalPages || page === currentPage.value) {
-    return;
-  }
-  currentPage.value = page;
-  emit("page-change", page);
-};
-
-onMounted(async() => {
-  
+onMounted(async () => {
+  getList()
 })
 </script>

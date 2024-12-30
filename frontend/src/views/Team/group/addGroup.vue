@@ -98,6 +98,7 @@
 <script setup>
 import { ref, computed, defineEmits, defineProps, onMounted, watch } from "vue";
 import { XIcon } from "lucide-vue-next";
+// import { team_update } from "@/commands/team";
 
 const props = defineProps({
   //接收父组件传递的控制参数
@@ -121,8 +122,8 @@ watch(() => props.groupObj, (val) => {
   console.log("groupObj:::", val);
   if (val != null) {
     formData.value.name = props.groupObj.name
-    if (props.groupObj.note != '\\')
-      formData.value.remarks = props.groupObj.note
+    if (props.groupObj.description != '\\')
+      formData.value.remarks = props.groupObj.description
   }
 
 })
@@ -388,6 +389,17 @@ const submitForm = async () => {
   });
   emit("update:showAddModal", false);
   // console.log("value:::", formData.value);
+  if(props.groupObj === null){
+    //新建分组
+    // await team_update({
+    //   name: formData.value.name,
+    //   description: formData.value.remarks,
+    //   permissions: Array.from(selectedItems.value),
+    // });
+  }else{
+    //修改分组
+    team_update(props.groupObj.id , formData.value.name, formData.value.remarks);
+  }
 
   clearForm()
 };

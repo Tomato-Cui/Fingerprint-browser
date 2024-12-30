@@ -15,12 +15,12 @@
           <div class="p-6">
             <form @submit.prevent="handleSubmit" class="space-y-6">
               <!-- Login Account -->
-              <div class="flex items-start">
+              <div class="flex items-start" v-if="!props.memberObj">
                 <label class="w-24 pt-2 pr-3 flex justify-end">
-                  <span class="text-red-500">*</span> 登录账号:
+                  <span class="text-red-500">*</span> 账号:
                 </label>
                 <div class="flex flex-col flex-1">
-                  <input v-model="formData.account" type="text" placeholder="请输入手机号/邮箱号"
+                  <input v-model="formData.account" type="text" placeholder="请输入用户邮箱"
                     class="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required
                     @input="validateEmail" />
                   <p v-if="emailError" style="color: red;">{{ emailError }}</p>
@@ -28,16 +28,16 @@
               </div>
 
               <!-- Name -->
-              <div class="flex items-start">
+              <!-- <div class="flex items-start">
                 <label class="w-24 pt-2 pr-3 flex justify-end">姓名:</label>
                 <input v-model="formData.name" type="text" placeholder="输入手机号/邮箱号后自动获取"
                   class="flex-1 px-3 py-2 border rounded bg-gray-50 text-gray-500 outline-none" readonly />
-              </div>
+              </div> -->
 
               <!-- Remark Name -->
               <div class="flex items-start">
                 <label class="w-24 pt-2 pr-3 flex justify-end">
-                  <span class="text-red-500">*</span> 备注名:
+                  <span class="text-red-500">*</span> 备注:
                 </label>
                 <input v-model="formData.remarkName" type="text" placeholder="请输入备注名"
                   class="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -45,7 +45,7 @@
               </div>
 
               <!-- Group Name -->
-              <div class="flex items-start">
+              <div class="flex items-start" v-if="props.memberObj">
                 <label class="w-24 pt-2 pr-3 flex justify-end">
                   <span class="text-red-500">*</span> 分组名称:
                 </label>
@@ -53,7 +53,7 @@
                   <div class="flex gap-2">
                     <More>
                       <MoreTrigger class="flex-1">
-                        <button @click=""
+                        <button @click="searchGroup"
                           class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md hover:ring-2 hover:ring-blue-500 focus:outline-none flex justify-between items-center"
                           :class="{ 'text-gray-400': formData.groupId === 0 }">
                           {{ teamGroupName }}
@@ -63,21 +63,21 @@
                       <MoreContent class="w-[240px]">
                         <MoreItem v-for="group in teamGroup" class="cursor-pointer w-full"
                           @click="formData.groupId = group.id">
-                          <Settings2Icon class="w-4 h-4" />{{ group.groupName }}
+                          <Settings2Icon class="w-4 h-4" />{{ group.name }}
                         </MoreItem>
                       </MoreContent>
                     </More>
-                    <button type="button" @click="handleAddGroup"
+                    <!-- <button type="button" @click="handleAddGroup"
                       class="text-blue-500 hover:text-blue-600 flex items-center hover:bg-gray-100 px-2">
                       <PlusIcon class="w-4 h-4 mr-1" />
                       添加分组
-                    </button>
+                    </button> -->
                   </div>
                 </div>
               </div>
 
               <!-- Environment Authorization -->
-              <div v-if="!props.memberObj" class="flex items-start">
+              <!-- <div v-if="!props.memberObj" class="flex items-start">
                 <label class="w-24 pt-2 pr-3 flex justify-end">授权环境:</label>
                 <div class="flex-1">
                   <div v-if="formData.environments.length === 0">
@@ -86,15 +86,12 @@
                       <PlusIcon class="w-4 h-4 mr-1" />
                       选择环境
                     </button>
-                    <!-- {{ formData.environments.length === 0 }} -->
                     <p class="mt-2 text-sm text-red-400">
                       请选择需要授权给该员工管理的环境
                     </p>
                   </div>
 
-                  <!-- 选择环境列表 -->
                   <div v-else class="w-full">
-                    <!-- Header -->
                     <div class="flex items-center justify-between mb-2">
                       <button type="button" @click="handleSelectEnvironment"
                         class="px-4 py-2 bg-blue-500 text-white rounded flex items-center hover:bg-blue-600">
@@ -110,7 +107,6 @@
                       </div>
                     </div>
 
-                    <!-- Collapsed View -->
                     <div v-if="!isExpanded" class="flex flex-wrap gap-2">
                       <div v-for="(item, index) in formData.envNameList.slice(0, 4)" :key="index"
                         class="px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-sm max-w-[150px]">
@@ -121,7 +117,6 @@
                       </div>
                     </div>
 
-                    <!-- Expanded View -->
                     <div v-else class="border rounded-md max-h-[120px] overflow-y-auto">
                       <div class="grid grid-cols-4 gap-2 p-2">
                         <div v-for="(item, index) in formData.envNameList" :key="index"
@@ -136,7 +131,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </form>
           </div>
 
@@ -145,7 +140,8 @@
             <button @click="closeModal" class="px-6 py-2 border rounded hover:bg-gray-50">
               取消
             </button>
-            <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <button type="submit" @click="handleSubmit"
+              class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
               确定
             </button>
           </div>
@@ -308,6 +304,10 @@ import { useRouter } from "vue-router";
 import { Model } from "@/components/model/index";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+import { team_group_query_all } from "@/commands/team-group";
+import { team_query, query_current_team_info, team_modify_team_user_info } from "@/commands/team";
+import { team_send } from '@/commands/user-team-temp'
+import { toast } from "vue-sonner";
 
 const emailError = ref(""); // 存储错误信息
 const router = useRouter()
@@ -318,10 +318,14 @@ const props = defineProps({
 const memberObj = ref(null)
 watch(() => props.memberObj, (val) => {
   memberObj.value = val    //赋值被编辑用户信息
+  console.log("_+_+_+_+_:", memberObj.value);
+  
   if (val) {
-    formData.value.name = val.name
+    // formData.value.name = val.name
     // formData.value.account = val.name
-    formData.value.remarkName = val.contact
+    formData.value.remarkName = val.description
+    teamGroupName.value = val.group_name
+    // formData.value.groupId = groups.value.find(item => item.name = val.group_name).id
   }
 })
 const emit = defineEmits(["update:addMemModel"]);
@@ -341,11 +345,10 @@ const clearFormData = () => {
   formData.value.groupName = "";
   formData.value.environments = [];
   formData.value.envNameList = []
-  // console.log("????????????????????????????????:", formData.value);
 }
 const teamGroupName = ref("请选择分组")
 watch(() => formData.value.groupId, (val) => {
-  teamGroupName.value = teamGroup.value.find((group) => group.id === val).groupName
+  teamGroupName.value = teamGroup.value.find((group) => group.id === val).name
 })
 
 const groups = ref(["管理员组", "普通用户组", "访客组"]);
@@ -364,14 +367,10 @@ watch(
 );
 
 const handleAddGroup = () => {
-  // Handle adding new group
-  // console.log("Add new group");
   router.push("/team/group")
 };
 
 const handleSelectEnvironment = () => {
-  // Handle environment selection
-  // console.log("Select environment");
   alertEnvironment.value = true
   selectedIds.value = formData.value.environments
 };
@@ -386,10 +385,28 @@ const refreshList = () => {
   })
 }
 const handleSubmit = () => {  //提交添加成员
-  // Handle form submission
   //重新赋值环境id数组，防止中途删除的数据
   refreshList()
-  // console.log("Form submitted:", formData.value.environments);
+  console.log("Form submitted:", formData.value);
+  if (props.memberObj) {
+    //修改
+    // console.log("props.member:", props.memberObj);
+    // console.log("form::::::::::", formData.value);
+    
+    team_modify_team_user_info(props.memberObj.team_id, formData.value.groupId, props.memberObj.user_uuid, formData.value.remarkName).then(res => {
+      toast.message(res.message)
+    });
+  } else {  //发送邀请
+    query_current_team_info().then(res => {
+      team_send(res.data.id, formData.value.account, formData.value.remarkName).then(res => {
+        if(res.message.includes("发送失败")){
+          toast.warning(res.message)
+        }else{
+          toast.success("邀请发送成功")
+        }
+      });
+    })
+  }
   emit("update:addMemModel", false);
   // closeModal();
 };
@@ -398,8 +415,6 @@ const closeModal = () => {  //取消
   emit("update:addMemModel", false);
   clearFormData()
   selectedIds.value = []
-  // console.log("这里？？？？？？？？？？？");
-  // console.log(props.addMemModel);
 };
 
 // 校验邮箱格式的函数
@@ -412,9 +427,6 @@ const validateEmail = () => {
   } else {
     emailError.value = ""; // 清除错误信息
   }
-
-  console.log("emailError:", emailError.value);
-
 };
 
 //选择环境---------------------------------
@@ -522,7 +534,16 @@ function updateSelectAll() {
 
 onMounted(() => {
   updateSelectAll()
+
 })
+const searchGroup = () => {
+  team_query(1, 10).then(res => {
+    // 查询团队下所有分组
+    team_group_query_all(res.data.data[0].id).then(res => {
+      teamGroup.value = res.data
+    })
+  })
+}
 
 //环境列表
 const sequences = ref(Array.from({ length: 28 }, (_, i) => i + 1))

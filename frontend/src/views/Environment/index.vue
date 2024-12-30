@@ -50,16 +50,20 @@ const searchType = ref<{ title: keyof Payment; value: string }>({
   value: "名称",
 });
 
+const selectedData = computed(() => {
+  return data.value.filter((item) => item.selected);
+});
+
 const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
-  pageIndex: 0,
+  pageIndex: 1,
   pageSize: 16,
   total: 0,
 });
 
 const loadData = (index: number, size: number) => {
-  environment_query(index, size).then((res) => {
+  environment_query(index-1, size).then((res) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
     data.value = data_;
@@ -68,6 +72,8 @@ const loadData = (index: number, size: number) => {
 
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 const paginationClickHandle = (index: number) => {
+  console.log("index:", index);
+  
   loadData(index, pagination.pageSize);
   pagination.pageIndex = index;
 };
@@ -175,7 +181,7 @@ watch(groupSelect, (newVal) => {
 <template>
   <div class="flex flex-col p-3 bg-gray-50 h-main">
     <div
-      class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow px-2"
+      class="flex overflow-hidden flex-col flex-1 px-2 bg-white rounded-lg shadow"
     >
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
@@ -187,14 +193,14 @@ watch(groupSelect, (newVal) => {
               @update:searchValue="searchValueHandle"
             />
           </div>
-          <div class="flex gap-2 py-2 ju justify-end flex-auto px-2">
+          <div class="flex flex-auto gap-2 justify-end px-2 py-2 ju">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <TooltipButton
                   title="筛选"
-                  class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border"
+                  class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
                 >
-                  <LogsIcon class="h-5 w-5 text-gray-600" />
+                  <LogsIcon class="w-5 h-5 text-gray-600" />
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -211,7 +217,7 @@ watch(groupSelect, (newVal) => {
             </DropdownMenu>
           </div>
         </div>
-        <div class="flex w-full gap-x-2">
+        <div class="flex gap-x-2 w-full">
           <PrimaryButton class="flex gap-x-2" @click="openGroup">
             <PackageOpenIcon />
             打开
@@ -219,18 +225,18 @@ watch(groupSelect, (newVal) => {
           <TooltipButton
             v-for="(item, index) in groupOperationBtns"
             :key="index"
-            class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border"
+            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
             :title="item.title"
             @click="item.click"
             :disabled="item.disabled"
           >
-            <component :is="item.icon" class="h-5 w-5 text-gray-600" />
+            <component :is="item.icon" class="w-5 h-5 text-gray-600" />
           </TooltipButton>
         </div>
       </div>
 
       <div class="flex flex-col h-full">
-        <div class="rounded-md flex-auto h-0 overflow-auto">
+        <div class="overflow-auto flex-auto h-0 rounded-md">
           <DataTable
             :data="data"
             :pagination="pagination"
@@ -239,7 +245,7 @@ watch(groupSelect, (newVal) => {
           />
         </div>
 
-        <div class="flex items-center justify-end space-x-2 py-1">
+        <div class="flex justify-end items-center py-1 space-x-2">
           <div class="flex-1 text-sm text-muted-foreground">
             共{{ pagination.total }}条.
           </div>
@@ -251,9 +257,9 @@ watch(groupSelect, (newVal) => {
             >
               <PaginationList
                 v-slot="{ items }"
-                class="flex items-center gap-1"
+                class="flex gap-1 items-center"
               >
-                <PaginationFirst @click="() => paginationClickHandle(0)" />
+                <PaginationFirst @click="() => paginationClickHandle(1)" />
                 <PaginationPrev
                   @click="() => paginationClickHandle(pagination.pageIndex - 1)"
                 />
@@ -265,11 +271,12 @@ watch(groupSelect, (newVal) => {
                     :value="item.value"
                     as-child
                   >
+                  <!-- {{ index }} -->
                     <Button
-                      class="w-10 h-10 p-0"
+                      class="p-0 w-10 h-10"
                       @click="() => paginationClickHandle(item.value - 1)"
                       :variant="
-                        item.value === pagination.pageIndex + 1
+                        item.value === pagination.pageIndex
                           ? 'default'
                           : 'outline'
                       "
@@ -287,7 +294,7 @@ watch(groupSelect, (newVal) => {
                   @click="
                     () =>
                       paginationClickHandle(
-                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                        Math.ceil(pagination.total / pagination.pageSize)
                       )
                   "
                 />

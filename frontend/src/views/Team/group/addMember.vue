@@ -98,6 +98,8 @@
 <script setup>
 import { ref, watch, defineEmits, defineProps, onMounted } from "vue";
 import { XIcon } from "lucide-vue-next";
+import { team_allow, team_send } from "@/commands/user-team-temp";
+import { query_current_team_info } from '@/commands/team'
 
 const props = defineProps({
   addMemModel: {
@@ -142,8 +144,11 @@ watch(
 
 const handleSubmit = () => {
   // Handle form submission
-  console.log("Form submitted:", formData.value);
+  // console.log("Form submitted:", formData.value);
   emit("update:addMemModel", false);
+  query_current_team_info().then(res => {
+    team_send(res.data.id, formData.value.account, formData.value.remarkName).then(res => {})
+  })
   closeModal();
 };
 

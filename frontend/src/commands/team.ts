@@ -13,6 +13,7 @@ export const query_current_team_info = async (): Promise<any> => {
     return await invoke('query_current_team_info', {})
 };
 
+// 拉黑
 export const blocked = async (
     currentUserUuid: string,
     teamId: number,
@@ -23,6 +24,7 @@ export const blocked = async (
     })
 };
 
+// 恢复
 export const un_blocked = async (
     currentUserUuid: string,
     teamId: number,
@@ -37,8 +39,8 @@ export const query_team_all_user = async (teamId: number, pageNum: number, pageS
     return await invoke('query_team_all_user', { teamId, pageNum, pageSize })
 };
 
-export const query_team_all_blocked_user = async (taemId: number, pageNum: number, pageSize: number): Promise<any> => {
-    return await invoke('query_team_all_blocked_user', { taemId, pageNum, pageSize })
+export const query_team_all_blocked_user = async (teamId: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('query_team_all_blocked_user', { teamId, pageNum, pageSize })
 };
 
 export const query_team_group_all_user = async (teamId: number, teamGroupId: number, pageNum: number, pageSize: number): Promise<any> => {
@@ -61,7 +63,7 @@ export const team_modify = async (
     })
 };
 
-
+//删除
 export const remove_current_user = async (
     currentUserUuid: string,
     teamId: number,

@@ -60,15 +60,18 @@
         </div>
       </div>
 
+      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
+        数据为空，没有成员
+      </div>
       <!-- Table -->
-      <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg">
+      <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg" v-else>
         <!-- Table Header -->
-        <div class="grid grid-cols-8 px-6 py-3 bg-gray-50 text-sm text-gray-500">
+        <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 text-sm text-gray-500">
           <div>姓名</div>
-          <div>分组</div>
+          <!-- <div>分组</div> -->
           <div>备注</div>
-          <div>手机号/邮箱</div>
-          <div>邀请人</div>
+          <div>邮箱</div>
+          <!-- <div>邀请人</div> -->
           <div>申请时间</div>
           <div>状态</div>
           <div>操作</div>
@@ -76,33 +79,33 @@
 
         <!-- Table Body -->
         <div class="divide-y flex-1 flex flex-col overflow-auto">
-          <div v-for="user in users" :key="user.id"
-            class="grid grid-cols-8 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
+          <div v-for="user in filterUsers" :key="user.id"
+            class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
             :class="{ 'border-t border-gray-100': true }">
 
-            <div class="text-gray-900 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.username }}</div>
-            <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.group_name }}</div>
+            <div class="text-gray-900 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.nickname }}</div>
+            <!-- <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.group_name }}</div> -->
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.description }}</div>
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.email }}</div>
-            <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.owner_name }}</div>
+            <!-- <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.owner_name }}</div> -->
             <div class="text-gray-600 text-ellipsis overflow-hidden whitespace-nowrap">{{ user.created_at }}</div>
             <div>
               <span class="px-4 py-2 text-sm rounded-sm" :class="{
-                'bg-emerald-50 text-emerald-500': user.status === 'approved',
-                'bg-yellow-50 text-yellow-500': user.status === 'pending',
-                'bg-red-50 text-red-500': user.status === 'rejected',
+                'bg-emerald-50 text-emerald-500': user.allow_2 === 1,
+                'bg-yellow-50 text-yellow-500': user.allow_2 === 0,
+                'bg-red-50 text-red-500': user.allow_2 === -1,
               }">
-                {{ getStatusText(user.status) }}
+                {{ getStatusText(user.allow_2) }}
               </span>
             </div>
             <div class="flex gap-2 text-sm">
-              <template v-if="user.status === 'pending'">
+              <template v-if="user.allow_2 === 0">
                 <button class="text-blue-500 hover:underline" @click="agreeApplyM(user)">同意</button>
                 <span class="text-gray-300">|</span>
                 <button class="text-blue-500 hover:underline" @click="refApply(user)">拒绝</button>
               </template>
               <template v-else>
-                {{ getActionText(user.status) }}
+                {{ getActionText(user.allow_2) }}
               </template>
             </div>
           </div>
@@ -111,35 +114,35 @@
 
 
       <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4 px-2 h-[58px]">
-        <div class="text-sm text-gray-500">共 {{ userTotal }} 项数据</div>
-        <div class="flex items-center gap-2">
-          <!-- Previous button -->
-          <button @click="handlePageChange(currentPage - 1)" :disabled="currentPage === 1"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            ←
-          </button>
+       {{ pagination }}
+      <div class="flex items-center justify-end space-x-2 py-1">
+        <div class="flex-1 text-sm text-muted-foreground">
+          共{{ pagination.total }}条
+        </div>
+        <div class="space-x-2">
+          <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+              <PaginationFirst @click="() => paginationClickHandle(0)" />
+              <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
-          <!-- Page numbers -->
-          <template v-for="number in displayedPages" :key="number">
-            <button v-if="number !== '...'" @click="handlePageChange(number)" :class="[
-              'w-10 h-10 rounded-md border flex items-center justify-center',
-              currentPage === number
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'hover:bg-gray-50',
-            ]">
-              {{ number }}
-            </button>
-            <span v-else class="flex justify-center items-center w-10 h-10">
-              ...
-            </span>
-          </template>
+              <template v-for="(item, index) in items">
+                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                  <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
+                    ">
+                    {{ item.value }}
+                  </Button>
+                </PaginationListItem>
+                <PaginationEllipsis v-else :key="item.type" :index="index" />
+              </template>
 
-          <!-- Next button -->
-          <button @click="handlePageChange(currentPage + 1)" :disabled="currentPage === totalPages"
-            class="w-[100px] px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
-            →
-          </button>
+              <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+              <PaginationLast @click="() =>
+                paginationClickHandle(
+                  Math.ceil(pagination.total / pagination.pageSize) - 1
+                )
+                " />
+            </PaginationList>
+          </Pagination>
         </div>
       </div>
     </div>
@@ -147,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch, reactive } from "vue";
 import {
   SearchIcon,
   ChevronDownIcon,
@@ -157,6 +160,19 @@ import {
 } from "lucide-vue-next";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { Settings2Icon, SquarePenIcon, Trash2Icon } from "lucide-vue-next";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
+import { team_receive_query, team_allow, reject } from '@/commands/user-team-temp'
+import { query_current_team_info } from "@/commands/team"
+import { toast } from "vue-sonner";
 
 //搜索条件
 const selectType = ref(1);
@@ -165,14 +181,18 @@ const selectVal = ref(""); //搜索值
 const selectT = (type) => {
   selectType.value = type;
 };
-onMounted(() => {
-  // users.value.filter((user) => user.status === 2)  //默认查看待审核
-  // filterUsers.value.filter((user) => user.status === 2)
+onMounted(() => {});
+const pagination = reactive({
+  pageIndex: 1,
+  pageSize: 16,
+  total: 0,
 });
+const paginationClickHandle = (index) => {
+  loadData(Number(route.params.id), index, pagination.pageSize);
+  pagination.pageIndex = index;
+};
 // 审核筛选区--------------------------------
 const isOpen = ref(false); //审核筛选
-const x = ref(0);
-const y = ref(0);
 const selectFlag = ref(0);
 const selectedLabel = ref("待审核");
 const status = ref([
@@ -180,73 +200,36 @@ const status = ref([
   { id: 2, label: "已同意" },
   { id: 3, label: "已拒绝" },
 ]);
-function handleDocumentClick(event) {
-  x.value = event.clientX;
-  y.value = event.clientY;
-  // console.log("isopen1--:", isOpen.value);
-  // console.log("selectFlag--:", selectFlag.value);
-  if (!isOpen.value && selectFlag.value === 1) {
-    isOpen.value = true;
-  } else {
-    selectFlag.value = 0;
-    isOpen.value = false;
-  }
-  // console.log("isopen2--:", isOpen.value);
-}
+
 const toggleDropdown = () => {
   //打开选项
   // isOpen.value = !isOpen.value;
   selectFlag.value = 1; //开启下拉框标志
 };
+const seStuVal = ref(0)
 const selectStatus = (label) => {
   //选择选项
   selectedLabel.value = label;
+  seStuVal.value = label === '待审核' ? 0 : label === '已同意' ? 1 : -1  //当前数据审核状态
 };
 
 
-const users = ref([
-  {
-    audit_id: 1,
-    created_at: "2024-02-22 14:30:00",
-    description: "备注",
-    email: "123",
-    group_name: "123",
-    owner_name: "123",
-    phone: "123",
-    status: "pending",
-  }
-]);
-const sortUsersByApplyTime = (order = "asc") => {  //数组按时间排序
-  users.value.sort((a, b) => {
-    const timeA = new Date(a.applyTime).getTime();
-    const timeB = new Date(b.applyTime).getTime();
-    return order === "asc" ? timeA - timeB : timeB - timeA;
-  });
-};
+const users = ref([]);
 const filterUsers = computed(() => {
   //过滤数组
-  // 调用方法：升序排序
-  sortUsersByApplyTime("desc"); // 按时间从早到晚排序
 
-  const selectQuery = ref(true);
+  const selectQuery = ref(true);   //查询搜索值
   return users.value.filter((user) => {
     if (selectType.value === 1) {
-      selectQuery.value = user.owner_name.includes(selectVal.value);
+      selectQuery.value = user.nickname?.includes(selectVal.value);
     } else if (selectType.value === 2) {
-      selectQuery.value = user.name.includes(selectVal.value);
+      selectQuery.value = user.description?.includes(selectVal.value);
     } else {
-      selectQuery.value = user.contact.includes(selectVal.value);
+      selectQuery.value = user.email?.includes(selectVal.value);
     }
 
-    const statusNum =
-      selectedLabel.value === "已同意"
-        ? 1
-        : selectedLabel.value === "待审核"
-          ? 2
-          : 3;
-    const selectStatus = user.status === statusNum;
-
-    return selectQuery && selectStatus;
+    const selectStatus = user.allow_2 === seStuVal.value;  //查询状态    
+    return selectQuery.value && selectStatus;
   });
 });
 const userTotal = ref(filterUsers.value.length)   //数据条数
@@ -255,89 +238,50 @@ watch(() => filterUsers.value, () => {
 })
 
 const getStatusText = (status) => {
-  const statusMap = {
-    'approved': "已同意",
-    'pending': "待审核",
-    'rejected': "已拒绝",
-  };
-  return statusMap[status];
+  const stateMenu = ['已拒绝', '待审核', '已同意']
+
+  return stateMenu[status + 1];
 };
 
 const getActionText = (status) => {
-  const actionMap = {
-    'approved': "已同意",
-    'rejected': "已拒绝",
-  };
-  return actionMap[status];
+  const stateMenu = ['已同意', '已拒绝']
+  return stateMenu[status];
 };
 
-const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-    default: 20,
-  },
-  initialPage: {
-    type: Number,
-    default: 1,
-  },
-});
-
-const emit = defineEmits(["page-change"]);
-
-const currentPage = ref(props.initialPage);
-
-const displayedPages = computed(() => {
-  const pages = [];
-  const totalPages = props.totalPages;
-
-  // Always show first page
-  pages.push(1);
-
-  if (currentPage.value <= 4) {
-    // Show first 5 pages
-    for (let i = 2; i <= Math.min(5, totalPages); i++) {
-      pages.push(i);
-    }
-    if (totalPages > 5) {
-      pages.push("...");
-      pages.push(totalPages);
-    }
-  } else if (currentPage.value >= totalPages - 3) {
-    // Show last 5 pages
-    pages.push("...");
-    for (let i = totalPages - 4; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Show current page and surrounding pages
-    pages.push("...");
-    for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) {
-      pages.push(i);
-    }
-    pages.push("...");
-    pages.push(totalPages);
-  }
-
-  return pages;
-});
-
-const handlePageChange = (page) => {
-  if (page < 1 || page > props.totalPages || page === currentPage.value) {
-    return;
-  }
-  currentPage.value = page;
-  emit("page-change", page);
-};
 //同意申请
 const agreeApplyM = (user) => {
-  // user.status = 'approved'
+  user.status = 1
+  team_allow(user.id, user.user_uuid, user.team_id).then(res => {
+    toast.message(res.message)
+    getList()
+  })
 }
 //拒绝申请
 const refApply = (user) => {
-  user.status = 'rejected'
+  user.status = -1
+  reject(user.id).then(res => {
+    toast.message(res.message)
+    getList()
+  })
+}
+
+const getList = () => {
+  query_current_team_info().then(res => {
+    team_receive_query(res.data.id, pagination.pageIndex, pagination.pageSize).then(res => {
+      // users.value = res.data.data
+      users.value = res.data.data.map(item => {
+        // 判断delete_at是否为空，若不为空，则将allow_2设置为-1
+        if (item.deleted_at) {
+          item.allow_2 = -1;
+        }
+        return item;
+      })
+      pagination.total = res.data.total
+    })
+  })
 }
 
 onMounted(() => {
+  getList()
 })
 </script>
