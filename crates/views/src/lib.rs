@@ -1,4 +1,9 @@
-use std::sync::Arc;
+use components::windows::tray;
+use tauri::AppHandle;
+use tauri::Manager;
+use tauri::RunEvent;
+use tauri::Window;
+use tauri::WindowEvent;
 
 pub mod command;
 pub mod components;
@@ -129,36 +134,51 @@ pub fn run() {
             browser_command::browser_status,
             command::os::platform,
         ])
+        .setup(|app| {
+            #[cfg(desktop)]
+            app.handle()
+                .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }))
+                .unwrap();
+
+            #[cfg(debug_assertions)]
+            app.handle()
+                .plugin(
+                    tauri_plugin_log::Builder::default()
+                        .level(log::LevelFilter::Info)
+                        .build(),
+                )
+                .unwrap();
+
+            tray::menu(app)?;
+            Ok(())
+        })
+        .on_window_event(window_event_handle)
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 
-    let app_handle = Arc::new(app.handle().clone());
+    app.run(run_event_handle);
+}
 
-    // use tauri::Manager;
-    //     let app_handle_clone = app_handle.clone();
-    //     tauri::async_runtime::spawn(async move {
-    //         async move {
-    //             let cache_dir = app_handle_clone.path().cache_dir().unwrap();
-    //             states::tauri::set_app_cache_location(cache_dir).await;
-    //         }
-    //         .await;
-    //     });
-
-    // 如果在调试模式下，初始化日志插件
-    if cfg!(debug_assertions) {
-        app_handle
-            .plugin(
-                tauri_plugin_log::Builder::default()
-                    .level(log::LevelFilter::Info)
-                    .build(),
-            )
-            .unwrap();
+fn window_event_handle(window: &Window, event: &WindowEvent) {
+    match event {
+        tauri::WindowEvent::CloseRequested { api, .. } => {
+            api.prevent_close();
+            let _ = window.hide();
+        }
+        _ => {}
     }
+}
 
-    app.run(|_app_handle, event| match event {
+fn run_event_handle(_app_handle: &AppHandle, event: RunEvent) {
+    match event {
         tauri::RunEvent::ExitRequested { api, .. } => {
             api.prevent_exit();
         }
         _ => {}
-    });
+    }
 }
