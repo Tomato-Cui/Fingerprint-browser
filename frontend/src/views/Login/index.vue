@@ -112,17 +112,23 @@
                 placeholder="请输入邮箱"
               />
             </div>
-            <div class="flex items-center space-x-2">
-              <Checkbox id="agree-terms" v-model="registerForm.agreeTerms" />
-              <label
-                for="agree-terms"
-                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                我已阅读并同意
-                <a variant="link" class="underline">服务条款</a>
-                和
-                <a variant="link" class="underline">隐私政策</a>
-              </label>
+            <div class="space-y-2">
+              <Label for="register-email">验证码</Label>
+              <div class="flex gap-x-2">
+                <Input
+                  id="register-code"
+                  class="w-5/6"
+                  v-model="registerForm.code"
+                  autocomplete="off"
+                  placeholder="请输入验证码"
+                />
+                <PrimaryButton
+                  @click="registerSendCode"
+                  class="whitespace-nowrap"
+                >
+                  发送验证码
+                </PrimaryButton>
+              </div>
             </div>
             <Button
               class="w-full cursor-pointer"
@@ -150,7 +156,10 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { PrimaryButton as Button } from "@/components/button/index";
+import {
+  PrimaryButton as Button,
+  PrimaryButton,
+} from "@/components/button/index";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -158,11 +167,12 @@ import {
   LucideMessageCircle,
   LucideSmartphone,
 } from "lucide-vue-next";
-import { login, register } from "@/commands/user";
+import { login, register, register_send } from "@/commands/user";
 import { toast } from "vue-sonner";
 
 import { storeToRefs } from "pinia";
 import { useUserStore } from "@/stores/user";
+import TooltipButton from "@/components/tooltip-button.vue";
 
 const activeTab = ref("login");
 const loading = ref(false);
@@ -181,6 +191,7 @@ const registerForm = ref({
   username: "",
   password: "",
   email: "",
+  code: "",
 });
 
 const handleLogin = () => {
@@ -211,17 +222,28 @@ const handleRegister = () => {
 
   register(
     registerForm.value.email,
+    registerForm.value.code,
     registerForm.value.username,
     registerForm.value.password
   )
     .then((res) => {
       loading.value = false;
-      toast.success("注册成功，请前往登录页面");
+      res.code ? toast.success(res.message) : toast.warning(res.message);
     })
     .catch((err) => {
       loading.value = false;
       toast.success("注册失败，请前往重新注册");
     });
+};
+
+const registerSendCode = () => {
+  let email = registerForm.value.email;
+
+  if (email) {
+    register_send(email).then((res) => {
+      res.code ? toast.success(res.message) : toast.warning(res.message);
+    });
+  }
 };
 
 const forgotPassword = () => {

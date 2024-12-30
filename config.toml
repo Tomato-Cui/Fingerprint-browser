@@ -14,3 +14,8 @@ browser_extensions_location = "browser-extensions"
 driver = "sqlite3"
 url = "ads-hubstudio.db"
 location = "cache"
+
+[email]
+smtp_username = "liushuinew@163.com"
+smtp_password = "NSgjTyY6uSQwPGwV"
+smtp_server = "smtp.163.com"

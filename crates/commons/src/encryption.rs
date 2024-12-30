@@ -1,10 +1,17 @@
 use anyhow::anyhow;
 use base64::{engine::general_purpose, DecodeError, Engine};
+use rand::Rng;
 use std::{fs, path::PathBuf};
 
 pub fn uuid() -> String {
     let uuid = uuid::Uuid::new_v4();
     uuid.to_string()
+}
+
+pub fn random_code() -> String {
+    let mut rng = rand::thread_rng();
+    let random_number: u32 = rng.gen_range(100000..1000000);
+    format!("{}", random_number)
 }
 
 pub fn base64_encode(data: &str) -> String {

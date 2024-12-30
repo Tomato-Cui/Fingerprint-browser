@@ -44,6 +44,7 @@ export interface Payment {
   proxy: string;
   open_urls: string;
   os: string;
+  selected?: boolean;
 }
 
 interface TableProps {
@@ -341,7 +342,7 @@ const table = useVueTable({
 
 <template>
   <Table>
-    <TableHeader class="z-10 sticky top-0">
+    <TableHeader class="sticky top-0 z-10">
       <TableRow
         v-for="headerGroup in table.getHeaderGroups()"
         :key="headerGroup.id"
@@ -405,8 +406,8 @@ const table = useVueTable({
 
       <TableRow v-else>
         <TableCell :colspan="columns.length">
-          <div class="flex justify-center items-center text-gray-400 gap-x-2">
-            <InboxIcon class="h-4 w-4" />
+          <div class="flex gap-x-2 justify-center items-center text-gray-400">
+            <InboxIcon class="w-4 h-4" />
             No results.
           </div>
         </TableCell>

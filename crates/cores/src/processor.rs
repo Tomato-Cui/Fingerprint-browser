@@ -9,9 +9,6 @@ use tokio::{
     sync::Mutex,
 };
 
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
-
 pub struct BrowserChildInfo {
     environemnt_info: models::environment::Environment,
     fingerprint_info: models::environment_fingerprint::EnvironmentFingerprint,
@@ -63,24 +60,17 @@ impl BrowserChildInfo {
             .to_str()
             .unwrap_or_else(|| current_dir.to_str().unwrap());
         let user_data_dir = format!(
-            r#"--user-data-dir={}/{}/{}"#,
+            "--user-data-dir={}/{}/{}",
             app_data,
             app_config.app.location.user_data_location,
-            commons::time::get_system_time_mills(),
+            self.environemnt_info.uuid.clone().unwrap_or_default(),
         );
 
         let no_default_browser_check = "--no-default-browser-check".to_string();
         let browser_unique = format!(
             "--app-browser-unique={}.{}",
             app_config.app.id,
-            format!(
-                "{}.{}",
-                self.environemnt_info.uuid.clone().unwrap_or_default(),
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_micros()
-            )
+            self.environemnt_info.uuid.clone().unwrap_or_default(),
         );
         let debugger_address = format!("--remote-debugging-port={}", self.port);
 

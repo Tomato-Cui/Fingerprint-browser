@@ -30,3 +30,4 @@ axum = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true }
 uuid = { workspace = true }
+lettre = { workspace = true }

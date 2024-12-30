@@ -4,12 +4,17 @@ export interface Extension {
     uuid: string;                        // String => string
     name: string;                        // String => string
     description?: string | null;         // Option<String> => string or null
-    cover_url?: string | null;           // Option<String> => string or null
+    avatar_url?: string | null;           // Option<String> => string or null
     release_url?: string | null;         // Option<String> => string or null
-    location_url: string;                // String => string
     size?: number | null;                // Option<i32> => number or null
     all_can_use?: number | null;         // Option<i32> => number or null
 }
+
+export const extension_info_by_chrome_store_url = async (
+    url: string,
+): Promise<any> => {
+    return await invoke('extension_info_by_chrome_store_url', { url })
+};
 
 export const extension_user_create = async (
     extension: Extension,

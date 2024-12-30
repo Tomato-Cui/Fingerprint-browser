@@ -110,7 +110,7 @@ const routes: Array<RouteRecordRaw> = [
     component: myAccout,
   },
   {
-    path: '/mydaili',
+    path: '/mydaili/:id',
     name: 'mydaili',
     component: mydaili,
   },
