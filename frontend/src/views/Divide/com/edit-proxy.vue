@@ -4,6 +4,7 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineEmits, defineProps, reactive } from 'vue'
 import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
+import { environment_proxies_modify } from "@/commands/environment-proxy"
 
 const props = defineProps({
     editProxyDialog: Boolean,
@@ -20,7 +21,7 @@ const createForm = reactive({
     teamName: "",
     remark: ""
 })
-//确认加入团队
+//确认
 const subMit = () => {
     emit('update:editProxyDialog', false)
 }
