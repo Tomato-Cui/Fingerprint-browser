@@ -103,8 +103,8 @@ export const environment_query_by_extension = async (extensionUuid: number, page
     return await invoke('environment_query_by_extension', { extensionUuid, pageNum, pageSize })
 };
 
-export const environment_detail_create = async (environmentName: string): Promise<any> => {
-    return await invoke('environment_detail_create', { environmentName })
+export const environment_detail_create = async (payload: EnvironmentInfo): Promise<any> => {
+    return await invoke('environment_detail_create', { payload })
 };
 
 export const environment_create = async (environmentName: String): Promise<any> => {

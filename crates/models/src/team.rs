@@ -82,10 +82,11 @@ impl Team {
 
     #[allow(dead_code)]
     pub async fn query_team_by_name(pool: &Pool<Sqlite>, name: &str) -> Result<Team, Error> {
-        let team: Team = sqlx::query_as("SELECT * FROM teams WHERE name = ? AND deleted_at IS NULL")
-            .bind(name)
-            .fetch_one(pool)
-            .await?;
+        let team: Team =
+            sqlx::query_as("SELECT * FROM teams WHERE name = ? AND deleted_at IS NULL")
+                .bind(name)
+                .fetch_one(pool)
+                .await?;
 
         Ok(team)
     }
@@ -432,6 +433,27 @@ impl Team {
         let row = sqlx::query(sql)
             .bind(current_user_uuid)
             .bind(team_id)
+            .execute(pool)
+            .await?;
+
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
+    pub async fn switch_team(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+    ) -> Result<bool, Error> {
+        let sql = "
+            UPDATE user_use_team
+                set team_id = ?
+            WHERE user_uuid = ? AND deleted_at IS NULL;
+            ";
+
+        let row = sqlx::query(sql)
+            .bind(team_id)
+            .bind(user_uuid)
             .execute(pool)
             .await?;
 

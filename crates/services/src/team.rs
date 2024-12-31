@@ -149,6 +149,14 @@ pub async fn remove_user(
     Ok(ok)
 }
 
+pub async fn switch_team(user_uuid: &str, team_id: u32) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = Team::switch_team(pool, user_uuid, team_id).await?;
+
+    Ok(ok)
+}
+
 pub async fn modify(id: u32, payload: &Team) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 

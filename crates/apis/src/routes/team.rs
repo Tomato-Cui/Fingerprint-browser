@@ -28,6 +28,7 @@ pub fn build_router() -> Router {
             .route("/un-blocked", put(unblocked::handle))
             .route("/create", post(create::handle))
             .route("/modify/:id", put(modify::handle))
+            .route("/switch-team", put(switch_team::handle))
             .route("/remove-current-user", put(remove_current_user::handle))
             .route("/modify/team-user-info", put(modify_team_user_info::handle))
             .route("/delete/:id", delete(delete::handle)),
@@ -303,6 +304,27 @@ mod modify {
         };
 
         match services::team::modify(id, &team).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<()>::success(success_msg, Some(()))
+                } else {
+                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod switch_team {
+    use super::*;
+
+    pub async fn handle(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("切换成功".to_string()), |v| {
+            Some(format!("切换失败: {}", v))
+        });
+
+        match services::team::switch_team(&state.user_uuid, id).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

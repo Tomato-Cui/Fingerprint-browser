@@ -73,3 +73,4 @@ cd zonghu-fingerprint-frontend/clients && cargo run --bin clients
 2. 编辑代理。
 3. 转移环境。
 4. 尽可能多的找出bug和未完成的功能并记录。
+

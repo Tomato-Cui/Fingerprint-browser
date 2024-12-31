@@ -42,7 +42,7 @@ export interface Payment {
   country: string;
   group: string;
   proxy: string;
-  open_urls: string;
+  default_urls: string;
   os: string;
   selected?: boolean;
 }
@@ -132,7 +132,7 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h("div", { class: "lowercase" }, row.getValue("description") || "/"),
+      h("div", { class: "lowercase whitespace-nowrap" }, row.getValue("description") || "/"),
   }),
   columnHelper.accessor("os", {
     header: ({ column }) => {
@@ -183,7 +183,7 @@ const columns = [
     cell: ({ row }) =>
       h("div", { class: "lowercase" }, row.getValue("group") || "/"),
   }),
-  columnHelper.accessor("open_urls", {
+  columnHelper.accessor("default_urls", {
     header: ({ column }) => {
       return h(
         Button,
@@ -199,7 +199,7 @@ const columns = [
       h(
         "div",
         { class: "lowercase whitespace-nowrap" },
-        row.getValue("open_urls") || "/"
+        row.getValue("default_urls") || "/"
       ),
   }),
   columnHelper.accessor("country", {
