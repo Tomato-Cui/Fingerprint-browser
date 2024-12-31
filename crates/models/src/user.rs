@@ -46,6 +46,21 @@ impl User {
     }
 
     #[allow(dead_code)]
+    pub async fn search_by_email(pool: &Pool<Sqlite>, email: &str) -> Result<Vec<String>, Error> {
+        let select_sql = format!(
+            "SELECT ui.email
+            FROM users u
+            JOIN user_infos ui ON u.user_info_id = ui.id
+            WHERE ui.email like '%{}%' AND deleted_at IS NULL",
+            email
+        );
+
+        let user_emails: Vec<String> = sqlx::query_scalar(&select_sql).fetch_all(pool).await?;
+
+        Ok(user_emails)
+    }
+
+    #[allow(dead_code)]
     pub async fn query_uuid_by_email(pool: &Pool<Sqlite>, email: &str) -> Result<String, Error> {
         let user_uuid: String = sqlx::query_scalar(
             r#"

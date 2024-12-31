@@ -14,7 +14,7 @@ export interface Environment {
 export interface EnvironmentInfo {
     id: number;
     uuid?: string;
-    user_uuid: string;
+    user_uuid?: string;
     team_id?: number;
     proxy?: Proxy;
     fp_info: EnvironmentFingerprint;

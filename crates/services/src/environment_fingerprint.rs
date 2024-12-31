@@ -29,7 +29,7 @@ pub async fn create(
 
     let ok = EnvironmentFingerprint::insert(pool, user_uuid, payload).await?;
 
-    Ok(ok)
+    Ok(ok > 0)
 }
 
 pub async fn modify(

@@ -22,7 +22,7 @@ pub struct EnvironmentInfo {
 pub struct Environment {
     pub id: i32,                      // 自增ID
     pub uuid: Option<String>,         // UUID
-    pub user_uuid: String,    // 用户UUID
+    pub user_uuid: String,            // 用户UUID
     pub team_id: Option<i32>,         // 团队ID
     pub proxy_id: Option<i32>,        // 代理ID
     pub fp_info_id: Option<i32>,      // 指纹信息ID
@@ -144,6 +144,23 @@ impl Environment {
 
     #[allow(dead_code)]
     pub async fn insert(pool: &Pool<Sqlite>, environment: &Environment) -> Result<bool, Error> {
+        let fp_info_id = EnvironmentFingerprint::insert(
+            pool,
+            &environment.user_uuid,
+            &EnvironmentFingerprint {
+                ..Default::default()
+            },
+        )
+        .await?;
+        let proxy_id = Proxy::insert_proxy(
+            pool,
+            &&Proxy {
+                user_uuid: Some(environment.user_uuid.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
         let sql = r#"
         INSERT INTO environments (
             uuid, user_uuid, team_id, proxy_id, fp_info_id, group_id, name, description, default_urls, 
@@ -154,8 +171,8 @@ impl Environment {
             .bind(&environment.uuid)
             .bind(&environment.user_uuid)
             .bind(environment.team_id)
-            .bind(environment.proxy_id)
-            .bind(environment.fp_info_id)
+            .bind(proxy_id)
+            .bind(fp_info_id)
             .bind(environment.group_id)
             .bind(&environment.name)
             .bind(&environment.description)
@@ -346,6 +363,7 @@ impl Environment {
     pub async fn modify_and_other_info(
         pool: &Pool<Sqlite>,
         user_uuid: &str,
+        environment_uuid: &str,
         environment: &EnvironmentInfo,
     ) -> Result<bool, Error> {
         let mut tx = pool.begin().await?;
@@ -423,21 +441,19 @@ impl Environment {
 
         let sql = r#"
         UPDATE environments SET
-            user_uuid = ?, team_id = ?, proxy_id = ?, fp_info_id = ?, name = ?, description = ?, default_urls = ?, 
+            proxy_id = ?, fp_info_id = ?, name = ?, description = ?, default_urls = ?, 
             proxy_enable = ?
         WHERE uuid = ?
         "#;
 
         let rows_affected = sqlx::query(sql)
-            .bind(&environment.user_uuid)
-            .bind(environment.team_id)
             .bind(proxy_id)
             .bind(fp_info_id)
             .bind(&environment.name)
             .bind(&environment.description)
             .bind(&environment.default_urls)
             .bind(environment.proxy_enable)
-            .bind(&environment.uuid)
+            .bind(environment_uuid)
             .execute(&mut *tx)
             .await?
             .rows_affected();

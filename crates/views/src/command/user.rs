@@ -66,6 +66,21 @@ pub async fn is_login() -> Result<AppResponse<bool>, tauri::Error> {
 }
 
 #[tauri::command]
+pub async fn user_query_search_by_email(
+    email: &str,
+) -> Result<AppResponse<Vec<String>>, tauri::Error> {
+    let _ = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(match services::user::query_search_by_email(&email).await {
+        Ok(data) => AppResponse::<Vec<String>>::success(success_msg, Some(data)),
+        Err(r) => AppResponse::<Vec<String>>::fail(warn_msg(r.to_string())),
+    })
+}
+
+#[tauri::command]
 pub async fn reset_password(
     email: &str,
     password1: &str,

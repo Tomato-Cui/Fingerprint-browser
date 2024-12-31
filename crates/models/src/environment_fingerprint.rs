@@ -51,7 +51,7 @@ impl EnvironmentFingerprint {
         pool: &Pool<Sqlite>,
         user_uuid: &str,
         fingerprint: &EnvironmentFingerprint,
-    ) -> Result<bool, Error> {
+    ) -> Result<u32, Error> {
         let sql = "
             INSERT INTO environment_fingerprints (
                 user_uuid, browser, ua, os, country, region, city, language_type, languages, gmt, geography, geo_tips, geo_rule, longitude, latitude, radius, height,
@@ -59,9 +59,9 @@ impl EnvironmentFingerprint {
                 webgl_info, audio_context, speech_voices, media, cpu, memory, do_not_track, battery, port_scan, white_list
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-            )";
+            ) returning id";
 
-        let row = sqlx::query(sql)
+        let id: u32 = sqlx::query_scalar(sql)
             .bind(user_uuid)
             .bind(&fingerprint.browser)
             .bind(&fingerprint.ua)
@@ -98,10 +98,10 @@ impl EnvironmentFingerprint {
             .bind(&fingerprint.battery)
             .bind(&fingerprint.port_scan)
             .bind(&fingerprint.white_list)
-            .execute(pool)
+            .fetch_one(pool)
             .await?;
 
-        Ok(row.rows_affected() == 1)
+        Ok(id)
     }
 
     #[allow(dead_code)]

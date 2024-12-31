@@ -157,6 +157,7 @@ pub async fn environment_batch_create(
 
 #[tauri::command]
 pub async fn environment_modify_info(
+    environment_uuid: &str,
     payload: models::environment::EnvironmentInfo,
 ) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
@@ -165,7 +166,7 @@ pub async fn environment_modify_info(
     });
 
     Ok(
-        match services::environment::modify_info(&user_uuid, payload).await {
+        match services::environment::modify_info(&user_uuid, environment_uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))

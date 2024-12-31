@@ -80,6 +80,7 @@ pub async fn delete(user_uuid: &str, environment_uuid: &str) -> Result<bool, Ser
 
     Ok(ok)
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

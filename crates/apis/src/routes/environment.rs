@@ -239,7 +239,13 @@ mod modify_info {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment::modify_info(&uuid, payload).await {
+        match services::environment::modify_info(
+            &uuid,
+            &payload.uuid.clone().unwrap_or_default(),
+            payload,
+        )
+        .await
+        {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

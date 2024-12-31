@@ -167,12 +167,18 @@ pub async fn modify_basic_info(
 }
 pub async fn modify_info(
     user_uuid: &str,
+    environment_uuid: &str,
     environment: models::environment::EnvironmentInfo,
 ) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = models::environment::Environment::modify_and_other_info(pool, user_uuid, &environment)
-        .await?;
+    let ok = models::environment::Environment::modify_and_other_info(
+        pool,
+        user_uuid,
+        environment_uuid,
+        &environment,
+    )
+    .await?;
 
     Ok(ok)
 }
@@ -257,7 +263,7 @@ mod tests {
     #[tokio::test]
     async fn test_create() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
+        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7".to_string();
         let result = create(&user_uuid, "133".to_string()).await;
         println!("{:?}", result);
     }
@@ -265,7 +271,7 @@ mod tests {
     #[tokio::test]
     async fn test_create_batch() {
         crate::setup().await;
-        let user_uuid = "2501e251-d3bd-4852-a2a3-088046fd2119".to_string();
+        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7".to_string();
         let payload = vec!["abc".to_string(), "a1bc".to_string()];
         let result = create_batch(&user_uuid, payload).await;
         println!("{:?}", result);

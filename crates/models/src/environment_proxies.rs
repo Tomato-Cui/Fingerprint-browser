@@ -11,7 +11,7 @@ pub struct Proxy {
     pub port: String,                      // 端口
     pub username: Option<String>,          // 用户名
     pub password: Option<String>,          // 密码
-    pub user_uuid: Option<String>,                 // 用户UUID
+    pub user_uuid: Option<String>,         // 用户UUID
     pub environment_group_id: Option<i32>, // 环境组ID
     pub created_at: Option<String>,        // 创建时间
     pub updated_at: Option<String>,        // 更新时间
@@ -20,15 +20,15 @@ pub struct Proxy {
 
 impl Proxy {
     #[allow(dead_code)]
-    pub async fn insert_proxy(pool: &Pool<Sqlite>, proxy: &Proxy) -> Result<bool, Error> {
+    pub async fn insert_proxy(pool: &Pool<Sqlite>, proxy: &Proxy) -> Result<u32, Error> {
         let sql = "
         INSERT INTO environment_proxies (
             kind, host, port, username, password, user_uuid, environment_group_id
         ) VALUES (
             ?, ?, ?, ?, ?, ?, ?
-        )";
+        ) returning id";
 
-        let row = sqlx::query(sql)
+        let row: u32 = sqlx::query_scalar(sql)
             .bind(&proxy.kind)
             .bind(&proxy.host)
             .bind(&proxy.port)
@@ -36,10 +36,10 @@ impl Proxy {
             .bind(&proxy.password)
             .bind(&proxy.user_uuid)
             .bind(&proxy.environment_group_id)
-            .execute(pool)
+            .fetch_one(pool)
             .await?;
 
-        Ok(row.rows_affected() == 1)
+        Ok(row)
     }
 
     #[allow(dead_code)]

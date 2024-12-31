@@ -71,6 +71,14 @@ pub async fn regsiter(
     Ok(ok)
 }
 
+pub async fn query_search_by_email(email: &str) -> Result<Vec<String>, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let user_emails = models::user::User::search_by_email(pool, email).await?;
+
+    Ok(user_emails)
+}
+
 pub async fn reset_password(
     email: &str,
     password1: &str,

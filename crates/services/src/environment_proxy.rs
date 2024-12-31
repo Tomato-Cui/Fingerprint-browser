@@ -44,7 +44,7 @@ pub async fn create(user_uuid: &str, mut payload: Proxy) -> Result<bool, Service
 
     let ok = Proxy::insert_proxy(pool, &payload).await?;
 
-    Ok(ok)
+    Ok(ok > 1)
 }
 
 pub async fn update(user_uuid: &str, id: u32, payload: Proxy) -> Result<bool, ServiceError> {

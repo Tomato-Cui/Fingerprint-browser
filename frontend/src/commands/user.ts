@@ -17,6 +17,10 @@ export const isLogin = async (): Promise<boolean> => {
     return await invoke('is_login',)
 };
 
+export const user_query_search_by_email = async (email: String): Promise<boolean> => {
+    return await invoke('user_query_search_by_email', { email })
+};
+
 export const reset_password = async (
     email: string,
     password1: string,

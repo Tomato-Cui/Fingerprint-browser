@@ -14,6 +14,7 @@ pub fn build_router() -> Router {
             .route("/login", post(login::handle))
             .route("/logout", get(logout::handle))
             .route("/register", post(register::handle))
+            .route("/search-by-email/:email", get(query_search_by_email::handle))
             .route("/reset-password", post(reset_password::handle))
             .route("/register/send", get(register_send::handle)), // .route("/reset_password/send", get(reset_password_send::handle)),
     )
@@ -70,6 +71,23 @@ mod logout {
                 }
             }
             Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod query_search_by_email {
+    use axum::extract::Path;
+
+    use super::*;
+
+    pub async fn handle(Path(email): Path<String>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::user::query_search_by_email(&email).await {
+            Ok(data) => AppResponse::<Vec<String>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Vec<String>>::fail(warn_msg(r.to_string())),
         }
     }
 }

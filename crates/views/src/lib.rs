@@ -114,6 +114,7 @@ pub fn run() {
             user_command::login,
             user_command::logout,
             user_command::register,
+            user_command::user_query_search_by_email,
             user_command::reset_password,
             user_command::is_login,
             user_command::register_send,
