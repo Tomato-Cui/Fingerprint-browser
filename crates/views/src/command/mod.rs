@@ -14,3 +14,17 @@ pub mod team;
 pub mod team_group;
 pub mod user;
 pub mod user_team_temp;
+
+use serde_json::Value;
+
+#[tauri::command]
+pub async fn ip_info() -> Result<crate::response::AppResponse<Value>, tauri::Error> {
+    let (success_msg, warn_msg) = (Some("获取成功".to_string()), |v| {
+        Some(format!("获取失败: {}", v))
+    });
+
+    Ok(match cores::requests::iprust_info().await {
+        Ok(ok) => crate::response::AppResponse::<Value>::success(success_msg, Some(ok)),
+        Err(r) => crate::response::AppResponse::<Value>::fail(warn_msg(r.to_string())),
+    })
+}

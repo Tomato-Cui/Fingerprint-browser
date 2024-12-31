@@ -96,6 +96,7 @@ pub fn run() {
             team_command::query_team_group_all_user,
             team_command::team_create,
             team_command::team_modify,
+            team_command::switch_team,
             team_command::remove_current_user,
             team_command::team_modify_team_user_info,
             team_command::team_delete,
@@ -133,6 +134,7 @@ pub fn run() {
             browser_command::browser_stops,
             browser_command::browser_status,
             command::os::platform,
+            command::ip_info,
         ])
         .setup(|app| {
             #[cfg(desktop)]

@@ -63,7 +63,15 @@ export const team_modify = async (
     })
 };
 
-//删除
+
+export const switch_team = async (
+    id: number,
+): Promise<any> => {
+    return await invoke('switch_team', {
+        id,
+    })
+};
+
 export const remove_current_user = async (
     currentUserUuid: string,
     teamId: number,

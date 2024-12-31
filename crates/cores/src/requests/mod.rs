@@ -1,4 +1,5 @@
 use reqwest::Client;
+use serde_json::Value;
 use std::path::Path;
 use tokio::{
     fs,
@@ -166,4 +167,16 @@ pub async fn download_file(url: &str, dest: &str) -> Result<(), anyhow::Error> {
     }
 
     Ok(())
+}
+
+pub async fn iprust_info() -> Result<Value, anyhow::Error> {
+    let url = "http://iprust.io/ip.json";
+    let response = Client::new().get(url).send().await?;
+    if !response.status().is_success() {
+        return Err(anyhow::anyhow!("download {} resource fail.", url));
+    }
+
+    let res: Value = response.json().await?;
+
+    Ok(res)
 }

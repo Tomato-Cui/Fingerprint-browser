@@ -218,6 +218,19 @@ pub async fn team_modify(
 }
 
 #[tauri::command]
+pub async fn switch_team(id: u32) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("切换成功".to_string()), |v| {
+        Some(format!("切换失败: {}", v))
+    });
+
+    Ok(match services::team::switch_team(&user_uuid, id).await {
+        Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
+        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+    })
+}
+
+#[tauri::command]
 pub async fn remove_current_user(
     team_id: u32,
     current_user_uuid: String,
