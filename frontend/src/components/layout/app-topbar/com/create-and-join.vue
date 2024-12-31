@@ -164,7 +164,7 @@ const handleSubmit = () => {  //提交添加成员
                         <label class="w-24 pt-2 pr-3 flex justify-end">
                             <span class="text-red-500">*</span> 备注:
                         </label>
-                        <input v-model="formData.description" type="text" placeholder="请输入备注名"
+                        <input v-model="formData.description" type="text" placeholder="请输入备注"
                             class="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required />
                     </div>
@@ -204,7 +204,7 @@ const handleSubmit = () => {  //提交添加成员
                 </div>
                 <div class="flex justify-center items-center gap-4">
                     <label class="w-[80px] flex justify-end">备注</label>
-                    <input v-model="joinForm.description" type="text" placeholder="请输入团队链接"
+                    <input v-model="joinForm.description" type="text" placeholder="请输入备注"
                         class="border border-gray-400 rounded-sm h-[40px] px-5" />
                 </div>
             </div>

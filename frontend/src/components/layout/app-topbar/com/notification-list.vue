@@ -31,9 +31,9 @@ getList()
             <li v-for="note in noteList" class="w-full border mb-3 h-[90px] px-2 py-4 rounded-xl shadow-sm">
                 <div class="h-full flex items-center">
                     <img src="../../../../assets/images/note-avatar.jpg" alt="" class="h-full w-[58px]">
-                    <div class="flex flex-col justify-around ml-2 h-full">
-                        <span class="text-sm">{{ note.description }}</span>
-                        <span class="font-medium">{{ note.description }}</span>
+                    <div class="flex flex-col justify-around ml-2 h-full w-[100px]">
+                        <span class="text-sm truncate">{{ note.description }}</span>
+                        <span class="font-medium truncate">{{ note.description }}</span>
                     </div>
                     <div class="flex flex-1 justify-end" v-if="note.allow_1 === 0">
                         <button class="border w-[100px] h-[40px] rounded-xl hover:bg-blue-100 transition-color duration-500" @click="allowInv(note)">立即加入</button>
