@@ -276,9 +276,7 @@ const columns = [
             'editEnvBtn': () => emits('editEnvBtn', uuid, id),
             'editAccountBtn': () => emits('editAccountBtn', uuid, id, user_uuid),
             'editProxyBtn': () => emits('editProxyBtn', uuid, id),
-            'authMemberBtn': () => emits('authMemberBtn', uuid, id),
             'transferEnvBtn': () => emits('transferEnvBtn', uuid, id),
-            'setCommonBtn': () => emits('setCommonBtn', uuid, id),
             'removeEnv': () => emits('removeEnv', uuid, id)
           }),
         ]), //传入点击事件参数

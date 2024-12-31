@@ -39,10 +39,14 @@ pub async fn account_query_current_environment(
     }))
 }
 
-pub async fn create(payload: &EnvironmentAccount) -> Result<bool, ServiceError> {
+pub async fn create(
+    user_uuid: &str,
+    mut payload: EnvironmentAccount,
+) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
+    payload.user_uuid = Some(user_uuid.to_string());
 
-    let ok = EnvironmentAccount::insert(pool, payload).await?;
+    let ok = EnvironmentAccount::insert(pool, &payload).await?;
 
     Ok(ok)
 }
@@ -96,16 +100,16 @@ mod tests {
     async fn test_create() {
         crate::setup().await;
 
+        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string();
         let payload = EnvironmentAccount {
             platform: "windows".to_string(),
             platform_url: "http://baidu.com".to_string(),
             platform_account: "liusjjkk".to_string(),
             platform_password: "String".to_string(),
             environment_uuid: "3dcd8228-120b-4ae7-b8d7-da7e6628269e".to_string(),
-            user_uuid: "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string(),
             ..Default::default()
         };
-        let result = create(&payload).await.unwrap();
+        let result = create(&user_uuid, payload).await.unwrap();
         println!("{:?}", result)
     }
 
@@ -119,7 +123,7 @@ mod tests {
             platform_account: "lius".to_string(),
             platform_password: "lius".to_string(),
             environment_uuid: "3dcd8228-120b-4ae7-b8d7-da7e6628269e".to_string(),
-            user_uuid: "3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string(),
+            user_uuid: Some("3cfb0bc6-7b48-498a-935a-90ce561e40a5".to_string()),
             id: Some(1),
             ..Default::default()
         };

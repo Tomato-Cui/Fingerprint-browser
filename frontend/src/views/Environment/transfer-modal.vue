@@ -5,7 +5,7 @@ import Input from "@/components/input.vue";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import { user_query_search_by_email } from "@/commands/user";
 import { environment_transfer_history_batch_create } from "@/commands/environment-transfer-history";
-import { XIcon, SearchX } from "lucide-vue-next";
+import { SearchX } from "lucide-vue-next";
 import {
   Select,
   SelectContent,

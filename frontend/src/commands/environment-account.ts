@@ -7,7 +7,7 @@ export type EnvironmentAccount = {
     platform_password: string;
     platform_description?: string;
     environment_uuid: string;
-    user_uuid: string;
+    user_uuid?: string;
 }
 
 export const environment_account_query_id = async (id: number,) => {

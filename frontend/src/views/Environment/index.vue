@@ -41,7 +41,7 @@ import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import TransferModal from "./transfer-modal.vue";
 import EditProxy from "@/views/Environment/com/edit-proxy.vue";
-import EditAccount from "@/views/Divide/com/edit-account.vue";
+import EditAccount from "@/views/Environment/com/edit-account.vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();

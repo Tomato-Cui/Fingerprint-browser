@@ -86,119 +86,110 @@ const proxyForm = ref({
 
 <template>
   <Model
-    class="min-w-[700px]"
+    class="min-w-[600px] text-sm"
     :title="'修改代理'"
     :open="props.editProxyDialog"
     @close="() => emit('update:editProxyDialog', false)"
   >
-    <div class="flex flex-col p-4 space-x-4">
-      <!-- 在这里书写弹出框主题内容代码 -->
-
-      <!-- 主体 -->
-      <div class="px-6 pb-8">
-        <!-- Environment Number -->
-        <div class="pl-4 mb-6">
-          <label class="text-gray-600">环境序号</label>
-          <div class="inline-block px-4 py-1 ml-4 bg-blue-50 rounded">
-            <span class="text-blue-600">{{ props.environmentUuid }}</span>
-          </div>
+    <div class="px-6 pb-8">
+      <!-- Environment Number -->
+      <div class="pl-4 mb-6">
+        <label class="text-gray-600">环境序号</label>
+        <div class="inline-block px-4 py-1 ml-4 bg-blue-50 rounded">
+          <span class="text-blue-600">{{ props.environmentUuid }}</span>
         </div>
+      </div>
 
-        <!-- Custom Configuration Form -->
-        <div class="pl-4 space-y-4">
-          <!-- Proxy Type Dropdown -->
-          <div class="flex relative gap-x-4 items-center">
-            <label class="block mb-2 text-gray-600">代理类型</label>
-            <div class="flex flex-auto items-center">
-              <div class="relative flex-1">
-                <button
-                  @click="toggleDropdown('proxyType')"
-                  class="flex justify-between items-center px-4 py-2 w-full text-left rounded-lg border hover:border-gray-400"
+      <!-- Custom Configuration Form -->
+      <div class="pl-4 space-y-4">
+        <!-- Proxy Type Dropdown -->
+        <div class="flex relative gap-x-4 items-center">
+          <label class="block mb-2 text-gray-600">代理类型</label>
+          <div class="flex flex-auto items-center">
+            <div class="relative flex-1">
+              <button
+                @click="toggleDropdown('proxyType')"
+                class="flex justify-between items-center px-4 py-2 w-full text-left rounded-lg border hover:border-gray-400"
+              >
+                <span>{{ selectedProxyType }}</span>
+                <svg
+                  class="w-5 h-5 text-gray-400"
+                  :class="{
+                    'transform rotate-180': activeDropdown === 'proxyType',
+                  }"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <span>{{ selectedProxyType }}</span>
-                  <svg
-                    class="w-5 h-5 text-gray-400"
-                    :class="{
-                      'transform rotate-180': activeDropdown === 'proxyType',
-                    }"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
 
+              <div
+                v-if="activeDropdown === 'proxyType'"
+                class="absolute z-10 mt-1 w-full bg-white rounded-lg border shadow-lg"
+              >
                 <div
-                  v-if="activeDropdown === 'proxyType'"
-                  class="absolute z-10 mt-1 w-full bg-white rounded-lg border shadow-lg"
+                  v-for="type in proxyTypes"
+                  :key="type"
+                  @click="selectProxyType(type)"
+                  class="px-4 py-2 cursor-pointer hover:bg-gray-100"
                 >
-                  <div
-                    v-for="type in proxyTypes"
-                    :key="type"
-                    @click="selectProxyType(type)"
-                    class="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                  >
-                    {{ type }}
-                  </div>
+                  {{ type }}
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        <div
-          v-if="selectedProxyType != 'NO Proxy (本地直连)'"
-          class="pt-4 space-y-4"
-        >
-          <div class="flex relative gap-x-4 items-center">
-            <label
-              class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
-              ><span class="text-red-500">*</span>代理主机</label
-            >
-            <Input v-model="proxyForm.host" class="flex-auto" />
-          </div>
-          <div class="flex relative gap-x-4 items-center">
-            <label
-              class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
-              ><span class="text-red-500">*</span>代理端口</label
-            >
-            <Input v-model="proxyForm.port" class="flex-auto" />
-          </div>
-
-          <div class="flex relative gap-x-4 items-center">
-            <label
-              class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
-              ><span class="text-red-500">&nbsp;</span>代理账号</label
-            >
-            <Input v-model="proxyForm.username" class="flex-auto" />
-          </div>
-
-          <div class="flex relative gap-x-4 items-center">
-            <label
-              class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
-              ><span class="text-red-500">&nbsp;</span>代理密码</label
-            >
-            <Input v-model="proxyForm.password" class="flex-auto" />
-          </div>
-        </div>
       </div>
 
-      <div class="flex justify-center border-t">
-        <div class="flex gap-x-4 justify-start py-8">
-          <PrimaryButton class="px-8" @click="subMit">确定 </PrimaryButton>
-          <CancelButton
-            class="px-8"
-            @click="() => emit('update:editProxyDialog', false)"
-            >取消
-          </CancelButton>
+      <div
+        v-if="selectedProxyType != 'NO Proxy (本地直连)'"
+        class="pt-4 space-y-4"
+      >
+        <div class="flex relative gap-x-4 items-center">
+          <label
+            class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
+            ><span class="text-red-500">*</span>代理主机</label
+          >
+          <Input v-model="proxyForm.host" class="flex-auto" />
+        </div>
+        <div class="flex relative gap-x-4 items-center">
+          <label
+            class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
+            ><span class="text-red-500">*</span>代理端口</label
+          >
+          <Input v-model="proxyForm.port" class="flex-auto" />
+        </div>
+
+        <div class="flex relative gap-x-4 items-center">
+          <label
+            class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
+            ><span class="text-red-500">&nbsp;</span>代理账号</label
+          >
+          <Input v-model="proxyForm.username" class="flex-auto" />
+        </div>
+
+        <div class="flex relative gap-x-4 items-center">
+          <label
+            class="flex gap-x-2 items-center mb-2 text-gray-600 whitespace-nowrap"
+            ><span class="text-red-500">&nbsp;</span>代理密码</label
+          >
+          <Input v-model="proxyForm.password" class="flex-auto" />
         </div>
       </div>
+    </div>
+
+    <div class="flex border-t justify-end p-2 px-4 gapx--4">
+      <CancelButton @click="() => emit('update:editProxyDialog', false)"
+        >取消
+      </CancelButton>
+      <PrimaryButton @click="subMit">确定 </PrimaryButton>
     </div>
   </Model>
 </template>

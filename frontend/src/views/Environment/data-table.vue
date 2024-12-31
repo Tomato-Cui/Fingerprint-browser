@@ -33,7 +33,6 @@ import { MoreBtn } from "./more-btn";
 import { browser_start, browser_stops } from "@/commands/browser";
 import { toast } from "vue-sonner";
 import { useBrowserStatusStore } from "@/stores/browser";
-import { environment_create } from "@/commands/environment.ts";
 
 export interface Payment {
   id: number;
@@ -328,8 +327,6 @@ const columns = [
             editEnvBtn: () => emits("editEnvBtn", uuid, id),
             editAccountBtn: () => emits("editAccountBtn", uuid, id, user_uuid),
             editProxyBtn: () => emits("editProxyBtn", uuid, id),
-            authMemberBtn: () => emits("authMemberBtn", uuid, id),
-            setCommonBtn: () => emits("setCommonBtn", uuid, id),
             removeEnv: () => emits("removeEnv", uuid, id),
             transferEnvBtn: () => {
               emits(
@@ -339,7 +336,7 @@ const columns = [
               );
             },
           }),
-        ]), //传入点击事件参数
+        ]),
       ]);
     },
   }),

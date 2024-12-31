@@ -62,12 +62,12 @@ pub async fn environment_account_query_current(
 pub async fn environment_account_create(
     payload: EnvironmentAccount,
 ) -> Result<AppResponse<bool>, tauri::Error> {
-    let _ = get_user_id().await?;
+    let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
         Some(format!("创建失败: {}", v))
     });
 
-    match services::environment_account::create(&payload).await {
+    match services::environment_account::create(&user_uuid, payload).await {
         Ok(data) => {
             if data {
                 Ok(AppResponse::<bool>::success(success_msg, Some(data)))

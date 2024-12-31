@@ -91,12 +91,15 @@ mod create {
 
     use super::*;
 
-    pub async fn handle(Json(payload): Json<EnvironmentAccount>) -> impl IntoResponse {
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        Json(payload): Json<EnvironmentAccount>,
+    ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {
             Some(format!("创建失败: {}", v))
         });
 
-        match services::environment_account::create(&payload).await {
+        match services::environment_account::create(&state.user_uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

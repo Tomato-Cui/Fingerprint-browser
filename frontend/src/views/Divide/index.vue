@@ -204,7 +204,6 @@ var environmentId = 0
 var userUuid = ""
 // ----编辑环境
 const editEnvBtn = (uuid: string, id: number) => {
-  console.log("编辑环境:", uuid + "-And-" + id);
   environmentUuid = uuid
   const environment = data.value.find(item => item.uuid === environmentUuid);
   router.push({path: '/environment-action/create',
@@ -216,7 +215,6 @@ const editEnvBtn = (uuid: string, id: number) => {
 };
 // ----编辑账号
 const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
-  console.log("编辑账号:", uuid + "-And-" + id + "  aaand  " + user_uuid);
   environmentUuid = uuid
   environmentId = id
   userUuid = user_uuid
@@ -224,28 +222,23 @@ const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
 };
 // ----修改代理
 const editProxyBtn = (uuid: string, id: number) => {
-  console.log("修改代理:", uuid + "-And-" + id);
   environmentUuid = uuid
   editProxyDialog.value = true
 };
 // ----授权成员
 const authMemberBtn = (uuid: string, id: number) => {
   environmentUuid = uuid
-  console.log("授权成员:", uuid + "-And-" + id);
 };
 // ----转移环境
 const transferEnvBtn = (uuid: string, id: number) => {
   environmentUuid = uuid
-  console.log("转移环境:", uuid + "-And-" + id);
 };
 // ----设为常用
 const setCommonBtn = (uuid: string, id: number) => {
   environmentUuid = uuid
-  console.log("设为常用:", uuid + "-And-" + id);
 };
 // ----删除
 const removeEnv = (uuid: string, id: number) => {
-  console.log("删除:", uuid + "-And-" + id);
   environmentUuid = uuid
   clickDel.value = true
 };

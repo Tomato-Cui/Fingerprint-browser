@@ -10,7 +10,7 @@ pub struct EnvironmentAccount {
     pub platform_password: String,
     pub platform_description: Option<String>, // 平台描述
     pub environment_uuid: String,             // 环境UUID
-    pub user_uuid: String,                    // 用户UUID
+    pub user_uuid: Option<String>,                    // 用户UUID
     pub created_at: Option<String>,           // 创建时间
     pub updated_at: Option<String>,           // 更新时间
     pub deleted_at: Option<String>,           // 删除时间
