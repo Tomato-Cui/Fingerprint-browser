@@ -4,7 +4,7 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineEmits, defineProps, reactive } from "vue";
 import { UserPlus2Icon, UsersIcon } from "lucide-vue-next";
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
-import { environment_proxies_modify } from "@/commands/environment-proxy";
+import { environment_modify_proxy } from "@/commands/environment-proxy";
 import Input from "@/components/input.vue";
 
 const props = defineProps({
@@ -25,10 +25,13 @@ const createForm = reactive({
 //确认
 const subMit = async () => {
   console.log(proxyForm.value, props.environmentUuid);
-  const res = await environment_proxies_modify(
-    props.environmentUuid,
-    proxyForm.value
-  );
+  const res = await environment_modify_proxy(props.environmentUuid, {
+    kind: selectedProxyType.value,
+    host: proxyForm.value.host,
+    port: proxyForm.value.port,
+    username: proxyForm.value.username,
+    password: proxyForm.value.password,
+  });
   console.log(res);
 
   //   emit("update:editProxyDialog", false);

@@ -27,6 +27,7 @@ pub fn build_router() -> Router {
             .route("/batch-export", post(query::handle))
             .route("/modify-basic-info/:uuid", put(modify_basic_info::handle))
             .route("/modify-info/:uuid", put(modify_info::handle))
+            .route("/modify-proxy/:uuid", put(modify_proxy::handle))
             .route("/move-to-group", put(move_to_group::handle))
             .route("/batch/move-to-group", put(batch_move_to_group::handle))
             // .route("/grant-permission", put(batch::handle))
@@ -246,6 +247,30 @@ mod modify_info {
         )
         .await
         {
+            Ok(data) => {
+                if data {
+                    AppResponse::<()>::success(success_msg, Some(()))
+                } else {
+                    AppResponse::<()>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<()>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod modify_proxy {
+    use super::*;
+
+    pub async fn handle(
+        Path(uuid): Path<String>,
+        Json(payload): Json<models::environment_proxies::Proxy>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+            Some(format!("更新失败: {}", v))
+        });
+
+        match services::environment_proxy::update_proxy(&uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

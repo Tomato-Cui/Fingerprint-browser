@@ -1,5 +1,5 @@
 use crate::response::AppResponse;
-use models::environment::Environment;
+use models::{environment::Environment, environment_proxies::Proxy};
 use serde_json::Value;
 
 use super::user::get_user_id;
@@ -167,6 +167,30 @@ pub async fn environment_modify_info(
 
     Ok(
         match services::environment::modify_info(&user_uuid, environment_uuid, payload).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
+            }
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
+pub async fn environment_modify_proxy(
+    environment_uuid: String,
+    payload: Proxy,
+) -> Result<AppResponse<bool>, tauri::Error> {
+    let _ = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
+        Some(format!("更新失败: {}", v))
+    });
+
+    Ok(
+        match services::environment_proxy::update_proxy(&environment_uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))
