@@ -388,26 +388,7 @@ const subDel = () => { //确认删除
     }
   })
 }
-const members = ref([
-  {
-    id: 1,
-    name: "刘芳",
-    group: "管理者",
-    groupId: 1,
-    contact: "18762736836",
-    environment: "/",
-    environments: [{ name: "新建环境1", account: "未绑定" }], note: "\\"
-  },
-  {
-    id: 2,
-    name: "李国强",
-    group: "编者",
-    groupId: 2,
-    contact: "1526738273@qq.com",
-    environment: "/",
-    environments: [{ name: "新建环境1", account: "未绑定" }], note: "\\"
-  },
-]);
+const members = ref([]);
 const memberTotal = ref(members.value.length)
 const groups = ref([
   { id: 0, groupName: "全部" },
@@ -454,12 +435,8 @@ const getList = () => {
     } else {
       //查询该团队下所有成员
       query_team_all_user(res.data.id, pagination.pageIndex, pagination.pageSize).then(res2 => {
-        console.log("aaa:", res2.data.data);
-
         members.value = res2.data.data
-        pagination.total = res.data.total
-        console.log("?????:", pagination);
-        
+        pagination.total = res2.data.total        
       })
     }
     //查询分组

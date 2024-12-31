@@ -8,12 +8,12 @@ import { defineAsyncComponent } from 'vue';
 import { XIcon, CheckIcon } from 'lucide-vue-next'
 import { toast } from "vue-sonner";
 
-// const AsyncButton = defineAsyncComponent(() => import('@shadcn-vue/core').then(module => module.Button));
 const router = useRouter()
 const props = defineProps({
-    switchTeam: Boolean
+    switchTeam: Boolean,
+    isLoadDialog: Boolean
 })
-const emit = defineEmits(['update:switchTeam'])
+const emit = defineEmits(['update:switchTeam', 'update:isLoadDialog'])
 const teams = ref([
     { id: 1, name: '12343234' },
     { id: 2, name: '这是测试' },
@@ -26,16 +26,20 @@ const selectTeam = (teamId) => {
     selectedTeam.value = teamId
 }
 
+const isLoad = ref(true)
 const confirmSelection = () => {
     emit('update:switchTeam', false)
     switch_team(selectedTeam.value).then(res => {
         toast.message(res.message)
         router.push('/environment')
         getList()
+        // console.log("teams----:", teams.value);
+        emit("update:isLoadDialog", true)  //开启加载效果
+        setTimeout(() => {
+            emit("update:isLoadDialog", false)  //关闭加载效果
+        }, 1000)
         //刷新
         window.location.reload()
-        // console.log("teams----:", teams.value);
-        
     })
 }
 
@@ -87,4 +91,5 @@ onMounted(() => {
             </div>
         </div>
     </Model>
+    
 </template>

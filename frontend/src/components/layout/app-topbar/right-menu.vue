@@ -16,6 +16,7 @@ import { useRouter } from 'vue-router'
 import { logout } from '@/commands/user'
 import { useUserStore } from '@/stores/user'
 import NotificationList from './com/notification-list.vue'
+import Loading from "@/components/loading.vue";
 
 const router = useRouter()
 const invMember = ref(false)
@@ -26,6 +27,7 @@ const profileDown = ref(false)
 
 const userSotre = useUserStore();
 const userInfo = userSotre.getUserInfo();
+const isLoadDialog = ref(false)
 
 const subQuit = () => {
     quitTeamDialog.value = false
@@ -197,11 +199,15 @@ const subQuit = () => {
             </PopoverContent>
         </Popover>
     </div>
+    <!-- 加载 -->
+    <div v-if="isLoadDialog" class="absolute bg-black opacity-30 w-screen h-screen z-[100]">
+        <Loading />
+    </div>
 
     <!-- 邀请成员 -->
     <InvMember v-model:invMember="invMember" />
     <!-- 切换团队 -->
-    <changeTeam v-model:switchTeam="switchTeam" />
+    <changeTeam v-model:switchTeam="switchTeam" :isLoadDialog="isLoadDialog"/>
     <!-- 删除消息弹出框 -->
     <AlertModel :title="'退出登录'" :open="quitTeamDialog" @close="() => (quitTeamDialog = false)"
         @cancel="() => (quitTeamDialog = false)" @submit="subQuit">
