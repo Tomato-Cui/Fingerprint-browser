@@ -24,7 +24,6 @@ const createForm = reactive({
 });
 //确认
 const subMit = async () => {
-  console.log(proxyForm.value, props.environmentUuid);
   const res = await environment_modify_proxy(props.environmentUuid, {
     kind: selectedProxyType.value,
     host: proxyForm.value.host,
@@ -32,9 +31,8 @@ const subMit = async () => {
     username: proxyForm.value.username,
     password: proxyForm.value.password,
   });
-  console.log(res);
 
-  //   emit("update:editProxyDialog", false);
+  emit("update:editProxyDialog", false);
 };
 
 const environmentNumber = ref(7); // 环境序号
