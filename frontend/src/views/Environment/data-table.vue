@@ -316,7 +316,12 @@ const columns = [
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
-const columnVisibility = ref<VisibilityState>({});
+const columnVisibility = ref<VisibilityState>({
+  id: false,
+  uuid: false,
+  proxy_host: false,
+  proxy_port: false,
+});
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 

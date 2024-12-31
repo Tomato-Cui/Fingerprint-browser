@@ -52,10 +52,6 @@ const searchType = ref<{ title: keyof Payment; value: string }>({
   value: "名称",
 });
 
-const selectedData = computed(() => {
-  return data.value.filter((item) => item.selected);
-});
-
 const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({

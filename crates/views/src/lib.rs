@@ -1,5 +1,6 @@
 use components::windows::tray;
 use tauri::AppHandle;
+use tauri::Emitter;
 use tauri::Manager;
 use tauri::RunEvent;
 use tauri::Window;
@@ -160,6 +161,8 @@ pub fn run() {
                 .unwrap();
 
             tray::menu(app)?;
+
+            let _ = app.emit("init", ());
             Ok(())
         })
         .on_window_event(window_event_handle)

@@ -165,6 +165,7 @@ pub async fn modify_basic_info(
 
     Ok(ok)
 }
+
 pub async fn modify_info(
     user_uuid: &str,
     environment_uuid: &str,
