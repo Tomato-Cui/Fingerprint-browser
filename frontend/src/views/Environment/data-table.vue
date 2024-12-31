@@ -42,6 +42,8 @@ export interface Payment {
   country: string;
   group: string;
   proxy: string;
+  proxy_host: string;
+  proxy_port: string;
   default_urls: string;
   os: string;
   selected?: boolean;
@@ -76,7 +78,9 @@ const columns = [
           table.toggleAllPageRowsSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
+            table
+              .getSelectedRowModel()
+              .rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select all",
@@ -89,7 +93,9 @@ const columns = [
           row.toggleSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
+            table
+              .getSelectedRowModel()
+              .rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select row",
@@ -101,6 +107,14 @@ const columns = [
     enablePinning: true,
   }),
   columnHelper.accessor("uuid", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
+  columnHelper.accessor("proxy_host", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
+  columnHelper.accessor("proxy_port", {
     header: () => h("div", { class: "hidden" }),
     cell: () => h("div", { class: "hidden" }),
   }),
@@ -132,7 +146,11 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h("div", { class: "lowercase whitespace-nowrap" }, row.getValue("description") || "/"),
+      h(
+        "div",
+        { class: "lowercase whitespace-nowrap" },
+        row.getValue("description") || "/"
+      ),
   }),
   columnHelper.accessor("os", {
     header: ({ column }) => {
@@ -165,8 +183,12 @@ const columns = [
         () => ["代理", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
       );
     },
-    cell: ({ row }) =>
-      h("div", { class: "lowercase" }, row.getValue("proxy") || "/"),
+    cell: ({ row }) => {
+      let proxy_host = (row.getValue("proxy_host") as string) || "";
+      let proxy_port = (row.getValue("proxy_port") as string) || "";
+      let proxy_ip = proxy_host ? proxy_host + ":" + proxy_port : "/";
+      return h("div", { class: "lowercase" }, proxy_ip);
+    },
   }),
   columnHelper.accessor("group", {
     header: ({ column }) => {

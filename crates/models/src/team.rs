@@ -92,6 +92,21 @@ impl Team {
     }
 
     #[allow(dead_code)]
+    pub async fn query_team_search_name(
+        pool: &Pool<Sqlite>,
+        name: &str,
+    ) -> Result<Vec<Team>, Error> {
+        let teams: Vec<Team> = sqlx::query_as(&format!(
+            "SELECT * FROM teams WHERE name like '%{}%' AND deleted_at IS NULL",
+            name
+        ))
+        .fetch_all(pool)
+        .await?;
+
+        Ok(teams)
+    }
+
+    #[allow(dead_code)]
     pub async fn query_team_by_id(pool: &Pool<Sqlite>, id: u32) -> Result<Team, Error> {
         let team: Team = sqlx::query_as("SELECT * FROM teams WHERE id = ? AND deleted_at IS NULL")
             .bind(id)
@@ -164,6 +179,22 @@ impl Team {
         .await?;
 
         Ok(team)
+    }
+
+    #[allow(dead_code)]
+    pub async fn is_leader(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        team_id: u32,
+    ) -> Result<bool, Error> {
+        let (is_leader,): (i64,) =
+            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ? and is_leader = 1")
+                .bind(team_id)
+                .bind(user_uuid)
+                .fetch_one(pool)
+                .await?;
+
+        Ok(is_leader > 0)
     }
 
     #[allow(dead_code)]
@@ -252,12 +283,13 @@ impl Team {
         page_num: u32,
         page_size: u32,
     ) -> Result<(i64, Vec<crate::dto::team_info::UserInfoWithGroup>), Error> {
-        let (is_leader,): (i64,) =
-            sqlx::query_as("SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ? and is_leader = 1")
-                .bind(team_id)
-                .bind(user_uuid)
-                .fetch_one(pool)
-                .await?;
+        let (is_leader,): (i64,) = sqlx::query_as(
+            "SELECT count(1) FROM user_team_relation WHERE team_id = ? and user_uuid = ?",
+        )
+        .bind(team_id)
+        .bind(user_uuid)
+        .fetch_one(pool)
+        .await?;
 
         if !(is_leader > 0) {
             return Ok((0, vec![]));

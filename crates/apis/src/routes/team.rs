@@ -14,6 +14,8 @@ pub fn build_router() -> Router {
         Router::new()
             .route("/:id", get(query_id::handle))
             .route("/query", get(query::handle))
+            .route("/is-leader", get(is_leader::handle))
+            .route("/query-by-name", get(query_by_name::handle))
             .route("/query/current-team", get(query_current_team::handle))
             .route("/query/team-all-user", post(query_team_all_user::handle))
             .route(
@@ -51,6 +53,41 @@ mod query_id {
     }
 }
 
+mod is_leader {
+
+    use super::*;
+
+    pub async fn handle(
+        state: Extension<CurrentUser>,
+        Path(team_id): Path<u32>,
+    ) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::team::is_leader(&state.user_uuid, team_id).await {
+            Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
+mod query_by_name {
+
+    use super::*;
+
+    pub async fn handle(Path(team_name): Path<String>) -> impl IntoResponse {
+        let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+            Some(format!("查询失败: {}", v))
+        });
+
+        match services::team::query_by_search_name(&team_name).await {
+            Ok(data) => AppResponse::<Vec<Team>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Vec<Team>>::fail(warn_msg(r.to_string())),
+        }
+    }
+}
+
 mod query {
 
     use super::*;
@@ -70,6 +107,7 @@ mod query {
         }
     }
 }
+
 mod query_current_team {
     use super::*;
 
