@@ -114,7 +114,6 @@
 
 
       <!-- Pagination -->
-       {{ pagination }}
       <div class="flex items-center justify-end space-x-2 py-1">
         <div class="flex-1 text-sm text-muted-foreground">
           共{{ pagination.total }}条

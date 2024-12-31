@@ -191,7 +191,7 @@ const registerForm = ref({
   username: "",
   password: "",
   email: "",
-  code: "",
+  codes: "",
 });
 
 const handleLogin = () => {
@@ -205,7 +205,7 @@ const handleLogin = () => {
         router.push("/environment");
         userSotre.login({
           account: loginForm.value.username,
-        });
+        }); 
       } else {
         loading.value = false;
         toast.warning(res.message);

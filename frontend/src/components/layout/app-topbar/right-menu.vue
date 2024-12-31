@@ -15,6 +15,8 @@ import CreateAndJoin from './com/create-and-join.vue'
 import { useRouter } from 'vue-router'
 import { logout } from '@/commands/user'
 import { useUserStore } from '@/stores/user'
+import NotificationList from './com/notification-list.vue'
+import Loading from "@/components/loading.vue";
 
 const router = useRouter()
 const invMember = ref(false)
@@ -25,6 +27,7 @@ const profileDown = ref(false)
 
 const userSotre = useUserStore();
 const userInfo = userSotre.getUserInfo();
+const isLoadDialog = ref(false)
 
 const subQuit = () => {
     quitTeamDialog.value = false
@@ -81,20 +84,9 @@ const subQuit = () => {
                     </div>
 
                     <!-- Notification List -->
-                    <div class="divide-y flex-auto">
-                        <div class="flex gap-3 p-4">
-                            <div class="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                                <Bell class="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-medium">账单通知</h3>
-                                    <span class="text-sm text-gray-400">12/05 09:27</span>
-                                </div>
-                                <p class="text-sm text-gray-500 truncate">
-                                    您的【11月账单】您的...
-                                </p>
-                            </div>
+                    <div class="divide-y flex-auto h-full">
+                        <div class="flex gap-3 p-4 h-full">
+                            <NotificationList />
                         </div>
                     </div>
 
@@ -183,11 +175,11 @@ const subQuit = () => {
                         <User2Icon class="w-4 h-4" />
                         用户中心
                     </div>
-                    <div @click="invMember = true"
+                    <!-- <div @click="invMember = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
                         <UserPlusIcon class="w-4 h-4" />
                         邀请成员
-                    </div>
+                    </div> -->
                     <div @click="switchTeam = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
                         <UsersIcon class="w-4 h-4" />
@@ -196,7 +188,7 @@ const subQuit = () => {
                     <div @click="createAndJoin = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
                         <TagIcon class="w-4 h-4" />
-                        加入/创建团队
+                        加入团队/邀请成员
                     </div>
                     <div @click="quitTeamDialog = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
@@ -207,11 +199,15 @@ const subQuit = () => {
             </PopoverContent>
         </Popover>
     </div>
+    <!-- 加载 -->
+    <div v-if="isLoadDialog" class="absolute bg-black opacity-30 w-screen h-screen z-[100]">
+        <Loading />
+    </div>
 
     <!-- 邀请成员 -->
     <InvMember v-model:invMember="invMember" />
     <!-- 切换团队 -->
-    <changeTeam v-model:switchTeam="switchTeam" />
+    <changeTeam v-model:switchTeam="switchTeam" :isLoadDialog="isLoadDialog"/>
     <!-- 删除消息弹出框 -->
     <AlertModel :title="'退出登录'" :open="quitTeamDialog" @close="() => (quitTeamDialog = false)"
         @cancel="() => (quitTeamDialog = false)" @submit="subQuit">

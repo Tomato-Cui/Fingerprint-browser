@@ -29,7 +29,8 @@ const subMit = () => {
         return
     }
     environment_group_create(addGroup.groupName, addGroup.description).then(res => {
-        console.log("res", res)
+        // console.log("res", res)
+        toast.message(res.message)
     })
 }
 watch(() => props.createGroupDialog, (val) => {
