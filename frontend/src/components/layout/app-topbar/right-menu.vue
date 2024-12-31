@@ -15,6 +15,7 @@ import CreateAndJoin from './com/create-and-join.vue'
 import { useRouter } from 'vue-router'
 import { logout } from '@/commands/user'
 import { useUserStore } from '@/stores/user'
+import NotificationList from './com/notification-list.vue'
 
 const router = useRouter()
 const invMember = ref(false)
@@ -81,20 +82,9 @@ const subQuit = () => {
                     </div>
 
                     <!-- Notification List -->
-                    <div class="divide-y flex-auto">
-                        <div class="flex gap-3 p-4">
-                            <div class="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                                <Bell class="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-medium">账单通知</h3>
-                                    <span class="text-sm text-gray-400">12/05 09:27</span>
-                                </div>
-                                <p class="text-sm text-gray-500 truncate">
-                                    您的【11月账单】您的...
-                                </p>
-                            </div>
+                    <div class="divide-y flex-auto h-full">
+                        <div class="flex gap-3 p-4 h-full">
+                            <NotificationList />
                         </div>
                     </div>
 
@@ -183,11 +173,11 @@ const subQuit = () => {
                         <User2Icon class="w-4 h-4" />
                         用户中心
                     </div>
-                    <div @click="invMember = true"
+                    <!-- <div @click="invMember = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
                         <UserPlusIcon class="w-4 h-4" />
                         邀请成员
-                    </div>
+                    </div> -->
                     <div @click="switchTeam = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
                         <UsersIcon class="w-4 h-4" />
@@ -196,7 +186,7 @@ const subQuit = () => {
                     <div @click="createAndJoin = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
                         <TagIcon class="w-4 h-4" />
-                        加入/创建团队
+                        加入团队/邀请成员
                     </div>
                     <div @click="quitTeamDialog = true"
                         class="hover:bg-sidebar hover:text-primary px-2 py-1 rounded-md cursor-pointer flex items-center gap-x-2 text-sm">
