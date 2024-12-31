@@ -8,6 +8,14 @@ export const team_query = async (pageNum: number, pageSize: number): Promise<any
     return await invoke('team_query', { pageNum, pageSize })
 };
 
+export const team_is_leader = async (teamId: number): Promise<any> => {
+    return await invoke('team_is_leader', { teamId })
+};
+
+export const team_query_name = async (teamName: String): Promise<any> => {
+    return await invoke('team_query_name', { teamName })
+};
+
 
 export const query_current_team_info = async (): Promise<any> => {
     return await invoke('query_current_team_info', {})

@@ -3,6 +3,20 @@ use serde_json::{json, Value};
 
 use crate::error::ServiceError;
 
+pub async fn is_leader(user_uuid: &str, team_id: u32) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+    let team = Team::is_leader(pool, user_uuid, team_id).await?;
+
+    Ok(team)
+}
+
+pub async fn query_by_search_name(team_name: &str) -> Result<Vec<Team>, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+    let team = Team::query_team_search_name(pool, team_name).await?;
+
+    Ok(team)
+}
+
 pub async fn query_by_id(id: u32) -> Result<Team, ServiceError> {
     let pool = states::database::get_database_pool()?;
     let team = Team::query_team_by_id(pool, id).await?;
@@ -305,6 +319,14 @@ mod tests {
         crate::setup().await;
         let result =
             query_team_group_all_user("d3129a09-5473-4b1e-915b-bba0af78d752", 1, 1, 1, 10).await;
+
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_query_by_search_name() {
+        crate::setup().await;
+        let result = query_by_search_name("liushuinew").await;
 
         println!("{:?}", result);
     }

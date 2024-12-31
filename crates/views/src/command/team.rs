@@ -5,6 +5,34 @@ use serde_json::Value;
 use super::user::get_user_id;
 
 #[tauri::command]
+pub async fn team_is_leader(team_id: u32) -> Result<AppResponse<bool>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(match services::team::is_leader(&user_uuid, team_id).await {
+        Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
+        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+    })
+}
+
+#[tauri::command]
+pub async fn team_query_name(team_name: &str) -> Result<AppResponse<Vec<Team>>, tauri::Error> {
+    let _ = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    Ok(
+        match services::team::query_by_search_name(team_name).await {
+            Ok(data) => AppResponse::<Vec<Team>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Vec<Team>>::fail(warn_msg(r.to_string())),
+        },
+    )
+}
+
+#[tauri::command]
 pub async fn team_query_id(id: u32) -> Result<AppResponse<Team>, tauri::Error> {
     let _ = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
