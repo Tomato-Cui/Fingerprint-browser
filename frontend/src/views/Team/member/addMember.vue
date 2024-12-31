@@ -318,15 +318,17 @@ const props = defineProps({
 const memberObj = ref(null)
 watch(() => props.memberObj, (val) => {
   memberObj.value = val    //赋值被编辑用户信息
-  console.log("_+_+_+_+_:", memberObj.value);
-  
+
   if (val) {
-    // formData.value.name = val.name
-    // formData.value.account = val.name
+    searchGroup() //获取分组信息以得到分组id
+    setTimeout(() => {   //延时使分组数据成功获取
+      formData.value.groupId = teamGroup.value?.find(item => item.name === val.group_name)?.id  //赋值分组ID
+    }, 100)
     formData.value.remarkName = val.description
     teamGroupName.value = val.group_name
-    // formData.value.groupId = groups.value.find(item => item.name = val.group_name).id
   }
+
+
 })
 const emit = defineEmits(["update:addMemModel"]);
 const formData = ref({
@@ -348,10 +350,10 @@ const clearFormData = () => {
 }
 const teamGroupName = ref("请选择分组")
 watch(() => formData.value.groupId, (val) => {
-  teamGroupName.value = teamGroup.value.find((group) => group.id === val).name
+  teamGroupName.value = teamGroup.value.find((group) => group.id === val)?.name
 })
 
-const groups = ref(["管理员组", "普通用户组", "访客组"]);
+const groups = ref([]);
 
 watch(
   () => formData.value.account,
@@ -392,16 +394,16 @@ const handleSubmit = () => {  //提交添加成员
     //修改
     // console.log("props.member:", props.memberObj);
     // console.log("form::::::::::", formData.value);
-    
+
     team_modify_team_user_info(props.memberObj.team_id, formData.value.groupId, props.memberObj.user_uuid, formData.value.remarkName).then(res => {
       toast.message(res.message)
     });
   } else {  //发送邀请
     query_current_team_info().then(res => {
       team_send(res.data.id, formData.value.account, formData.value.remarkName).then(res => {
-        if(res.message.includes("发送失败")){
+        if (res.message.includes("发送失败")) {
           toast.warning(res.message)
-        }else{
+        } else {
           toast.success("邀请发送成功")
         }
       });
@@ -490,12 +492,7 @@ const envGroup = ref([
   { id: 4, groupName: "分组d" },
 ])
 //团队的分组
-const teamGroup = ref([
-  { id: 1, groupName: "分组a" },
-  { id: 2, groupName: "分组b" },
-  { id: 3, groupName: "分组c" },
-  { id: 4, groupName: "分组d" },
-])
+const teamGroup = ref([])
 const optionName = ref('所有操作类型')
 watch(() => searchForm.selectOption, (val) => {
   optionName.value = val === 0 ? '所有操作系统' : val === 1 ? 'Windows' : 'Android'

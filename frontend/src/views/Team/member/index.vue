@@ -299,7 +299,7 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
-import { ref, computed, onMounted, onBeforeUnmount, reactive } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, reactive, watch } from "vue";
 import {
   UserPlusIcon,
   PlusIcon,
@@ -439,6 +439,12 @@ const editMember = (member) => {
   memberObj.value = member
   addMemModel.value = true
 }
+watch(() => addMemModel.value, (val) => {  //监听使数据更新后刷新页面
+  if(!val){
+    console.log("给我刷新");
+    getList()
+  }
+})
 
 const getList = () => {
   //查询用户团队

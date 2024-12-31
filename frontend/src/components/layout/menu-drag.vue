@@ -11,6 +11,7 @@ import { environment_group_query } from '@/commands/environment-group';
 import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as ComponentIcon } from 'lucide-vue-next'
 import { PrimaryButton } from "@/components/button";
 import CreateGroup from "@/views/Divide/com/create-group.vue"
+import { watch } from 'vue';
 
 const props = defineProps({
     menu: [],
@@ -24,8 +25,14 @@ const createGroupDialog = ref(false)  // 创建分组
 const createGroup = () => {
     createGroupDialog.value = true
 };
+watch(createGroupDialog, (val) => {
+    
+    if (!val) {
+        getList()
+    }
+})
 
-onMounted(() => {
+const getList = () => {
     environment_group_query(1, 1000).then(res => {
         //获取到的数组依次添加到props.menu中
         res.data.data.forEach(item => {
@@ -45,6 +52,10 @@ onMounted(() => {
     }).catch(err => {
         console.log(err)
     })
+}
+
+onMounted(() => {
+    getList()
 
     new Sortable(hsSortable.value, {
         animation: 150,
@@ -56,7 +67,7 @@ onMounted(() => {
 
 <template>
     <!-- {{ menus }} -->
-    <ul ref="hsSortable" class="max-w-xs flex flex-col hs-handle ">
+    <ul ref="hsSortable" class="max-w-xs flex flex-col hs-handle max-h-[230px] overflow-auto">
         <SidebarMenuItem v-for="item in menus" :key="item.id" class="ml-2 mt-2 group ">
             <SidebarMenuButton asChild :class="`  text-[16px] rounded-md h-12 cursor-grab min-h-12 flex justify-start items-center px-6 text-[#858C94] ${item.title == '分组管理' ? 'h-10 min-h-10' : ''} ${item.url == route.path && 'bg-white text-primary'
                 }`">
