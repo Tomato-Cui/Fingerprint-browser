@@ -2,6 +2,7 @@
 import { Model } from "@/components/model/index";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineProps, defineEmits, onMounted } from 'vue'
+import { team_query } from "@/commands/team"
 
 const props = defineProps({
     switchTeam: Boolean
@@ -13,13 +14,6 @@ const teams = ref([
   { id: 1, name: '12343234' },
   { id: 2, name: '这是测试' },
   { id: 3, name: 'wrewg' },
-  { id: 4, name: 'wrewg' },
-  { id: 5, name: 'wrewg' },
-  { id: 6, name: 'wrewg' },
-  { id: 7, name: 'wrewg' },
-  { id: 8, name: 'wrewg' },
-  { id: 9, name: 'wrewg' },
-  { id: 10, name: 'wrewg' },
 ])
 
 const selectedTeam = ref(2) // Default selected team
@@ -35,6 +29,12 @@ const confirmSelection = () => {
     emit('select', selectedTeam.value)
   }
 }
+
+onMounted(() => {
+    team_query(1, 1000).then(res => {
+        teams.value = res.data.data
+    });
+})
 </script>
 
 <template>
@@ -53,7 +53,7 @@ const confirmSelection = () => {
                             'border-gray-200 hover:border-gray-300': selectedTeam !== team.id
                         }" @click="selectTeam(team.id)">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-900">{{ team.teamName }}</span>
+                            <span class="text-gray-900">{{ team.name }}</span>
                             <CheckIcon v-if="selectedTeam === team.id" class="w-5 h-5 text-blue-500" />
                         </div>
                     </div>
