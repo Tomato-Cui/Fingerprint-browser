@@ -9,7 +9,7 @@ import { useEnvironmentCreateFromStore } from "@/stores/form/environment-create"
 import { useEnvironmentCreatesFromStore } from "@/stores/form/environment-creates";
 import {
   environment_create,
-  environment_batch_create,
+  environment_batch_create, environment_modify_basic_info,
 } from "@/commands/environment";
 import { toast } from "vue-sonner";
 
@@ -28,18 +28,34 @@ const proxyModelOpenHandle = () => (importProxyOpen.value = true);
 
 const environmentCreateFrom = useEnvironmentCreateFromStore();
 const environmentCreatesFrom = useEnvironmentCreatesFromStore();
+console.log(route)
 const onSubmit = () => {
-  if (route.path == "/environment-action/create") {
+  if (route.path === "/environment-action/create") {
+
     environmentCreateFrom.handleSubmit(async (values) => {
       try {
-        let { name } = values;
-        let res = await environment_create(name);
-        toast.success(res.message);
+        let { name,description} = values;
+        const action = route.query.action;
+        console.log("这是action:  "+action)
+        const environment = route.query.environment ? JSON.parse(route.query.environment) : null;
+        console.log("这是环境"+environment.uuid)
+        if (action === "edit") {
+          // 修改逻辑
+          environment.name = name
+          environment.description =description
+          let res= await environment_modify_basic_info(environment.uuid,environment)
+          toast.success("环境信息更新成功：" + res.message);
+        } else {
+          // 创建逻辑
+          let res = await environment_create(name);
+          toast.success("环境创建成功：" + res.message);
+        }
+
       } catch (error) {
         toast.warning("创建失败:" + error);
       }
     })();
-  } else if (route.path == "/environment-action/creates") {
+  } else if (route.path === "/environment-action/creates") {
     environmentCreatesFrom.handleSubmit(async (values) => {
       try {
         let { name, numbers } = values;

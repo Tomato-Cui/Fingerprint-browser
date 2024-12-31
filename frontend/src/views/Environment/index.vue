@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { Button } from "@/components/ui/button";
+<script lang="ts" setup>
+import {Button} from "@/components/ui/button";
 import {
   Pagination,
   PaginationEllipsis,
@@ -16,29 +16,31 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ref, onMounted, reactive, computed, watch } from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import TooltipButton from "@/components/tooltip-button.vue";
 import {
-  LogsIcon,
-  PackageOpenIcon,
-  PackageIcon,
-  ExternalLinkIcon,
-  TrashIcon,
   ArrowRightFromLineIcon,
+  ExternalLinkIcon,
+  LogsIcon,
+  PackageIcon,
+  PackageOpenIcon,
+  TrashIcon,
 } from "lucide-vue-next";
 import SearchInput from "./search-input.vue";
 import GroupSelect from "./group-select.vue";
-import {
-  environment_batch_delete,
-  environment_query,
-  environment_query_by_group,
-} from "@/commands/environment";
-import DataTable, { type Payment } from "./data-table.vue";
-import { PrimaryButton } from "@/components/button";
-import { browser_starts, browser_stops } from "@/commands/browser";
-import { useBrowserStatusStore } from "@/stores/browser";
-import { toast } from "vue-sonner";
-import { convertToCSV, downloadCSV } from "@/util/lib";
+import {environment_batch_delete, environment_query, environment_query_by_group,} from "@/commands/environment";
+import DataTable, {type Payment} from "./data-table.vue";
+import {PrimaryButton} from "@/components/button";
+import {browser_starts, browser_stops} from "@/commands/browser";
+import {useBrowserStatusStore} from "@/stores/browser";
+import {toast} from "vue-sonner";
+import {convertToCSV, downloadCSV} from "@/util/lib";
+import EditProxy from "@/views/Divide/com/edit-proxy.vue";
+import EditAccount from "@/views/Divide/com/edit-account.vue";
+import {useRoute, useRouter} from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
 
 const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
@@ -63,8 +65,8 @@ const pagination = reactive({
 });
 
 const loadData = (index: number, size: number) => {
-  environment_query(index-1, size).then((res) => {
-    let { data: data_, total } = res.data;
+  environment_query(index - 1, size).then((res) => {
+    let {data: data_, total} = res.data;
     pagination.total = total;
     data.value = data_;
   });
@@ -73,7 +75,7 @@ const loadData = (index: number, size: number) => {
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 const paginationClickHandle = (index: number) => {
   console.log("index:", index);
-  
+
   loadData(index, pagination.pageSize);
   pagination.pageIndex = index;
 };
@@ -107,13 +109,13 @@ const closeGroup = () => {
 const batchDelete = () => {
   let ids = [...selectData.value].map((item) => item) as any[];
   environment_batch_delete(ids)
-    .then((_: any) => {
-      data.value = data.value.filter((item) => !ids.includes(item.uuid));
-      toast.success("删除成功");
-    })
-    .catch((err) => {
-      toast.warning(err);
-    });
+      .then((_: any) => {
+        data.value = data.value.filter((item) => !ids.includes(item.uuid));
+        toast.success("删除成功");
+      })
+      .catch((err) => {
+        toast.warning(err);
+      });
 };
 
 const exportData = () => {
@@ -130,7 +132,8 @@ const groupOperationBtns = computed(() => [
   {
     title: "导入",
     icon: ExternalLinkIcon,
-    click: () => {},
+    click: () => {
+    },
     disabled: true,
   },
   {
@@ -164,11 +167,11 @@ const searchValueHandle = (value: string) => {
 watch(groupSelect, (newVal) => {
   if (newVal && newVal != "0") {
     environment_query_by_group(
-      parseInt(newVal),
-      pagination.pageIndex,
-      pagination.pageSize
+        parseInt(newVal),
+        pagination.pageIndex,
+        pagination.pageSize
     ).then((res) => {
-      let { data: data_, total } = res.data;
+      let {data: data_, total} = res.data;
       pagination.total = total;
       data.value = data_;
     });
@@ -176,40 +179,74 @@ watch(groupSelect, (newVal) => {
     loadData(pagination.pageIndex, pagination.pageSize);
   }
 });
+
+const editAccountDialog = ref(false)  // 编辑账号
+const editProxyDialog = ref(false)  // 修改代理
+//下拉菜单中的的按钮
+let environmentUuid = "";
+let environmentId = 0;
+let userUuid = "";
+
+const editEnvBtn = (uuid: string, id: number) => {
+  console.log("编辑环境:", uuid + "-And-" + id);
+  environmentUuid = uuid
+  const environment = data.value.find(item => item.uuid === environmentUuid);
+  router.push({path: '/environment-action/create',
+    query: {
+    id: uuid,
+      action: "edit",
+      environment:JSON.stringify(environment)
+  }})
+};
+
+// ----编辑账号
+const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
+  console.log("编辑账号:", uuid + "-And-" + id + "  aaand  " + user_uuid);
+  environmentUuid = uuid
+  environmentId = id
+  userUuid = user_uuid
+  editAccountDialog.value = true
+};
+// ----修改代理
+const editProxyBtn = (uuid: string, id: number) => {
+  console.log("修改代理:", uuid + "-And-" + id);
+  environmentUuid = uuid
+  editProxyDialog.value = true
+};
 </script>
 
 <template>
   <div class="flex flex-col p-3 bg-gray-50 h-main">
     <div
-      class="flex overflow-hidden flex-col flex-1 px-2 bg-white rounded-lg shadow"
+        class="flex overflow-hidden flex-col flex-1 px-2 bg-white rounded-lg shadow"
     >
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
-            <GroupSelect @select="groupSelectHandle" />
+            <GroupSelect @select="groupSelectHandle"/>
             <SearchInput
-              :search-current-type="searchType"
-              @update:searchType="(value:any) => (searchType = value)"
-              @update:searchValue="searchValueHandle"
+                :search-current-type="searchType"
+                @update:searchType="(value:any) => (searchType = value)"
+                @update:searchValue="searchValueHandle"
             />
           </div>
           <div class="flex flex-auto gap-2 justify-end px-2 py-2 ju">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <TooltipButton
-                  title="筛选"
-                  class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+                    class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+                    title="筛选"
                 >
-                  <LogsIcon class="w-5 h-5 text-gray-600" />
+                  <LogsIcon class="w-5 h-5 text-gray-600"/>
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuCheckboxItem
-                  v-for="column in columns"
-                  :key="column.id"
-                  class="capitalize"
-                  :checked="column.getIsVisible()"
-                  @update:checked="(value) => column.toggleVisibility(!!value)"
+                    v-for="column in columns"
+                    :key="column.id"
+                    :checked="column.getIsVisible()"
+                    class="capitalize"
+                    @update:checked="(value) => column.toggleVisibility(!!value)"
                 >
                   {{ column.id }}
                 </DropdownMenuCheckboxItem>
@@ -219,30 +256,28 @@ watch(groupSelect, (newVal) => {
         </div>
         <div class="flex gap-x-2 w-full">
           <PrimaryButton class="flex gap-x-2" @click="openGroup">
-            <PackageOpenIcon />
+            <PackageOpenIcon/>
             打开
           </PrimaryButton>
           <TooltipButton
-            v-for="(item, index) in groupOperationBtns"
-            :key="index"
-            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
-            :title="item.title"
-            @click="item.click"
-            :disabled="item.disabled"
+              v-for="(item, index) in groupOperationBtns"
+              :key="index"
+              :disabled="item.disabled"
+              :title="item.title"
+              class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+              @click="item.click"
           >
-            <component :is="item.icon" class="w-5 h-5 text-gray-600" />
+            <component :is="item.icon" class="w-5 h-5 text-gray-600"/>
           </TooltipButton>
         </div>
       </div>
 
       <div class="flex flex-col h-full">
-        <div class="overflow-auto flex-auto h-0 rounded-md">
-          <DataTable
-            :data="data"
-            :pagination="pagination"
-            @onSyncColumns="onSyncColumns"
-            @onSelect="(v: Number[]) => selectData = v"
-          />
+        <div class="rounded-md flex-auto h-0 overflow-auto">
+          <DataTable :data="data" :pagination="pagination" @editAccountBtn="editAccountBtn"
+                     @editEnvBtn="editEnvBtn" @editProxyBtn="editProxyBtn"
+                     @onSelect="(v: any[]) => selectData = v"
+                     @onSyncColumns="onSyncColumns"/>
         </div>
 
         <div class="flex justify-end items-center py-1 space-x-2">
@@ -251,47 +286,47 @@ watch(groupSelect, (newVal) => {
           </div>
           <div class="space-x-2">
             <Pagination
-              :total="pagination.total"
-              :itemsPerPage="pagination.pageSize"
-              :default-page="1"
+                :default-page="1"
+                :itemsPerPage="pagination.pageSize"
+                :total="pagination.total"
             >
               <PaginationList
-                v-slot="{ items }"
-                class="flex gap-1 items-center"
+                  v-slot="{ items }"
+                  class="flex gap-1 items-center"
               >
-                <PaginationFirst @click="() => paginationClickHandle(1)" />
+                <PaginationFirst @click="() => paginationClickHandle(1)"/>
                 <PaginationPrev
-                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
+                    @click="() => paginationClickHandle(pagination.pageIndex - 1)"
                 />
 
                 <template v-for="(item, index) in items">
                   <PaginationListItem
-                    v-if="item.type === 'page'"
-                    :key="index"
-                    :value="item.value"
-                    as-child
+                      v-if="item.type === 'page'"
+                      :key="index"
+                      :value="item.value"
+                      as-child
                   >
-                  <!-- {{ index }} -->
+                    <!-- {{ index }} -->
                     <Button
-                      class="p-0 w-10 h-10"
-                      @click="() => paginationClickHandle(item.value - 1)"
-                      :variant="
+                        :variant="
                         item.value === pagination.pageIndex
                           ? 'default'
                           : 'outline'
                       "
+                        class="p-0 w-10 h-10"
+                        @click="() => paginationClickHandle(item.value - 1)"
                     >
                       {{ item.value }}
                     </Button>
                   </PaginationListItem>
-                  <PaginationEllipsis v-else :key="item.type" :index="index" />
+                  <PaginationEllipsis v-else :key="item.type" :index="index"/>
                 </template>
 
                 <PaginationNext
-                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
+                    @click="() => paginationClickHandle(pagination.pageIndex + 1)"
                 />
                 <PaginationLast
-                  @click="
+                    @click="
                     () =>
                       paginationClickHandle(
                         Math.ceil(pagination.total / pagination.pageSize)
@@ -305,4 +340,10 @@ watch(groupSelect, (newVal) => {
       </div>
     </div>
   </div>
+
+  <!-- 修改账号 -->
+  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentId="environmentId"
+               :environmentUuid="environmentUuid" :userUuid="userUuid"/>
+  <!-- 修改代理 -->
+  <EditProxy v-model:editProxyDialog="editProxyDialog" :environmentUuid="environmentUuid"/>
 </template>

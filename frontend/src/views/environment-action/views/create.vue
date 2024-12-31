@@ -28,6 +28,7 @@ import Alignment from "../components/alignment.vue";
 import { useEnvironmentCreateFromStore } from "@/stores/form/environment-create";
 
 const environmentCreateFrom = useEnvironmentCreateFromStore();
+
 </script>
 <template>
   <Accordion
@@ -234,6 +235,8 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
           <div class="w-full">
             <div class="flex gap-x-4 relative">
               <Input
+                v-model="environmentCreateFrom.forms.environmentDescription"
+                v-bind="environmentCreateFrom.forms.environmentDescriptionProps"
                 placeholder="请输入备注"
                 rows="3"
                 class="w-full px-3 py-2 border rounded-md"
