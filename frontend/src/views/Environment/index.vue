@@ -39,6 +39,7 @@ import { browser_starts, browser_stops } from "@/commands/browser";
 import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
+import TransferModal from "./transfer-modal.vue";
 
 const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
@@ -48,6 +49,12 @@ const groupSelect = ref<string | undefined>();
 const searchType = ref<{ title: keyof Payment; value: string }>({
   title: "name",
   value: "名称",
+});
+const transferModal = ref({
+  open: false,
+  title: "转移环境",
+  name: "",
+  uuid: "",
 });
 
 const selectedData = computed(() => {
@@ -63,7 +70,7 @@ const pagination = reactive({
 });
 
 const loadData = (index: number, size: number) => {
-  environment_query(index-1, size).then((res) => {
+  environment_query(index - 1, size).then((res) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
     data.value = data_;
@@ -73,7 +80,7 @@ const loadData = (index: number, size: number) => {
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 const paginationClickHandle = (index: number) => {
   console.log("index:", index);
-  
+
   loadData(index, pagination.pageSize);
   pagination.pageIndex = index;
 };
@@ -176,6 +183,12 @@ watch(groupSelect, (newVal) => {
     loadData(pagination.pageIndex, pagination.pageSize);
   }
 });
+
+const transferEnv = (uuid: string, name: string, team_id: string) => {
+  transferModal.value.open = true;
+  transferModal.value.uuid = uuid;
+  transferModal.value.name = name;
+};
 </script>
 
 <template>
@@ -242,6 +255,7 @@ watch(groupSelect, (newVal) => {
             :pagination="pagination"
             @onSyncColumns="onSyncColumns"
             @onSelect="(v: Number[]) => selectData = v"
+            @onTransferEnv="transferEnv"
           />
         </div>
 
@@ -271,7 +285,7 @@ watch(groupSelect, (newVal) => {
                     :value="item.value"
                     as-child
                   >
-                  <!-- {{ index }} -->
+                    <!-- {{ index }} -->
                     <Button
                       class="p-0 w-10 h-10"
                       @click="() => paginationClickHandle(item.value - 1)"
@@ -304,5 +318,12 @@ watch(groupSelect, (newVal) => {
         </div>
       </div>
     </div>
+    <TransferModal
+      :open="transferModal.open"
+      :title="transferModal.title"
+      :uuid="transferModal.uuid"
+      :name="transferModal.name"
+      @close="transferModal.open = false"
+    />
   </div>
 </template>

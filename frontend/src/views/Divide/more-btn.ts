@@ -10,10 +10,7 @@ export const MoreBtn = (props: any) => {
         [
             h(MoreTrigger, h('div', { class: 'px-2' }, h(EllipsisIcon, { class: 'h-6 w-6 cursor-pointer' }))),
             h(MoreContent, [
-                // h(MoreItem, { class: 'cursor-pointer' }, [
-                //     h(Settings2Icon, { class: 'w-4 h-4' }),
-                //     '详情'
-                // ]),
+
                 h(MoreItem, { class: 'cursor-pointer', onClick: () => editEnvBtn() }, [
                     h(SquarePenIcon, { class: 'w-4 h-4' }),
                     '编辑环境'
@@ -33,13 +30,7 @@ export const MoreBtn = (props: any) => {
                 h(MoreItem, { class: 'cursor-pointer', onClick: () => transferEnvBtn() }, [
                     h(Rotate3d, { class: 'w-4 h-4' }),
                     '转移环境'
-
                 ]),
-                // h(MoreItem, { class: 'cursor-pointer', onClick: () => setCommonBtn() }, [
-                //     h(Star, { class: 'w-4 h-4' }),
-                //     '设为常用'
-                // ]),
-
                 h(MoreItem, { class: 'cursor-pointer', onClick: () => removeEnv() }, [
                     h(Trash2Icon, { class: 'w-4 h-4' }),
                     '移除'
@@ -52,7 +43,7 @@ export const MoreBtn = (props: any) => {
 
 //   <More>
 //     <MoreTrigger>
-//       <Ellipsis v-if="activeTab !== 'recommended'" class="h-6 w-6 cursor-pointer" />
+//       <Ellipsis v-if="activeTab !== 'recommended'" class="w-6 h-6 cursor-pointer" />
 //     </MoreTrigger>
 //     <MoreContent>
 //       <MoreItem class="cursor-pointer" @click="settingOpenHandle">

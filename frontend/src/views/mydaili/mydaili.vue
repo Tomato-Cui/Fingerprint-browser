@@ -462,7 +462,9 @@ const paginationClickHandle = (index: number) => {
                 />
               </td>
 
-              <td class="p-4 text-sm text-left">{{ index + 1 }}</td>
+              <td class="p-4 text-sm text-left">
+                {{ pagination.pageIndex * pagination.pageSize + index + 1 }}
+              </td>
               <td class="p-4 text-sm text-left">{{ row.kind || "\\" }}</td>
               <td class="p-4 text-sm text-left">{{ row.port || "\\" }}</td>
               <td class="p-4 text-sm text-left">{{ row.envCount || "\\" }}</td>

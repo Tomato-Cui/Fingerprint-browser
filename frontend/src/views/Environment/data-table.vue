@@ -64,7 +64,7 @@ const props = withDefaults(defineProps<TableProps>(), {
 });
 
 const browserStatusStore = useBrowserStatusStore();
-const emits = defineEmits(["onSelect", "onSyncColumns"]);
+const emits = defineEmits(["onSelect", "onSyncColumns", "onTransferEnv"]);
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -299,7 +299,11 @@ const columns = [
             ]
           )
         ),
-        MoreBtn(),
+        MoreBtn({
+          transferEnvBtn: () => {
+            emits("onTransferEnv", row.getValue("uuid"), row.getValue("name"));
+          },
+        }),
       ]);
     },
   }),

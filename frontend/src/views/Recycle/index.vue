@@ -258,7 +258,9 @@ const searchValueHandle = (value: string) => {
             <td class="px-4 py-3">
               <input type="checkbox" class="rounded" v-model="row.selected" />
             </td>
-            <td class="px-4 py-3 text-sm">{{ index + 1 }}</td>
+            <td class="px-4 py-3 text-sm">
+              {{ pagination.pageIndex * pagination.pageSize + index + 1 }}
+            </td>
             <td class="px-4 py-3 text-sm">{{ row.name }}</td>
 
             <td class="px-4 py-3">

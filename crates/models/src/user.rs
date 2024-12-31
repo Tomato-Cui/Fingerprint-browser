@@ -51,7 +51,7 @@ impl User {
             "SELECT ui.email
             FROM users u
             JOIN user_infos ui ON u.user_info_id = ui.id
-            WHERE ui.email like '%{}%' AND deleted_at IS NULL",
+            WHERE ui.email like '%{}%' AND u.deleted_at IS NULL",
             email
         );
 

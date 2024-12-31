@@ -207,7 +207,9 @@ const searchValueHandle = (value: string) => {
               v-model="row.selected"
             />
           </td> -->
-              <td class="px-4 py-3 text-sm min-w-48">{{ index + 1 }}</td>
+              <td class="px-4 py-3 text-sm min-w-48">
+                {{ pagination.pageIndex * pagination.pageSize + index + 1 }}
+              </td>
               <td class="px-4 py-3 text-sm min-w-48">
                 <div class="flex items-center">
                   <span class="text-gray-500">{{ row.name }}</span>
