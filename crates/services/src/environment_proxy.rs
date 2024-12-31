@@ -1,4 +1,4 @@
-use models::environment_proxies::Proxy;
+use models::{environment::Environment, environment_proxies::Proxy};
 use serde_json::{json, Value};
 
 use crate::error::ServiceError;
@@ -51,6 +51,14 @@ pub async fn update(user_uuid: &str, id: u32, payload: Proxy) -> Result<bool, Se
     let pool = states::database::get_database_pool()?;
 
     let ok = Proxy::update_proxy(pool, id, user_uuid, &payload).await?;
+
+    Ok(ok)
+}
+
+pub async fn update_proxy(environmnet_uuid: &str, payload: Proxy) -> Result<bool, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let ok = Environment::modify_proxy(pool, environmnet_uuid, &payload).await?;
 
     Ok(ok)
 }

@@ -337,6 +337,47 @@ impl Environment {
     }
 
     #[allow(dead_code)]
+    pub async fn modify_proxy(
+        pool: &Pool<Sqlite>,
+        environment_uuid: &str,
+        proxy: &Proxy,
+    ) -> Result<bool, Error> {
+        let mut tx = pool.begin().await?;
+        let sql = "
+            INSERT INTO environment_proxies (
+                kind, host, port, username, password, user_uuid
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?
+            ) RETURNING id";
+
+        let proxy_id: u32 = sqlx::query_scalar(sql)
+            .bind(&proxy.kind)
+            .bind(&proxy.host)
+            .bind(&proxy.port)
+            .bind(&proxy.username)
+            .bind(&proxy.password)
+            .bind(&proxy.user_uuid)
+            .fetch_one(&mut *tx)
+            .await?;
+
+        let sql = r#"
+        UPDATE environments SET
+            proxy_id = ?
+        WHERE uuid = ?
+        "#;
+
+        let row = sqlx::query(sql)
+            .bind(proxy_id)
+            .bind(environment_uuid)
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+
+        Ok(row.rows_affected() == 1)
+    }
+
+    #[allow(dead_code)]
     pub async fn modify_basic_info(
         pool: &Pool<Sqlite>,
         uuid: &str,

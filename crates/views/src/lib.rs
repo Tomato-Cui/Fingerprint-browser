@@ -87,6 +87,7 @@ pub fn run() {
             environment_command::environment_batch_move_to_group,
             environment_command::environment_delete,
             environment_command::environment_batch_delete,
+            environment_command::environment_modify_proxy,
             team_command::team_is_leader,
             team_command::team_query_id,
             team_command::team_query,
