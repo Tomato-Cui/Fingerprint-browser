@@ -36,7 +36,7 @@ const cleanForm = () => {
 }
 //确认加入团队
 const subJoinTeam = () => {
-    joinTeamDialog.value = false
+    joinTeamDialog.value = false 
     user_send(joinForm.teamName, joinForm.description).then(res => {
         if (res.data) {
             toast.success("发送成功")
@@ -60,11 +60,11 @@ const handleSubmit = () => {  //提交添加成员
                 toast.warning(res.message)
             } else {
                 toast.success("邀请发送成功")
+                cleanForm()
+                addMemModel.value = false
             }
-            cleanForm()
         });
     })
-    addMemModel.value = false
 };
 </script>
 
@@ -204,7 +204,7 @@ const handleSubmit = () => {  //提交添加成员
                 </div>
                 <div class="flex justify-center items-center gap-4">
                     <label class="w-[80px] flex justify-end">备注</label>
-                    <input v-model="joinForm.description" type="text" placeholder="请输入备注"
+                    <input v-model="joinForm.description" type="text" placeholder="请输入备注 "
                         class="border border-gray-400 rounded-sm h-[40px] px-5" />
                 </div>
             </div>

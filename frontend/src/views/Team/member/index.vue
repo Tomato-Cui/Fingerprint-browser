@@ -373,9 +373,6 @@ const subForbid = () => {  //确定禁用
       toast.error("失败失败失败！！！")
     }
   })
-
-  // members.value = members.value.filter((member) => member.id !== memberObj.value.id)
-  // filterMember.value = filterMember.value.filter((member) => member.id !== memberObj.value.id)
 }
 const subDel = () => { //确认删除
   delM.value = false
@@ -441,7 +438,6 @@ const editMember = (member) => {
 }
 watch(() => addMemModel.value, (val) => {  //监听使数据更新后刷新页面
   if(!val){
-    console.log("给我刷新");
     getList()
   }
 })
@@ -462,6 +458,8 @@ const getList = () => {
 
         members.value = res2.data.data
         pagination.total = res.data.total
+        console.log("?????:", pagination);
+        
       })
     }
     //查询分组

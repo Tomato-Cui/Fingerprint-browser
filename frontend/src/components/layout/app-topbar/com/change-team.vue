@@ -4,15 +4,16 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineProps, defineEmits, onMounted } from 'vue'
 import { team_query, switch_team, query_current_team_info } from "@/commands/team"
 import { useRouter } from "vue-router";
+import { defineAsyncComponent } from 'vue';
+import { XIcon, CheckIcon } from 'lucide-vue-next'
+import { toast } from "vue-sonner";
 
+// const AsyncButton = defineAsyncComponent(() => import('@shadcn-vue/core').then(module => module.Button));
 const router = useRouter()
 const props = defineProps({
     switchTeam: Boolean
 })
 const emit = defineEmits(['update:switchTeam'])
-import { XIcon, CheckIcon } from 'lucide-vue-next'
-import { toast } from "vue-sonner";
-
 const teams = ref([
     { id: 1, name: '12343234' },
     { id: 2, name: '这是测试' },
@@ -29,17 +30,26 @@ const confirmSelection = () => {
     emit('update:switchTeam', false)
     switch_team(selectedTeam.value).then(res => {
         toast.message(res.message)
-        router.push('/team/group')
+        router.push('/environment')
+        getList()
+        //刷新
+        window.location.reload()
+        // console.log("teams----:", teams.value);
+        
     })
 }
 
-onMounted(() => {
+const getList = () => {
     team_query(1, 1000).then(res => {
         teams.value = res.data.data
     });
     query_current_team_info().then(res => {
         selectedTeam.value = res.data.id
     })
+}
+
+onMounted(() => {
+    getList()
 })
 </script>
 
@@ -65,7 +75,6 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-
 
                 <div class="">
                     <div class="flex justify-start py-8 gap-x-4">
