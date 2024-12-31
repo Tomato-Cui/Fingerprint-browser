@@ -184,13 +184,15 @@ pub async fn environment_modify_proxy(
     environment_uuid: String,
     payload: Proxy,
 ) -> Result<AppResponse<bool>, tauri::Error> {
-    let _ = get_user_id().await?;
+    let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
         Some(format!("更新失败: {}", v))
     });
 
     Ok(
-        match services::environment_proxy::update_proxy(&environment_uuid, payload).await {
+        match services::environment_proxy::update_proxy(&user_uuid, &environment_uuid, payload)
+            .await
+        {
             Ok(data) => {
                 if data {
                     AppResponse::<bool>::success(success_msg, Some(data))
