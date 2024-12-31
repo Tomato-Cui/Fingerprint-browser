@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Button } from "@/components/ui/button";
 import {
   Pagination,
@@ -16,15 +16,15 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ref, onMounted, reactive, computed, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import TooltipButton from "@/components/tooltip-button.vue";
 import {
-  LogsIcon,
-  PackageOpenIcon,
-  PackageIcon,
-  ExternalLinkIcon,
-  TrashIcon,
   ArrowRightFromLineIcon,
+  ExternalLinkIcon,
+  LogsIcon,
+  PackageIcon,
+  PackageOpenIcon,
+  TrashIcon,
 } from "lucide-vue-next";
 import SearchInput from "./search-input.vue";
 import GroupSelect from "./group-select.vue";
@@ -40,6 +40,12 @@ import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import TransferModal from "./transfer-modal.vue";
+import EditProxy from "@/views/Environment/com/edit-proxy.vue";
+import EditAccount from "@/views/Divide/com/edit-account.vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
 
 const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
@@ -55,10 +61,6 @@ const transferModal = ref({
   title: "转移环境",
   name: "",
   uuid: "",
-});
-
-const selectedData = computed(() => {
-  return data.value.filter((item) => item.selected);
 });
 
 const onSyncColumns = (value: any) => (columns.value = value);
@@ -189,6 +191,39 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
   transferModal.value.uuid = uuid;
   transferModal.value.name = name;
 };
+const editAccountDialog = ref(false); // 编辑账号
+const editProxyDialog = ref(false); // 修改代理
+//下拉菜单中的的按钮
+let environmentUuid = "";
+let environmentId = 0;
+let userUuid = "";
+
+const editEnvBtn = (uuid: string, id: number) => {
+  console.log("编辑环境:", uuid + "-And-" + id);
+  environmentUuid = uuid;
+  const environment = data.value.find((item) => item.uuid === environmentUuid);
+  router.push({
+    path: "/environment-action/create",
+    query: {
+      id: uuid,
+      action: "edit",
+      environment: JSON.stringify(environment),
+    },
+  });
+};
+
+// ----编辑账号
+const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
+  environmentUuid = uuid;
+  environmentId = id;
+  userUuid = user_uuid;
+  editAccountDialog.value = true;
+};
+// ----修改代理
+const editProxyBtn = (uuid: string, id: number) => {
+  environmentUuid = uuid;
+  editProxyDialog.value = true;
+};
 </script>
 
 <template>
@@ -210,8 +245,8 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <TooltipButton
-                  title="筛选"
                   class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+                  title="筛选"
                 >
                   <LogsIcon class="w-5 h-5 text-gray-600" />
                 </TooltipButton>
@@ -220,8 +255,8 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
                 <DropdownMenuCheckboxItem
                   v-for="column in columns"
                   :key="column.id"
-                  class="capitalize"
                   :checked="column.getIsVisible()"
+                  class="capitalize"
                   @update:checked="(value) => column.toggleVisibility(!!value)"
                 >
                   {{ column.id }}
@@ -238,10 +273,10 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
           <TooltipButton
             v-for="(item, index) in groupOperationBtns"
             :key="index"
-            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
-            :title="item.title"
-            @click="item.click"
             :disabled="item.disabled"
+            :title="item.title"
+            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+            @click="item.click"
           >
             <component :is="item.icon" class="w-5 h-5 text-gray-600" />
           </TooltipButton>
@@ -256,6 +291,9 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
             @onSyncColumns="onSyncColumns"
             @onSelect="(v: Number[]) => selectData = v"
             @onTransferEnv="transferEnv"
+            @editAccountBtn="editAccountBtn"
+            @editEnvBtn="editEnvBtn"
+            @editProxyBtn="editProxyBtn"
           />
         </div>
 
@@ -265,9 +303,9 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
           </div>
           <div class="space-x-2">
             <Pagination
-              :total="pagination.total"
-              :itemsPerPage="pagination.pageSize"
               :default-page="1"
+              :itemsPerPage="pagination.pageSize"
+              :total="pagination.total"
             >
               <PaginationList
                 v-slot="{ items }"
@@ -287,13 +325,13 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
                   >
                     <!-- {{ index }} -->
                     <Button
-                      class="p-0 w-10 h-10"
-                      @click="() => paginationClickHandle(item.value - 1)"
                       :variant="
                         item.value === pagination.pageIndex
                           ? 'default'
                           : 'outline'
                       "
+                      class="p-0 w-10 h-10"
+                      @click="() => paginationClickHandle(item.value - 1)"
                     >
                       {{ item.value }}
                     </Button>
@@ -326,4 +364,17 @@ const transferEnv = (uuid: string, name: string, team_id: string) => {
       @close="transferModal.open = false"
     />
   </div>
+
+  <!-- 修改账号 -->
+  <EditAccount
+    v-model:editAccountDialog="editAccountDialog"
+    :environmentId="environmentId"
+    :environmentUuid="environmentUuid"
+    :userUuid="userUuid"
+  />
+  <!-- 修改代理 -->
+  <EditProxy
+    v-model:editProxyDialog="editProxyDialog"
+    :environmentUuid="environmentUuid"
+  />
 </template>

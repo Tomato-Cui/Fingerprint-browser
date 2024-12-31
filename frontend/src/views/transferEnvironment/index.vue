@@ -80,7 +80,6 @@ const pagination = reactive({
 
 const loadData = (index: number, size: number) => {
   environment_transfer_history_query(index, size).then((res) => {
-    console.log("res", res);
     let { data: data_, total } = res.data;
 
     pagination.total = total;

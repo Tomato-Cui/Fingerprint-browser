@@ -1,9 +1,19 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import type {
   ColumnFiltersState,
   ExpandedState,
   SortingState,
   VisibilityState,
+} from "@tanstack/vue-table";
+import {
+  createColumnHelper,
+  FlexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useVueTable,
 } from "@tanstack/vue-table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,27 +26,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn, valueUpdater } from "@/util/lib";
-import {
-  createColumnHelper,
-  FlexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useVueTable,
-} from "@tanstack/vue-table";
 import { ArrowUpDown, ChromeIcon, InboxIcon } from "lucide-vue-next";
-import { h, ref, defineProps, withDefaults, onMounted } from "vue";
+import { defineProps, h, onMounted, ref, withDefaults } from "vue";
 import { PrimaryButton } from "@/components/button/index";
 import { MoreBtn } from "./more-btn";
 import { browser_start, browser_stops } from "@/commands/browser";
 import { toast } from "vue-sonner";
 import { useBrowserStatusStore } from "@/stores/browser";
+import { environment_create } from "@/commands/environment.ts";
 
 export interface Payment {
   id: number;
   uuid: string;
+  user_uuid: string;
   name: string;
   description: string;
   country: string;
@@ -64,7 +66,18 @@ const props = withDefaults(defineProps<TableProps>(), {
 });
 
 const browserStatusStore = useBrowserStatusStore();
-const emits = defineEmits(["onSelect", "onSyncColumns", "onTransferEnv"]);
+const emits = defineEmits([
+  "onSelect",
+  "onSyncColumns",
+  "onTransferEnv",
+  "removeEnv",
+  "setCommonBtn",
+  "transferEnvBtn",
+  "authMemberBtn",
+  "editProxyBtn",
+  "editAccountBtn",
+  "editEnvBtn",
+]);
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -110,11 +123,19 @@ const columns = [
     header: () => h("div", { class: "hidden" }),
     cell: () => h("div", { class: "hidden" }),
   }),
+  columnHelper.accessor("user_uuid", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
   columnHelper.accessor("proxy_host", {
     header: () => h("div", { class: "hidden" }),
     cell: () => h("div", { class: "hidden" }),
   }),
   columnHelper.accessor("proxy_port", {
+    header: () => h("div", { class: "hidden" }),
+    cell: () => h("div", { class: "hidden" }),
+  }),
+  columnHelper.accessor("id", {
     header: () => h("div", { class: "hidden" }),
     cell: () => h("div", { class: "hidden" }),
   }),
@@ -254,6 +275,9 @@ const columns = [
       ]),
     cell: ({ row }) => {
       let uuid = row.getValue("uuid") as string;
+      let id = row.getValue("id") as number;
+      let user_uuid = row.getValue("user_uuid") as string;
+
       return h("div", { class: "flex gap-x-4" }, [
         h(
           "div",
@@ -299,11 +323,23 @@ const columns = [
             ]
           )
         ),
-        MoreBtn({
-          transferEnvBtn: () => {
-            emits("onTransferEnv", row.getValue("uuid"), row.getValue("name"));
-          },
-        }),
+        h("div", { class: "parent-container" }, [
+          MoreBtn({
+            editEnvBtn: () => emits("editEnvBtn", uuid, id),
+            editAccountBtn: () => emits("editAccountBtn", uuid, id, user_uuid),
+            editProxyBtn: () => emits("editProxyBtn", uuid, id),
+            authMemberBtn: () => emits("authMemberBtn", uuid, id),
+            setCommonBtn: () => emits("setCommonBtn", uuid, id),
+            removeEnv: () => emits("removeEnv", uuid, id),
+            transferEnvBtn: () => {
+              emits(
+                "onTransferEnv",
+                row.getValue("uuid"),
+                row.getValue("name")
+              );
+            },
+          }),
+        ]), //传入点击事件参数
       ]);
     },
   }),
@@ -311,7 +347,12 @@ const columns = [
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
-const columnVisibility = ref<VisibilityState>({});
+const columnVisibility = ref<VisibilityState>({
+  id: false,
+  uuid: false,
+  proxy_host: false,
+  proxy_port: false,
+});
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 
@@ -376,7 +417,6 @@ const table = useVueTable({
         <TableHead
           v-for="header in headerGroup.headers"
           :key="header.id"
-          :data-pinned="header.column.getIsPinned()"
           :class="
             cn(
               {
@@ -385,11 +425,12 @@ const table = useVueTable({
               header.column.getIsPinned() === 'left' ? 'left-0' : 'right-0'
             )
           "
+          :data-pinned="header.column.getIsPinned()"
         >
           <FlexRender
             v-if="!header.isPlaceholder"
-            :render="header.column.columnDef.header"
             :props="header.getContext()"
+            :render="header.column.columnDef.header"
           />
         </TableHead>
       </TableRow>
@@ -404,7 +445,6 @@ const table = useVueTable({
             <TableCell
               v-for="cell in row.getVisibleCells()"
               :key="cell.id"
-              :data-pinned="cell.column.getIsPinned()"
               :class="
                 cn(
                   {
@@ -415,10 +455,11 @@ const table = useVueTable({
                   'group-hover:bg-muted transition-colors'
                 )
               "
+              :data-pinned="cell.column.getIsPinned()"
             >
               <FlexRender
-                :render="cell.column.columnDef.cell"
                 :props="cell.getContext()"
+                :render="cell.column.columnDef.cell"
               />
             </TableCell>
           </TableRow>

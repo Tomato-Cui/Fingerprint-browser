@@ -8,9 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-// import { pageId } from "../mydaili/mydaili.vue";
 
 const activeTab = ref("single");
 const router = useRouter();
@@ -22,15 +21,73 @@ const port = ref("");
 const username = ref("");
 const password = ref("");
 const refreshUrl = ref("");
-
-const singleForm = ref({
-  url: "",
-  proxyType: "IPv4",
-  proxyService: "SOCKS5",
-  host: "",
-  port: "",
-  username: "",
+const agents = ref(""); // 输入代理信息的字符串
+const proxies = ref<Proxy[]>([]); // 存储解析后的代理对象数组
+const batchForm = ref({
+  service: "IPRust.io",
+  autoRefresh: false,
 });
+
+const parseAgents = () => {
+  console.log(agents.value);
+  proxies.value = (agents.value as any)
+    .split("\n") // 按行分割
+    .filter((line: any) => line.trim() !== "") // 去除空行
+    .map((line: any) => {
+      const parts = line.split(":"); // 使用 ":" 分隔
+      if (parts.length < 5) {
+        console.warn("代理信息格式错误:", line);
+        return null;
+      }
+
+      const [kind, host, port, username, password] = parts;
+
+      if (!kind || !host || !port || !username || !password) {
+        console.warn("代理信息缺少字段:", line);
+        return null;
+      }
+
+      return {
+        kind,
+        host,
+        port,
+        username,
+        password,
+      } as Proxy;
+    })
+    .filter((proxy: any, index: any, self: any) => {
+      if (!proxy) return false; // 过滤掉解析失败的行
+
+      if (batchForm.value.autoRefresh == true) {
+        // 如果 autoRefresh 为 true，则去重
+        const isDuplicate =
+          self.findIndex(
+            (p: any) => p && p.host === proxy.host && p.port === proxy.port
+          ) !== index;
+        return !isDuplicate; // 仅保留第一个出现的代理
+      }
+
+      return true; // 如果 autoRefresh 为 false，不进行去重
+    });
+
+  console.log(proxies.value);
+};
+
+const addProxies = async () => {
+  try {
+    const results = await Promise.all(
+      proxies.value.map((proxy) => environment_proxies_create(proxy))
+    );
+    console.log("所有代理添加成功:", results);
+  } catch (error) {
+    console.warn("批量添加代理失败:", error);
+  }
+};
+
+// 用户输入的原始代理信息
+const rawInput = ref("");
+// 存储解析后的代理信息列表
+const singleForm = ref([]);
 
 interface Proxy {
   id?: number;
@@ -42,6 +99,46 @@ interface Proxy {
   user_uuid?: string;
   environment_group_id?: number;
 }
+// 监听 rawInput 的变化并解析
+watch(
+  () => rawInput.value,
+  (newInput) => {
+    const parseAgents = (input: any) => {
+      return input
+        .split("\n") // 按行分割
+        .filter((line: any) => line.trim() !== "") // 过滤空行
+        .map((line: any) => {
+          const parts = line.split(":"); // 使用 ":" 分隔
+          if (parts.length !== 5) {
+            console.warn("代理信息格式错误:", line);
+            return null; // 跳过格式错误的行
+          }
+
+          const [kind, host, port, username, password] = parts;
+          return { kind, host, port, username, password };
+        })
+        .filter((proxy: any) => proxy !== null); // 过滤掉解析失败的行
+    };
+
+    // 更新 singleForm
+    singleForm.value = parseAgents(newInput);
+
+    // 如果有解析成功的代理信息，取第一条赋值到详细字段
+    if (singleForm.value.length > 0) {
+      const firstProxy = singleForm.value[0] as any; // 取第一条代理
+      host.value = firstProxy.host;
+      port.value = firstProxy.port;
+      username.value = firstProxy.username;
+      password.value = firstProxy.password;
+    } else {
+      // 没有代理信息时，清空详细字段
+      host.value = "";
+      port.value = "";
+      username.value = "";
+      password.value = "";
+    }
+  }
+);
 
 // 跳转到新增代理页面
 const SaveOne = () => {
@@ -55,40 +152,18 @@ const SaveOne = () => {
     password: password.value,
   };
   environment_proxies_create(proxy);
-
-  // router.push("/mydaili?id=" + proxyId.value);
-  router.go(-1);
+  // router.go(-1);
 };
 
 // 跳转到新增代理页面
 const mydaili = () => {
-  router.push("/mydaili");
-};
-
-const batchForm = ref({
-  service: "IPRust.io",
-  autoRefresh: false,
-});
-
-const handleSubmit = () => {
-  // Handle form submission
-};
-
-const handleCancel = () => {
-  // Reset form
-  proxyType.value = "IPV4";
-  proxyInfo.value = "SOCKS5";
-  host.value = "";
-  port.value = "";
-  username.value = "";
-  password.value = "";
-  refreshUrl.value = "";
+  addProxies();
 };
 </script>
 
 <template>
   <div class="p-4 h-main">
-    <div class="p-6 bg-white rounded-lg shadow" style="height: 100%">
+    <div class="p-6 bg-white rounded-lg shadow h-main">
       <!-- Tabs -->
       <div class="mb-6 border-b border-gray-200">
         <nav class="flex -mb-px">
@@ -128,10 +203,10 @@ const handleCancel = () => {
             >智能识别</label
           >
           <textarea
-            v-model="singleForm.url"
+            v-model="rawInput"
             rows="4"
             class="p-3 w-full text-sm rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-            placeholder="[代理主机端口][IP][代理类型][用户名][密码][URL]"
+            placeholder="类型:IP:代理主机端口:用户名:密码"
           ></textarea>
         </div>
 
@@ -252,25 +327,24 @@ const handleCancel = () => {
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div
-          class="flex justify-center pt-6 space-x-4 border-t"
-          style="min-height: 50px"
-        >
-          <button
-            @click="SaveOne"
-            class="px-8 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          <!-- Action Buttons -->
+          <div
+            class="flex justify-center pt-6 space-x-4 border-t"
+            style="min-height: 50px"
           >
-            确定
-          </button>
-          <button
-            @click="mydaili"
-            class="px-8 py-2 text-gray-600 hover:text-gray-800 focus:outline-none"
-          >
-            取消
-          </button>
+            <button
+              @click="SaveOne"
+              class="px-8 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            >
+              确定
+            </button>
+            <button
+              @click="mydaili"
+              class="px-8 py-2 text-gray-600 hover:text-gray-800 focus:outline-none"
+            >
+              取消
+            </button>
+          </div>
         </div>
       </div>
 
@@ -281,6 +355,7 @@ const handleCancel = () => {
             <h3 class="text-sm font-medium text-gray-700">代理服务器</h3>
 
             <textarea
+              v-model="agents"
               placeholder="请输入代理信息"
               class="flex-1 border-[1px] border-gray-300 rounded-md shadow-sm p-2 text-sm h-96 overflow-y-auto resize-none focus:border-blue-400"
               style="width: 100%; border-width: 1px; outline: none"
@@ -318,6 +393,7 @@ const handleCancel = () => {
               <button
                 class="px-4 py-2 ml-auto text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
                 style="height: 40px; width: 80px"
+                @click="parseAgents"
               >
                 解析
               </button>
@@ -325,12 +401,38 @@ const handleCancel = () => {
           </div>
 
           <div class="p-4 bg-gray-50 rounded-md">
-            <h4 class="mb-2 text-sm font-medium text-gray-700">写入规则</h4>
-            <div class="space-y-1 text-xs text-gray-400">
+            <h4
+              v-if="proxies.length === 0"
+              class="mb-2 text-sm font-medium text-gray-700"
+            >
+              写入规则
+            </h4>
+            <h4
+              v-if="proxies.length"
+              class="mb-2 text-sm font-medium text-gray-700"
+            >
+              解析代理
+            </h4>
+            <!-- 初始提示信息 -->
+            <div
+              v-if="proxies.length === 0"
+              class="space-y-1 text-xs text-gray-400"
+            >
               <p>支持 IPv4, IPv6</p>
               <p>支持 HTTP, HTTPS, SOCKS5 三种类型代理</p>
               <p>每一行一个代理，必须完整添加</p>
               <p>检测IP代理时间，测试自动添加IP，主机端口必须填写对应位置</p>
+              <p>以下是例子</p>
+              <p>Socks5:36.26.81.57:51800:xmdlyuje:qrh8xi7y</p>
+            </div>
+
+            <!-- 代理信息显示区域 -->
+            <div v-else class="space-y-1 text-xs text-gray-400">
+              <p v-for="(proxy, index) in proxies" :key="index">
+                {{ proxy.kind }}:{{ proxy.host }}:{{ proxy.port }}:{{
+                  proxy.username
+                }}:{{ proxy.password }}
+              </p>
             </div>
           </div>
         </div>

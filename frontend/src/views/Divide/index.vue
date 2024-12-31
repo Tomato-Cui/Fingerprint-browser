@@ -88,7 +88,7 @@ const openGroup = async () => {
     (item) => ( item  as any)
   );
   console.log("ids:::", ids);
-  
+
   try {
     let data = await browser_starts(ids);
     data = await data.data;
@@ -117,7 +117,7 @@ const closeGroup = () => {
 // 批量删除
 const batchDelete = () => {
   let ids = [...selectData.value].map((item) => item) as string[];
-  
+
   environment_batch_delete(ids)
     .then((_: any) => {
       data.value = data.value.filter((item) => !ids.includes(item.uuid));
@@ -206,7 +206,13 @@ var userUuid = ""
 const editEnvBtn = (uuid: string, id: number) => {
   console.log("编辑环境:", uuid + "-And-" + id);
   environmentUuid = uuid
-  router.push({ path: '/environment-action/create', query: { id: uuid } })
+  const environment = data.value.find(item => item.uuid === environmentUuid);
+  router.push({path: '/environment-action/create',
+    query: {
+      id: uuid,
+      action: "edit",
+      environment:JSON.stringify(environment)
+    }})
 };
 // ----编辑账号
 const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
@@ -248,7 +254,7 @@ const removeEnv = (uuid: string, id: number) => {
 const clickDel = ref(false)
 const handleSubmitDel = () => {
   console.log("uuid:", environmentUuid);
-  
+
   environment_delete(environmentUuid).then((res) => {
     if (res.message && (res.message as string).includes("删除成功")) {
       toast.success("删除成功");
