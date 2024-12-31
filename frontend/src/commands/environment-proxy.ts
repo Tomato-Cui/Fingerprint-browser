@@ -29,8 +29,8 @@ export const environment_proxies_modify = async (id: number, payload: Proxy): Pr
     return await invoke('environment_proxies_modify', { id, payload })
 };
 
-export const environment_modify_proxy = async (enuironmentUuid: string, payload: Proxy): Promise<any> => {
-    return await invoke('environment_modify_proxy', { enuironmentUuid, payload })
+export const environment_modify_proxy = async (environmentUuid: string, payload: Proxy): Promise<any> => {
+    return await invoke('environment_modify_proxy', { environmentUuid, payload })
 };
 
 export const environment_proxies_delete = async (id: number): Promise<any> => {

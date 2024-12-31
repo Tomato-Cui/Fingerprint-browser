@@ -264,13 +264,14 @@ mod modify_proxy {
 
     pub async fn handle(
         Path(uuid): Path<String>,
+        state: Extension<middlewares::CurrentUser>,
         Json(payload): Json<models::environment_proxies::Proxy>,
     ) -> impl IntoResponse {
         let (success_msg, warn_msg) = (Some("更新成功".to_string()), |v| {
             Some(format!("更新失败: {}", v))
         });
 
-        match services::environment_proxy::update_proxy(&uuid, payload).await {
+        match services::environment_proxy::update_proxy(&state.user_uuid, &uuid, payload).await {
             Ok(data) => {
                 if data {
                     AppResponse::<()>::success(success_msg, Some(()))

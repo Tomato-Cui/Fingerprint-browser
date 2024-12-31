@@ -55,10 +55,14 @@ pub async fn update(user_uuid: &str, id: u32, payload: Proxy) -> Result<bool, Se
     Ok(ok)
 }
 
-pub async fn update_proxy(environmnet_uuid: &str, payload: Proxy) -> Result<bool, ServiceError> {
+pub async fn update_proxy(
+    user_uuid: &str,
+    environmnet_uuid: &str,
+    payload: Proxy,
+) -> Result<bool, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
-    let ok = Environment::modify_proxy(pool, environmnet_uuid, &payload).await?;
+    let ok = Environment::modify_proxy(pool, user_uuid, environmnet_uuid, &payload).await?;
 
     Ok(ok)
 }

@@ -339,6 +339,7 @@ impl Environment {
     #[allow(dead_code)]
     pub async fn modify_proxy(
         pool: &Pool<Sqlite>,
+        user_uuid: &str,
         environment_uuid: &str,
         proxy: &Proxy,
     ) -> Result<bool, Error> {
@@ -347,7 +348,7 @@ impl Environment {
             INSERT INTO environment_proxies (
                 kind, host, port, username, password, user_uuid
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?
             ) RETURNING id";
 
         let proxy_id: u32 = sqlx::query_scalar(sql)
@@ -356,7 +357,7 @@ impl Environment {
             .bind(&proxy.port)
             .bind(&proxy.username)
             .bind(&proxy.password)
-            .bind(&proxy.user_uuid)
+            .bind(user_uuid)
             .fetch_one(&mut *tx)
             .await?;
 
