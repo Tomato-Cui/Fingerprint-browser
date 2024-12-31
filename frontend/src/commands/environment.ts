@@ -117,8 +117,9 @@ export const environment_batch_create = async (environmentNames: Array<String>):
     return await invoke('environment_batch_create', { environmentNames })
 }
 
-export const environment_modify_info = async (payload: EnvironmentInfo): Promise<any> => {
-    return await invoke('environment_modify_info ', { payload })
+export const environment_modify_info = async (
+    envirunmentUuid: String, payload: EnvironmentInfo): Promise<any> => {
+    return await invoke('environment_modify_info ', { envirunmentUuid, payload })
 };
 
 export const environment_modify_basic_info = async (environmentUuid: string, payload: Environment): Promise<any> => {
