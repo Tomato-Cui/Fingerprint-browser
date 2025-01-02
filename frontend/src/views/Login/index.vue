@@ -122,7 +122,7 @@
               <label class="text-gray-800 text-sm mb-2 block">用户名</label>
               <div class="relative flex items-center">
                 <input name="name" type="text" required v-model="registerForm.username"
-                  class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                  class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                   placeholder="请输入您的名字" />
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-4 h-4 absolute right-4"
                   viewBox="0 0 24 24">
@@ -138,7 +138,7 @@
               <label class="text-gray-800 text-sm mb-2 block">邮箱</label>
               <div class="relative flex items-center">
                 <input name="email" type="email" required v-model="registerForm.email"
-                  class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                  class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                   placeholder="请输入您的邮箱" />
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-4 h-4 absolute right-4"
                   viewBox="0 0 682.667 682.667">
@@ -163,7 +163,7 @@
             <label class="text-gray-800 text-xs block mb-2">密码</label>
             <div class="relative flex items-center">
               <input v-model="registerForm.password" :type="showPassword ? 'text' : 'password'" required
-                class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                 placeholder="请输入密码" />
               <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
                 class="w-[18px] h-[18px] absolute right-2 cursor-pointer" viewBox="0 0 128 128"
@@ -179,7 +179,7 @@
               <label class="text-gray-800 text-sm mb-2 block">验证码</label>
               <div class="relative flex items-center">
                 <input type="text" required v-model="registerForm.code"
-                  class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                  class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                   placeholder="请输入验证码" />
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
                   class="w-4 h-4 absolute right-4 cursor-pointer" viewBox="0 0 128 128">
