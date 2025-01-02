@@ -230,7 +230,9 @@ const addGroup = async () => {
     return;
   }
   await environment_proxy_group_create(payload);
+
   groupData();
+  newGroupName.value = "12312";
 };
 
 const startEdit = async (groups: any, index: number) => {
