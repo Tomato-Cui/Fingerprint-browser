@@ -31,6 +31,7 @@ import SearchInput from "./search-input.vue";
 import {
   environment_batch_delete,
   environment_query_by_group,
+  environment_delete,
 } from "@/commands/environment";
 import DataTable, { type Payment } from "./data-table.vue";
 import { PrimaryButton } from "@/components/button";
@@ -38,10 +39,10 @@ import { browser_starts, browser_stops } from "@/commands/browser";
 import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
-import { environment_delete } from "@/commands/environment";
-import CreateGroup from "./com/create-group.vue"
-import EditAccount from "./com/edit-account.vue"
+import CreateGroup from "./com/create-group.vue";
+import EditAccount from "./com/edit-account.vue";
 import EditProxy from "./com/edit-proxy.vue";
+import { AlertModel } from "@/components/alert-model";
 
 const route = useRoute();
 const router = useRouter();
@@ -55,12 +56,11 @@ const searchType = ref<{ title: keyof Payment; value: string }>({
 });
 const groupSelect = ref<string | undefined>();
 const columns = ref<any[]>([]);
-onMounted(() => {
-  console.log("当前分组id：", route.params.id);
-})
-const createGroupDialog = ref(false)  // 创建分组
-const editAccountDialog = ref(false)  // 编辑账号
-const editProxyDialog = ref(false)  // 修改代理
+const createGroupDialog = ref(false); // 创建分组
+const editAccountDialog = ref(false); // 编辑账号
+const editProxyDialog = ref(false); // 修改代理
+const removeDialog = ref(false); // 删除环境
+
 const onSyncColumns = (value: any) => (columns.value = value);
 const pagination = reactive({
   pageIndex: 0,
@@ -74,19 +74,19 @@ const loadData = (groupId: number, index: number, size: number) => {
     let { data: data_, total } = res.data;
     pagination.total = total;
     data.value = data_;
-    copyData.value = data.value
+    copyData.value = data.value;
   });
 };
 
-onMounted(() => loadData(Number(route.params.id), pagination.pageIndex, pagination.pageSize));
+onMounted(() =>
+  loadData(Number(route.params.id), pagination.pageIndex, pagination.pageSize)
+);
 const paginationClickHandle = (index: number) => {
   loadData(Number(route.params.id), index, pagination.pageSize);
   pagination.pageIndex = index;
 };
 const openGroup = async () => {
-  let ids = [...selectData.value].map(
-    (item) => ( item  as any)
-  );
+  let ids = [...selectData.value].map((item) => item as any);
   console.log("ids:::", ids);
 
   try {
@@ -127,7 +127,7 @@ const batchDelete = () => {
       toast.warning(err);
     });
 
-  selectData.value = []
+  selectData.value = [];
 };
 
 const exportData = () => {
@@ -144,7 +144,7 @@ const groupOperationBtns = computed(() => [
   {
     title: "导入",
     icon: ExternalLinkIcon,
-    click: () => { },
+    click: () => {},
     disabled: true,
   },
   {
@@ -162,25 +162,32 @@ const groupOperationBtns = computed(() => [
 ]);
 
 const createGroup = () => {
-  createGroupDialog.value = true
+  createGroupDialog.value = true;
 };
 
 const searchValueHandle = (value: string) => {
-  data.value = copyData.value
+  data.value = copyData.value;
   if (value.length != 0) {
     data.value = data.value.filter((item) => {
       let current = item[searchType.value.title as keyof Payment] as string;
       return current ? current.includes(value) : false;
     });
   } else {
-    loadData(Number(route.params.id), pagination.pageIndex, pagination.pageSize);
+    loadData(
+      Number(route.params.id),
+      pagination.pageIndex,
+      pagination.pageSize
+    );
   }
 };
 
 // 监听路由中id的变化
-watch(() => route.params.id, (value: any) => {
-  loadData(Number(value), pagination.pageIndex, pagination.pageSize);
-});
+watch(
+  () => route.params.id,
+  (value: any) => {
+    loadData(Number(value), pagination.pageIndex, pagination.pageSize);
+  }
+);
 
 watch(groupSelect, (newVal) => {
   if (newVal && newVal != "0") {
@@ -194,57 +201,57 @@ watch(groupSelect, (newVal) => {
       data.value = data_;
     });
   } else if (newVal == "0") {
-    loadData(Number(route.params.id), pagination.pageIndex, pagination.pageSize);
+    loadData(
+      Number(route.params.id),
+      pagination.pageIndex,
+      pagination.pageSize
+    );
   }
 });
 
 //下拉菜单中的的按钮
-var environmentUuid = ""
-var environmentId = 0
-var userUuid = ""
-// ----编辑环境
-const editEnvBtn = (uuid: string, id: number) => {
-  environmentUuid = uuid
-  const environment = data.value.find(item => item.uuid === environmentUuid);
-  router.push({path: '/environment-action/create',
+var environmentUuid = "";
+var environmentId = 0;
+var userUuid = "";
+
+const editEnvBtn = (uuid: string) => {
+  environmentUuid = uuid;
+  const environment = data.value.find((item) => item.uuid === environmentUuid);
+  router.push({
+    path: "/environment-action/create",
     query: {
       id: uuid,
       action: "edit",
-      environment:JSON.stringify(environment)
-    }})
-};
-// ----编辑账号
-const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
-  environmentUuid = uuid
-  environmentId = id
-  userUuid = user_uuid
-  editAccountDialog.value = true
-};
-// ----修改代理
-const editProxyBtn = (uuid: string, id: number) => {
-  environmentUuid = uuid
-  editProxyDialog.value = true
-};
-// ----授权成员
-const authMemberBtn = (uuid: string, id: number) => {
-  environmentUuid = uuid
-};
-// ----转移环境
-const transferEnvBtn = (uuid: string, id: number) => {
-  environmentUuid = uuid
-};
-// ----设为常用
-const setCommonBtn = (uuid: string, id: number) => {
-  environmentUuid = uuid
-};
-// ----删除
-const removeEnv = (uuid: string, id: number) => {
-  environmentUuid = uuid
-  clickDel.value = true
+      environment: JSON.stringify(environment),
+    },
+  });
 };
 
-// 删除
-const clickDel = ref(false)
+const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
+  environmentUuid = uuid;
+  environmentId = id;
+  userUuid = user_uuid;
+  editAccountDialog.value = true;
+};
+
+const editProxyBtn = (uuid: string) => {
+  environmentUuid = uuid;
+  editProxyDialog.value = true;
+};
+
+const authMemberBtn = (uuid: string) => {
+  environmentUuid = uuid;
+};
+
+const transferEnvBtn = (uuid: string) => {
+  environmentUuid = uuid;
+};
+
+const setCommonBtn = (uuid: string) => {
+  environmentUuid = uuid;
+};
+
+const clickDel = ref(false);
 const handleSubmitDel = () => {
   console.log("uuid:", environmentUuid);
 
@@ -257,14 +264,32 @@ const handleSubmitDel = () => {
       toast.warning("删除失败");
     }
   });
-  clickDel.value = false
-}
+  clickDel.value = false;
+};
+
+const removeHandle = (uuid: string) => {
+  environmentUuid = uuid;
+  removeDialog.value = true;
+};
+const removeSubmitHandle = () => {
+  environment_delete(environmentUuid).then((res) => {
+    res.code == 0 ? toast.warning(res.message) : toast.success(res.message);
+    loadData(
+      Number(route.params.id),
+      pagination.pageIndex,
+      pagination.pageSize
+    );
+  });
+  removeDialog.value = false;
+};
 </script>
 
 <template>
   <!-- {{ route.params.id }} -->
   <div class="flex flex-col p-3 bg-gray-50 h-main">
-    <div class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow px-2">
+    <div
+      class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow px-2"
+    >
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
@@ -272,19 +297,30 @@ const handleSubmitDel = () => {
             <PrimaryButton class="flex gap-x-2" @click="createGroup">
               创建分组
             </PrimaryButton>
-            <SearchInput :search-current-type="searchType" @update:searchType="(value: any) => (searchType = value)"
-              @update:searchValue="searchValueHandle" />
+            <SearchInput
+              :search-current-type="searchType"
+              @update:searchType="(value: any) => (searchType = value)"
+              @update:searchValue="searchValueHandle"
+            />
           </div>
           <div class="flex gap-2 py-2 ju justify-end flex-auto px-2">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <TooltipButton title="筛选" class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border">
+                <TooltipButton
+                  title="筛选"
+                  class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border"
+                >
                   <LogsIcon class="h-5 w-5 text-gray-600" />
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem v-for="column in columns" :key="column.id" class="capitalize"
-                  :checked="column.getIsVisible()" @update:checked="(value) => column.toggleVisibility(!!value)">
+                <DropdownMenuCheckboxItem
+                  v-for="column in columns"
+                  :key="column.id"
+                  class="capitalize"
+                  :checked="column.getIsVisible()"
+                  @update:checked="(value) => column.toggleVisibility(!!value)"
+                >
                   {{ column.id }}
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
@@ -296,9 +332,14 @@ const handleSubmitDel = () => {
             <PackageOpenIcon />
             打开
           </PrimaryButton>
-          <TooltipButton v-for="(item, index) in groupOperationBtns" :key="index"
-            class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border" :title="item.title" @click="item.click"
-            :disabled="item.disabled">
+          <TooltipButton
+            v-for="(item, index) in groupOperationBtns"
+            :key="index"
+            class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border"
+            :title="item.title"
+            @click="item.click"
+            :disabled="item.disabled"
+          >
             <component :is="item.icon" class="h-5 w-5 text-gray-600" />
           </TooltipButton>
         </div>
@@ -306,10 +347,19 @@ const handleSubmitDel = () => {
 
       <div class="flex flex-col h-full">
         <div class="rounded-md flex-auto h-0 overflow-auto">
-          <DataTable :data="data" :pagination="pagination" @editEnvBtn="editEnvBtn" @editAccountBtn="editAccountBtn"
-            @editProxyBtn="editProxyBtn" @authMemberBtn="authMemberBtn" @transferEnvBtn="transferEnvBtn"
-            @setCommonBtn="setCommonBtn" @removeEnv="removeEnv" @onSyncColumns="onSyncColumns"
-            @onSelect="(v: string[]) => selectData = v" />
+          <DataTable
+            :data="data"
+            :pagination="pagination"
+            @editEnvBtn="editEnvBtn"
+            @editAccountBtn="editAccountBtn"
+            @editProxyBtn="editProxyBtn"
+            @authMemberBtn="authMemberBtn"
+            @transferEnvBtn="transferEnvBtn"
+            @setCommonBtn="setCommonBtn"
+            @removeEnv="removeHandle"
+            @onSyncColumns="onSyncColumns"
+            @onSelect="(v: string[]) => selectData = v"
+          />
         </div>
 
         <div class="flex items-center justify-end space-x-2 py-1">
@@ -317,27 +367,53 @@ const handleSubmitDel = () => {
             共{{ pagination.total }}条.
           </div>
           <div class="space-x-2">
-            <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
-              <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+            <Pagination
+              :total="pagination.total"
+              :itemsPerPage="pagination.pageSize"
+              :default-page="1"
+            >
+              <PaginationList
+                v-slot="{ items }"
+                class="flex items-center gap-1"
+              >
                 <PaginationFirst @click="() => paginationClickHandle(0)" />
-                <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
+                <PaginationPrev
+                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
+                />
 
                 <template v-for="(item, index) in items">
-                  <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-                    <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
-                      ">
+                  <PaginationListItem
+                    v-if="item.type === 'page'"
+                    :key="index"
+                    :value="item.value"
+                    as-child
+                  >
+                    <Button
+                      class="w-10 h-10 p-0"
+                      @click="() => paginationClickHandle(index)"
+                      :variant="
+                        item.value === pagination.pageIndex + 1
+                          ? 'default'
+                          : 'outline'
+                      "
+                    >
                       {{ item.value }}
                     </Button>
                   </PaginationListItem>
                   <PaginationEllipsis v-else :key="item.type" :index="index" />
                 </template>
 
-                <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
-                <PaginationLast @click="() =>
-                    paginationClickHandle(
-                      Math.ceil(pagination.total / pagination.pageSize) - 1
-                    )
-                  " />
+                <PaginationNext
+                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
+                />
+                <PaginationLast
+                  @click="
+                    () =>
+                      paginationClickHandle(
+                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                      )
+                  "
+                />
               </PaginationList>
             </Pagination>
           </div>
@@ -348,17 +424,31 @@ const handleSubmitDel = () => {
   <!-- 创建分组 -->
   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
   <!-- 修改账号 -->
-  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentId="environmentId" :environmentUuid="environmentUuid" :userUuid="userUuid"/>
+  <EditAccount
+    v-model:editAccountDialog="editAccountDialog"
+    :environmentId="environmentId"
+    :environmentUuid="environmentUuid"
+    :userUuid="userUuid"
+  />
   <!-- 修改代理 -->
-  <EditProxy v-model:editProxyDialog="editProxyDialog" :environmentUuid="environmentUuid"/>
+  <EditProxy
+    v-model:editProxyDialog="editProxyDialog"
+    :environmentUuid="environmentUuid"
+  />
   <!-- 删除 -->
   <Teleport to="body" class="z-30">
-    <div class="fixed inset-0 bg-black/20 flex items-center justify-center z-30" v-if="clickDel">
+    <div
+      class="fixed inset-0 bg-black/20 flex items-center justify-center z-30"
+      v-if="clickDel"
+    >
       <div class="bg-white rounded-lg w-[400px]">
         <!-- Modal Header -->
         <div class="flex justify-between items-center p-4">
           <h2 class="text-lg font-medium">提示</h2>
-          <button @click="clickDel = false" class="text-gray-400 hover:text-gray-600">
+          <button
+            @click="clickDel = false"
+            class="text-gray-400 hover:text-gray-600"
+          >
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -366,14 +456,41 @@ const handleSubmitDel = () => {
 
         <!-- Modal Footer -->
         <div class="flex justify-center space-x-3 p-4">
-          <button @click="handleSubmitDel" class="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          <button
+            @click="handleSubmitDel"
+            class="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
             确定
           </button>
-          <button @click="clickDel = false" class="px-8 py-2 border rounded-md hover:bg-gray-50">
+          <button
+            @click="clickDel = false"
+            class="px-8 py-2 border rounded-md hover:bg-gray-50"
+          >
             取消
           </button>
         </div>
       </div>
     </div>
   </Teleport>
+  <AlertModel
+    title="删除环境"
+    :open="removeDialog"
+    @close="() => (removeDialog = false)"
+    @cancel="() => (removeDialog = false)"
+    @submit="removeSubmitHandle"
+  >
+    <div
+      class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm"
+    >
+      删除成功后，可以前往回收站恢复
+    </div>
+    <div class="text-sm flex flex-col gap-y-4 py-4">
+      <p>
+        环境UUID
+        <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4">{{
+          environmentUuid
+        }}</span>
+      </p>
+    </div>
+  </AlertModel>
 </template>

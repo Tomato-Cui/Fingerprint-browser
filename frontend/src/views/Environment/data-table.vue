@@ -327,7 +327,7 @@ const columns = [
             editEnvBtn: () => emits("editEnvBtn", uuid, id),
             editAccountBtn: () => emits("editAccountBtn", uuid, id, user_uuid),
             editProxyBtn: () => emits("editProxyBtn", uuid, id),
-            removeEnv: () => emits("removeEnv", uuid, id),
+            removeEnv: () => emits("removeEnv", uuid),
             transferEnvBtn: () => {
               emits(
                 "onTransferEnv",

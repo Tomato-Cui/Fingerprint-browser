@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-#[derive(Serialize, Deserialize, FromRow)]
+#[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct EnvironmentWithDetails {
     // Fields from Environment
     id: i32,
@@ -73,7 +73,7 @@ pub struct EnvironmentWithDetails {
     proxy_deleted_at: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, FromRow)]
+#[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct EnvironmentWithInfo {
     // Fields from Environment
     id: i32,

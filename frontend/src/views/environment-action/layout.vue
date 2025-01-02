@@ -1,15 +1,14 @@
 <script setup>
-import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import { ShuffleIcon, WaypointsIcon } from "lucide-vue-next";
-import ImportProxyModel from "./components/import-proxy-model.vue";
 import RightDetail from "./right-detail.vue";
 import { useEnvironmentCreateFromStore } from "@/stores/form/environment-create";
 import { useEnvironmentCreatesFromStore } from "@/stores/form/environment-creates";
 import {
   environment_create,
-  environment_batch_create, environment_modify_basic_info,
+  environment_batch_create,
+  environment_modify_basic_info,
 } from "@/commands/environment";
 import { toast } from "vue-sonner";
 
@@ -22,35 +21,34 @@ const tabs = [
 const route = useRoute();
 const router = useRouter();
 
-const importProxyOpen = ref(false);
-const proxyModelCloseHandle = () => (importProxyOpen.value = false);
-const proxyModelOpenHandle = () => (importProxyOpen.value = true);
-
 const environmentCreateFrom = useEnvironmentCreateFromStore();
 const environmentCreatesFrom = useEnvironmentCreatesFromStore();
-console.log(route)
+console.log(route);
 const onSubmit = () => {
   if (route.path === "/environment-action/create") {
-
     environmentCreateFrom.handleSubmit(async (values) => {
       try {
-        let { name,description} = values;
+        let { name, description } = values;
         const action = route.query.action;
-        console.log("这是action:  "+action)
-        const environment = route.query.environment ? JSON.parse(route.query.environment) : null;
-        console.log("这是环境"+environment.uuid)
+        console.log("这是action:  " + action);
+        const environment = route.query.environment
+          ? JSON.parse(route.query.environment)
+          : null;
+        console.log("这是环境" + environment.uuid);
         if (action === "edit") {
           // 修改逻辑
-          environment.name = name
-          environment.description =description
-          let res= await environment_modify_basic_info(environment.uuid,environment)
+          environment.name = name;
+          environment.description = description;
+          let res = await environment_modify_basic_info(
+            environment.uuid,
+            environment
+          );
           toast.success("环境信息更新成功：" + res.message);
         } else {
           // 创建逻辑
           let res = await environment_create(name);
           toast.success("环境创建成功：" + res.message);
         }
-
       } catch (error) {
         toast.warning("创建失败:" + error);
       }
@@ -90,14 +88,6 @@ const onSubmit = () => {
           {{ tab.name }}
         </button>
       </nav>
-      <PrimaryButton
-        @click="proxyModelOpenHandle"
-        v-if="route.path === '/environment-action/creates'"
-        class="my-1 text-white px-4 flex justify-center items-center gap-x-2 rounded-lg"
-      >
-        <WaypointsIcon />
-        代理导入
-      </PrimaryButton>
     </div>
 
     <form
@@ -112,10 +102,9 @@ const onSubmit = () => {
         <RightDetail />
       </div>
       <div class="flex gap-x-4 pt-3 px-6 mb-8 bg-white border-t">
+        <CancelButton @click="router.go(-1)">取消</CancelButton>
         <PrimaryButton type="submit">确定</PrimaryButton>
-        <CancelButton>取消</CancelButton>
       </div>
     </form>
-    <ImportProxyModel :open="importProxyOpen" @close="proxyModelCloseHandle" />
   </div>
 </template>

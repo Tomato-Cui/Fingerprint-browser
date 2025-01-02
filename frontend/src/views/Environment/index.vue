@@ -32,6 +32,7 @@ import {
   environment_batch_delete,
   environment_query,
   environment_query_by_group,
+  environment_delete,
 } from "@/commands/environment";
 import DataTable, { type Payment } from "./data-table.vue";
 import { PrimaryButton } from "@/components/button";
@@ -42,11 +43,10 @@ import { convertToCSV, downloadCSV } from "@/util/lib";
 import TransferModal from "./transfer-modal.vue";
 import EditProxy from "@/views/Environment/com/edit-proxy.vue";
 import EditAccount from "@/views/Environment/com/edit-account.vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
+import { AlertModel } from "@/components/alert-model";
 
-const route = useRoute();
 const router = useRouter();
-
 const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
 const selectData = ref<Number[]>([]);
@@ -186,20 +186,19 @@ watch(groupSelect, (newVal) => {
   }
 });
 
-const transferEnv = (uuid: string, name: string, team_id: string) => {
+const transferEnv = (uuid: string, name: string) => {
   transferModal.value.open = true;
   transferModal.value.uuid = uuid;
   transferModal.value.name = name;
 };
 const editAccountDialog = ref(false); // 编辑账号
 const editProxyDialog = ref(false); // 修改代理
-//下拉菜单中的的按钮
+const removeDialog = ref(false); // 删除环境
 let environmentUuid = "";
 let environmentId = 0;
 let userUuid = "";
 
-const editEnvBtn = (uuid: string, id: number) => {
-  console.log("编辑环境:", uuid + "-And-" + id);
+const editEnvBtn = (uuid: string) => {
   environmentUuid = uuid;
   const environment = data.value.find((item) => item.uuid === environmentUuid);
   router.push({
@@ -212,17 +211,28 @@ const editEnvBtn = (uuid: string, id: number) => {
   });
 };
 
-// ----编辑账号
 const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
   environmentUuid = uuid;
   environmentId = id;
   userUuid = user_uuid;
   editAccountDialog.value = true;
 };
-// ----修改代理
-const editProxyBtn = (uuid: string, id: number) => {
+
+const editProxyBtn = (uuid: string) => {
   environmentUuid = uuid;
   editProxyDialog.value = true;
+};
+
+const removeHandle = (uuid: string) => {
+  environmentUuid = uuid;
+  removeDialog.value = true;
+};
+const removeSubmitHandle = () => {
+  environment_delete(environmentUuid).then((res) => {
+    res.code == 0 ? toast.warning(res.message) : toast.success(res.message);
+    loadData(pagination.pageIndex, pagination.pageSize);
+  });
+  removeDialog.value = false;
 };
 </script>
 
@@ -294,6 +304,7 @@ const editProxyBtn = (uuid: string, id: number) => {
             @editAccountBtn="editAccountBtn"
             @editEnvBtn="editEnvBtn"
             @editProxyBtn="editProxyBtn"
+            @removeEnv="removeHandle"
           />
         </div>
 
@@ -377,4 +388,26 @@ const editProxyBtn = (uuid: string, id: number) => {
     v-model:editProxyDialog="editProxyDialog"
     :environmentUuid="environmentUuid"
   />
+
+  <AlertModel
+    title="删除环境"
+    :open="removeDialog"
+    @close="() => (removeDialog = false)"
+    @cancel="() => (removeDialog = false)"
+    @submit="removeSubmitHandle"
+  >
+    <div
+      class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm"
+    >
+      删除成功后，可以前往回收站恢复
+    </div>
+    <div class="text-sm flex flex-col gap-y-4 py-4">
+      <p>
+        环境UUID
+        <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4">{{
+          environmentUuid
+        }}</span>
+      </p>
+    </div>
+  </AlertModel>
 </template>

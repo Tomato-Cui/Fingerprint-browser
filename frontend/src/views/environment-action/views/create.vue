@@ -264,8 +264,8 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
             <TabsTrigger value="appended"> 已添加的代理 </TabsTrigger>
             <TabsTrigger value="extract"> API提取 </TabsTrigger>
           </TabsList>
-          <TabsContent value="custom">
-            <div class="flex items-center">
+          <TabsContent value="custom" class="space-y-2">
+            <div class="flex items-center ">
               <p
                 class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
               >
@@ -374,7 +374,6 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
     </AccordionItem>
   </Accordion>
 
-  <!-- Fingerprint Configuration -->
   <Accordion type="single" class="w-full px-6" collapsible>
     <AccordionItem value="webrtc-setting" class="border-0">
       <AccordionTrigger

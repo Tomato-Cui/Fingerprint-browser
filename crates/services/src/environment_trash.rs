@@ -99,10 +99,10 @@ mod tests {
     #[tokio::test]
     async fn test_query() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let page_num = 1;
+        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7";
+        let page_num = 0;
         let page_size = 10;
-        let result = query(user_uuid, page_num, page_size).await;
+        let result = query(user_uuid, page_num, page_size).await.unwrap();
         println!("{:?}", result);
     }
 

@@ -21,8 +21,8 @@ const emit = defineEmits(['close'])
 <template>
     <Dialog :open="props.open">
         <DialogContent :class="`p-0 shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] ${props.class} `">
-            <DialogHeader class="border-b p-6 pt-8 flex flex-row justify-between">
-                <DialogTitle class="text-2xl">
+            <DialogHeader class="border-b p-2 pt-4 flex flex-row justify-between">
+                <DialogTitle class="text-xl font-normal">
                     {{ props.title || '&nbsp;' }}
                     <span class="text-sm text-gray-400 font-normal">
                         {{ props.description || '&nbsp;' }}

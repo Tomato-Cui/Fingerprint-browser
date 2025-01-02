@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from "vue";
 import {
   IconLinuxOs,
   IconMacOs,
@@ -33,8 +34,14 @@ import {
   NumberFieldInput,
 } from "@/components/ui/number-field";
 import { useEnvironmentCreatesFromStore } from "@/stores/form/environment-creates";
+import ImportProxyModel from "../components/import-proxy-model.vue";
+import DefaultButton from "@/components/button/default-button.vue";
 
 const environmentCreatesFrom = useEnvironmentCreatesFromStore();
+
+const importProxyOpen = ref(false);
+const proxyModelCloseHandle = () => (importProxyOpen.value = false);
+const proxyModelOpenHandle = () => (importProxyOpen.value = true);
 </script>
 <template>
   <div class="w-full px-6 py-3 flex items-center justify-between">
@@ -288,12 +295,16 @@ const environmentCreatesFrom = useEnvironmentCreatesFromStore();
       >
       <AccordionContent class="px-4 pt-2">
         <Tabs default-value="custom" class="">
-          <TabsList class="flex w-72 ml-[8.25rem]">
-            <TabsTrigger value="custom"> 自定义代理 </TabsTrigger>
-            <TabsTrigger value="appended"> 已添加的代理 </TabsTrigger>
-            <TabsTrigger value="extract"> API提取 </TabsTrigger>
-          </TabsList>
-          <TabsContent value="custom">
+          <div class="flex gap-x-[1.6rem]">
+            <TabsList class="flex w-56 ml-[8.25rem]">
+              <TabsTrigger value="custom"> 自定义代理 </TabsTrigger>
+              <TabsTrigger value="appended"> 已添加的代理 </TabsTrigger>
+            </TabsList>
+            <DefaultButton @click="proxyModelOpenHandle">
+              代理导入
+            </DefaultButton>
+          </div>
+          <TabsContent value="custom" class="space-y-2">
             <div class="flex items-center">
               <p
                 class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
@@ -688,4 +699,6 @@ const environmentCreatesFrom = useEnvironmentCreatesFromStore();
       </AccordionContent>
     </AccordionItem>
   </Accordion>
+
+  <ImportProxyModel :open="importProxyOpen" @close="proxyModelCloseHandle" />
 </template>

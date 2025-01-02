@@ -73,7 +73,7 @@ const onSubmitHandle = () => {
     :open="props.editAccountDialog"
     @close="() => emit('update:editAccountDialog', false)"
   >
-    <div class="px-6 pb-8 text-sm">
+    <div class="px-6 pb-4 text-sm">
       <div class="space-y-4">
         <div class="flex items-center">
           <label class="text-gray-600 w-[100px]">环境序号</label>

@@ -2,8 +2,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{error::Error, FromRow, Pool, Sqlite};
 
-use crate::environment::Environment;
-
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct EnvironmentTransferHistory {
     pub id: Option<i32>,            // 自增ID
@@ -96,7 +94,7 @@ impl EnvironmentTransferHistory {
         LIMIT ? OFFSET ?
     ";
 
-        let environments: Vec<Environment> = sqlx::query_as(query)
+        let environments: Vec<crate::dto::environment_info::EnvironmentWithDetails> = sqlx::query_as(query)
             .bind(from_user_uuid)
             .bind(page_size)
             .bind(offset)

@@ -1,7 +1,6 @@
+use crate::error::ServiceError;
 use models::environment::{Environment, EnvironmentInfo};
 use serde_json::{json, Value};
-
-use crate::error::ServiceError;
 
 pub async fn query_by_uuid(uuid: &str) -> Result<Environment, ServiceError> {
     let pool = states::database::get_database_pool()?;
@@ -20,8 +19,26 @@ pub async fn query_environment_details(user_uuid: &str, uuid: &str) -> Result<Va
 
 pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Value, ServiceError> {
     let pool = states::database::get_database_pool()?;
+    let current_team_id = crate::team::query_current_team_info(user_uuid).await?.id as u32;
+    let is_leader = crate::team::is_leader(user_uuid, current_team_id).await?;
 
-    let (total, environment) = models::environment::Environment::query_environments_by_user_uuid(
+    let (total, environment) = if is_leader {
+        models::environment::Environment::query_environments_by_user_uuid(
+            pool, user_uuid, page_num, page_size,
+        )
+        .await?
+    } else {
+        models::environment::Environment::query_environments_by_team_id_and_user_uuid(
+            pool,
+            user_uuid,
+            current_team_id,
+            page_num,
+            page_size,
+        )
+        .await?
+    };
+
+    models::environment::Environment::query_environments_by_user_uuid(
         pool, user_uuid, page_num, page_size,
     )
     .await?;
@@ -216,7 +233,7 @@ mod tests {
     #[tokio::test]
     async fn test_query_by_uuid() {
         crate::setup().await;
-        let uuid = "b13d4d98-f3da-4479-97b9-6de4975aa97b";
+        let uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7";
         let result = query_by_uuid(uuid).await;
         println!("{:?}", result);
     }
@@ -233,7 +250,7 @@ mod tests {
     #[tokio::test]
     async fn test_query() {
         crate::setup().await;
-        let user_uuid = "d3129a09-5473-4b1e-915b-bba0af78d752";
+        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7";
         let page_num = 1;
         let page_size = 10;
         let result = query(user_uuid, page_num, page_size).await;
@@ -321,11 +338,8 @@ mod tests {
     #[tokio::test]
     async fn test_batch_delete() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let env_ids = vec![
-            "a8bb7d2e-09ec-436b-aa51-2e5a6424acbd".to_string(),
-            "e5368907-d858-47e4-bfee-eddabbd36a56".to_string(),
-        ];
+        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7";
+        let env_ids = vec!["316b654d-6d00-4a91-af15-a88e25e5a158".to_string()];
         let result = batch_delete(user_uuid, env_ids).await;
         println!("{:?}", result);
     }
