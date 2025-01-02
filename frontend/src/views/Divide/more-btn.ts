@@ -1,10 +1,10 @@
 import { h } from 'vue'
 import { More, MoreContent, MoreItem, MoreTrigger } from '@/components/more'
-import { EllipsisIcon, Settings2Icon, SquarePenIcon, Trash2Icon, CircleUser, Activity, UserCheck, Rotate3d, Star } from 'lucide-vue-next'
+import { EllipsisIcon, SquarePenIcon, Trash2Icon, CircleUser, Activity, UserCheck, Rotate3d } from 'lucide-vue-next'
 
 export const MoreBtn = (props: any) => {
 
-    const { setCommonBtn, transferEnvBtn, authMemberBtn, editProxyBtn, editAccountBtn, editEnvBtn, removeEnv } = props;
+    const { transferEnvBtn, authMemberBtn, editProxyBtn, editAccountBtn, editEnvBtn, removeEnv } = props;
 
     return h(More,
         [
@@ -41,19 +41,3 @@ export const MoreBtn = (props: any) => {
 }
 
 
-//   <More>
-//     <MoreTrigger>
-//       <Ellipsis v-if="activeTab !== 'recommended'" class="w-6 h-6 cursor-pointer" />
-//     </MoreTrigger>
-//     <MoreContent>
-//       <MoreItem class="cursor-pointer" @click="settingOpenHandle">
-//         <Settings2Icon class="w-4 h-4" />配置
-//       </MoreItem>
-//       <MoreItem class="cursor-pointer" @click="updateOpenHandle">
-//         <SquarePenIcon class="w-4 h-4" />更新
-//       </MoreItem>
-//       <MoreItem class="cursor-pointer" @click="() => removeSoftwareHandle(app)">
-//         <Trash2Icon class="w-4 h-4" />移除
-//       </MoreItem>
-//     </MoreContent>
-//   </More>

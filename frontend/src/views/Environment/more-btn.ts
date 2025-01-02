@@ -1,10 +1,10 @@
 import { h } from 'vue'
 import { More, MoreContent, MoreItem, MoreTrigger } from '@/components/more'
-import { EllipsisIcon, Settings2Icon, SquarePenIcon, Trash2Icon, CircleUser, Activity, UserCheck, Rotate3d, Star } from 'lucide-vue-next'
+import { EllipsisIcon, Settings2Icon, SquarePenIcon, Trash2Icon, CircleUser, Activity, Rotate3d } from 'lucide-vue-next'
 
 export const MoreBtn = (props: any) => {
 
-    const { transferEnvBtn, authMemberBtn, editProxyBtn, editAccountBtn, editEnvBtn, removeEnv } = props;
+    const { transferEnvBtn, editProxyBtn, editAccountBtn, editEnvBtn, removeEnv } = props;
 
     return h(More,
         [

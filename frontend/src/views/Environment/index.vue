@@ -42,9 +42,8 @@ import { convertToCSV, downloadCSV } from "@/util/lib";
 import TransferModal from "./transfer-modal.vue";
 import EditProxy from "@/views/Environment/com/edit-proxy.vue";
 import EditAccount from "@/views/Divide/com/edit-account.vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 
-const route = useRoute();
 const router = useRouter();
 
 const browserStatusStore = useBrowserStatusStore();
@@ -186,7 +185,7 @@ watch(groupSelect, (newVal) => {
   }
 });
 
-const transferEnv = (uuid: string, name: string, team_id: string) => {
+const transferEnv = (uuid: string, name: string) => {
   transferModal.value.open = true;
   transferModal.value.uuid = uuid;
   transferModal.value.name = name;
@@ -220,7 +219,7 @@ const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
   editAccountDialog.value = true;
 };
 // ----修改代理
-const editProxyBtn = (uuid: string, id: number) => {
+const editProxyBtn = (uuid: string) => {
   environmentUuid = uuid;
   editProxyDialog.value = true;
 };

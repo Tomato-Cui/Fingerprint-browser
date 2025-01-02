@@ -1,30 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, onMounted, reactive } from "vue";
-import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  SearchIcon,
-  LayoutGridIcon,
-  MenuIcon,
-  PencilIcon,
-  BoxIcon,
-  MoreVerticalIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  SlidersHorizontalIcon,
-  Settings2Icon,
-  SquarePenIcon,
-  Trash2Icon,
-  TrashIcon,
-  PackageIcon,
-  RotateCcw,
-} from "lucide-vue-next";
-import { environment_trash_query } from "@/commands/environment-trash";
-import { environment_transfer_query } from "@/commands/environment_transfer";
+import { ref, onMounted, reactive } from "vue";
 
 import {
   Pagination,
@@ -40,9 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import SearchInput from "./search-input.vue";
 
-import TooltipButton from "@/components/tooltip-button.vue";
-
-import { PrimaryButton } from "@/components/button";
 import { environment_transfer_history_query } from "@/commands/environment-transfer-history";
 
 interface Payment {
@@ -53,6 +25,7 @@ interface Payment {
   description: string;
   browser: string;
   remark: string;
+  created_at: string;
 
   domain_name: string;
   transferTime: string;
@@ -60,17 +33,12 @@ interface Payment {
   selected?: boolean;
 }
 
-const selectData = ref<Number[]>([]);
-const columns = ref<any[]>([]);
-const groupSelect = ref<string | undefined>();
-
 const data = ref<Array<Payment>>([]);
 
 const searchType = ref<{ title: keyof Payment; value: string }>({
   title: "name",
   value: "名称",
 });
-const onSyncColumns = (value: any) => (columns.value = value);
 
 const pagination = reactive({
   pageIndex: 0,
@@ -165,30 +133,6 @@ const searchValueHandle = (value: string) => {
               <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
                 转移时间
               </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                转移类型
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                转移团队名称
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                转移团队ID
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                代理类型
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                API服务商
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                操作者
-              </th>
-              <!-- <th class="px-4 py-3 text-sm font-medium text-left text-gray-600">
-            操作
-          </th> -->
-              <!-- <th class="px-4 py-3 text-sm font-medium text-left text-gray-600">
-            更多
-          </th> -->
             </tr>
           </thead>
           <tbody>
@@ -197,24 +141,14 @@ const searchValueHandle = (value: string) => {
               :key="index"
               class="hover:bg-blue-100"
               :class="{ 'bg-blue-50': row.selected }"
-              @click="toggleRowSelection(row)"
+              @click=""
             >
-              <!-- <td class="px-4 py-3">
-            <input
-              type="checkbox"
-              class="rounded border-gray-300"
-              v-model="row.selected"
-            />
-          </td> -->
               <td class="px-4 py-3 text-sm min-w-48">
                 {{ pagination.pageIndex * pagination.pageSize + index + 1 }}
               </td>
               <td class="px-4 py-3 text-sm min-w-48">
                 <div class="flex items-center">
                   <span class="text-gray-500">{{ row.name }}</span>
-                  <!-- <button class="p-1 rounded hover:bg-gray-100">
-                <img src="../../assets/icons/modify.svg" class="w-4 h-4" />
-              </button> -->
                 </div>
               </td>
 
@@ -225,7 +159,6 @@ const searchValueHandle = (value: string) => {
                     class="mr-1 w-4 h-4"
                   />
                   {{ row.ip }}
-                  <!-- <span class="ml-1 text-gray-500">{{ row.location }}</span> -->
                 </div>
               </td>
               <td class="px-4 py-3 min-w-48">
@@ -247,17 +180,9 @@ const searchValueHandle = (value: string) => {
               <td class="px-4 py-3 text-sm min-w-48">
                 {{ row.browser || "\\" }}
               </td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.transferTime }}</td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.transferType }}</td>
               <td class="px-4 py-3 text-sm min-w-48">
-                {{ row.transferTeamName }}
+                {{ row.created_at || "\\" }}
               </td>
-              <td class="px-4 py-3 text-sm min-w-48">
-                {{ row.transferTeamId }}
-              </td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.agentType }}</td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.apiService }}</td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.operator }}</td>
             </tr>
           </tbody>
         </table>

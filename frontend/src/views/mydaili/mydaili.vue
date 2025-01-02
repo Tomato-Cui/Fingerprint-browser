@@ -46,9 +46,12 @@ import {
   PaginationPrev,
 } from "@/components/ui/pagination";
 import {
+  environment_proxy_group_create,
+  environment_proxy_group_delete,
   environment_proxy_group_modify,
   environment_proxy_group_query,
 } from "@/commands/environment-proxy-group";
+import { toast } from "vue-sonner";
 
 interface Payment {
   id: number;
@@ -197,13 +200,13 @@ const toggleRowSelection = (row: Payment) => {
 //分组
 const groupisOpen = ref(false);
 const newGroupName = ref("");
-const groups = ref([]);
+
+const groups = ref<any[]>([]);
 
 const groupData = async () => {
   await environment_proxy_group_query(1, 1000000).then((res) => {
-    groups.value = res.data.data.map((item: any) => item.name);
+    groups.value = res.data.data;
   });
-  console.log("groups", groups.value);
 };
 
 onMounted(() => {
@@ -212,37 +215,45 @@ onMounted(() => {
 
 const toggleAll = () => {
   data.value.forEach((row) => {
-    console.log("asds", selectAll.value);
     row.selected = selectAll.value;
   });
 };
 const editingIndex = ref(-1);
-const editingName = ref("");
+const editingName = ref();
 
-const addGroup = () => {
-  if (newGroupName.value.trim()) {
-    groups.value.push(newGroupName.value.trim());
-    newGroupName.value = "";
-  }
-};
-
-const startEdit = async (index: number) => {
-  console.log("index", index);
+const addGroup = async () => {
   const payload = {
-    name: editingName.value,
+    name: newGroupName.value.trim(),
   };
-  await environment_proxy_group_modify(index, payload);
-};
-
-const saveEdit = () => {
-  if (editingIndex.value !== -1 && editingName.value.trim()) {
-    groups.value[editingIndex.value] = editingName.value;
+  if (newGroupName.value.trim() === "") {
+    toast.warning("分组名不能为空");
+    return;
   }
-  editingIndex.value = -1;
+  await environment_proxy_group_create(payload);
+  groupData();
 };
 
-const deleteGroup = (index: number) => {
-  groups.value.splice(index, 1);
+const startEdit = async (groups: any, index: number) => {
+  editingName.value = groups[index].name;
+  editingIndex.value = index;
+};
+
+const saveEdit = async (groups: any, index: number) => {
+  console.log("editingIndex", editingIndex.value);
+  console.log("groups", groups);
+  console.log("index", index);
+  await environment_proxy_group_modify(groups[editingIndex.value].id, {
+    name: editingName.value,
+  });
+  toast.success("修改成功");
+
+  groupData();
+};
+
+const deleteGroup = async (index: number) => {
+  await environment_proxy_group_delete(groups.value[index].id);
+  groupData();
+  toast.success("删除成功");
 };
 
 const confirm = () => {
@@ -343,12 +354,12 @@ const paginationClickHandle = (index: number) => {
                       <input
                         v-if="editingIndex === index"
                         v-model="editingName"
-                        @blur="saveEdit"
-                        @keyup.enter="saveEdit"
+                        @blur="saveEdit(groups, index)"
+                        @keyup.enter="saveEdit(groups, index)"
                         ref="editInput"
                         class="w-full text-sm outline-none"
                       />
-                      <span v-else>{{ group }}</span>
+                      <span v-else>{{ group.name }}</span>
 
                       <div
                         class="hidden absolute right-1 top-1/2 gap-1 items-center -translate-y-1/2 group-hover:flex"
@@ -356,7 +367,7 @@ const paginationClickHandle = (index: number) => {
                       >
                         <button
                           title="修改"
-                          @click="startEdit(index)"
+                          @click="startEdit(groups, index)"
                           class="p-1 text-blue-500 hover:text-blue-600"
                         >
                           <PencilIcon class="w-4 h-4" />
