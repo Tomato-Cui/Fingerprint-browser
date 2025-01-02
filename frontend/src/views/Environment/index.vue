@@ -25,6 +25,7 @@ import {
   PackageIcon,
   PackageOpenIcon,
   TrashIcon,
+  Boxes,
 } from "lucide-vue-next";
 import SearchInput from "./search-input.vue";
 import GroupSelect from "./group-select.vue";
@@ -45,6 +46,7 @@ import EditProxy from "@/views/Environment/com/edit-proxy.vue";
 import EditAccount from "@/views/Environment/com/edit-account.vue";
 import { useRouter } from "vue-router";
 import { AlertModel } from "@/components/alert-model";
+import CreateGroup from "@/views/Divide/com/create-group.vue";
 
 const router = useRouter();
 const browserStatusStore = useBrowserStatusStore();
@@ -52,6 +54,7 @@ const data = ref<Array<Payment>>([]);
 const selectData = ref<Number[]>([]);
 const columns = ref<any[]>([]);
 const groupSelect = ref<string | undefined>();
+const createGroupDialog = ref(false); //添加分组弹出框
 const searchType = ref<{ title: keyof Payment; value: string }>({
   title: "name",
   value: "名称",
@@ -252,6 +255,13 @@ const removeSubmitHandle = () => {
             />
           </div>
           <div class="flex flex-auto gap-2 justify-end px-2 py-2 ju">
+            <TooltipButton
+            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+            title="添加分组"
+            @click="createGroupDialog = true"
+          >
+            <component :is="Boxes" class="w-5 h-5 text-gray-600" />
+          </TooltipButton>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <TooltipButton
@@ -410,4 +420,6 @@ const removeSubmitHandle = () => {
       </p>
     </div>
   </AlertModel>
+  <!-- 添加分组 -->
+   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
 </template>

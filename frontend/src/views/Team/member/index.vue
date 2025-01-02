@@ -26,10 +26,22 @@
               <ChevronDownIcon class="w-5 h-5 absolute right-2 top-2.5 text-gray-500" />
             </div> -->
             <!-- 下拉菜单 -->
+            <!-- <Select v-model="select">
+              <SelectTrigger class="w-44 bg-[#f9f9f9]">
+                <SelectValue placeholder="请选择环境分组" class="p-2 w-full rounded-lg outline-none" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem :value="item.id" v-for="item in groups">
+                    {{ item.name }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent> 
+            </Select>-->
             <More>
               <MoreTrigger>
                 <div
-                  class="appearance-none bg-[#f5f6fa] border border-gray-300 rounded-lg px-4 py-2 w-[200px] cursor-pointer hover:ring-2 hover:ring-blue-500 flex justify-between"
+                  class="appearance-none border border-gray-300 translate ease-in-out delay-150 rounded-lg px-4 py-2 w-[210px] cursor-pointer hover:ring-1 hover:ring-blue-500 flex justify-between"
                   @click="toggleDropdown">
                   {{ selectedGroup || "请选择" }}
                   <ChevronDownIcon class="w-5 h-5 absolute right-2 top-2.5 text-gray-500" />
@@ -52,15 +64,18 @@
             </ul> -->
           </div>
           <div class="relative">
-            <input type="text" placeholder="请输入姓名" v-model="searchName"
-              class="pl-10 pr-4 bg-[#f5f6fa] py-2 border border-gray-300 rounded-lg outline-none hover:ring-2 hover:ring-blue-500" />
+            <Input v-model="searchQuery" placeholder="请输入姓名" class="pl-[40px] hover:ring-1 hover:border-blue-500" />
+
             <SearchIcon class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
           </div>
         </div>
       </div>
 
+      <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
+        数据为空，没有成员
+      </div>
       <!-- Table -->
-      <div class="flex-1 overflow-auto">
+      <div class="flex-1 overflow-auto" v-else>
         <table class="w-full border-none flex-1">
           <thead class="bg-gray-50 sticky top-0 z-10">
             <tr>
@@ -101,12 +116,12 @@
                 <!-- <button @click="openDetail(member)" class="text-blue-600 hover:text-blue-800 mr-4">
                   详情
                 </button> -->
-                <button @click="editMember(member)" class="text-blue-600 hover:text-blue-800 mr-4">
+                <button @click="editMember(member)" class="text-blue-600 hover:text-blue-800 mr-4" v-show="isLeader">
                   编辑
                 </button>
                 <More>
                   <MoreTrigger>
-                    <button class="text-gray-400 hover:text-gray-600 flex items-center">
+                    <button class="text-gray-400 hover:text-gray-600 flex items-center" v-show="isLeader">
                       <MoreVerticalIcon class="w-6 h-6" />
                     </button>
                   </MoreTrigger>
@@ -121,12 +136,11 @@
                     </MoreItem>
                   </MoreContent>
                 </More>
+                <span v-show="!isLeader">\</span>
               </td>
             </tr>
           </tbody>
-          <!-- <table v-if="members.length === 0" class="w-[1000px] h-[300px]"> -->
 
-          <!-- </table> -->
         </table>
       </div>
       <!-- <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
@@ -320,9 +334,10 @@ import {
 } from "@/components/ui/tooltip";
 import { user_receive_query } from "@/commands/user-team-temp";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-import { query_team_all_user, team_query, query_team_group_all_user, query_current_team_info, remove_current_user, blocked } from "@/commands/team"
+import { query_team_all_user, team_query, query_team_group_all_user, query_current_team_info, remove_current_user, blocked, team_is_leader } from "@/commands/team"
 import { team_group_query_all } from "@/commands/team-group";
 import { toast } from "vue-sonner";
+import Input from "@/components/input.vue"
 
 const route = useRoute()
 const selectedMember = ref(null);
@@ -418,7 +433,7 @@ const editMember = (member) => {
   addMemModel.value = true
 }
 watch(() => addMemModel.value, (val) => {  //监听使数据更新后刷新页面
-  if(!val){
+  if (!val) {
     getList()
   }
 })
@@ -436,14 +451,20 @@ const getList = () => {
       //查询该团队下所有成员
       query_team_all_user(res.data.id, pagination.pageIndex, pagination.pageSize).then(res2 => {
         members.value = res2.data.data
-        pagination.total = res2.data.total        
+        pagination.total = res2.data.total
       })
     }
     //查询分组
   })
 }
 
+const isLeader = ref(false)
 onMounted(async () => {
   getList()
+  query_current_team_info().then(res => {
+    team_is_leader(res.data.id).then(res2 => {
+      isLeader.value = res2.data
+    })
+  })
 })
 </script>

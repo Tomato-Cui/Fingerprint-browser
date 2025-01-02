@@ -7,7 +7,7 @@
           <div class="relative flex-1 flex items-center gap-4 min-w-[500px] max-w-[1000px]">
             <!-- 搜索框 -->
             <div
-              class="relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500">
+              class="relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-1 hover:ring-blue-500">
               <input v-model="selectVal" type="text" :placeholder="'请输入' +
                 (selectType === 1
                   ? '名称'
@@ -40,7 +40,7 @@
               <More>
                 <MoreTrigger>
                   <div
-                    class="appearance-none bg-[#f5f6fa] border border-gray-300 rounded-lg px-4 py-2 w-[200px] cursor-pointer hover:ring-2 hover:ring-blue-500 flex items-center justify-between"
+                    class="appearance-none bg-[#f5f6fa] border border-gray-300 rounded-lg px-4 py-2 w-[200px] cursor-pointer hover:ring-1 hover:ring-blue-500 flex items-center justify-between"
                     @click="toggleDropdown">
                     {{ selectedLabel || "请选择" }}
                     <ChevronDownIcon class="w-5 h-5 absolute right-2 top-2.5 text-gray-500" />

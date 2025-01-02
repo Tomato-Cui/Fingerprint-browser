@@ -30,8 +30,7 @@
         </div>
 
         <div class="relative">
-          <input type="text" v-model="searchQuery" placeholder="请输入分组名称"
-            class="pl-10 pr-4 py-2 w-64 rounded-lg border border-gray-200 hover:ring-2 hover:ring-blue-500 bg-[#f9f9f9] focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          <Input v-model="searchQuery" placeholder="请输入分组名称" class="pl-[40px] hover:ring-1 hover:border-blue-500"/>
 
           <SearchIcon class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
         </div>
@@ -108,44 +107,6 @@
           </div> -->
         </div>
       </div>
-
-      <div class="flex items-center justify-center w-full h-full" v-if="groups?.length === 0">
-        数据为空，没有成员
-      </div>
-      <!-- </div> -->
-
-      <!-- Pagination -->
-      <!-- <div class="flex items-center justify-end space-x-2 py-1">
-        <div class="flex-1 text-sm text-muted-foreground">
-          共{{ pagination.total }}条.
-        </div>
-        <div class="space-x-2">
-          <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
-            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
-              <PaginationFirst @click="() => paginationClickHandle(0)" />
-              <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
-
-              <template v-for="(item, index) in items">
-                <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-                  <Button class="w-10 h-10 p-0" @click="() => paginationClickHandle(index)" :variant="item.value === pagination.pageIndex + 1 ? 'default' : 'outline'
-                    ">
-                    {{ item.value }}
-                  </Button>
-                </PaginationListItem>
-                <PaginationEllipsis v-else :key="item.type" :index="index" />
-              </template>
-
-<PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
-<PaginationLast @click="() =>
-                paginationClickHandle(
-                  Math.ceil(pagination.total / pagination.pageSize) - 1
-                )
-                " />
-</PaginationList>
-</Pagination>
-</div>
-</div> -->
-      <!-- </div> -->
     </div>
   </div>
 
@@ -218,6 +179,7 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
+import Input from "@/components/input.vue"
 
 const router = useRouter()
 const searchQuery = ref("");

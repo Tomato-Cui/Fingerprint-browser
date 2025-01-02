@@ -294,7 +294,7 @@ const removeSubmitHandle = () => {
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
             <!-- 创建分组 -->
-            <PrimaryButton class="flex gap-x-2" @click="createGroup">
+            <!-- <PrimaryButton class="flex gap-x-2" @click="createGroup">
               创建分组
             </PrimaryButton>
             <SearchInput
@@ -302,6 +302,9 @@ const removeSubmitHandle = () => {
               @update:searchType="(value: any) => (searchType = value)"
               @update:searchValue="searchValueHandle"
             />
+            </PrimaryButton> -->
+            <SearchInput :search-current-type="searchType" @update:searchType="(value: any) => (searchType = value)"
+              @update:searchValue="searchValueHandle" />
           </div>
           <div class="flex gap-2 py-2 ju justify-end flex-auto px-2">
             <DropdownMenu>
