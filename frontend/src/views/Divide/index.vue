@@ -270,9 +270,9 @@ const handleSubmitDel = () => {
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
             <!-- 创建分组 -->
-            <PrimaryButton class="flex gap-x-2" @click="createGroup">
+            <!-- <PrimaryButton class="flex gap-x-2" @click="createGroup">
               创建分组
-            </PrimaryButton>
+            </PrimaryButton> -->
             <SearchInput :search-current-type="searchType" @update:searchType="(value: any) => (searchType = value)"
               @update:searchValue="searchValueHandle" />
           </div>

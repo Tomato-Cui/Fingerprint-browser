@@ -6,7 +6,7 @@
         <!-- <div class="flex justify-between items-center"> -->
 
         <div
-          class="relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-2 hover:ring-blue-500 ">
+          class="relative max-w-xl flex items-center border rounded-lg bg-[#f9f9f9] hover:outline-none hover:ring-1 transform ease-in-out delay-150 duration-100 hover:ring-blue-500 ">
           <input v-model="selectVal" type="text"
             :placeholder="'请输入' + (selectType === 1 ? '名称' : selectType === 2 ? '备注' : '邮箱')"
             class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 bg-[#f9f9f9] outline-none" />
@@ -35,11 +35,11 @@
 
       <!-- Table -->
       <!-- <div class="bg-white rounded-lg flex flex-col flex-1">  -->
-      <!-- <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
-        数据为空，没有成员
-      </div> -->
+      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
+        数据为空，还没有黑名单用户
+      </div>
       <!-- Table Header -->
-      <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500">
+      <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500" v-else>
         <div>姓名</div>
         <div>分组</div>
         <div>备注</div>
