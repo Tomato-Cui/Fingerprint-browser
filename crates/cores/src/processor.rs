@@ -46,8 +46,12 @@ impl BrowserChildInfo {
         );
         let window_position = format!(
             "--window-position={},{}",
-            self.fingerprint_info.longitude.unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
-            self.fingerprint_info.latitude.unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
+            self.fingerprint_info
+                .longitude
+                .unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
+            self.fingerprint_info
+                .latitude
+                .unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
         );
         let user_agent = format!("--user-agent={}", self.fingerprint_info.ua);
         let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);
@@ -136,19 +140,22 @@ impl Processer {
         &mut self,
         payload: BrowserChildInfo,
     ) -> core::result::Result<bool, anyhow::Error> {
+        let environment_uuid = payload.environemnt_info.clone().uuid.unwrap_or_default();
+        if let Ok(ok) = self.status(&environment_uuid).await {
+            return Ok(ok);
+        }
+
         let child = Command::new(&payload.browser_exe_path)
             .args(&payload.format().await?)
             .stderr(Stdio::null())
             .stdout(Stdio::null())
             .spawn()?;
 
-        let browser_id = &payload.environemnt_info.uuid.clone().unwrap_or_default();
-
         let child_pid = child
             .id()
             .ok_or(anyhow::anyhow!("child starting failed."))?;
 
-        self.index.insert(browser_id.to_string(), child_pid);
+        self.index.insert(environment_uuid, child_pid);
         {
             self.childs
                 .clone()

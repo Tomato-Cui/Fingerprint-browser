@@ -36,6 +36,9 @@ pub async fn stop(environmnet_uuiids: Vec<String>) -> Result<HashMap<String, i32
 
 pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Error> {
     let port = get_debug_port().await?;
+    let mut stauts = false;
+    let mut message = String::from("");
+
     match environment::query_by_uuid(environment_uuid).await {
         Ok(current_environement) => {
             let user_uuid = &current_environement.user_uuid;
@@ -71,24 +74,31 @@ pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Erro
                 &chrome_install_path,
             );
 
-            let ok = ACTUATOR
+            match ACTUATOR
                 .lock()
                 .await
                 .start_browser(browser_child_info)
-                .await?;
-
-            Ok(json!({
-                            "environment_uuid": environment_uuid,
-                            "status":  ok,
-                            "message":format!("启动成功."),
-            }))
+                .await
+            {
+                Ok(ok) => {
+                    stauts = ok;
+                    message = "启动成功".to_string();
+                }
+                Err(err) => {
+                    message = err.to_string();
+                }
+            };
         }
-        Err(_) => Ok(json!({
-                        "environment_uuid": environment_uuid,
-                        "status":  false,
-                        "message":format!("启动失败, 指定环境ID不存在."),
-        })),
-    }
+        Err(_) => {
+            message = "启动失败，指定环境不存在".to_string();
+        }
+    };
+
+    Ok(json!({
+        "environment_uuid": environment_uuid,
+        "status":  stauts,
+        "message": message,
+    }))
 }
 
 #[cfg(test)]

@@ -54,6 +54,13 @@ const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
 const selectData = ref<string[]>([]);
 const columns = ref<any[]>([]);
+const hiddenColumns = {
+  id: false,
+  uuid: false,
+  user_uuid: false,
+  proxy_host: false,
+  proxy_port: false,
+};
 const groupSelect = ref<string | undefined>();
 const createGroupDialog = ref(false); //添加分组弹出框
 const searchType = ref<{ title: keyof Payment; value: string }>({
@@ -270,15 +277,23 @@ const removeSubmitHandle = () => {
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem
-                  v-for="column in columns"
-                  :key="column.id"
-                  :checked="column.getIsVisible()"
-                  class="capitalize"
-                  @update:checked="(value) => column.toggleVisibility(!!value)"
-                >
-                  {{ column.id }}
-                </DropdownMenuCheckboxItem>
+                <template v-for="column in columns">
+                  <DropdownMenuCheckboxItem
+                    v-if="
+                      !Object.keys(hiddenColumns).some((item) => {
+                        return item.toLowerCase() === column.id.toLowerCase();
+                      })
+                    "
+                    :key="column.id"
+                    :checked="column.getIsVisible()"
+                    class="capitalize"
+                    @update:checked="
+                      (value) => column.toggleVisibility(!!value)
+                    "
+                  >
+                    {{ column.id }}
+                  </DropdownMenuCheckboxItem>
+                </template>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -305,6 +320,7 @@ const removeSubmitHandle = () => {
         <div class="overflow-auto flex-auto h-0 rounded-md">
           <DataTable
             :data="data"
+            :hiddenColumns="hiddenColumns"
             :pagination="pagination"
             @onSyncColumns="onSyncColumns"
             @onSelect="(v: string[]) => selectData = v"

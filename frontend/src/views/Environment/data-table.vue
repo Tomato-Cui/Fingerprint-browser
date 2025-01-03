@@ -51,11 +51,13 @@ export interface Payment {
 }
 
 interface TableProps {
+  hiddenColumns: any,
   data: Payment[];
   pagination: any;
 }
 
 const props = withDefaults(defineProps<TableProps>(), {
+  hiddenColumns: () => {},
   data: () => [] as Payment[],
   pagination: {
     pageIndex: 0,
@@ -347,12 +349,7 @@ const columns = [
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
-const columnVisibility = ref<VisibilityState>({
-  id: false,
-  uuid: false,
-  proxy_host: false,
-  proxy_port: false,
-});
+const columnVisibility = ref<VisibilityState>(props.hiddenColumns);
 const rowSelection = ref({});
 const expanded = ref<ExpandedState>({});
 

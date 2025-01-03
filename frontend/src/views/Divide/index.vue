@@ -60,6 +60,13 @@ const createGroupDialog = ref(false); // 创建分组
 const editAccountDialog = ref(false); // 编辑账号
 const editProxyDialog = ref(false); // 修改代理
 const removeDialog = ref(false); // 删除环境
+const hiddenColumns = {
+  id: false,
+  uuid: false,
+  user_uuid: false,
+  proxy_host: false,
+  proxy_port: false,
+};
 
 const onSyncColumns = (value: any) => (columns.value = value);
 const pagination = reactive({
@@ -314,15 +321,23 @@ const removeSubmitHandle = () => {
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem
-                  v-for="column in columns"
-                  :key="column.id"
-                  class="capitalize"
-                  :checked="column.getIsVisible()"
-                  @update:checked="(value) => column.toggleVisibility(!!value)"
-                >
-                  {{ column.id }}
-                </DropdownMenuCheckboxItem>
+                <template v-for="column in columns">
+                  <DropdownMenuCheckboxItem
+                    v-if="
+                      !Object.keys(hiddenColumns).some((item) => {
+                        return item.toLowerCase() === column.id.toLowerCase();
+                      })
+                    "
+                    :key="column.id"
+                    :checked="column.getIsVisible()"
+                    class="capitalize"
+                    @update:checked="
+                      (value) => column.toggleVisibility(!!value)
+                    "
+                  >
+                    {{ column.id }}
+                  </DropdownMenuCheckboxItem>
+                </template>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -349,6 +364,7 @@ const removeSubmitHandle = () => {
         <div class="rounded-md flex-auto h-0 overflow-auto">
           <DataTable
             :data="data"
+            :hiddenColumns="hiddenColumns"
             :pagination="pagination"
             @editEnvBtn="editEnvBtn"
             @editAccountBtn="editAccountBtn"

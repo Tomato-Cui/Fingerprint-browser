@@ -340,7 +340,7 @@ mod tests {
                 id: 0,
                 fp_info: EnvironmentFingerprint {
                     id: Some(5),
-                    browser: "1234".to_string(),
+                    browser: "12shdufshdf34".to_string(),
                     ..Default::default()
                 },
                 ..Default::default()
