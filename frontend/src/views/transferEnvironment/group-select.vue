@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { onMounted, ref, watch } from "vue";
 import {
   Select,
@@ -8,12 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/select";
-import { group_query } from "@/commands/group";
 
-const groups = ref<any[]>([]);
+const groups = ref([]);
 const emits = defineEmits(["select"]);
 
-const select = ref<string | undefined>(undefined);
+const select = ref(undefined);
 
 onMounted(() => {
   group_query(0, 100).then((res) => {

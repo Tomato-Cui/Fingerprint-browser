@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, defineProps, defineEmits, onMounted, reactive } from "vue";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import {
@@ -36,41 +36,24 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination";
-
 import { Button } from "@/components/ui/button";
 import SearchInput from "./search-input.vue";
-
 import TooltipButton from "@/components/tooltip-button.vue";
-
 import { PrimaryButton } from "@/components/button";
 import { environment_transfer_history_query } from "@/commands/environment-transfer-history";
 
-interface Payment {
-  id: number;
-  name: string;
-  group: string;
-  location: string;
-  description: string;
-  browser: string;
-  remark: string;
 
-  domain_name: string;
-  transferTime: string;
-  transferType: string;
-  selected?: boolean;
-}
-
-const selectData = ref<Number[]>([]);
-const columns = ref<any[]>([]);
-const groupSelect = ref<string | undefined>();
+const selectData = ref([]);
+const columns = ref([]);
+const groupSelect = ref();
 
 const data = ref<Array<Payment>>([]);
 
-const searchType = ref<{ title: keyof Payment; value: string }>({
+const searchType = ref({
   title: "name",
   value: "名称",
 });
-const onSyncColumns = (value: any) => (columns.value = value);
+const onSyncColumns = (value) => (columns.value = value);
 
 const pagination = reactive({
   pageIndex: 0,
@@ -78,7 +61,7 @@ const pagination = reactive({
   total: 0,
 });
 
-const loadData = (index: number, size: number) => {
+const loadData = (index, size) => {
   environment_transfer_history_query(index, size).then((res) => {
     let { data: data_, total } = res.data;
 
@@ -87,17 +70,17 @@ const loadData = (index: number, size: number) => {
   });
 };
 
-const paginationClickHandle = (index: number) => {
+const paginationClickHandle = (index) => {
   loadData(index, pagination.pageSize);
   pagination.pageIndex = index;
 };
 
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 
-const searchValueHandle = (value: string) => {
+const searchValueHandle = (value) => {
   if (value.length != 0) {
     data.value = data.value.filter((item) => {
-      let current = item[searchType.value.title as keyof Payment] as string;
+      let current = item[searchType.value.title ] ;
       return current ? current.includes(value) : false;
     });
   } else {
@@ -122,7 +105,7 @@ const searchValueHandle = (value: string) => {
               <!-- <GroupSelect @select="groupSelectHandle" /> -->
               <SearchInput
                 :search-current-type="searchType"
-                @update:searchType="(value:any) => (searchType = value)"
+                @update:searchType="(value) => (searchType = value)"
                 @update:searchValue="searchValueHandle"
               />
             </div>

@@ -161,9 +161,6 @@ const groupOperationBtns = computed(() => [
   },
 ]);
 
-const createGroup = () => {
-  createGroupDialog.value = true;
-};
 
 const searchValueHandle = (value: string) => {
   data.value = copyData.value;

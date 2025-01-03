@@ -1,15 +1,18 @@
-// static CONFIG: &str = include_str!("../.././config.toml");
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{path::PathBuf, str::FromStr};
+static CONFIG: &str = include_str!("../../../config.toml");
 
 use commons::config::Location;
+use std::{path::PathBuf, str::FromStr};
 
-pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // init config
-    states::init_config_state(r#"config.toml"#).await;
-    // cores::config::init_config_by_str(CONFIG).await;
+    // states::init_config_state(r#"config.toml"#).await;
+    states::init_config_state_str(CONFIG).await;
 
-    let config = states::config::get_config().unwrap();
+    let config = states::config::get_config().expect("loading config failed.");
+
     let Location {
         user_data_location,
         user_logs_location,
@@ -31,7 +34,9 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         PathBuf::from_str(&database_location).unwrap(),
     ];
     // init cache locations
-    cores::init_location(locations).await?;
+    cores::init_location(locations)
+        .await
+        .expect("loading cache location failed.");
 
     // init browser version info, WARN: move other where
     // cores::requests::browser_resources::chrome::init_action_client(url);
@@ -39,16 +44,16 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // init states
     states::init_state().await;
 
-    // migrates
-    let migration_path = std::env::current_dir().unwrap().join("migrations");
     let pool = states::database::get_database_pool()?;
-    commons::database::Database::migrator(pool, migration_path)
-        .await
-        .unwrap();
+    if let Err(_) = commons::database::Database::migrator(pool).await {
+        let cache_dir = states::config::APP_DATA.clone().join(database_location);
+        if let Ok(_) = commons::util::delete_data_file(cache_dir).await {
+            if let Err(_) = commons::database::Database::migrator(pool).await {
+                eprintln!("database migrate failed.")
+            }
+        }
+    }
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:5678").await?;
-    let routes = apis::build_root_router();
-
-    axum::serve(listener, routes).await?;
+    views::run();
     Ok(())
 }

@@ -1,7 +1,6 @@
 [workspace]
 resolver = "1"
 members = [
-  "clients",
   "crates/apis",
   "crates/commons",
   "crates/cores",

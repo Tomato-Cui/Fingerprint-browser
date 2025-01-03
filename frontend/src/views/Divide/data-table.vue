@@ -33,7 +33,6 @@ import { MoreBtn } from "./more-btn";
 import { browser_start, browser_stops } from "@/commands/browser";
 import { toast } from "vue-sonner";
 import { useBrowserStatusStore } from "@/stores/browser";
-import { environment_delete } from "@/commands/environment";
 
 export interface Payment {
   id: number;

@@ -160,7 +160,7 @@ const adddaili = () => {
   router.push("/adddaili");
 };
 
-const toggleDropdown = (id) => {
+const toggleDropdown = (id: any) => {
   if (activeDropdown.value === id) {
     activeDropdown.value = null;
   } else {
@@ -168,27 +168,11 @@ const toggleDropdown = (id) => {
   }
 };
 
-const deleteModel = ref(false);
 
 const deleteOpenHandle = async (id: number) => {
   await environment_proxies_delete(id);
   loadData(pagination.pageIndex, pagination.pageSize);
 };
-
-const filters = ref([
-  { key: "platform", label: "账号平台", placeholder: "请选择", value: "" },
-  { key: "browser", label: "浏览器", placeholder: "请选择", value: "" },
-  { key: "environment", label: "环境分组", placeholder: "请选择", value: "" },
-  { key: "proxyType", label: "代理类型", placeholder: "请选择", value: "" },
-  { key: "provider", label: "服务商", placeholder: "请选择", value: "" },
-  { key: "operator", label: "操作者", placeholder: "请选择", value: "" },
-  {
-    key: "transferType",
-    label: "转移类型",
-    placeholder: "含备注与代理",
-    value: "",
-  },
-]);
 
 const toggleRowSelection = (row: Payment) => {
   row.selected = !row.selected;
@@ -196,8 +180,8 @@ const toggleRowSelection = (row: Payment) => {
 
 //分组
 const groupisOpen = ref(false);
-const newGroupName = ref("");
-const groups = ref([]);
+const newGroupName = ref<string>("");
+const groups = ref<string[]>([]);
 
 const groupData = async () => {
   await environment_proxy_group_query(1, 1000000).then((res) => {

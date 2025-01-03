@@ -19,3 +19,5 @@ tracing-appender = { workspace = true }
 services = { workspace = true }
 commons = { workspace = true }
 models = { workspace = true }
+cores = { workspace = true }
+states = { workspace = true }

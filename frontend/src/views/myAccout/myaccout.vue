@@ -282,7 +282,7 @@
   </div>
 </template>
 
-<script setup  lang="ts">
+<script setup>
 import {computed, reactive, ref, watch} from "vue";
 import ShowModel from "./showModel.vue";
 import updateModel from "./updateModel.vue";
@@ -394,13 +394,13 @@ const showDetails = (item) => {
 const showModelProps = reactive({
   open: false,
   title: "",
-  itemData: {} as Record<string, any>,
+  itemData: {},
 });
 
 const updateModelProps = reactive({
   open: false,
   title: "",
-  itemData: {} as Record<string, any>,
+  itemData: {},
 });
 
 const openupdateModal = (item) => {

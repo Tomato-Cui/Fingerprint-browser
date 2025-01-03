@@ -1,5 +1,4 @@
-use sqlx::{migrate::Migrator, Pool, Sqlite};
-use std::{io, path::PathBuf};
+use sqlx::{Pool, Sqlite};
 
 pub enum DatabaseDriverType {
     Sqlite,
@@ -25,17 +24,8 @@ impl Database {
         }
     }
 
-    pub async fn migrator(
-        pool: &Pool<Sqlite>,
-        migration_location: PathBuf,
-    ) -> Result<(), sqlx::migrate::MigrateError> {
-        if !migration_location.exists() {
-            return Err(sqlx::migrate::MigrateError::from(sqlx::error::Error::from(
-                io::Error::new(io::ErrorKind::NotFound, "Migration directory not found"),
-            )));
-        }
-
-        Ok(Migrator::new(migration_location).await?.run(pool).await?)
+    pub async fn migrator(pool: &Pool<Sqlite>) -> Result<(), sqlx::migrate::MigrateError> {
+        Ok(sqlx::migrate!("../../migrations").run(pool).await?)
     }
 
     pub fn get(&self) -> &Pool<Sqlite> {
@@ -75,10 +65,10 @@ async fn test_database_sqlite_memory() {
 
 #[tokio::test]
 async fn test_migrator() {
-    let mut migration_path = std::env::current_dir().unwrap();
-    migration_path.pop();
-    migration_path.pop();
-    migration_path = migration_path.join("migrations");
+    // let mut migration_path = std::env::current_dir().unwrap();
+    // migration_path.pop();
+    // migration_path.pop();
+    // migration_path = migration_path.join("migrations");
 
     let db_url = vec!["test.db", "memory"];
 
@@ -87,9 +77,7 @@ async fn test_migrator() {
             .await
             .unwrap();
 
-        Database::migrator(pool.get(), migration_path.clone())
-            .await
-            .unwrap();
+        Database::migrator(pool.get()).await.unwrap();
     }
 }
 
@@ -98,7 +86,7 @@ async fn test_migrator_2() {
     let mut db_path = std::env::current_dir().unwrap();
     db_path.pop();
     db_path.pop();
-    let migration_path = db_path.join("migrations");
+    // let migration_path = db_path.join("migrations");
     db_path = db_path.join("test.db");
 
     let pool = Database::new(
@@ -108,7 +96,5 @@ async fn test_migrator_2() {
     .await
     .unwrap();
 
-    Database::migrator(pool.get(), migration_path.clone())
-        .await
-        .unwrap();
+    Database::migrator(pool.get()).await.unwrap();
 }

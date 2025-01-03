@@ -23,7 +23,6 @@ const router = useRouter();
 
 const environmentCreateFrom = useEnvironmentCreateFromStore();
 const environmentCreatesFrom = useEnvironmentCreatesFromStore();
-console.log(route);
 const onSubmit = () => {
   if (route.path === "/environment-action/create") {
     environmentCreateFrom.handleSubmit(async (values) => {
@@ -31,11 +30,11 @@ const onSubmit = () => {
         let { name, description } = values;
         const action = route.query.action;
         console.log("这是action:  " + action);
-        const environment = route.query.environment
-          ? JSON.parse(route.query.environment)
-          : null;
-        console.log("这是环境" + environment.uuid);
         if (action === "edit") {
+          const environment = route.query.environment
+            ? JSON.parse(route.query.environment)
+            : null;
+          console.log("这是环境" + environment.uuid);
           // 修改逻辑
           environment.name = name;
           environment.description = description;

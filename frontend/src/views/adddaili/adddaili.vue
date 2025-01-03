@@ -9,11 +9,8 @@ import {
   SelectValue,
 } from "@/components/select";
 import { ref, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
 
 const activeTab = ref("single");
-const router = useRouter();
-const route = useRoute();
 const proxyType = ref("IPV4");
 const proxyInfo = ref("");
 const host = ref("");

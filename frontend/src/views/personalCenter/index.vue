@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import Account from "./Account/index.vue";
 import Preference from "./Preference/index.vue";
 import Local from "./Local/index.vue";

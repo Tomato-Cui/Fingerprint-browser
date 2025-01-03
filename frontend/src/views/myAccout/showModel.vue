@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script setup>
 import { XIcon } from "lucide-vue-next";
 
 const props = defineProps({
-  itemData: Object,
+  itemData: null,
   open: false,
   title: "",
 });

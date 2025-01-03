@@ -16,7 +16,7 @@ import EnvironmentActionLayout from '@/views/environment-action/layout.vue';
 import EnvironmentActionCreate from '@/views/environment-action/views/create.vue';
 import EnvironmentActionCreates from '@/views/environment-action/views/creates.vue';
 import EnvironmentActionImports from '@/views/environment-action/views/imports.vue';
-import myAccout from '@/views/myAccout/myAccout.vue';
+import myAccout from '@/views/myAccout/myaccout.vue';
 import mydaili from '@/views/mydaili/mydaili.vue';
 import adddaili from '@/views/adddaili/adddaili.vue';
 import mylog from '@/views/mylog/mylog.vue';

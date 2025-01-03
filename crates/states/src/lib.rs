@@ -14,3 +14,7 @@ pub async fn init_state() {
 pub async fn init_config_state(path: &str) {
     config::init_state_path(path).await;
 }
+pub async fn init_config_state_str(config_str: &str) {
+    config::init_state_str(config_str).await;
+}
+

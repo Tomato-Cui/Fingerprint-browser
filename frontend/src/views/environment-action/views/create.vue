@@ -28,7 +28,6 @@ import Alignment from "../components/alignment.vue";
 import { useEnvironmentCreateFromStore } from "@/stores/form/environment-create";
 
 const environmentCreateFrom = useEnvironmentCreateFromStore();
-
 </script>
 <template>
   <Accordion
@@ -60,7 +59,9 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
             <span class="absolute right-3 top-2 text-xs text-gray-400"
               >0/100</span
             >
-            <span class="text-red-400">{{ environmentCreateFrom.errors.name }}</span>
+            <span class="text-red-400">{{
+              environmentCreateFrom.errors.name
+            }}</span>
           </div>
         </div>
         <div class="space-y-2 flex items-center">
@@ -227,13 +228,13 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
         <!-- Notes -->
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
-            备注
-          </p>
           <div class="w-full">
-            <div class="flex gap-x-4 relative">
+            <div class="flex relative">
+              <p
+                class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
+              >
+                备注
+              </p>
               <Input
                 v-model="environmentCreateFrom.forms.environmentDescription"
                 v-bind="environmentCreateFrom.forms.environmentDescriptionProps"
@@ -245,6 +246,9 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
                 >0/1500</span
               >
             </div>
+            <span class="text-red-400 pl-[7.85rem]">{{
+              environmentCreateFrom.errors.description
+            }}</span>
           </div>
         </div>
       </AccordionContent>
@@ -265,7 +269,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
             <TabsTrigger value="extract"> API提取 </TabsTrigger>
           </TabsList>
           <TabsContent value="custom" class="space-y-2">
-            <div class="flex items-center ">
+            <div class="flex items-center">
               <p
                 class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
               >

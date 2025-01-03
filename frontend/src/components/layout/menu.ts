@@ -17,8 +17,6 @@ import {
     IconSoftware,
     IconLogActive,
     IconLog,
-    IconAutomationActive,
-    IconAutomation,
     IconWindowSyncActive,
     IconWindowSync,
     IconGroupManagement,
@@ -29,12 +27,11 @@ import {
     IconBlockActive,
     IconMembershipApplication,
     IconMembershipApplicationActive,
-    IconRpa,
     IconApi,
     IconApiActive,
 } from "@/assets/icons/index";
 
-import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as ComponentIcon } from 'lucide-vue-next'
+import { Component as ComponentIcon } from 'lucide-vue-next'
 export const menuTop = [
     {
         title: "环境列表",
