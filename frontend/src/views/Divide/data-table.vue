@@ -62,7 +62,17 @@ const props = withDefaults(defineProps<TableProps>(), {
 });
 
 const browserStatusStore = useBrowserStatusStore();
-const emits = defineEmits(["onSelect", "onSyncColumns", "removeEnv", 'setCommonBtn', 'transferEnvBtn', 'authMemberBtn', 'editProxyBtn', 'editAccountBtn', 'editEnvBtn']);
+const emits = defineEmits([
+  "onSelect",
+  "onSyncColumns",
+  "removeEnv",
+  "setCommonBtn",
+  "transferEnvBtn",
+  "authMemberBtn",
+  "editProxyBtn",
+  "editAccountBtn",
+  "editEnvBtn",
+]);
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -89,7 +99,9 @@ const columns = [
           row.toggleSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
+            table
+              .getSelectedRowModel()
+              .rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select row",
@@ -155,7 +167,11 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h("div", { class: "lowercase whitespace-nowrap" }, row.getValue("os") || "/"),
+      h(
+        "div",
+        { class: "lowercase whitespace-nowrap" },
+        row.getValue("os") || "/"
+      ),
   }),
   columnHelper.accessor("proxy", {
     header: ({ column }) => {
@@ -169,7 +185,8 @@ const columns = [
         () => ["代理", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
       );
     },
-    cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("proxy") || "/"),
+    cell: ({ row }) =>
+      h("div", { class: "lowercase" }, row.getValue("proxy") || "/"),
   }),
   columnHelper.accessor("group", {
     header: ({ column }) => {
@@ -183,7 +200,8 @@ const columns = [
         () => ["分组", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })]
       );
     },
-    cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("group") || "/"),
+    cell: ({ row }) =>
+      h("div", { class: "lowercase" }, row.getValue("group") || "/"),
   }),
   columnHelper.accessor("open_urls", {
     header: ({ column }) => {
@@ -217,7 +235,11 @@ const columns = [
       );
     },
     cell: ({ row }) =>
-      h("div", { class: "lowercase whitespace-nowrap" }, row.getValue("country") || "/"),
+      h(
+        "div",
+        { class: "lowercase whitespace-nowrap" },
+        row.getValue("country") || "/"
+      ),
   }),
   columnHelper.display({
     id: "actions",
@@ -247,13 +269,19 @@ const columns = [
                     browser_start(uuid)
                       .then((res) => {
                         let data = res.data;
-                        browserStatusStore.updateStatus(data.environment_uuid, data.status);
+                        browserStatusStore.updateStatus(
+                          data.environment_uuid,
+                          data.status
+                        );
                       })
                       .catch((_) => toast.warning("启动失败"));
                   }
                 } else {
                   browser_stops([uuid]).then((res: any) => {
-                    if (res.message && (res.message as string).includes("关闭成功")) {
+                    if (
+                      res.message &&
+                      (res.message as string).includes("关闭成功")
+                    ) {
                       browserStatusStore.updateStatus(uuid, false);
                     }
                   });
@@ -265,7 +293,9 @@ const columns = [
               h(
                 "span",
                 { class: "text-sm" },
-                !browserStatusStore.getStatus(uuid) ? "打开浏览器" : "关闭浏览器"
+                !browserStatusStore.getStatus(uuid)
+                  ? "打开浏览器"
+                  : "关闭浏览器"
               ),
             ]
           )
@@ -308,10 +338,12 @@ const table = useVueTable({
   getFilteredRowModel: getFilteredRowModel(),
   getExpandedRowModel: getExpandedRowModel(),
   onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
-  onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
+  onColumnFiltersChange: (updaterOrValue) =>
+    valueUpdater(updaterOrValue, columnFilters),
   onColumnVisibilityChange: (updaterOrValue) =>
     valueUpdater(updaterOrValue, columnVisibility),
-  onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
+  onRowSelectionChange: (updaterOrValue) =>
+    valueUpdater(updaterOrValue, rowSelection),
   onExpandedChange: (updaterOrValue) => valueUpdater(updaterOrValue, expanded),
   manualPagination: true,
   state: {
@@ -341,18 +373,29 @@ const table = useVueTable({
 
 <template>
   <Table>
-    <TableHeader class="z-10 sticky top-0">
-      <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-        <TableHead v-for="header in headerGroup.headers" :key="header.id" :data-pinned="header.column.getIsPinned()"
-          :class="cn(
-            {
-              'sticky bg-muted': header.column.getIsPinned(),
-            },
-            header.column.getIsPinned() === 'left' ? 'left-0' : 'right-0'
-          )
-            ">
-          <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
-            :props="header.getContext()" />
+    <TableHeader class="sticky top-0 z-10">
+      <TableRow
+        v-for="headerGroup in table.getHeaderGroups()"
+        :key="headerGroup.id"
+      >
+        <TableHead
+          v-for="header in headerGroup.headers"
+          :key="header.id"
+          :data-pinned="header.column.getIsPinned()"
+          :class="
+            cn(
+              {
+                'sticky bg-muted': header.column.getIsPinned(),
+              },
+              header.column.getIsPinned() === 'left' ? 'left-0' : 'right-0'
+            )
+          "
+        >
+          <FlexRender
+            v-if="!header.isPlaceholder"
+            :render="header.column.columnDef.header"
+            :props="header.getContext()"
+          />
         </TableHead>
       </TableRow>
     </TableHeader>
@@ -360,18 +403,29 @@ const table = useVueTable({
       <template v-if="table.getRowModel().rows?.length">
         <template v-for="row in table.getRowModel().rows" :key="row.id">
           <!-- {{ row }} -->
-          <TableRow :data-state="row.getIsSelected() && 'selected'" class="group">
-            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id" :data-pinned="cell.column.getIsPinned()"
-              :class="cn(
-                {
-                  'sticky bg-background/95': cell.column.getIsPinned(),
-                  'bg-muted': row.getIsSelected(),
-                },
-                cell.column.getIsPinned() === 'left' ? 'left-0' : 'right-0',
-                'group-hover:bg-muted transition-colors'
-              )
-                ">
-              <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+          <TableRow
+            :data-state="row.getIsSelected() && 'selected'"
+            class="group"
+          >
+            <TableCell
+              v-for="cell in row.getVisibleCells()"
+              :key="cell.id"
+              :data-pinned="cell.column.getIsPinned()"
+              :class="
+                cn(
+                  {
+                    'sticky bg-background/95': cell.column.getIsPinned(),
+                    'bg-muted': row.getIsSelected(),
+                  },
+                  cell.column.getIsPinned() === 'left' ? 'left-0' : 'right-0',
+                  'group-hover:bg-muted transition-colors'
+                )
+              "
+            >
+              <FlexRender
+                :render="cell.column.columnDef.cell"
+                :props="cell.getContext()"
+              />
             </TableCell>
           </TableRow>
           <TableRow v-if="row.getIsExpanded()">
@@ -384,8 +438,8 @@ const table = useVueTable({
 
       <TableRow v-else>
         <TableCell :colspan="columns.length">
-          <div class="flex justify-center items-center text-gray-400 gap-x-2">
-            <InboxIcon class="h-4 w-4" />
+          <div class="flex gap-x-2 justify-center items-center text-gray-400">
+            <InboxIcon class="w-4 h-4" />
             No results.
           </div>
         </TableCell>

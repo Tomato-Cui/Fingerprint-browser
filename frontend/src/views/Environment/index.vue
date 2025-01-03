@@ -220,7 +220,11 @@ const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
   userUuid = user_uuid;
   editAccountDialog.value = true;
 };
+<<<<<<< HEAD
 
+=======
+// ----修改代理
+>>>>>>> origin/dev-1
 const editProxyBtn = (uuid: string) => {
   environmentUuid = uuid;
   editProxyDialog.value = true;

@@ -267,15 +267,14 @@ const searchValueHandle = (value: string) => {
               <div class="flex items-center">
                 <img src="../../assets/icons/stop.svg" class="mr-1 w-4 h-4" />
                 <span
-                  v-if="row.domain_name"
                   class="px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded"
                 >
-                  {{ row.domain_name }}
+                  {{ row.domain_name || "\\" }}
                 </span>
               </div>
             </td>
 
-            <td class="px-4 py-3 text-sm">{{ row.description }}</td>
+            <td class="px-4 py-3 text-sm">{{ row.description || "\\" }}</td>
             <td class="px-4 py-3 text-sm">
               {{ row.delete_from_user_nickname }}
             </td>

@@ -148,30 +148,6 @@ const searchValueHandle = (value) => {
               <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
                 转移时间
               </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                转移类型
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                转移团队名称
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                转移团队ID
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                代理类型
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                API服务商
-              </th>
-              <th class="px-4 py-3 text-sm font-medium text-left min-w-48">
-                操作者
-              </th>
-              <!-- <th class="px-4 py-3 text-sm font-medium text-left text-gray-600">
-            操作
-          </th> -->
-              <!-- <th class="px-4 py-3 text-sm font-medium text-left text-gray-600">
-            更多
-          </th> -->
             </tr>
           </thead>
           <tbody>
@@ -180,24 +156,14 @@ const searchValueHandle = (value) => {
               :key="index"
               class="hover:bg-blue-100"
               :class="{ 'bg-blue-50': row.selected }"
-              @click="toggleRowSelection(row)"
+              @click=""
             >
-              <!-- <td class="px-4 py-3">
-            <input
-              type="checkbox"
-              class="rounded border-gray-300"
-              v-model="row.selected"
-            />
-          </td> -->
               <td class="px-4 py-3 text-sm min-w-48">
                 {{ pagination.pageIndex * pagination.pageSize + index + 1 }}
               </td>
               <td class="px-4 py-3 text-sm min-w-48">
                 <div class="flex items-center">
                   <span class="text-gray-500">{{ row.name }}</span>
-                  <!-- <button class="p-1 rounded hover:bg-gray-100">
-                <img src="../../assets/icons/modify.svg" class="w-4 h-4" />
-              </button> -->
                 </div>
               </td>
 
@@ -208,7 +174,6 @@ const searchValueHandle = (value) => {
                     class="mr-1 w-4 h-4"
                   />
                   {{ row.ip }}
-                  <!-- <span class="ml-1 text-gray-500">{{ row.location }}</span> -->
                 </div>
               </td>
               <td class="px-4 py-3 min-w-48">
@@ -230,17 +195,9 @@ const searchValueHandle = (value) => {
               <td class="px-4 py-3 text-sm min-w-48">
                 {{ row.browser || "\\" }}
               </td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.transferTime }}</td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.transferType }}</td>
               <td class="px-4 py-3 text-sm min-w-48">
-                {{ row.transferTeamName }}
+                {{ row.created_at || "\\" }}
               </td>
-              <td class="px-4 py-3 text-sm min-w-48">
-                {{ row.transferTeamId }}
-              </td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.agentType }}</td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.apiService }}</td>
-              <td class="px-4 py-3 text-sm min-w-48">{{ row.operator }}</td>
             </tr>
           </tbody>
         </table>
