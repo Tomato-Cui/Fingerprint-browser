@@ -27,6 +27,7 @@ import {
   PackageOpenIcon,
   TrashIcon,
   Boxes,
+  SendToBack,
 } from "lucide-vue-next";
 import SearchInput from "./search-input.vue";
 import GroupSelect from "./group-select.vue";
@@ -35,6 +36,7 @@ import {
   environment_query,
   environment_query_by_group,
   environment_delete,
+  environment_query_id,
 } from "@/commands/environment";
 import DataTable, { type Payment } from "./data-table.vue";
 import { PrimaryButton } from "@/components/button";
@@ -43,6 +45,7 @@ import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import TransferModal from "./transfer-modal.vue";
+import MoveToGroup from "./com/move-to-group.vue";
 import EditProxy from "@/views/Environment/com/edit-proxy.vue";
 import EditAccount from "@/views/Environment/com/edit-account.vue";
 import { useRouter } from "vue-router";
@@ -65,6 +68,13 @@ const transferModal = ref({
   title: "转移环境",
   name: "",
   uuid: "",
+});
+
+const moveToGroupModal = ref({
+  open: false,
+  title: "设置分组",
+  name: [] as string[],
+  uuid: [] as string[],
 });
 
 const onSyncColumns = (value: any) => (columns.value = value);
@@ -141,7 +151,7 @@ const groupOperationBtns = computed(() => [
   {
     title: "导入",
     icon: ExternalLinkIcon,
-    click: () => {},
+    click: () => { },
     disabled: true,
   },
   {
@@ -156,10 +166,34 @@ const groupOperationBtns = computed(() => [
     click: batchDelete,
     disabled: selectData.value.length <= 0,
   },
+  {
+    title: "移入分组",
+    icon: SendToBack,
+    click: moveToGroup,
+    disabled: selectData.value.length <= 0,
+  },
 ]);
 const groupSelectHandle = (value: string) => {
   groupSelect.value = value;
 };
+
+const environmentName = ref<string[]>([]);
+/**
+ * 移入分组
+ */
+const moveToGroup = () => {
+  let ids = [...selectData.value].map((item) => item) as any[];
+  ids.forEach((item) => {
+    environment_query_id(item).then((res) => {
+      environmentName.value.push(res.data.name);
+    });
+  });
+  moveToGroupModal.value.open = true;
+  moveToGroupModal.value.uuid = ids as string[];
+  moveToGroupModal.value.name = environmentName.value;
+  console.log("1234567890:", environmentName.value);
+  
+}
 
 const searchValueHandle = (value: string) => {
   if (value.length != 0) {
@@ -239,18 +273,13 @@ const removeSubmitHandle = () => {
 
 <template>
   <div class="flex flex-col p-3 bg-gray-50 h-main">
-    <div
-      class="flex overflow-hidden flex-col flex-1 px-2 bg-white rounded-lg shadow"
-    >
+    <div class="flex overflow-hidden flex-col flex-1 px-2 bg-white rounded-lg shadow">
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
             <GroupSelect @select="groupSelectHandle" />
-            <SearchInput
-              :search-current-type="searchType"
-              @update:searchType="(value:any) => (searchType = value)"
-              @update:searchValue="searchValueHandle"
-            />
+            <SearchInput :search-current-type="searchType" @update:searchType="(value: any) => (searchType = value)"
+              @update:searchValue="searchValueHandle" />
           </div>
           <div class="flex flex-auto gap-2 justify-end px-2 py-2 ju">
             <TooltipButton
@@ -262,21 +291,13 @@ const removeSubmitHandle = () => {
             </TooltipButton>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <TooltipButton
-                  class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
-                  title="筛选"
-                >
+                <TooltipButton class="p-2.5 rounded border border-gray-200 hover:bg-gray-100" title="筛选">
                   <LogsIcon class="w-5 h-5 text-gray-600" />
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem
-                  v-for="column in columns"
-                  :key="column.id"
-                  :checked="column.getIsVisible()"
-                  class="capitalize"
-                  @update:checked="(value) => column.toggleVisibility(!!value)"
-                >
+                <DropdownMenuCheckboxItem v-for="column in columns" :key="column.id" :checked="column.getIsVisible()"
+                  class="capitalize" @update:checked="(value) => column.toggleVisibility(!!value)">
                   {{ column.id }}
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
@@ -288,14 +309,8 @@ const removeSubmitHandle = () => {
             <PackageOpenIcon />
             打开
           </PrimaryButton>
-          <TooltipButton
-            v-for="(item, index) in groupOperationBtns"
-            :key="index"
-            :disabled="item.disabled"
-            :title="item.title"
-            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
-            @click="item.click"
-          >
+          <TooltipButton v-for="(item, index) in groupOperationBtns" :key="index" :disabled="item.disabled"
+            :title="item.title" class="p-2.5 rounded border border-gray-200 hover:bg-gray-100" @click="item.click">
             <component :is="item.icon" class="w-5 h-5 text-gray-600" />
           </TooltipButton>
         </div>
@@ -321,102 +336,53 @@ const removeSubmitHandle = () => {
             共{{ pagination.total }}条.
           </div>
           <div class="space-x-2">
-            <Pagination
-              :default-page="1"
-              :itemsPerPage="pagination.pageSize"
-              :total="pagination.total"
-            >
-              <PaginationList
-                v-slot="{ items }"
-                class="flex gap-1 items-center"
-              >
+            <Pagination :default-page="1" :itemsPerPage="pagination.pageSize" :total="pagination.total">
+              <PaginationList v-slot="{ items }" class="flex gap-1 items-center">
                 <PaginationFirst @click="() => paginationClickHandle(1)" />
-                <PaginationPrev
-                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
-                />
+                <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
                 <template v-for="(item, index) in items">
-                  <PaginationListItem
-                    v-if="item.type === 'page'"
-                    :key="index"
-                    :value="item.value"
-                    as-child
-                  >
-                    <Button
-                      :class="
-                        cn(
-                          'w-10 h-10 p-0',
-                          item.value === pagination.pageIndex + 1
-                            ? 'hover:bg-blue-700'
-                            : 'hover:bg-slate-100'
-                        )
-                      "
-                      @click="
-                        () => {
-                          paginationClickHandle(item.value - 1);
-                        }
-                      "
-                      :variant="
-                        item.value === pagination.pageIndex + 1
-                          ? 'default'
-                          : 'outline'
-                      "
-                    >
+                  <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                    <!-- {{ index }} -->
+                    <Button :variant="item.value === pagination.pageIndex
+                      ? 'default'
+                      : 'outline'
+                      " class="p-0 w-10 h-10" @click="() => paginationClickHandle(item.value - 1)">
                       {{ item.value }}
                     </Button>
                   </PaginationListItem>
                   <PaginationEllipsis v-else :key="item.type" :index="index" />
                 </template>
 
-                <PaginationNext
-                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
-                />
-                <PaginationLast
-                  @click="
-                    () =>
-                      paginationClickHandle(
-                        Math.ceil(pagination.total / pagination.pageSize)
-                      )
-                  "
-                />
+                <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+                <PaginationLast @click="() =>
+                  paginationClickHandle(
+                    Math.ceil(pagination.total / pagination.pageSize)
+                  )
+                  " />
               </PaginationList>
             </Pagination>
           </div>
         </div>
       </div>
     </div>
-    <TransferModal
-      :open="transferModal.open"
-      :title="transferModal.title"
-      :uuid="transferModal.uuid"
-      :name="transferModal.name"
-      @close="transferModal.open = false"
-    />
+    <TransferModal :open="transferModal.open" :title="transferModal.title" :uuid="transferModal.uuid"
+      :name="transferModal.name" @close="transferModal.open = false" />
+
+    <MoveToGroup :open="moveToGroupModal.open" :title="moveToGroupModal.title" :uuid="moveToGroupModal.uuid"
+      :name="moveToGroupModal.name" @close="() => {moveToGroupModal.open = false, environmentName = []}" />
   </div>
 
   <!-- 修改账号 -->
-  <EditAccount
-    v-model:editAccountDialog="editAccountDialog"
-    :environmentId="environmentId"
-    :environmentUuid="environmentUuid"
-    :userUuid="userUuid"
-  />
+  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentId="environmentId"
+    :environmentUuid="environmentUuid" :userUuid="userUuid" />
   <!-- 修改代理 -->
-  <EditProxy
-    v-model:editProxyDialog="editProxyDialog"
-    :environmentUuid="environmentUuid"
-  />
+  <EditProxy v-model:editProxyDialog="editProxyDialog" :environmentUuid="environmentUuid" />
 
-  <AlertModel
-    title="删除环境"
-    :open="removeDialog"
-    @close="() => (removeDialog = false)"
-    @cancel="() => (removeDialog = false)"
-    @submit="removeSubmitHandle"
-  >
+  <AlertModel title="删除环境" :open="removeDialog" @close="() => (removeDialog = false)"
+    @cancel="() => (removeDialog = false)" @submit="removeSubmitHandle">
     <div
-      class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm"
-    >
+      class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm">
       删除成功后，可以前往回收站恢复
     </div>
     <div class="text-sm flex flex-col gap-y-4 py-4">

@@ -19,6 +19,7 @@ import {
 import { ref, onMounted, reactive, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import TooltipButton from "@/components/tooltip-button.vue";
+import { cn } from "@/util/lib";
 import {
   LogsIcon,
   PackageOpenIcon,
@@ -144,7 +145,7 @@ const groupOperationBtns = computed(() => [
   {
     title: "导入",
     icon: ExternalLinkIcon,
-    click: () => {},
+    click: () => { },
     disabled: true,
   },
   {
@@ -284,9 +285,7 @@ const removeSubmitHandle = () => {
 <template>
   <!-- {{ route.params.id }} -->
   <div class="flex flex-col p-3 bg-gray-50 h-main">
-    <div
-      class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow px-2"
-    >
+    <div class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow px-2">
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">
@@ -306,21 +305,13 @@ const removeSubmitHandle = () => {
           <div class="flex gap-2 py-2 ju justify-end flex-auto px-2">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <TooltipButton
-                  title="筛选"
-                  class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border"
-                >
+                <TooltipButton title="筛选" class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border">
                   <LogsIcon class="h-5 w-5 text-gray-600" />
                 </TooltipButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem
-                  v-for="column in columns"
-                  :key="column.id"
-                  class="capitalize"
-                  :checked="column.getIsVisible()"
-                  @update:checked="(value) => column.toggleVisibility(!!value)"
-                >
+                <DropdownMenuCheckboxItem v-for="column in columns" :key="column.id" class="capitalize"
+                  :checked="column.getIsVisible()" @update:checked="(value) => column.toggleVisibility(!!value)">
                   {{ column.id }}
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
@@ -332,14 +323,9 @@ const removeSubmitHandle = () => {
             <PackageOpenIcon />
             打开
           </PrimaryButton>
-          <TooltipButton
-            v-for="(item, index) in groupOperationBtns"
-            :key="index"
-            class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border"
-            :title="item.title"
-            @click="item.click"
-            :disabled="item.disabled"
-          >
+          <TooltipButton v-for="(item, index) in groupOperationBtns" :key="index"
+            class="p-2.5 hover:bg-gray-100 rounded border-gray-200 border" :title="item.title" @click="item.click"
+            :disabled="item.disabled">
             <component :is="item.icon" class="h-5 w-5 text-gray-600" />
           </TooltipButton>
         </div>
@@ -347,19 +333,10 @@ const removeSubmitHandle = () => {
 
       <div class="flex flex-col h-full">
         <div class="rounded-md flex-auto h-0 overflow-auto">
-          <DataTable
-            :data="data"
-            :pagination="pagination"
-            @editEnvBtn="editEnvBtn"
-            @editAccountBtn="editAccountBtn"
-            @editProxyBtn="editProxyBtn"
-            @authMemberBtn="authMemberBtn"
-            @transferEnvBtn="transferEnvBtn"
-            @setCommonBtn="setCommonBtn"
-            @removeEnv="removeHandle"
-            @onSyncColumns="onSyncColumns"
-            @onSelect="(v: string[]) => selectData = v"
-          />
+          <DataTable :data="data" :pagination="pagination" @editEnvBtn="editEnvBtn" @editAccountBtn="editAccountBtn"
+            @editProxyBtn="editProxyBtn" @authMemberBtn="authMemberBtn" @transferEnvBtn="transferEnvBtn"
+            @setCommonBtn="setCommonBtn" @removeEnv="removeHandle" @onSyncColumns="onSyncColumns"
+            @onSelect="(v: string[]) => selectData = v" />
         </div>
 
         <div class="flex items-center justify-end space-x-2 py-1">
@@ -367,30 +344,27 @@ const removeSubmitHandle = () => {
             共{{ pagination.total }}条.
           </div>
           <div class="space-x-2">
-            <Pagination
-              :total="pagination.total"
-              :itemsPerPage="pagination.pageSize"
-              :default-page="1"
-            >
-              <PaginationList
-                v-slot="{ items }"
-                class="flex items-center gap-1"
-              >
+            <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
+              <PaginationList v-slot="{ items }" class="flex items-center gap-1">
                 <PaginationFirst @click="() => paginationClickHandle(0)" />
-                <PaginationPrev
-                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
-                />
+                <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
 
                 <template v-for="(item, index) in items">
-                  <PaginationListItem
-                    v-if="item.type === 'page'"
-                    :key="index"
-                    :value="item.value"
-                    as-child
-                  >
+                  <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
                     <Button
-                      class="w-10 h-10 p-0"
-                      @click="() => paginationClickHandle(index)"
+                      :class="
+                        cn(
+                          'w-10 h-10 p-0',
+                          item.value === pagination.pageIndex + 1
+                            ? 'hover:bg-blue-700'
+                            : 'hover:bg-slate-100'
+                        )
+                      "
+                      @click="
+                        () => {
+                          paginationClickHandle(item.value - 1);
+                        }
+                      "
                       :variant="
                         item.value === pagination.pageIndex + 1
                           ? 'default'
@@ -403,17 +377,12 @@ const removeSubmitHandle = () => {
                   <PaginationEllipsis v-else :key="item.type" :index="index" />
                 </template>
 
-                <PaginationNext
-                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
-                />
-                <PaginationLast
-                  @click="
-                    () =>
-                      paginationClickHandle(
-                        Math.ceil(pagination.total / pagination.pageSize) - 1
-                      )
-                  "
-                />
+                <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
+                <PaginationLast @click="() =>
+                    paginationClickHandle(
+                      Math.ceil(pagination.total / pagination.pageSize) - 1
+                    )
+                  " />
               </PaginationList>
             </Pagination>
           </div>
@@ -424,31 +393,18 @@ const removeSubmitHandle = () => {
   <!-- 创建分组 -->
   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
   <!-- 修改账号 -->
-  <EditAccount
-    v-model:editAccountDialog="editAccountDialog"
-    :environmentId="environmentId"
-    :environmentUuid="environmentUuid"
-    :userUuid="userUuid"
-  />
+  <EditAccount v-model:editAccountDialog="editAccountDialog" :environmentId="environmentId"
+    :environmentUuid="environmentUuid" :userUuid="userUuid" />
   <!-- 修改代理 -->
-  <EditProxy
-    v-model:editProxyDialog="editProxyDialog"
-    :environmentUuid="environmentUuid"
-  />
+  <EditProxy v-model:editProxyDialog="editProxyDialog" :environmentUuid="environmentUuid" />
   <!-- 删除 -->
   <Teleport to="body" class="z-30">
-    <div
-      class="fixed inset-0 bg-black/20 flex items-center justify-center z-30"
-      v-if="clickDel"
-    >
+    <div class="fixed inset-0 bg-black/20 flex items-center justify-center z-30" v-if="clickDel">
       <div class="bg-white rounded-lg w-[400px]">
         <!-- Modal Header -->
         <div class="flex justify-between items-center p-4">
           <h2 class="text-lg font-medium">提示</h2>
-          <button
-            @click="clickDel = false"
-            class="text-gray-400 hover:text-gray-600"
-          >
+          <button @click="clickDel = false" class="text-gray-400 hover:text-gray-600">
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -456,32 +412,20 @@ const removeSubmitHandle = () => {
 
         <!-- Modal Footer -->
         <div class="flex justify-center space-x-3 p-4">
-          <button
-            @click="handleSubmitDel"
-            class="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
+          <button @click="handleSubmitDel" class="px-8 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
             确定
           </button>
-          <button
-            @click="clickDel = false"
-            class="px-8 py-2 border rounded-md hover:bg-gray-50"
-          >
+          <button @click="clickDel = false" class="px-8 py-2 border rounded-md hover:bg-gray-50">
             取消
           </button>
         </div>
       </div>
     </div>
   </Teleport>
-  <AlertModel
-    title="删除环境"
-    :open="removeDialog"
-    @close="() => (removeDialog = false)"
-    @cancel="() => (removeDialog = false)"
-    @submit="removeSubmitHandle"
-  >
+  <AlertModel title="删除环境" :open="removeDialog" @close="() => (removeDialog = false)"
+    @cancel="() => (removeDialog = false)" @submit="removeSubmitHandle">
     <div
-      class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm"
-    >
+      class="text-orange-400 border-[1px] p-2 px-4 border-orange-400 rounded-md bg-orange-100 flex items-center gap-x-4 text-sm">
       删除成功后，可以前往回收站恢复
     </div>
     <div class="text-sm flex flex-col gap-y-4 py-4">
