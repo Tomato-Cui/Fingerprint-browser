@@ -41,13 +41,13 @@ impl BrowserChildInfo {
         let new_window = "--new-window".to_string();
         let window_size = format!(
             "--window-size={},{}",
-            self.fingerprint_info.width.unwrap_or_default(),
-            self.fingerprint_info.height.unwrap_or_default()
+            self.fingerprint_info.width.unwrap_or_else(|| 488),
+            self.fingerprint_info.height.unwrap_or_else(|| 488)
         );
         let window_position = format!(
             "--window-position={},{}",
-            self.fingerprint_info.longitude.clone().unwrap_or_default(),
-            self.fingerprint_info.latitude.clone().unwrap_or_default(),
+            self.fingerprint_info.longitude.unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
+            self.fingerprint_info.latitude.unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
         );
         let user_agent = format!("--user-agent={}", self.fingerprint_info.ua);
         let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);

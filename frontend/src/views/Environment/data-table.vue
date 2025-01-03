@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/table";
 import { cn, valueUpdater } from "@/util/lib";
 import { ArrowUpDown, ChromeIcon, InboxIcon } from "lucide-vue-next";
-import { defineProps, h, onMounted, ref, withDefaults } from "vue";
+import { defineProps, h, onMounted, ref, withDefaults, watch } from "vue";
 import { PrimaryButton } from "@/components/button/index";
 import { MoreBtn } from "./more-btn";
 import { browser_start, browser_stops } from "@/commands/browser";
@@ -77,6 +77,9 @@ const emits = defineEmits([
   "editAccountBtn",
   "editEnvBtn",
 ]);
+
+watch(props, (_) => table.toggleAllRowsSelected(false));
+
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({

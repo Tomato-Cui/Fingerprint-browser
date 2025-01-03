@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { cn } from "@/util/lib";
 import { ref, computed, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -528,8 +529,19 @@ const paginationClickHandle = (index: number) => {
                     as-child
                   >
                     <Button
-                      class="p-0 w-10 h-10"
-                      @click="() => paginationClickHandle(index)"
+                      :class="
+                        cn(
+                          'w-10 h-10 p-0',
+                          item.value === pagination.pageIndex + 1
+                            ? 'hover:bg-blue-700'
+                            : 'hover:bg-slate-100'
+                        )
+                      "
+                      @click="
+                        () => {
+                          paginationClickHandle(item.value - 1);
+                        }
+                      "
                       :variant="
                         item.value === pagination.pageIndex + 1
                           ? 'default'

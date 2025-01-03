@@ -88,8 +88,8 @@ mod tests {
     #[tokio::test]
     async fn test_modify() {
         crate::setup().await;
-        let user_uuid = "3cfb0bc6-7b48-498a-935a-90ce561e40a5";
-        let id = 1;
+        let user_uuid = "02e8a4ba-dad5-40d9-b4ec-31d3334b09c8";
+        let id = 5;
         let payload = EnvironmentFingerprint {
             browser: "abc".to_string(),
             ..Default::default()

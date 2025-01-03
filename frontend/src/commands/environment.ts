@@ -108,8 +108,6 @@ export const environment_detail_create = async (payload: EnvironmentInfo): Promi
 };
 
 export const environment_create = async (environmentName: String): Promise<any> => {
-    console.log(environmentName);
-
     return await invoke('environment_create', { environmentName })
 };
 

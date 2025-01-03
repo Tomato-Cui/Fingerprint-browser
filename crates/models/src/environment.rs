@@ -412,13 +412,16 @@ impl Environment {
 
         let fingerprint = &environment.fp_info;
         let sql = "
-        UPDATE environment_fingerprints SET
-            browser = ?, ua = ?, os = ?, country = ?, region = ?, city = ?, language_type = ?, languages = ?, gmt = ?, geography = ?, geo_tips = ?, geo_rule = ?, longitude = ?, latitude = ?, radius = ?, height = ?,
-            width = ?, fonts_type = ?, fonts = ?, font_fingerprint = ?, web_rtc = ?, web_rtc_local_ip = ?, canvas = ?, webgl = ?, hardware_acceleration = ?, webgl_info = ?, audio_context = ?, speech_voices = ?, media = ?, cpu = ?, memory = ?, do_not_track = ?, battery = ?, port_scan = ?, white_list = ?
-        WHERE user_uuid = ? AND id = ? RETURNING id;
-    ";
+        UPDATE environment_fingerprints
+            SET browser = ?, ua = ?, os = ?, country = ?, region = ?, city = ?, language_type = ?, languages = ?, gmt = ?, geography = ?, geo_tips = ?, geo_rule = ?,
+                longitude = ?, latitude = ?, radius = ?, height = ?, width = ?, fonts_type = ?, fonts = ?, font_fingerprint = ?, 
+                web_rtc = ?, web_rtc_local_ip = ?, canvas = ?, webgl = ?, hardware_acceleration = ?, webgl_info = ?, audio_context = ?, 
+                speech_voices = ?, media = ?, cpu = ?, memory = ?, do_not_track = ?, battery = ?, port_scan = ?, white_list = ?, 
+                updated_at = CURRENT_TIMESTAMP
+        WHERE user_uuid = ? AND id = ?;
+        ";
 
-        let fp_info_id: u32 = sqlx::query_scalar(sql)
+        sqlx::query(sql)
             .bind(&fingerprint.browser)
             .bind(&fingerprint.ua)
             .bind(&fingerprint.os)
@@ -456,10 +459,10 @@ impl Environment {
             .bind(&fingerprint.white_list)
             .bind(user_uuid)
             .bind(fingerprint.id)
-            .fetch_one(&mut *tx)
+            .execute(&mut *tx)
             .await?;
 
-        let proxy_id = if let Some(proxy) = &environment.proxy {
+        let proxy_sql = if let Some(proxy) = &environment.proxy {
             let sql = "
             UPDATE environment_proxies SET
                 kind = ?, host = ?, port = ?, username = ?, password = ?, user_uuid = ?
@@ -476,33 +479,33 @@ impl Environment {
                 .bind(proxy.id)
                 .fetch_one(pool)
                 .await?;
-            proxy_id
+
+            format!("proxy_id = {},", proxy_id)
         } else {
-            0
+            format!("")
         };
 
-        let sql = r#"
+        let rows_affected = sqlx::query(&format!(
+            "
         UPDATE environments SET
-            proxy_id = ?, fp_info_id = ?, name = ?, description = ?, default_urls = ?, 
-            proxy_enable = ?
+            {} fp_info_id = ?, name = ?, description = ?, default_urls = ?, proxy_enable = ?
         WHERE uuid = ?
-        "#;
-
-        let rows_affected = sqlx::query(sql)
-            .bind(proxy_id)
-            .bind(fp_info_id)
-            .bind(&environment.name)
-            .bind(&environment.description)
-            .bind(&environment.default_urls)
-            .bind(environment.proxy_enable)
-            .bind(environment_uuid)
-            .execute(&mut *tx)
-            .await?
-            .rows_affected();
+        ",
+            proxy_sql
+        ))
+        .bind(environment.fp_info.id)
+        .bind(&environment.name)
+        .bind(&environment.description)
+        .bind(&environment.default_urls)
+        .bind(environment.proxy_enable)
+        .bind(environment_uuid)
+        .execute(&mut *tx)
+        .await?
+        .rows_affected();
 
         tx.commit().await?;
 
-        Ok(rows_affected == 1)
+        Ok(rows_affected >= 1)
     }
 
     #[allow(dead_code)]

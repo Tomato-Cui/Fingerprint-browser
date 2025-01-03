@@ -17,8 +17,8 @@ pub struct EnvironmentFingerprint {
     pub geography: String,                // 地理
     pub geo_tips: i32,                    // 地理位置请求行为
     pub geo_rule: i32,                    // 地理位置规则
-    pub longitude: Option<String>,        // 自定义经度
-    pub latitude: Option<String>,         // 自定义纬度
+    pub longitude: Option<i32>,        // 自定义经度
+    pub latitude: Option<i32>,         // 自定义纬度
     pub radius: Option<i32>,              // 自定义半径
     pub height: Option<i32>,              // 分辨率高
     pub width: Option<i32>,               // 分辨率宽

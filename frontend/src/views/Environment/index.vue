@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { cn } from "@/util/lib";
 import { Button } from "@/components/ui/button";
 import {
   Pagination,
@@ -51,7 +52,7 @@ import CreateGroup from "@/views/Divide/com/create-group.vue";
 const router = useRouter();
 const browserStatusStore = useBrowserStatusStore();
 const data = ref<Array<Payment>>([]);
-const selectData = ref<Number[]>([]);
+const selectData = ref<string[]>([]);
 const columns = ref<any[]>([]);
 const groupSelect = ref<string | undefined>();
 const createGroupDialog = ref(false); //添加分组弹出框
@@ -84,8 +85,6 @@ const loadData = (index: number, size: number) => {
 
 onMounted(() => loadData(pagination.pageIndex, pagination.pageSize));
 const paginationClickHandle = (index: number) => {
-  console.log("index:", index);
-
   loadData(index, pagination.pageSize);
   pagination.pageIndex = index;
 };
@@ -220,11 +219,6 @@ const editAccountBtn = (uuid: string, id: number, user_uuid: string) => {
   userUuid = user_uuid;
   editAccountDialog.value = true;
 };
-<<<<<<< HEAD
-
-=======
-// ----修改代理
->>>>>>> origin/dev-1
 const editProxyBtn = (uuid: string) => {
   environmentUuid = uuid;
   editProxyDialog.value = true;
@@ -260,12 +254,12 @@ const removeSubmitHandle = () => {
           </div>
           <div class="flex flex-auto gap-2 justify-end px-2 py-2 ju">
             <TooltipButton
-            class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
-            title="添加分组"
-            @click="createGroupDialog = true"
-          >
-            <component :is="Boxes" class="w-5 h-5 text-gray-600" />
-          </TooltipButton>
+              class="p-2.5 rounded border border-gray-200 hover:bg-gray-100"
+              title="添加分组"
+              @click="createGroupDialog = true"
+            >
+              <component :is="Boxes" class="w-5 h-5 text-gray-600" />
+            </TooltipButton>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <TooltipButton
@@ -313,7 +307,7 @@ const removeSubmitHandle = () => {
             :data="data"
             :pagination="pagination"
             @onSyncColumns="onSyncColumns"
-            @onSelect="(v: Number[]) => selectData = v"
+            @onSelect="(v: string[]) => selectData = v"
             @onTransferEnv="transferEnv"
             @editAccountBtn="editAccountBtn"
             @editEnvBtn="editEnvBtn"
@@ -348,15 +342,25 @@ const removeSubmitHandle = () => {
                     :value="item.value"
                     as-child
                   >
-                    <!-- {{ index }} -->
                     <Button
+                      :class="
+                        cn(
+                          'w-10 h-10 p-0',
+                          item.value === pagination.pageIndex + 1
+                            ? 'hover:bg-blue-700'
+                            : 'hover:bg-slate-100'
+                        )
+                      "
+                      @click="
+                        () => {
+                          paginationClickHandle(item.value - 1);
+                        }
+                      "
                       :variant="
-                        item.value === pagination.pageIndex
+                        item.value === pagination.pageIndex + 1
                           ? 'default'
                           : 'outline'
                       "
-                      class="p-0 w-10 h-10"
-                      @click="() => paginationClickHandle(item.value - 1)"
                     >
                       {{ item.value }}
                     </Button>
@@ -425,5 +429,5 @@ const removeSubmitHandle = () => {
     </div>
   </AlertModel>
   <!-- 添加分组 -->
-   <CreateGroup v-model:createGroupDialog="createGroupDialog" />
+  <CreateGroup v-model:createGroupDialog="createGroupDialog" />
 </template>

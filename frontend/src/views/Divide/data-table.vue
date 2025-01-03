@@ -27,7 +27,7 @@ import {
   useVueTable,
 } from "@tanstack/vue-table";
 import { ArrowUpDown, ChromeIcon, InboxIcon } from "lucide-vue-next";
-import { h, ref, defineProps, withDefaults, onMounted } from "vue";
+import { h, ref, defineProps, withDefaults, onMounted, watch } from "vue";
 import { PrimaryButton } from "@/components/button/index";
 import { MoreBtn } from "./more-btn";
 import { browser_start, browser_stops } from "@/commands/browser";
@@ -73,6 +73,9 @@ const emits = defineEmits([
   "editAccountBtn",
   "editEnvBtn",
 ]);
+
+watch(props, (_) => table.toggleAllRowsSelected(false));
+
 const columnHelper = createColumnHelper<Payment>();
 const columns = [
   columnHelper.display({
@@ -302,11 +305,11 @@ const columns = [
         ),
         h("div", { class: "parent-container" }, [
           MoreBtn({
-            'editEnvBtn': () => emits('editEnvBtn', uuid, id),
-            'editAccountBtn': () => emits('editAccountBtn', uuid, id, user_uuid),
-            'editProxyBtn': () => emits('editProxyBtn', uuid, id),
-            'transferEnvBtn': () => emits('transferEnvBtn', uuid, id),
-            'removeEnv': () => emits('removeEnv', uuid, id)
+            editEnvBtn: () => emits("editEnvBtn", uuid, id),
+            editAccountBtn: () => emits("editAccountBtn", uuid, id, user_uuid),
+            editProxyBtn: () => emits("editProxyBtn", uuid, id),
+            transferEnvBtn: () => emits("transferEnvBtn", uuid, id),
+            removeEnv: () => emits("removeEnv", uuid, id),
           }),
         ]), //传入点击事件参数
       ]);

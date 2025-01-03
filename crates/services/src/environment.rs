@@ -228,6 +228,8 @@ pub async fn batch_delete(
 
 #[cfg(test)]
 mod tests {
+    use models::environment_fingerprint::EnvironmentFingerprint;
+
     use super::*;
 
     #[tokio::test]
@@ -323,6 +325,28 @@ mod tests {
         let name = "new-name";
         let description = Some("new-description".to_string());
         let result = modify_basic_info(uuid, name, description).await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
+    async fn test_modify_info() {
+        crate::setup().await;
+        let uuid = "02e8a4ba-dad5-40d9-b4ec-31d3334b09c8";
+        let environment_uuid = "15dc4369-0fa7-49ff-8a63-9abd3dc1f375";
+        let result = modify_info(
+            uuid,
+            environment_uuid,
+            EnvironmentInfo {
+                id: 0,
+                fp_info: EnvironmentFingerprint {
+                    id: Some(5),
+                    browser: "1234".to_string(),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        )
+        .await;
         println!("{:?}", result);
     }
 

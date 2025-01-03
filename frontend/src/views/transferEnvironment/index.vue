@@ -1,4 +1,5 @@
 <script setup>
+import { cn } from "@/util/lib";
 import { ref, defineProps, defineEmits, onMounted, reactive } from "vue";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import {
@@ -47,7 +48,7 @@ const selectData = ref([]);
 const columns = ref([]);
 const groupSelect = ref();
 
-const data = ref<Array<Payment>>([]);
+const data = ref([]);
 
 const searchType = ref({
   title: "name",
@@ -232,8 +233,19 @@ const searchValueHandle = (value) => {
                     as-child
                   >
                     <Button
-                      class="p-0 w-10 h-10"
-                      @click="() => paginationClickHandle(index)"
+                      :class="
+                        cn(
+                          'w-10 h-10 p-0',
+                          item.value === pagination.pageIndex + 1
+                            ? 'hover:bg-blue-700'
+                            : 'hover:bg-slate-100'
+                        )
+                      "
+                      @click="
+                        () => {
+                          paginationClickHandle(item.value - 1);
+                        }
+                      "
                       :variant="
                         item.value === pagination.pageIndex + 1
                           ? 'default'
