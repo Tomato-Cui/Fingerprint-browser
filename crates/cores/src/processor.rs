@@ -44,15 +44,20 @@ impl BrowserChildInfo {
             self.fingerprint_info.width.unwrap_or_else(|| 488),
             self.fingerprint_info.height.unwrap_or_else(|| 488)
         );
+
+        let system_time_millis = commons::time::get_system_time_mills();
+        let offset = (system_time_millis % 100) as i32;
+
         let window_position = format!(
             "--window-position={},{}",
             self.fingerprint_info
-                .longitude
-                .unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
+            .longitude
+            .unwrap_or_else(|| 100 + offset),
             self.fingerprint_info
-                .latitude
-                .unwrap_or_else(|| rand::random::<u32>() as i32 % 50),
+            .latitude
+            .unwrap_or_else(|| 100 + offset),
         );
+
         let user_agent = format!("--user-agent={}", self.fingerprint_info.ua);
         let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);
         let no_first_run = "--no-first-run".to_string();
@@ -112,7 +117,7 @@ impl BrowserChildInfo {
             .environemnt_info
             .default_urls
             .clone()
-            .unwrap_or_default()
+            .unwrap_or_else(|| "https://www.google.com".to_string())
             .split(",")
         {
             args.push(url.to_string());
@@ -142,7 +147,9 @@ impl Processer {
     ) -> core::result::Result<bool, anyhow::Error> {
         let environment_uuid = payload.environemnt_info.clone().uuid.unwrap_or_default();
         if let Ok(ok) = self.status(&environment_uuid).await {
-            return Ok(ok);
+            if ok {
+                return Ok(ok);
+            }
         }
 
         let child = Command::new(&payload.browser_exe_path)

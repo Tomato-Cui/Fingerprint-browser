@@ -27,6 +27,7 @@ import {
   PackageOpenIcon,
   TrashIcon,
   Boxes,
+  SendToBack,
 } from "lucide-vue-next";
 import SearchInput from "./search-input.vue";
 import GroupSelect from "./group-select.vue";
@@ -35,6 +36,7 @@ import {
   environment_query,
   environment_query_by_group,
   environment_delete,
+  environment_query_id,
 } from "@/commands/environment";
 import DataTable, { type Payment } from "./data-table.vue";
 import { PrimaryButton } from "@/components/button";
@@ -43,6 +45,7 @@ import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from "vue-sonner";
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import TransferModal from "./transfer-modal.vue";
+import MoveToGroup from "./com/move-to-group.vue";
 import EditProxy from "@/views/Environment/com/edit-proxy.vue";
 import EditAccount from "@/views/Environment/com/edit-account.vue";
 import { useRouter } from "vue-router";
@@ -72,6 +75,13 @@ const transferModal = ref({
   title: "转移环境",
   name: "",
   uuid: "",
+});
+
+const moveToGroupModal = ref({
+  open: false,
+  title: "设置分组",
+  name: [] as string[],
+  uuid: [] as string[],
 });
 
 const onSyncColumns = (value: any) => (columns.value = value);
@@ -163,9 +173,32 @@ const groupOperationBtns = computed(() => [
     click: batchDelete,
     disabled: selectData.value.length <= 0,
   },
+  {
+    title: "移入分组",
+    icon: SendToBack,
+    click: moveToGroup,
+    disabled: selectData.value.length <= 0,
+  },
 ]);
 const groupSelectHandle = (value: string) => {
   groupSelect.value = value;
+};
+
+const environmentName = ref<string[]>([]);
+/**
+ * 移入分组
+ */
+const moveToGroup = () => {
+  let ids = [...selectData.value].map((item) => item) as any[];
+  ids.forEach((item) => {
+    environment_query_id(item).then((res) => {
+      environmentName.value.push(res.data.name);
+    });
+  });
+  moveToGroupModal.value.open = true;
+  moveToGroupModal.value.uuid = ids as string[];
+  moveToGroupModal.value.name = environmentName.value;
+  console.log("1234567890:", environmentName.value);
 };
 
 const searchValueHandle = (value: string) => {
@@ -255,7 +288,7 @@ const removeSubmitHandle = () => {
             <GroupSelect @select="groupSelectHandle" />
             <SearchInput
               :search-current-type="searchType"
-              @update:searchType="(value:any) => (searchType = value)"
+              @update:searchType="(value: any) => (searchType = value)"
               @update:searchValue="searchValueHandle"
             />
           </div>
@@ -407,6 +440,18 @@ const removeSubmitHandle = () => {
       :uuid="transferModal.uuid"
       :name="transferModal.name"
       @close="transferModal.open = false"
+    />
+
+    <MoveToGroup
+      :open="moveToGroupModal.open"
+      :title="moveToGroupModal.title"
+      :uuid="moveToGroupModal.uuid"
+      :name="moveToGroupModal.name"
+      @close="
+        () => {
+          (moveToGroupModal.open = false), (environmentName = []);
+        }
+      "
     />
   </div>
 

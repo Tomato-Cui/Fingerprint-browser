@@ -1,7 +1,7 @@
 <script setup>
 import { Model } from "@/components/model/index";
 import { PrimaryButton, CancelButton } from "@/components/button";
-import { ref, defineProps, defineEmits, onMounted } from 'vue'
+import { ref, defineProps, defineEmits, onMounted, watch } from 'vue'
 import { team_query, switch_team, query_current_team_info } from "@/commands/team"
 import { useRouter } from "vue-router";
 import { defineAsyncComponent } from 'vue';
@@ -12,6 +12,11 @@ const router = useRouter()
 const props = defineProps({
     switchTeam: Boolean,
     isLoadDialog: Boolean
+})
+watch(() => props.switchTeam, (v) => {
+    if (v) {
+        getList()
+    }
 })
 const emit = defineEmits(['update:switchTeam', 'update:isLoadDialog'])
 const teams = ref([
@@ -37,7 +42,7 @@ const confirmSelection = () => {
         setTimeout(() => {
             emit("update:isLoadDialog", false)  //关闭加载效果
         }, 1000)
-        // window.location.reload()
+        window.location.reload()
     })
 }
 

@@ -60,6 +60,46 @@ impl Proxy {
     }
 
     #[allow(dead_code)]
+    pub async fn query_proxies_by_group_id(
+        pool: &Pool<Sqlite>,
+        user_uuid: &str,
+        proxy_group_id: u32,
+        page_num: u32,
+        page_size: u32,
+    ) -> Result<(i64, Vec<Proxy>), Error> {
+        let (total,): (i64,) = sqlx::query_as(
+            "SELECT count(1) FROM environment_proxies WHERE user_uuid = ? AND environment_group_id = ? and deleted_at IS NULL",
+        )
+        .bind(user_uuid)
+        .fetch_one(pool)
+        .await?;
+
+        let page_num = if page_num <= 0 || ((page_num * page_size) as i64) > total {
+            0
+        } else {
+            page_num
+        };
+        let offset = page_num * page_size;
+
+        let proxies: Vec<Proxy> = sqlx::query_as(
+            r#"
+            SELECT * FROM environment_proxies 
+                WHERE user_uuid = ? 
+                    AND environment_group_id = ? 
+                    and deleted_at IS NULL
+            LIMIT ? OFFSET ?
+        "#,
+        )
+        .bind(proxy_group_id)
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(pool)
+        .await?;
+
+        Ok((total, proxies))
+    }
+
+    #[allow(dead_code)]
     pub async fn query_proxies_by_user_uuid(
         pool: &Pool<Sqlite>,
         user_uuid: &str,

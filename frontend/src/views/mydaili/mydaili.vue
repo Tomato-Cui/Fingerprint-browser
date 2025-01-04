@@ -345,7 +345,7 @@ const paginationClickHandle = (index: number) => {
                         ref="editInput"
                         class="w-full text-sm outline-none"
                       />
-                      <span v-else>{{ group.name }}</span>
+                      <span v-else>{{ (group as any).name }}</span>
 
                       <div
                         class="hidden absolute right-1 top-1/2 gap-1 items-center -translate-y-1/2 group-hover:flex"

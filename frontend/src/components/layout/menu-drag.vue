@@ -79,10 +79,6 @@ onMounted(() => {
                 </router-link>
             </SidebarMenuButton>
         </SidebarMenuItem>
-        <!-- 创建分组 -->
-        <PrimaryButton class="flex gap-x-2" @click="createGroup" v-if="menus.length === 0">
-            创建分组
-        </PrimaryButton>
     </ul>
     <!-- 创建分组 -->
     <CreateGroup v-model:createGroupDialog="createGroupDialog" />

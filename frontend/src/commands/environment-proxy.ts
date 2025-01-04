@@ -19,6 +19,10 @@ export const environment_proxies_query = async (pageNum: number, pageSize: numbe
     return await invoke('environment_proxies_query', { pageNum, pageSize })
 };
 
+export const environment_proxies_query_by_group = async (proxyGroupId: number, pageNum: number, pageSize: number): Promise<any> => {
+    return await invoke('environment_proxies_query_by_group', { proxyGroupId, pageNum, pageSize })
+};
+
 export const environment_proxies_create = async (payload: Proxy): Promise<any> => {
     return await invoke('environment_proxies_create', {
         payload

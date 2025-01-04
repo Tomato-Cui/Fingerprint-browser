@@ -10,17 +10,72 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "../ui/colla
 import { ChevronDown, Search as SearchIcon, Folder as FolderIcon, Component as ComponentIcon } from 'lucide-vue-next'
 import { useRoute } from "vue-router";
 import MenuDrag from './menu-drag.vue'
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import { environment_group_query } from '@/commands/environment-group';
 import { team_is_leader, query_current_team_info } from "@/commands/team";
 import { toast } from "vue-sonner";
 import { ref } from "vue";
+// import { environment_group_query } from '@/commands/environment-group';
+// import { environment_proxy_group_query } from '@/commands/environment-proxy-group';
 // import { Search as SearchIcon } from 'lucide-vue-next'
 // import Input from '@/components/input.vue'
 
 const props = defineProps(['menus'])
 const route = useRoute();
 const isLeader = ref(true)
+
+watch(() => props.menus, (v) => {
+    // if (v) {
+    //     getList()
+    // }
+})
+
+const envMenus = ref([]) //环境分组子菜单
+const proxyMenus = ref([])  //代理分组子菜单
+
+// const getList = () => { 
+//     // 查询环境子菜单
+//     environment_group_query(1, 1000).then(res => {
+//         //获取到的数组依次添加到props.menu中
+//         res.data.data.forEach(item => {
+//             envMenus.value.push(item)
+//         })
+
+//         //添加之后，处理字段
+//         envMenus.value = envMenus.value.map(item => {
+//             return {
+//                 id: item.id,
+//                 title: item.name,
+//                 url: `/divide/${item.id}`,
+//                 icon: ComponentIcon,
+//                 activeIcon: ComponentIcon
+//             }
+//         })
+//     }).catch(err => {
+//         console.log(err)
+//     })
+
+//     // 查询代理分组子菜单
+//     environment_proxy_group_query(1, 1000).then(res => {
+//         //获取到的数组依次添加到props.menu中
+//         res.data.data.forEach(item => {
+//             proxyMenus.value.push(item)
+//         })
+
+//         //添加之后，处理字段
+//         proxyMenus.value = proxyMenus.value.map(item => {
+//             return {
+//                 id: item.id,
+//                 title: item.name,
+//                 url: `/divide/${item.id}`,
+//                 icon: ComponentIcon,
+//                 activeIcon: ComponentIcon
+//             }
+//         })
+//     }).catch(err => {
+//         console.log(err)
+//     })
+// }
 
 onMounted(() => {
     query_current_team_info().then(res => {

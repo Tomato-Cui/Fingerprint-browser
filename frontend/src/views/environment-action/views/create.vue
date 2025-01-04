@@ -55,9 +55,10 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
               type="text"
               placeholder="请输入环境名称"
               class="w-full"
+              maxlength="10"
             />
             <span class="absolute right-3 top-2 text-xs text-gray-400"
-              >0/100</span
+              >{{ environmentCreateFrom.forms.environmentName?.length || 0 }}/10</span
             >
             <span class="text-red-400">{{
               environmentCreateFrom.errors.name

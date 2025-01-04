@@ -36,6 +36,30 @@ pub async fn environment_proxies_query(
 }
 
 #[tauri::command]
+pub async fn environment_proxies_query_by_group(
+    proxy_group_id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<AppResponse<Value>, tauri::Error> {
+    let user_uuid = get_user_id().await?;
+    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
+        Some(format!("查询失败: {}", v))
+    });
+
+    match services::environment_proxy::query_by_group_id(
+        &user_uuid,
+        proxy_group_id,
+        page_num,
+        page_size,
+    )
+    .await
+    {
+        Ok(data) => Ok(AppResponse::<Value>::success(success_msg, Some(data))),
+        Err(r) => Ok(AppResponse::<Value>::fail(warn_msg(r.to_string()))),
+    }
+}
+
+#[tauri::command]
 pub async fn environment_proxies_create(payload: Proxy) -> Result<AppResponse<bool>, tauri::Error> {
     let user_uuid = get_user_id().await?;
     let (success_msg, warn_msg) = (Some("创建成功".to_string()), |v| {

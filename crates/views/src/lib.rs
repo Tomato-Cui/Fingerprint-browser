@@ -53,6 +53,7 @@ pub fn run() {
             environment_group_command::environment_group_delete,
             environment_proxies_command::environment_proxies_query_id,
             environment_proxies_command::environment_proxies_query,
+            environment_proxies_command::environment_proxies_query_by_group,
             environment_proxies_command::environment_proxies_create,
             environment_proxies_command::environment_proxies_modify,
             environment_proxies_command::environment_proxies_delete,

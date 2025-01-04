@@ -156,7 +156,7 @@ const handleSubmit = () => {  //提交添加成员
                 </div>
                 <div class="flex items-center gap-4">
                     <label class="w-[80px] flex justify-end">备注</label>
-                    <Input v-model="joinForm.teamName" type="text" class="w-full" placeholder="请输入备注 "
+                    <Input v-model="joinForm.description" type="text" class="w-full" placeholder="请输入备注 "
                          />
                 </div>
             </div>

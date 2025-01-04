@@ -25,6 +25,24 @@ pub async fn query_by_uuid(
     }))
 }
 
+pub async fn query_by_group_id(
+    user_uuid: &str,
+    proxy_group_id: u32,
+    page_num: u32,
+    page_size: u32,
+) -> Result<Value, ServiceError> {
+    let pool = states::database::get_database_pool()?;
+
+    let (total, proxies) =
+        Proxy::query_proxies_by_group_id(pool, user_uuid, proxy_group_id, page_num, page_size)
+            .await?;
+
+    Ok(json!({
+        "total": total,
+        "data": proxies,
+    }))
+}
+
 pub async fn query(user_uuid: &str, page_num: u32, page_size: u32) -> Result<Value, ServiceError> {
     let pool = states::database::get_database_pool()?;
 
