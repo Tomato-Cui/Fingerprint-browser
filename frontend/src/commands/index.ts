@@ -6,3 +6,11 @@ export function invoke<T>(cmd: string, args?: InvokeArgs, options?: InvokeOption
 export const ip_info = async (): Promise<any> => {
     return await invoke('ip_info')
 }
+
+export const init_command = async (): Promise<any> => {
+    return await invoke('init_command')
+}
+
+export const init_porcessor = async (): Promise<any> => {
+    return await invoke('init_porcessor')
+}

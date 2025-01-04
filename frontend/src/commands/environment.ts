@@ -40,7 +40,7 @@ export interface Proxy {
 
 export interface EnvironmentFingerprint {
     id: number;
-    user_uuid?: number;
+    user_uuid?: string;
     browser: string;
     ua: string;
     os: string;
@@ -53,8 +53,8 @@ export interface EnvironmentFingerprint {
     geography: string;
     geo_tips: number;
     geo_rule: number;
-    longitude?: string;
-    latitude?: string;
+    longitude?: number;
+    latitude?: number;
     radius?: number;
     height?: number;
     width?: number;

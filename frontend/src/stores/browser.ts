@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, watchEffect } from 'vue'
+import { ref } from 'vue'
 
 interface BrowserStatus {
     uuid: string
@@ -9,19 +9,6 @@ interface BrowserStatus {
 export const useBrowserStatusStore = defineStore('browserStatus', () => {
     const browserStatus = ref<Array<BrowserStatus>>([])
 
-    const loadStatusFromLocalStorage = () => {
-        const savedStatus = JSON.parse(localStorage.getItem('browser-status') || '[]')
-        browserStatus.value = savedStatus
-    }
-
-    loadStatusFromLocalStorage()
-
-    watchEffect(() => {
-        window.addEventListener('storage', () => {
-            loadStatusFromLocalStorage()
-        })
-    })
-
     const updateStatus = (uuid: string, status: boolean) => {
         const index = browserStatus.value.findIndex((item) => item.uuid === uuid)
         if (index !== -1) {
@@ -29,7 +16,6 @@ export const useBrowserStatusStore = defineStore('browserStatus', () => {
         } else {
             browserStatus.value.push({ uuid, status })
         }
-        localStorage.setItem('browser-status', JSON.stringify(browserStatus.value))
     }
 
     const getStatus = (uuid: string): boolean | undefined => {

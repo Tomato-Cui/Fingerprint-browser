@@ -1,4 +1,5 @@
 use components::windows::tray;
+use log::info;
 use tauri::AppHandle;
 use tauri::Emitter;
 use tauri::Manager;
@@ -141,6 +142,8 @@ pub fn run() {
             browser_command::browser_status,
             command::os::platform,
             command::ip_info,
+            command::init_command,
+            command::init_porcessor
         ])
         .setup(|app| {
             #[cfg(desktop)]
@@ -157,14 +160,16 @@ pub fn run() {
             app.handle()
                 .plugin(
                     tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Debug)
+                        .level(log::LevelFilter::Info)
                         .build(),
                 )
                 .unwrap();
 
             tray::menu(app)?;
 
+            info!("send");
             let _ = app.emit("init", ());
+
             Ok(())
         })
         .on_window_event(window_event_handle)

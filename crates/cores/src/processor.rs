@@ -3,10 +3,12 @@ use std::{
     process::{ExitStatus, Stdio},
     sync::Arc,
 };
-
 use tokio::{
     process::{Child, Command},
-    sync::Mutex,
+    sync::{
+        mpsc::{self, Receiver, Sender},
+        Mutex,
+    },
 };
 
 pub struct BrowserChildInfo {
@@ -41,8 +43,8 @@ impl BrowserChildInfo {
         let new_window = "--new-window".to_string();
         let window_size = format!(
             "--window-size={},{}",
-            self.fingerprint_info.width.unwrap_or_else(|| 488),
-            self.fingerprint_info.height.unwrap_or_else(|| 488)
+            self.fingerprint_info.width.unwrap_or_else(|| 888),
+            self.fingerprint_info.height.unwrap_or_else(|| 888)
         );
 
         let system_time_millis = commons::time::get_system_time_mills();
@@ -51,11 +53,11 @@ impl BrowserChildInfo {
         let window_position = format!(
             "--window-position={},{}",
             self.fingerprint_info
-            .longitude
-            .unwrap_or_else(|| 100 + offset),
+                .longitude
+                .unwrap_or_else(|| 100 + offset),
             self.fingerprint_info
-            .latitude
-            .unwrap_or_else(|| 100 + offset),
+                .latitude
+                .unwrap_or_else(|| 100 + offset),
         );
 
         let user_agent = format!("--user-agent={}", self.fingerprint_info.ua);
@@ -129,16 +131,18 @@ impl BrowserChildInfo {
 
 #[allow(dead_code)]
 pub struct Processer {
-    childs: Arc<Mutex<HashMap<u32, (Child, BrowserChildInfo)>>>,
-    index: HashMap<String, u32>,
+    childs: Arc<Mutex<HashMap<u32, (Arc<Mutex<Child>>, BrowserChildInfo)>>>,
+    index: Arc<Mutex<HashMap<String, u32>>>,
+    tx: Sender<(String, ExitStatus)>,
 }
 
 impl Processer {
-    pub fn new() -> Self {
-        Processer {
-            childs: Arc::new(Mutex::new(HashMap::new())),
-            index: HashMap::new(),
-        }
+    pub fn new() -> (Self, Receiver<(String, ExitStatus)>) {
+        let childs = Arc::new(Mutex::new(HashMap::new()));
+        let index = Arc::new(Mutex::new(HashMap::new()));
+        let (tx, rx) = mpsc::channel::<(String, ExitStatus)>(32);
+
+        (Processer { childs, index, tx }, rx)
     }
 
     pub async fn start_browser(
@@ -152,51 +156,103 @@ impl Processer {
             }
         }
 
-        let child = Command::new(&payload.browser_exe_path)
-            .args(&payload.format().await?)
-            .stderr(Stdio::null())
-            .stdout(Stdio::null())
-            .spawn()?;
+        let browser_exe_path = payload.browser_exe_path.clone();
+        let childs = self.childs.clone();
+        let indexs = self.index.clone();
+        let tx = self.tx.clone();
 
-        let child_pid = child
-            .id()
-            .ok_or(anyhow::anyhow!("child starting failed."))?;
+        tokio::spawn(async move {
+            let child = Command::new(&browser_exe_path)
+                .args(&payload.format().await?)
+                .stderr(Stdio::null())
+                .stdout(Stdio::null())
+                .spawn()?;
 
-        self.index.insert(environment_uuid, child_pid);
-        {
-            self.childs
-                .clone()
-                .lock()
-                .await
-                .insert(child_pid, (child, payload));
-        }
+            let child_pid = child
+                .id()
+                .ok_or(anyhow::anyhow!("child starting failed."))?;
 
+            let child_arc = Arc::new(Mutex::new(child));
+            {
+                indexs
+                    .lock()
+                    .await
+                    .insert(environment_uuid.clone(), child_pid);
+                childs
+                    .lock()
+                    .await
+                    .insert(child_pid, (Arc::clone(&child_arc), payload));
+            }
+
+            loop {
+                tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+
+                if let Ok(mut child) = child_arc.try_lock() {
+                    if let Ok(Some(status)) = child.try_wait() {
+                        let _ = tx.send((environment_uuid.clone(), status)).await;
+                        break;
+                    }
+                }
+            }
+
+            Ok::<(), anyhow::Error>(())
+        });
         Ok(true)
     }
 
+    pub async fn stop_all_browser(&mut self) -> Result<Vec<ExitStatus>, anyhow::Error> {
+        let mut childs_lock = self.childs.lock().await;
+        let indexs = self.index.clone();
+        let mut index_lock = indexs.lock().await;
+        let mut exit_status = vec![];
+
+        for (_, child_pid) in &*index_lock {
+            if let Some((child, _)) = childs_lock.get_mut(&child_pid) {
+                let mut child = child.lock().await;
+                // .ok_or(anyhow::anyhow!("child stoping failed."))?;
+                let a = child.kill().await;
+                println!("{:?}", a);
+                exit_status.push(child.wait().await?);
+            } else {
+                println!("获取指纹失败")
+            }
+        }
+
+        let keys: Vec<String> = index_lock.keys().cloned().collect();
+        for browser_uuid in keys {
+            index_lock.remove(&browser_uuid);
+        }
+
+        Ok(exit_status)
+    }
+
     pub async fn stop_browser(&mut self, browser_uuid: &str) -> Result<ExitStatus, anyhow::Error> {
-        let child_id = self
-            .index
+        let index = self.index.clone();
+        let mut index_lock = index.lock().await;
+        let child_pid: &u32 = index_lock
             .get(browser_uuid)
             .ok_or(anyhow::anyhow!("child stoping failed."))?;
 
         let exit_status = {
             let mut childs_lock = self.childs.lock().await;
 
-            let (child, _) = childs_lock
-                .get_mut(child_id)
-                .ok_or(anyhow::anyhow!("child stoping failed."))?;
-
-            let _ = child.kill().await?;
-            child.wait().await?
+            if let Some((child, _)) = childs_lock.get_mut(&child_pid) {
+                let mut child = child.lock().await;
+                let _ = child.kill().await.expect("abc");
+                index_lock.remove(browser_uuid);
+                child.wait().await?
+            } else {
+                return Err(anyhow::anyhow!("child stopping failed: PID not found"));
+            }
         };
 
         Ok(exit_status)
     }
 
     pub async fn status(&self, browser_uuid: &str) -> Result<bool, anyhow::Error> {
-        let child_id = self
-            .index
+        let index = self.index.clone();
+        let index_lock = index.lock().await;
+        let child_pid = index_lock
             .get(browser_uuid)
             .ok_or(anyhow::anyhow!("child status failed."))?;
 
@@ -204,8 +260,9 @@ impl Processer {
             let mut childs_lock = self.childs.lock().await;
 
             let (child, _) = childs_lock
-                .get_mut(child_id)
+                .get_mut(child_pid)
                 .ok_or(anyhow::anyhow!("child status failed."))?;
+            let mut child = child.lock().await;
 
             match child.try_wait() {
                 Ok(Some(_)) => false,
@@ -219,9 +276,9 @@ impl Processer {
 
     pub async fn all_status(&self) -> Result<HashMap<String, bool>, anyhow::Error> {
         let mut status = HashMap::new();
-        println!("{:?}", &self.index);
+        let indexs = self.index.clone();
 
-        for (browser_uuid, _) in &self.index {
+        for (browser_uuid, _) in &*indexs.lock().await {
             let data = self.status(&*&browser_uuid).await?;
 
             status.insert(browser_uuid.clone(), data);

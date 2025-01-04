@@ -86,8 +86,8 @@ mod stops {
         });
 
         match services::command::stop(payload.environment_uuids).await {
-            Ok(data) => AppResponse::<HashMap<String, i32>>::success(success_msg, Some(data)),
-            Err(r) => AppResponse::<HashMap<String, i32>>::fail(warn_msg(r.to_string())),
+            Ok(data) => AppResponse::<HashMap<String, String>>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<HashMap<String, String>>::fail(warn_msg(r.to_string())),
         }
     }
 }

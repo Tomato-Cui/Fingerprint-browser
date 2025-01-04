@@ -8,7 +8,7 @@ import "./index.css"
 const pinia = createPinia();
 const app = createApp(App);
 
-app.use(init)
 app.use(router);
 app.use(pinia);
+app.use(init)
 app.mount('#app');

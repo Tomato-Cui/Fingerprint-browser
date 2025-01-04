@@ -71,6 +71,7 @@ impl Proxy {
             "SELECT count(1) FROM environment_proxies WHERE user_uuid = ? AND environment_group_id = ? and deleted_at IS NULL",
         )
         .bind(user_uuid)
+        .bind(proxy_group_id)
         .fetch_one(pool)
         .await?;
 

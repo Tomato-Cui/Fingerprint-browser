@@ -2,7 +2,8 @@ use std::sync::Arc;
 use tokio::sync::{OnceCell, RwLock};
 
 pub struct State {
-    // pub app_cache_location: Option<PathBuf>,
+    // pub tx: Sender<String>,
+    // pub rx: Sender<String>,
 }
 
 pub static STATE: OnceCell<Arc<RwLock<State>>> = OnceCell::const_new();

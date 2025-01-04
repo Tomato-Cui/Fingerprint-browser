@@ -20,8 +20,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { isLogin } from "@/commands/user";
 import { onMounted, ref, watch } from "vue";
 import Login from "@/views/Login/index.vue";
+import { toast } from "vue-sonner";
 
 const route = useRoute();
+toast.success("abc");
 </script>
 
 <style style>

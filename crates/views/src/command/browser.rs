@@ -52,7 +52,7 @@ pub mod starts {
 #[tauri::command]
 pub async fn browser_stops(
     environment_uuids: Vec<String>,
-) -> Result<AppResponse<HashMap<String, i32>>, tauri::Error> {
+) -> Result<AppResponse<HashMap<String, String>>, tauri::Error> {
     let _ = get_user_id().await?;
     Ok(match services::command::stop(environment_uuids).await {
         Ok(v) => AppResponse::success(

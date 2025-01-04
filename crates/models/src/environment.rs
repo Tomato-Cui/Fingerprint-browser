@@ -477,7 +477,7 @@ impl Environment {
                 .bind(&proxy.password)
                 .bind(&proxy.user_uuid)
                 .bind(proxy.id)
-                .fetch_one(pool)
+                .fetch_one(&mut *tx)
                 .await?;
 
             format!("proxy_id = {},", proxy_id)

@@ -17,6 +17,7 @@ tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
 sqlx = { workspace = true }
 once_cell = { workspace = true }
+log = { workspace = true }
 
 commons = { workspace = true }
 states = { workspace = true }

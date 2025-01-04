@@ -128,7 +128,7 @@ const closeGroup = () => {
     if (res.message && (res.message as string).includes("关闭成功")) {
       ids.forEach((item) => browserStatusStore.updateStatus(item, false));
     } else {
-      toast.warning("启动失败");
+      toast.warning("关闭失败");
     }
   });
 };
@@ -136,7 +136,8 @@ const batchDelete = () => {
   let ids = [...selectData.value].map((item) => item) as any[];
   environment_batch_delete(ids)
     .then((_: any) => {
-      data.value = data.value.filter((item) => !ids.includes(item.uuid));
+      loadData(pagination.pageIndex, pagination.pageSize);
+      // data.value = data.value.filter((item) => !ids.includes(item.uuid));
       toast.success("删除成功");
     })
     .catch((err) => {
@@ -379,6 +380,7 @@ const removeSubmitHandle = () => {
                 v-slot="{ items }"
                 class="flex gap-1 items-center"
               >
+                <GroupSelect @select="groupSelectHandle" />
                 <PaginationFirst @click="() => paginationClickHandle(1)" />
                 <PaginationPrev
                   @click="() => paginationClickHandle(pagination.pageIndex - 1)"
