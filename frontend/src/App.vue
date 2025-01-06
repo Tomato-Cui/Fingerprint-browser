@@ -1,21 +1,13 @@
 <template>
-  <template v-if="switchStore.isCan()">
-    <template v-if="route.path === '/'">
-      <Login />
-    </template>
-    <template v-else>
-      <TooltipProvider>
-        <Layout>
-          <router-view />
-        </Layout>
-      </TooltipProvider>
-    </template>
+  <template v-if="route.path === '/'">
+    <Login />
   </template>
   <template v-else>
-    <div class="flex items-center justify-center flex-col h-screen gap-y-2">
-      <Loading />
-      <span class="text-xs">尝试连接服务器...</span>
-    </div>
+    <TooltipProvider>
+      <Layout>
+        <router-view />
+      </Layout>
+    </TooltipProvider>
   </template>
   <Toaster :rich-colors="true" position="top-center" />
 </template>
@@ -29,20 +21,10 @@ import { isLogin } from "@/commands/user";
 import { onMounted, ref, watch } from "vue";
 import Login from "@/views/Login/index.vue";
 import { toast } from "vue-sonner";
-import { useSwitchStore } from "@/stores/switch";
 import Loading from "@/components/loading.vue";
 import { update } from "./plugins/update";
 
 const route = useRoute();
-const switchStore = useSwitchStore();
-
-const timer = setInterval(async () => {
-  await update();
-}, [6000]);
-
-watch(switchStore.switch_, (newS) => {
-  if (newS) clearInterval(timer);
-});
 </script>
 
 <style style>
