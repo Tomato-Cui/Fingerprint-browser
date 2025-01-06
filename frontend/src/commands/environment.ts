@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from './index'
 
 export interface Environment {
     name: string;                    // 环境名称
@@ -115,7 +115,7 @@ export const environment_batch_create = async (environmentNames: Array<String>):
     return await invoke('environment_batch_create', { environmentNames })
 }
 
-export const  environment_modify_info= async (
+export const environment_modify_info = async (
     environmentUuid: String, payload: EnvironmentInfo): Promise<any> => {
     return await invoke('environment_modify_info', { environmentUuid, payload })
 };

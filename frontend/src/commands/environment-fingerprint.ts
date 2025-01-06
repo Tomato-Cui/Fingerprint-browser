@@ -1,5 +1,4 @@
-
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from './index'
 
 export interface EnvironmentFingerprint {
     browser: string;              // 浏览器

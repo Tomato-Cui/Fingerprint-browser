@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from './index'
 
 export const environment_transfer_query_id = async (id: number): Promise<any> => {
     return await invoke('environment_query_id', { id })

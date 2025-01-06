@@ -1,8 +1,5 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from './index'
 
-export const fetch_update = async (): Promise<String> => {
-    return await invoke('fetch_update',)
-};
-export const install_update = async (): Promise<String> => {
-    return await invoke('install_update',)
-};
+export const platform = async (): Promise<String> => {
+    return await invoke('platfrom',)
+}
