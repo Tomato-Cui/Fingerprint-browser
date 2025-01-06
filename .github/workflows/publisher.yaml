@@ -33,7 +33,9 @@ jobs:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: install frontend dependencies
-        run: npm install 
+        run: |
+          cd frontend
+          npm install 
 
       - name: Build the app
         id: build
