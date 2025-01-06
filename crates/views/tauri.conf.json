@@ -61,7 +61,7 @@
         "installMode": "passive"
       },
       "endpoints": ["https://github.com/liusnew/lpbrowser-release/releases/latest/download/latest.json"],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJGNjU3NzY1MjIzMEFCODIKUldTQ3F6QWlaWGRsTDYrTzExakE0ZmEzb3RtcnBYNWF1NjNpUUZtZEUrQ0podnNNZ0ZIbVdoNFkK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFNUFGRjJCRDNEMTgwODkKUldTSmdOSFRLLzlhbmd4TUF0L1NHZmI2VWdSNzBpRTZBeU4vZVp6dEp0UTM5RllWUHorN1lKcWYK"
     }
   }
 }
