@@ -6,15 +6,15 @@
   "build": {
     "frontendDist": "../../frontend/dist",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "",
     "devUrl": "http://localhost:5173"
   },
   "app": {
     "windows": [
       {
         "title": "ads-hubstudio",
-        "width": 1444,
-        "height": 925,
+        "width": 1285,
+        "height": 825,
         "resizable": true,
         "fullscreen": false,
         "center": true,
@@ -24,13 +24,13 @@
     ],
     "security": {
       "csp": null
-      
     },
     "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
     "targets": "msi",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -53,6 +53,15 @@
       "wix": {
         "language": "zh-CN"
       }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "windows": {
+        "installMode": "passive"
+      },
+      "endpoints": ["https://github.com/liusnew/lpbrowser-release/releases/latest/download/latest.json"],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY4RDAzMDE0MDA4ODkwMzgKUldRNGtJZ0FGRERRYUFNMXZQWEpnbUh0NWJOckNkTk1sZmV2LzdKaUJxQ0Z4TG9hcnUzd1d3MUUK"
     }
   }
 }

@@ -13,10 +13,12 @@ pub async fn environment_trash_query_id(
         Some(format!("查询失败: {}", v))
     });
 
-    Ok(match services::environment_trash::query_by_environment_uuid(&environment_uuid).await {
-        Ok(data) => AppResponse::<Environment>::success(success_msg, Some(data)),
-        Err(r) => AppResponse::<Environment>::fail(warn_msg(r.to_string())),
-    })
+    Ok(
+        match services::environment_trash::query_by_environment_uuid(&environment_uuid).await {
+            Ok(data) => AppResponse::<Environment>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<Environment>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -45,16 +47,18 @@ pub async fn environment_trash_recover(
         Some(format!("恢复失败: {}", v))
     });
 
-    Ok(match services::environment_trash::recover(&user_uuid, &environment_uuid).await {
-        Ok(data) => {
-            if data {
-                AppResponse::<bool>::success(success_msg, Some(data))
-            } else {
-                AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+    Ok(
+        match services::environment_trash::recover(&user_uuid, &environment_uuid).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
             }
-        }
-        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-    })
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -67,14 +71,17 @@ pub async fn environment_trash_recovers(
         Some(format!("恢复失败: {}", v))
     });
 
-    Ok(match services::environment_trash::recovers(
-        &user_uuid,
-        environment_uuids.iter().map(|v| v.as_str()).collect(),
+    Ok(
+        match services::environment_trash::recovers(
+            &user_uuid,
+            environment_uuids.iter().map(|v| v.as_str()).collect(),
+        )
+        .await
+        {
+            Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
     )
-    .await {
-        Ok(data) => AppResponse::<bool>::success(success_msg, Some(data)),
-        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-    })
 }
 
 #[tauri::command]
@@ -85,16 +92,18 @@ pub async fn environment_trash_recover_all() -> Result<AppResponse<bool>, tauri:
         Some(format!("恢复失败: {}", v))
     });
 
-    Ok(match services::environment_trash::recover_all(&user_uuid).await {
-        Ok(data) => {
-            if data {
-                AppResponse::<bool>::success(success_msg, Some(data))
-            } else {
-                AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+    Ok(
+        match services::environment_trash::recover_all(&user_uuid).await {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
             }
-        }
-        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-    })
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -105,19 +114,22 @@ pub async fn environment_trash_delete_batch(
         Some(format!("删除失败: {}", v))
     });
 
-    Ok(match services::environment_trash::batch_delete_again(
-        environment_uuids.iter().map(|v| v.as_str()).collect(),
-    )
-    .await {
-        Ok(data) => {
-            if data {
-                AppResponse::<bool>::success(success_msg, Some(data))
-            } else {
-                AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+    Ok(
+        match services::environment_trash::batch_delete_again(
+            environment_uuids.iter().map(|v| v.as_str()).collect(),
+        )
+        .await
+        {
+            Ok(data) => {
+                if data {
+                    AppResponse::<bool>::success(success_msg, Some(data))
+                } else {
+                    AppResponse::<bool>::fail(warn_msg("未知错误".to_string()))
+                }
             }
-        }
-        Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-    })
+            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
