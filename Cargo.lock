@@ -6425,6 +6425,7 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
+ "thiserror 1.0.69",
  "tokio",
 ]
 

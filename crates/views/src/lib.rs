@@ -1,5 +1,6 @@
 use command::*;
 use components::windows::tray;
+use std::sync::Mutex;
 use tauri::AppHandle;
 use tauri::Manager;
 use tauri::RunEvent;
@@ -9,7 +10,7 @@ use tauri::WindowEvent;
 pub mod command;
 pub mod components;
 pub mod response;
-pub mod upadtor;
+pub mod updator;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -127,11 +128,13 @@ pub fn run() {
             command::os::platform,
             command::ip_info,
             command::init_command,
-            command::init_porcessor
+            command::init_porcessor,
+            updator::app_updates::fetch_update,
+            updator::app_updates::install_update,
         ])
         .setup(|app| {
             register_plugins(app.app_handle());
-            regsister_other_processor(app.app_handle().clone());
+            regsister_update_processor(app.app_handle().clone());
             tray::menu(app)?;
             Ok(())
         })
@@ -187,8 +190,8 @@ fn register_plugins(app_handle: &AppHandle) {
         .unwrap();
 }
 
-fn regsister_other_processor(app_handle: AppHandle) {
+fn regsister_update_processor(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
-        upadtor::update(app_handle).await.unwrap();
+        app.manage(updator::app_updates::PendingUpdate(Mutex::new(None)));
     });
 }
