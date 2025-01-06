@@ -1,7 +1,6 @@
+use command::*;
 use components::windows::tray;
-use log::info;
 use tauri::AppHandle;
-use tauri::Emitter;
 use tauri::Manager;
 use tauri::RunEvent;
 use tauri::Window;
@@ -10,22 +9,7 @@ use tauri::WindowEvent;
 pub mod command;
 pub mod components;
 pub mod response;
-
-use command::browser as browser_command;
-use command::environment as environment_command;
-use command::environment_account as environment_account_command;
-use command::environment_cookie as environment_cookie_command;
-use command::environment_fingerprint as environment_fingerprint_command;
-use command::environment_group as environment_group_command;
-use command::environment_proxies as environment_proxies_command;
-use command::environment_proxy_group as environment_proxy_group_command;
-use command::environment_transfer_history as environment_transfer_history_command;
-use command::environment_trash as environment_trash_command;
-use command::extension as extension_command;
-use command::team as team_command;
-use command::team_group as team_group_command;
-use command::user as user_command;
-use command::user_team_temp as user_team_temp_command;
+pub mod upadtor;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -146,33 +130,9 @@ pub fn run() {
             command::init_porcessor
         ])
         .setup(|app| {
-            #[cfg(desktop)]
-            app.handle()
-                .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-                    if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.show();
-                        let _ = window.set_focus();
-                    }
-                }))
-                .unwrap();
-
-            #[cfg(desktop)]
-            app.handle().plugin(tauri_plugin_updater::Builder::new().build()).unwrap();
-
-            #[cfg(debug_assertions)]
-            app.handle()
-                .plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )
-                .unwrap();
-
+            register_plugins(app.app_handle());
+            regsister_other_processor(app.app_handle().clone());
             tray::menu(app)?;
-
-            info!("send");
-            let _ = app.emit("init", ());
-
             Ok(())
         })
         .on_window_event(window_event_handle)
@@ -199,4 +159,36 @@ fn run_event_handle(_app_handle: &AppHandle, event: RunEvent) {
         }
         _ => {}
     }
+}
+
+fn register_plugins(app_handle: &AppHandle) {
+    #[cfg(desktop)]
+    app_handle
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }))
+        .unwrap();
+
+    #[cfg(debug_assertions)]
+    app_handle
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
+        .unwrap();
+
+    #[cfg(desktop)]
+    app_handle
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .unwrap();
+}
+
+fn regsister_other_processor(app_handle: AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        upadtor::update(app_handle).await.unwrap();
+    });
 }

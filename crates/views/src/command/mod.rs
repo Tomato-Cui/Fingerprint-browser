@@ -15,6 +15,22 @@ pub mod team_group;
 pub mod user;
 pub mod user_team_temp;
 
+pub use browser as browser_command;
+pub use environment as environment_command;
+pub use environment_account as environment_account_command;
+pub use environment_cookie as environment_cookie_command;
+pub use environment_fingerprint as environment_fingerprint_command;
+pub use environment_group as environment_group_command;
+pub use environment_proxies as environment_proxies_command;
+pub use environment_proxy_group as environment_proxy_group_command;
+pub use environment_transfer_history as environment_transfer_history_command;
+pub use environment_trash as environment_trash_command;
+pub use extension as extension_command;
+pub use team as team_command;
+pub use team_group as team_group_command;
+pub use user as user_command;
+pub use user_team_temp as user_team_temp_command;
+
 use serde_json::Value;
 use services::command::Actuator;
 use tauri::{AppHandle, Emitter};
