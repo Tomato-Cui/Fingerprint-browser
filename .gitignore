@@ -8,6 +8,7 @@
 # ignore vscode & jetbrains
 /**/**/.vscode
 /**/**/.idea
+/**/**/.vs
 
 # ignore log
 /**/**/logs
