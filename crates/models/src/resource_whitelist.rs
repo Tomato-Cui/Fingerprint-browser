@@ -4,7 +4,7 @@ use sqlx::{error::Error, FromRow, Pool, Sqlite};
 #[derive(Debug, Deserialize, Serialize, FromRow, Clone, Default)]
 pub struct ResourceWhiteList {
     pub id: i32,
-    pub href: String,
+    pub path: String,
     pub method: String,
     pub description: Option<String>,
     pub created_at: Option<String>,
@@ -16,9 +16,9 @@ impl ResourceWhiteList {
     #[allow(dead_code)]
     pub async fn insert(pool: &Pool<Sqlite>, resource: &ResourceWhiteList) -> Result<bool, Error> {
         let row = sqlx::query(
-            "insert into resource_whitelist(href, method, description) values(?, ?, ?)",
+            "insert into resource_whitelist(path, method, description) values(?, ?, ?)",
         )
-        .bind(resource.href.to_string())
+        .bind(resource.path.to_string())
         .bind(resource.method.to_string())
         .bind(resource.deleted_at.clone())
         .execute(pool)
@@ -78,14 +78,14 @@ impl ResourceWhiteList {
     }
 
     #[allow(dead_code)]
-    pub async fn query_by_href_method(
+    pub async fn query_by_path_method(
         pool: &Pool<Sqlite>,
-        href: &str,
+        path: &str,
         description: &str,
     ) -> Result<ResourceWhiteList, Error> {
         let resource: ResourceWhiteList =
-            sqlx::query_as("select * from resource_whitelist where href = ? and method = ?")
-                .bind(href)
+            sqlx::query_as("select * from resource_whitelist where path = ? and method = ?")
+                .bind(path)
                 .bind(description)
                 .fetch_one(pool)
                 .await?;
@@ -96,9 +96,9 @@ impl ResourceWhiteList {
     #[allow(dead_code)]
     pub async fn update(pool: &Pool<Sqlite>, resource: &ResourceWhiteList) -> Result<bool, Error> {
         let row = sqlx::query(
-            "update resource_whitelist set href = ?, method = ?, description = ?, updated_at = DATETIME('now') where id = ?",
+            "update resource_whitelist set path = ?, method = ?, description = ?, updated_at = DATETIME('now') where id = ?",
         )
-        .bind(&resource.href)
+        .bind(&resource.path)
         .bind(&resource.method)
         .bind(resource.description.clone())
         .bind(resource.id)

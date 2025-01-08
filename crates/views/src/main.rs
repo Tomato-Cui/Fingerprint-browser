@@ -47,9 +47,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = states::database::get_database_pool()?;
     if let Err(_) = commons::database::Database::migrator(pool).await {
         let cache_dir = states::config::APP_DATA.clone().join(database_location);
-        if let Ok(_) = commons::util::delete_data_file(cache_dir).await {
-            if let Err(_) = commons::database::Database::migrator(pool).await {
-                eprintln!("database migrate failed.")
+        if let Ok(_) = commons::util::delete_data_file(cache_dir) {
+            if let Err(e) = commons::database::Database::migrator(pool).await {
+                eprintln!("database migrate failed:{:?}", e)
             }
         }
     }

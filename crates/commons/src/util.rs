@@ -122,17 +122,13 @@ pub async fn get_debug_port() -> Result<u16, std::io::Error> {
     Ok(port.port())
 }
 
-pub async fn delete_data_file(path: PathBuf) -> Result<(), std::io::Error> {
-    use std::fs::metadata;
-    use tokio::fs::{remove_dir_all, remove_file};
+pub fn delete_data_file(path: PathBuf) -> Result<(), anyhow::Error> {
+    use std::fs;
 
-    if let Ok(meta) = metadata(&path) {
-        if meta.is_file() {
-            remove_file(&path).await?;
-        } else if meta.is_dir() {
-            remove_dir_all(&path).await?;
-        }
-    }
+    let abc = fs::remove_dir_all(&path)
+        .map_err(|v| anyhow::anyhow!("remove current path target failed: {:?}", v));
+    eprintln!("{:?}", abc);
+
     Ok(())
 }
 

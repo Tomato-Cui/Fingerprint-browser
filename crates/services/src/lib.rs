@@ -1,5 +1,6 @@
 pub mod error;
 
+pub mod allowed_operation;
 pub mod command;
 pub mod environment;
 pub mod environment_account;
@@ -11,6 +12,8 @@ pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod environmnet_cookie;
 pub mod extension;
+pub mod operation_log;
+pub mod permission;
 pub mod resource_whitelist;
 pub mod team;
 pub mod team_group;
@@ -27,8 +30,8 @@ pub(crate) async fn setup() {
     let _migration_path = migration_path.join("migrations");
     states::database::init_sqlite_database().await.unwrap();
 
-    // let pool = states::database::get_database_pool().unwrap();
-    // commons::database::Database::migrator(pool).await.unwrap();
+    let pool = states::database::get_database_pool().unwrap();
+    commons::database::Database::migrator(pool).await.unwrap();
 }
 
 #[tokio::test]

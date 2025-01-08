@@ -150,7 +150,7 @@ mod tests {
     #[tokio::test]
     async fn test_team_send() {
         crate::setup().await;
-        let current_user_email = "1";
+        let current_user_email = "abc@abc.com";
         let team_id = 2;
         let description = "test_description";
 
@@ -161,9 +161,9 @@ mod tests {
     #[tokio::test]
     async fn test_allow() {
         crate::setup().await;
-        let id = 1;
-        let user_uuid = "9bc584d5-68cb-43fd-b78e-618b28ff6f1a";
-        let team_id = 2;
+        let id = 2;
+        let user_uuid = "b1537d51-23a6-48b5-a2d6-be98617e9d33";
+        let team_id = 1;
 
         let result = allow(id, user_uuid, team_id).await;
         println!("{:?}", result)

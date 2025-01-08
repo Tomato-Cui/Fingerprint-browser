@@ -80,7 +80,7 @@ pub async fn query_environmnets_by_extension_uuid(
 }
 
 pub async fn query_by_environmnet_uuid(
-    environmnet_uuid: &str,
+    environment_uuid: &str,
     page_num: u32,
     page_size: u32,
 ) -> Result<Value, ServiceError> {
@@ -88,7 +88,7 @@ pub async fn query_by_environmnet_uuid(
 
     let (total, extens) = extension::Extension::query_by_environmnet_uuid(
         pool,
-        environmnet_uuid,
+        environment_uuid,
         page_num,
         page_size,
     )

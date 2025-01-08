@@ -1,3 +1,4 @@
+pub mod allowed_operation;
 pub mod codes;
 pub mod environment;
 pub mod environment_account;
@@ -9,6 +10,7 @@ pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod environmnet_cookie;
 pub mod extension;
+pub mod operation_log;
 pub mod resource_whitelist;
 pub mod team;
 pub mod team_group;
@@ -33,9 +35,7 @@ pub(crate) async fn setup() {
     println!("{:?}", migration_path);
 
     let pool = states::database::get_database_pool().unwrap();
-    commons::database::Database::migrator(pool)
-        .await
-        .unwrap();
+    commons::database::Database::migrator(pool).await.unwrap();
 }
 
 #[tokio::test]

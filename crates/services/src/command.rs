@@ -51,6 +51,13 @@ pub async fn is_active(environment_uuid: &str) -> Result<bool, anyhow::Error> {
         .await?)
 }
 
+pub async fn stop_all() -> Result<bool, anyhow::Error> {
+    match ACTUATOR.controller.lock().await.stop_all_browser().await {
+        Ok(_statu) => Ok(true),
+        Err(_e) => Ok(false),
+    }
+}
+
 pub async fn stop(
     environment_uuiids: Vec<String>,
 ) -> Result<HashMap<String, String>, anyhow::Error> {
