@@ -1,7 +1,6 @@
 use crate::entities::{environment_trash::*, EnvironmentUUIdPayload, Pagination};
 use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
-use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use serde_json::Value;
@@ -21,7 +20,10 @@ pub async fn query_by_uuid(Json(payload): Json<EnvironmentUUIdPayload>) -> impl 
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::environment_trash::query(&state.user_uuid, payload.page_num, payload.page_size)
         .await
     {

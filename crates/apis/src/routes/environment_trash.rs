@@ -1,4 +1,4 @@
-use axum::routing::{delete, get, put};
+use axum::routing::{delete, get, post, put};
 use axum::Router;
 
 use crate::handles::environment_trash;
@@ -7,8 +7,8 @@ pub fn build_router() -> Router {
     Router::new().nest(
         "/environment-trash",
         Router::new()
-            .route("/uuid", get(environment_trash::query_by_uuid))
-            .route("/", get(environment_trash::query))
+            .route("/query/uuid", get(environment_trash::query_by_uuid))
+            .route("/query", post(environment_trash::query))
             .route("/recover", put(environment_trash::recover))
             .route("/recovers", put(environment_trash::recovers))
             .route("/recover-all", put(environment_trash::recover_all))

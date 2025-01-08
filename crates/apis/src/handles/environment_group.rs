@@ -2,7 +2,6 @@ use super::{success_message, warn_message};
 use crate::entities::{environment_group::*, Pagination};
 use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
-use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use models::environment_group::EnvironmentGroup;
@@ -15,7 +14,10 @@ pub async fn query_by_id(Json(payload): Json<IdPayload>) -> impl IntoResponse {
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::environment_group::query(&state.user_uuid, payload.page_num, payload.page_size)
         .await
     {

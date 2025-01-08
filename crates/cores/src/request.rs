@@ -1,7 +1,7 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Serialize)]
 pub struct JsonRespnse {
     pub code: Option<i32>,
     pub message: Option<String>,
@@ -62,6 +62,8 @@ pub mod client {
                 .remote_url;
             Ok(Url::parse(&server_url)
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
+                .join("/api/v1")
+                .map_err(|e| anyhow::anyhow!("{:?}", e))?
                 .join(resource)
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?)
         }
@@ -120,15 +122,19 @@ pub mod client {
             Ok(response)
         }
 
-        pub async fn delete(
+        pub async fn delete<T>(
             &self,
             url: reqwest::Url,
-        ) -> core::result::Result<Response, reqwest::Error> {
+            json: &T,
+        ) -> core::result::Result<Response, reqwest::Error>
+        where
+            T: serde::Serialize,
+        {
             let mut request_builder = self.client.delete(url);
             for call in &self.before {
                 request_builder = call(request_builder).await?;
             }
-            let mut response = request_builder.send().await?;
+            let mut response = request_builder.json(json).send().await?;
             for call in &self.after {
                 response = call(response).await?;
             }

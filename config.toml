@@ -2,7 +2,7 @@
 id = "com.ads-hubstudio.browser"
 name = "ads-hubstudio"
 remote_switch = false
-remote_url = 'http://192.168.6.116:8080'
+remote_url = 'http://127.0.0.1:5678'
 
 [app.location]
 user_data_location = "user-data"

@@ -2,7 +2,6 @@ use crate::entities::environment_fingerprint::*;
 use crate::entities::Pagination;
 use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
-use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use models::environment_fingerprint::EnvironmentFingerprint;
@@ -24,7 +23,10 @@ pub async fn query_by_id(
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::environment_fingerprint::query(
         &state.user_uuid,
         payload.page_num,

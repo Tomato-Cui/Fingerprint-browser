@@ -1,4 +1,3 @@
-use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use serde_json::Value;
@@ -22,7 +21,10 @@ pub async fn query_by_id(Json(payload): Json<QueryByIdPayload>) -> impl IntoResp
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::environment_account::query(
         &state.user_uuid,
         payload.page_num,
@@ -37,7 +39,7 @@ pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) ->
 
 pub async fn query_current_by_user(
     state: Extension<CurrentUser>,
-    payload: Query<Pagination>,
+    Json(payload): Json<Pagination>,
 ) -> impl IntoResponse {
     match services::environment_account::query(
         &state.user_uuid,

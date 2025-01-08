@@ -1,7 +1,6 @@
 use crate::entities::{environment::*, EnvironmentUUIdPayload};
 use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
-use axum::extract::{Path, Query};
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use serde_json::Value;
@@ -23,7 +22,10 @@ pub async fn query_by_uuid(
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     let user_id = &state.user_uuid;
     match services::environment::query(user_id, payload.page_num, payload.page_size).await {
         Ok(data) => AppResponse::<Value>::success(success_message("查询成功"), Some(data)),
@@ -108,7 +110,7 @@ pub async fn batch_create(
 }
 
 pub async fn modify_info(
-    Path(uuid): Path<String>,
+    state: Extension<CurrentUser>,
     Json(payload): Json<models::environment::EnvironmentInfo>,
 ) -> impl IntoResponse {
     if let None = payload.uuid {
@@ -119,7 +121,7 @@ pub async fn modify_info(
     }
 
     match services::environment::modify_info(
-        &uuid,
+        &state.user_uuid,
         &payload.uuid.clone().unwrap_or_default(),
         payload,
     )

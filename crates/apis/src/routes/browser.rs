@@ -6,7 +6,7 @@ pub fn build_router() -> Router {
     Router::new().nest(
         "/browsers",
         Router::new()
-            .route("/start", get(browser::start))
+            .route("/start", post(browser::start))
             .route("/starts", post(browser::starts))
             .route("/stops", post(browser::stops))
             .route("/stop-all", post(browser::stop_all))

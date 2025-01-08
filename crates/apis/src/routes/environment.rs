@@ -1,16 +1,16 @@
 use crate::handles::environment;
-use axum::routing::{delete, get, post, put};
+use axum::routing::{delete, post, put};
 use axum::Router;
 
 pub fn build_router() -> Router {
     Router::new().nest(
         "/environments",
         Router::new()
-            .route("/uuid", get(environment::query_by_uuid))
-            .route("/", get(environment::query))
-            .route("/group", get(environment::query_by_group))
-            .route("/team", get(environment::query_by_team))
-            .route("/extension", post(environment::query_by_extension))
+            .route("/query/uuid", post(environment::query_by_uuid))
+            .route("/query", post(environment::query))
+            .route("/query/group", post(environment::query_by_group))
+            .route("/query/team", post(environment::query_by_team))
+            .route("/query/extension", post(environment::query_by_extension))
             .route("/create", post(environment::create))
             .route("/detail/create", post(environment::detail_create))
             .route("/batch", post(environment::batch_create))

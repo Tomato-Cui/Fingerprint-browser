@@ -7,7 +7,6 @@ members = [
   "crates/models",
   "crates/services",
   "crates/services-remote",
-  "crates/requests",
   "crates/states",
   "crates/views",
 ]

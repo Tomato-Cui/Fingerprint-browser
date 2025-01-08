@@ -2,7 +2,6 @@ use crate::entities::environment_transfer_history::BatchCreatePayload;
 use crate::entities::{EnvironmentUUIdPayload, Pagination};
 use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
-use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use models::environment_transfer_history::EnvironmentTransferHistory;
@@ -24,7 +23,10 @@ pub async fn query_by_uuid(Json(payload): Json<EnvironmentUUIdPayload>) -> impl 
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::environment_transfer_history::query(
         &state.user_uuid,
         payload.page_num,

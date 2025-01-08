@@ -4,13 +4,13 @@ use crate::{
     middlewares::CurrentUser,
     response::AppResponse,
 };
-use axum::{extract::Path, response::IntoResponse, Extension, Json};
+use axum::{response::IntoResponse, Extension, Json};
 
 pub async fn user_create(
     state: Extension<CurrentUser>,
-    Path(extension_uuid): Path<String>,
+    Json(payload): Json<ExtensionUUidPayload>,
 ) -> impl IntoResponse {
-    match services::extension::user_insert(&state.user_uuid, &extension_uuid).await {
+    match services::extension::user_insert(&state.user_uuid, &payload.extension_uuid).await {
         Ok(ok) => AppResponse::success(success_message("创建成功"), Some(ok)),
         Err(e) => AppResponse::fail(warn_message(e)),
     }
@@ -125,8 +125,8 @@ pub async fn user_toggle_extension(
     }
 }
 
-pub async fn delete_by_uuid(Path(extension_uuid): Path<String>) -> impl IntoResponse {
-    match services::extension::delete(&extension_uuid).await {
+pub async fn delete_by_uuid(Json(payload): Json<ExtensionUUidPayload>) -> impl IntoResponse {
+    match services::extension::delete(&payload.extension_uuid).await {
         Ok(ok) => AppResponse::success(success_message("删除成功"), Some(ok)),
         Err(e) => AppResponse::fail(warn_message(e)),
     }
@@ -134,9 +134,10 @@ pub async fn delete_by_uuid(Path(extension_uuid): Path<String>) -> impl IntoResp
 
 pub async fn remove_by_user_uuid(
     state: Extension<CurrentUser>,
-    Path(extension_uuid): Path<String>,
+    Json(payload): Json<ExtensionUUidPayload>,
 ) -> impl IntoResponse {
-    match services::extension::remove_by_user_uuid(&state.user_uuid, &extension_uuid).await {
+    match services::extension::remove_by_user_uuid(&state.user_uuid, &payload.extension_uuid).await
+    {
         Ok(ok) => AppResponse::success(success_message("移除成功"), Some(ok)),
         Err(e) => AppResponse::fail(warn_message(e)),
     }

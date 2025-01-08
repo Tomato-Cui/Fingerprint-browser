@@ -1,7 +1,6 @@
 use crate::entities::{environment_proxies::*, Pagination};
 use crate::middlewares::CurrentUser;
 use crate::response::AppResponse;
-use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use models::environment_proxies::Proxy;
@@ -19,7 +18,10 @@ pub async fn query_by_id(
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::environment_proxy::query(&state.user_uuid, payload.page_num, payload.page_size)
         .await
     {

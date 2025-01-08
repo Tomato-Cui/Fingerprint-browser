@@ -44,3 +44,8 @@ pub struct UserToggleExtensionPayload {
     pub extension_uuid: String,
     pub open: bool,
 }
+
+#[derive(Deserialize)]
+pub struct ExtensionUUidPayload {
+    pub extension_uuid: String,
+}

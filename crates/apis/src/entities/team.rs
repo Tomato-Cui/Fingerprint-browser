@@ -14,6 +14,11 @@ pub struct TeamQueryPayload {
 }
 
 #[derive(Deserialize)]
+pub struct TeamSearchByNamePayload {
+    pub team_name: String,
+}
+
+#[derive(Deserialize)]
 pub struct TeamGroupQueryPayload {
     pub team_id: u32,
     pub team_group_id: u32,

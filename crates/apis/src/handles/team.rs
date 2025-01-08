@@ -1,8 +1,4 @@
-use axum::{
-    extract::{Path, Query},
-    response::IntoResponse,
-    Extension, Json,
-};
+use axum::{response::IntoResponse, Extension, Json};
 
 use crate::{
     entities::{team::*, IdPayload},
@@ -21,22 +17,27 @@ pub async fn query_by_id(Json(payload): Json<IdPayload>) -> impl IntoResponse {
 
 pub async fn is_leader(
     state: Extension<CurrentUser>,
-    Path(team_id): Path<u32>,
+    Json(payload): Json<IdPayload>,
 ) -> impl IntoResponse {
-    match services::team::is_leader(&state.user_uuid, team_id).await {
+    match services::team::is_leader(&state.user_uuid, payload.id).await {
         Ok(data) => AppResponse::success(success_message("查询成功"), Some(data)),
         Err(e) => AppResponse::fail(warn_message(e)),
     }
 }
 
-pub async fn query_search_by_name(Path(team_name): Path<String>) -> impl IntoResponse {
-    match services::team::query_by_search_name(&team_name).await {
+pub async fn query_search_by_name(
+    Json(payload): Json<TeamSearchByNamePayload>,
+) -> impl IntoResponse {
+    match services::team::query_by_search_name(&payload.team_name).await {
         Ok(data) => AppResponse::success(success_message("查询成功"), Some(data)),
         Err(e) => AppResponse::fail(warn_message(e)),
     }
 }
 
-pub async fn query(state: Extension<CurrentUser>, payload: Query<Pagination>) -> impl IntoResponse {
+pub async fn query(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<Pagination>,
+) -> impl IntoResponse {
     match services::team::query(&state.user_uuid, payload.page_num, payload.page_size).await {
         Ok(data) => AppResponse::success(success_message("查询成功"), Some(data)),
         Err(e) => AppResponse::fail(warn_message(e)),
@@ -165,8 +166,11 @@ pub async fn modify(payload: Json<ModifyTeamPayload>) -> impl IntoResponse {
     }
 }
 
-pub async fn switch_team(state: Extension<CurrentUser>, Path(id): Path<u32>) -> impl IntoResponse {
-    match services::team::switch_team(&state.user_uuid, id).await {
+pub async fn switch_team(
+    state: Extension<CurrentUser>,
+    Json(payload): Json<IdPayload>,
+) -> impl IntoResponse {
+    match services::team::switch_team(&state.user_uuid, payload.id).await {
         Ok(_) => AppResponse::success(success_message("切换成功"), Some(())),
         Err(e) => AppResponse::fail(warn_message(e)),
     }
