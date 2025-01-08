@@ -6,6 +6,13 @@ use crate::{
 };
 use axum::{response::IntoResponse, Extension, Json};
 
+pub async fn create(Json(payload): Json<models::extension::Extension>) -> impl IntoResponse {
+    match services::extension::insert(payload).await {
+        Ok(ok) => AppResponse::success(success_message("创建成功"), Some(ok)),
+        Err(e) => AppResponse::fail(warn_message(e)),
+    }
+}
+
 pub async fn user_create(
     state: Extension<CurrentUser>,
     Json(payload): Json<ExtensionUUidPayload>,

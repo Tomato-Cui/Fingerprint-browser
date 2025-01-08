@@ -64,7 +64,7 @@ views = { path = "./crates/views" }
 
 commons = { path = "./crates/commons" }
 services = { path = "./crates/services" }
-remote_services = { path = "./crates/services-remote" }
+services_remote = { path = "./crates/services-remote" }
 models = { path = "./crates/models" }
 states = { path = "./crates/states" }
 apis = { path = "./crates/apis" }

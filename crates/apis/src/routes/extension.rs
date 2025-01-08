@@ -6,6 +6,7 @@ pub fn build_router() -> Router {
     Router::new().nest(
         "/extensions",
         Router::new()
+            .route("/create", post(extension::create))
             .route("/user/create", post(extension::user_create))
             .route("/team/create", post(extension::team_create))
             .route("/query/user", post(extension::query_by_user))

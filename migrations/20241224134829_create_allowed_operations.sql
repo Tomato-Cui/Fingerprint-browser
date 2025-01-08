@@ -30,7 +30,7 @@ INSERT INTO allowed_operations (operation_name, operation_description, permissio
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/teams/+DELETE', '删除团队', 4, '/api/v1/teams/+DELETE');
 
 -- Team Groups
-INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/team-groups/id+GET', '通过ID查询团队组', 4, '/api/v1/team-groups/id+GET');
+INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/team-groups/id+POST', '通过ID查询团队组', 4, '/api/v1/team-groups/id+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/team-groups/+POST', '查询所有团队组', 4, '/api/v1/team-groups/+POST');
 
 -- Messages
@@ -43,6 +43,7 @@ INSERT INTO allowed_operations (operation_name, operation_description, permissio
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/messages/user/allow+PUT', '允许用户消息', 4, '/api/v1/messages/user/allow+PUT');
 
 -- Extensions
+INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/extensions/create+POST', '创建扩展', 4, '/api/v1/extensions/create+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/extensions/user/create+POST', '创建用户扩展', 4, '/api/v1/extensions/user/create+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/extensions/team/create+POST', '创建团队扩展', 4, '/api/v1/extensions/team/create+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/extensions/query/user+POST', '查询用户扩展', 4, '/api/v1/extensions/query/user+POST');
@@ -76,7 +77,7 @@ INSERT INTO allowed_operations (operation_name, operation_description, permissio
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environments/batch+DELETE', '批量删除环境', 4, '/api/v1/environments/batch+DELETE');
 
 -- Environment Trash
-INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-trash/query/uuid+GET', '通过UUID查询环境回收站', 4, '/api/v1/environment-trash/query/uuid+GET');
+INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-trash/query/uuid+POST', '通过UUID查询环境回收站', 4, '/api/v1/environment-trash/query/uuid+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-trash/query+POST', '查询环境回收站', 4, '/api/v1/environment-trash/query+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-trash/recover+PUT', '恢复环境', 4, '/api/v1/environment-trash/recover+PUT');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-trash/recovers+PUT', '批量恢复环境', 4, '/api/v1/environment-trash/recovers+PUT');
@@ -129,7 +130,7 @@ INSERT INTO allowed_operations (operation_name, operation_description, permissio
 -- Environment Accounts
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/query/id+POST', '通过ID查询环境账户', 4, '/api/v1/environment-accounts/query/id+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/query+POST', '查询环境账户', 4, '/api/v1/environment-accounts/query+POST');
-INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/user+GET', '查询当前用户的环境账户', 4, '/api/v1/environment-accounts/user+GET');
+INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/query/environment/uuid+POST', '查询当前环境的环境账户', 4, '/api/v1/environment-accounts/query/environment/uuid+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/+POST', '创建环境账户', 4, '/api/v1/environment-accounts/+POST');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/+PUT', '修改环境账户', 4, '/api/v1/environment-accounts/+PUT');
 INSERT INTO allowed_operations (operation_name, operation_description, permission_id, resource_name) VALUES ('/api/v1/environment-accounts/+DELETE', '删除环境账户', 4, '/api/v1/environment-accounts/+DELETE');

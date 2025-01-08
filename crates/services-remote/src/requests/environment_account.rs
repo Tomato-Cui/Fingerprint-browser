@@ -38,18 +38,20 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
     Ok(json_response)
 }
 
-pub async fn query_current_by_user(
+pub async fn query_current_by_current_environment(
+    environmnet_uuid: &str,
     page_num: u32,
     page_size: u32,
 ) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
+        "environmnet_uuid": environmnet_uuid,
         "page_num": page_num,
         "page_size": page_size,
     });
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environment-accounts/user")?,
+            client::Client::build_url("/environment-accounts//query/environment/uuid")?,
             &data,
         )
         .await?

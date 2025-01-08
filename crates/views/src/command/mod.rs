@@ -9,12 +9,12 @@ pub mod environment_proxy_group;
 pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod extension;
+pub mod message;
 pub mod os;
 pub mod team;
 pub mod team_group;
 pub mod updator;
 pub mod user;
-pub mod user_team_temp;
 
 pub use browser as browser_command;
 pub use environment as environment_command;
@@ -27,11 +27,11 @@ pub use environment_proxy_group as environment_proxy_group_command;
 pub use environment_transfer_history as environment_transfer_history_command;
 pub use environment_trash as environment_trash_command;
 pub use extension as extension_command;
+pub use message as message_command;
 pub use team as team_command;
 pub use team_group as team_group_command;
 pub use user as user_command;
 use user::get_user_id;
-pub use user_team_temp as user_team_temp_command;
 
 use serde_json::Value;
 use services::command::Actuator;
@@ -202,13 +202,13 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         team_command::team_delete,
         team_group_command::team_group_query_id,
         team_group_command::team_group_query_all,
-        user_team_temp_command::user_receive_query,
-        user_team_temp_command::team_receive_query,
-        user_team_temp_command::team_send,
-        user_team_temp_command::user_send,
-        user_team_temp_command::reject,
-        user_team_temp_command::team_allow,
-        user_team_temp_command::user_allow,
+        message_command::user_receive_query,
+        message_command::team_receive_query,
+        message_command::team_send,
+        message_command::user_send,
+        message_command::reject,
+        message_command::team_allow,
+        message_command::user_allow,
         user_command::login,
         user_command::logout,
         user_command::register,
@@ -224,8 +224,8 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         extension_command::extension_query_by_user,
         extension_command::extension_query_by_environment,
         extension_command::extension_query,
-        extension_command::extension_environmnet_use_extension,
-        extension_command::extension_environmnet_remove_extension,
+        extension_command::extension_environment_use_extension,
+        extension_command::extension_environment_remove_extension,
         extension_command::extension_update,
         extension_command::user_toggle_extension,
         extension_command::extension_delete_by_uuid,

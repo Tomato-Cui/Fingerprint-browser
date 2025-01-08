@@ -1,6 +1,17 @@
 use cores::request::{client, JsonRespnse};
 use serde_json::json;
 
+pub async fn create(extension: models::extension::Extension) -> Result<JsonRespnse, anyhow::Error> {
+    let json_response = client::REQUEST
+        .post(client::Client::build_url("/extensions/create")?, &extension)
+        .await?
+        .json()
+        .await
+        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+
+    Ok(json_response)
+}
+
 pub async fn user_create(extension_uuid: &str) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
         "extension_uuid": extension_uuid,

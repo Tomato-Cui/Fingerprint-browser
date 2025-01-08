@@ -8,7 +8,10 @@ pub fn build_router() -> Router {
         Router::new()
             .route("/query/id", post(environment_account::query_by_id))
             .route("/query", post(environment_account::query))
-            .route("/user", post(environment_account::query_current_by_user))
+            .route(
+                "/query/environment/uuid",
+                post(environment_account::query_current_by_current_environment),
+            )
             .route("/", post(environment_account::create))
             .route("/", put(environment_account::modify))
             .route("/", delete(environment_account::delete))

@@ -14,3 +14,10 @@ pub struct QueryByIdPayload {
 pub struct DeleteByIdPayload {
     pub id: u32,
 }
+
+#[derive(Deserialize)]
+pub struct QueryByEnvironmentUUidPayload {
+    pub environment_uuid: String,
+    pub page_num: u32,
+    pub page_size: u32,
+}

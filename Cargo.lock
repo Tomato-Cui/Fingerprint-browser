@@ -4811,7 +4811,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "services-remote"
+name = "services_remote"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -6431,6 +6431,7 @@ dependencies = [
  "serde",
  "serde_json",
  "services",
+ "services_remote",
  "states",
  "tauri",
  "tauri-build",

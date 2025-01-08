@@ -37,12 +37,11 @@ pub async fn query(
     }
 }
 
-pub async fn query_current_by_user(
-    state: Extension<CurrentUser>,
-    Json(payload): Json<Pagination>,
+pub async fn query_current_by_current_environment(
+    Json(payload): Json<QueryByEnvironmentUUidPayload>,
 ) -> impl IntoResponse {
-    match services::environment_account::query(
-        &state.user_uuid,
+    match services::environment_account::account_query_current_environment(
+        &payload.environment_uuid,
         payload.page_num,
         payload.page_size,
     )
