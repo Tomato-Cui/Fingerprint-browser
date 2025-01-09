@@ -7,11 +7,8 @@ pub async fn query_by_uuid(environment_uuid: &str) -> Result<JsonRespnse, anyhow
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environment-trash/uuid")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(client::Client::build_url("/environment-trash/query/uuid")?, &data)
+        .await?;
 
     Ok(json_response)
 }
@@ -23,11 +20,8 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environment-trash")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(client::Client::build_url("/environment-trash/query")?, &data)
+        .await?;
 
     Ok(json_response)
 }
@@ -42,10 +36,7 @@ pub async fn recover(environment_uuid: &str) -> Result<JsonRespnse, anyhow::Erro
             client::Client::build_url("/environment-trash/recover")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("恢复失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -60,10 +51,7 @@ pub async fn recovers(environment_uuids: Vec<String>) -> Result<JsonRespnse, any
             client::Client::build_url("/environment-trash/recovers")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("恢复失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -74,10 +62,7 @@ pub async fn recover_all() -> Result<JsonRespnse, anyhow::Error> {
             client::Client::build_url("/environment-trash/recover-all")?,
             &json!({}),
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("恢复失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -92,10 +77,7 @@ pub async fn delete_batch(environment_uuids: Vec<String>) -> Result<JsonRespnse,
             client::Client::build_url("/environment-trash/batch")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -106,10 +88,7 @@ pub async fn clean() -> Result<JsonRespnse, anyhow::Error> {
             client::Client::build_url("/environment-trash/clean")?,
             &json!({}),
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("清空失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

@@ -289,6 +289,20 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_create_and_other_info() {
+        crate::setup().await;
+        let user_uuid = "6cce7b5f-0721-4302-8fb0-c1b9115858df".to_string();
+        let result = create_and_other_info(
+            &user_uuid,
+            EnvironmentInfo {
+                ..Default::default()
+            },
+        )
+        .await;
+        println!("{:?}", result);
+    }
+
+    #[tokio::test]
     async fn test_create_batch() {
         crate::setup().await;
         let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7".to_string();

@@ -21,7 +21,7 @@ pub mod user;
 pub mod user_team_temp;
 
 #[allow(dead_code)]
-pub(crate) async fn setup() {
+pub async fn setup() {
     states::init_config_state(r#"../../config.toml"#).await;
     let mut migration_path = std::env::current_dir().unwrap();
     migration_path.pop();
@@ -30,8 +30,10 @@ pub(crate) async fn setup() {
     let _migration_path = migration_path.join("migrations");
     states::database::init_sqlite_database().await.unwrap();
 
-    let pool = states::database::get_database_pool().unwrap();
-    commons::database::Database::migrator(pool).await.unwrap();
+    states::init_state().await;
+
+    // let pool = states::database::get_database_pool().unwrap();
+    // commons::database::Database::migrator(pool).await.unwrap();
 }
 
 #[tokio::test]

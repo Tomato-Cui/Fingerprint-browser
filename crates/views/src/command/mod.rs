@@ -31,14 +31,11 @@ pub use message as message_command;
 pub use team as team_command;
 pub use team_group as team_group_command;
 pub use user as user_command;
-use user::get_user_id;
 
 use serde_json::Value;
 use services::command::Actuator;
 use tauri::ipc::Invoke;
 use tauri::{AppHandle, Emitter};
-
-use crate::response::AppResponse;
 
 #[tauri::command]
 pub async fn ip_info() -> Result<crate::response::AppResponse<Value>, tauri::Error> {
@@ -80,47 +77,6 @@ pub async fn init_command(
         Some("init command finish.".to_string()),
         Some(true),
     ))
-}
-
-#[tauri::command]
-pub async fn auth_operation(
-    resource_name: &str,
-) -> Result<crate::response::AppResponse<bool>, tauri::Error> {
-    let user_uuid = get_user_id().await?;
-    let (success_msg, warn_msg) = (Some("权限校验成功".to_string()), |v| {
-        Some(format!("权限校验失败: {}", v))
-    });
-
-    let can = services::permission::can_check_permission(resource_name).await;
-
-    Ok(if can.is_ok_and(|v| v) {
-        let check_resource =
-            services::permission::check_permission(&user_uuid, resource_name).await;
-
-        match check_resource {
-            Ok(v) => AppResponse::<bool>::success(success_msg, Some(v)),
-            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-        }
-    } else {
-        AppResponse::<bool>::success(success_msg, Some(true))
-    })
-}
-
-#[tauri::command]
-pub async fn record_operation_log(
-    resource_name: &str,
-) -> Result<crate::response::AppResponse<bool>, tauri::Error> {
-    let user_uuid = get_user_id().await?;
-    let (success_msg, warn_msg) = (Some("查询成功".to_string()), |v| {
-        Some(format!("查询失败: {}", v))
-    });
-
-    Ok(
-        match services::operation_log::record_operation_log(&user_uuid, resource_name).await {
-            Ok(_) => AppResponse::<bool>::success(success_msg, Some(true)),
-            Err(r) => AppResponse::<bool>::fail(warn_msg(r.to_string())),
-        },
-    )
 }
 
 pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync + 'static {
@@ -238,8 +194,6 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         ip_info,
         init_command,
         init_porcessor,
-        record_operation_log,
-        auth_operation,
         updator::app_updates::fetch_update,
         updator::app_updates::install_update,
     ]

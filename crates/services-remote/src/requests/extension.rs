@@ -4,10 +4,7 @@ use serde_json::json;
 pub async fn create(extension: models::extension::Extension) -> Result<JsonRespnse, anyhow::Error> {
     let json_response = client::REQUEST
         .post(client::Client::build_url("/extensions/create")?, &extension)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -19,10 +16,7 @@ pub async fn user_create(extension_uuid: &str) -> Result<JsonRespnse, anyhow::Er
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/extensions/user/create")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -38,10 +32,7 @@ pub async fn team_create(
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/extensions/team/create")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -59,10 +50,7 @@ pub async fn query_by_team(
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/extensions/query/team")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -75,10 +63,7 @@ pub async fn query_by_user(page_num: u32, page_size: u32) -> Result<JsonRespnse,
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/extensions/query/user")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -99,10 +84,7 @@ pub async fn query_by_environment(
             client::Client::build_url("/extensions/query/environment")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -115,10 +97,7 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/extensions/query")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -137,10 +116,7 @@ pub async fn environment_use_extension(
             client::Client::build_url("/extensions/environmnet/use")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -159,10 +135,7 @@ pub async fn environment_remove_extension(
             client::Client::build_url("/extensions/environmnet/remove")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("移除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -178,10 +151,7 @@ pub async fn update(
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/extensions/update")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -200,10 +170,7 @@ pub async fn user_toggle_extension(
             client::Client::build_url("/extensions/user/toggle-extension")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -218,10 +185,7 @@ pub async fn delete_by_uuid(extension_uuid: &str) -> Result<JsonRespnse, anyhow:
             client::Client::build_url(&format!("/extensions/delete/uuid",))?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -232,13 +196,10 @@ pub async fn remove_by_user_uuid(extension_uuid: &str) -> Result<JsonRespnse, an
     });
     let json_response = client::REQUEST
         .delete(
-            client::Client::build_url(&format!("/extensions/remove/user-uuid/{}", extension_uuid))?,
+            client::Client::build_url(&format!("/extensions/remove/user-uuid"))?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("移除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

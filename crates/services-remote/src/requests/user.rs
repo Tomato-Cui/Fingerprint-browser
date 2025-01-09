@@ -4,10 +4,7 @@ use serde_json::json;
 pub async fn logout() -> Result<JsonRespnse, anyhow::Error> {
     let json_response: JsonRespnse = client::REQUEST
         .get(client::Client::build_url("/users/logout")?)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("退出失败: {:?}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -18,14 +15,17 @@ pub async fn login(nickname: &str, password: &str) -> Result<JsonRespnse, anyhow
             "password": password
     });
 
-    let response = client::REQUEST
+    let json_response = client::REQUEST
         .post(client::Client::build_url("/users/login")?, &data)
         .await?;
 
-    let json_response = response
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("登录失败: {}", e))?;
+    if let Some(data) = &json_response.data {
+        if let Some(token) = data.get("token") {
+            let token_str = token.to_string();
+            let token_str = token_str.replace("\\", "").replace("\"", "");
+            states::auth::set_token(&token_str).await;
+        }
+    }
 
     Ok(json_response)
 }
@@ -45,10 +45,7 @@ pub async fn regsiter(
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/users/register")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("注册失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -60,10 +57,7 @@ pub async fn query_search_by_email(email: &str) -> Result<JsonRespnse, anyhow::E
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/users/search-by-email")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -81,10 +75,7 @@ pub async fn reset_password(
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/users/reset-password")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("重置失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -95,11 +86,8 @@ pub async fn register_send(email: &str) -> Result<JsonRespnse, anyhow::Error> {
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/users/register-send")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("重置失败: {}", e))?;
+        .post(client::Client::build_url("/users/register/send")?, &data)
+        .await?;
 
     Ok(json_response)
 }

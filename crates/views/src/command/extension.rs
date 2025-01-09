@@ -2,14 +2,10 @@ use crate::response::AppResponse;
 use cores::request::JsonRespnse;
 use serde_json::Value;
 
-use super::user::get_user_id;
-
 #[tauri::command]
 pub async fn extension_info_by_chrome_store_url(
     url: &str,
 ) -> Result<AppResponse<Value>, tauri::Error> {
-    let _ = get_user_id().await?;
-
     let (success_msg, warn_msg) = (Some("获取成功".to_string()), |v| {
         Some(format!("获取失败: {}", v))
     });
@@ -26,13 +22,11 @@ pub async fn extension_info_by_chrome_store_url(
 pub async fn extension_create(
     extension: models::extension::Extension,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::create(extension).await?)
 }
 
 #[tauri::command]
 pub async fn extension_user_create(extension_uuid: String) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::user_create(&extension_uuid).await?)
 }
 
@@ -41,7 +35,6 @@ pub async fn extension_team_create(
     team_id: String,
     extension_uuid: String,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::team_create(&team_id, &extension_uuid).await?)
 }
 
@@ -51,7 +44,6 @@ pub async fn extension_query_by_team(
     page_num: u32,
     page_size: u32,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::query_by_team(team_id, page_num, page_size).await?)
 }
 
@@ -60,7 +52,6 @@ pub async fn extension_query_by_user(
     page_num: u32,
     page_size: u32,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::query_by_user(page_num, page_size).await?)
 }
 
@@ -70,7 +61,6 @@ pub async fn extension_query_by_environment(
     page_num: u32,
     page_size: u32,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::query_by_environment(
         &environment_uuid,
         page_num,
@@ -81,7 +71,6 @@ pub async fn extension_query_by_environment(
 
 #[tauri::command]
 pub async fn extension_query(page_num: u32, page_size: u32) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::query(page_num, page_size).await?)
 }
 
@@ -90,7 +79,6 @@ pub async fn extension_environment_use_extension(
     extension_uuid: String,
     environment_uuids: Vec<String>,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(
         services_remote::requests::extension::environment_use_extension(
             &extension_uuid,
@@ -105,7 +93,6 @@ pub async fn extension_environment_remove_extension(
     extension_uuid: String,
     environment_uuid: String,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(
         services_remote::requests::extension::environment_remove_extension(
             &extension_uuid,
@@ -120,7 +107,6 @@ pub async fn extension_update(
     extension_uuid: String,
     extension: models::extension::Extension,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::update(&extension_uuid, extension).await?)
 }
 
@@ -129,13 +115,11 @@ pub async fn user_toggle_extension(
     extension_uuid: String,
     open: bool,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::user_toggle_extension(&extension_uuid, open).await?)
 }
 
 #[tauri::command]
 pub async fn extension_delete_by_uuid(extension_uuid: String) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::delete_by_uuid(&extension_uuid).await?)
 }
 
@@ -143,6 +127,5 @@ pub async fn extension_delete_by_uuid(extension_uuid: String) -> Result<JsonResp
 pub async fn extension_remove_by_user_uuid(
     extension_uuid: String,
 ) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::extension::remove_by_user_uuid(&extension_uuid).await?)
 }

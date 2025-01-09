@@ -62,3 +62,32 @@ pub async fn auth(mut req: Request, next: Next) -> Result<Response, StatusCode> 
     req.extensions_mut().insert(CurrentUser { user_uuid: uuid });
     return Ok(next.run(req).await);
 }
+
+#[tokio::test]
+async fn test_auth() {
+    services::setup().await;
+    let resource = "/api/v1/environments/create";
+    let resource_method = "POST";
+
+    let token_str = "eyJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiMDcyOGY1NTMtMTg3Zi00NTFkLWEyZjYtMjBiZTdiNDA0NTRmIn0.pgFSSMTU3m4b3Czz4xBEOpDinBFWm0P63QaLZPdGQ1c";
+    let uuid = commons::encryption::verify_token(token_str).unwrap();
+
+    let resource = &format!("{}+{}", resource, resource_method.to_ascii_uppercase());
+    eprintln!("resource: {}", resource);
+
+    let ok = permission::can_check_permission(resource).await;
+
+    if let Ok(v) = ok {
+        if !v {
+            eprintln!("no need check resource: {}", v);
+        }
+    }
+
+    let ok = permission::check_permission(&uuid, resource)
+        .await
+        .map_err(|_| StatusCode::UNAUTHORIZED)
+        .unwrap();
+
+    eprintln!("ok: {}", ok);
+    let _ = operation_log::record_operation_log(&uuid, resource);
+}

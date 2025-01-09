@@ -8,13 +8,10 @@ pub async fn query_by_id(id: u32) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environmnet-proxy-groups/id")?,
+            client::Client::build_url("/environmnet-proxy-groups/query/id")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -27,13 +24,10 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environmnet-proxy-groups")?,
+            client::Client::build_url("/environmnet-proxy-groups/query")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -46,10 +40,7 @@ pub async fn create(
             client::Client::build_url("/environmnet-proxy-groups")?,
             &proxy_group,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -62,10 +53,7 @@ pub async fn modify(
             client::Client::build_url("/environmnet-proxy-groups")?,
             &proxy_group,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -80,10 +68,7 @@ pub async fn delete(id: u32) -> Result<JsonRespnse, anyhow::Error> {
             client::Client::build_url("/environmnet-proxy-groups")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

@@ -180,7 +180,7 @@ mod tests {
     #[tokio::test]
     async fn test_register() {
         crate::setup().await;
-        let ok = super::regsiter("liushui_new@126.com", "578321", "42", "23").await;
+        let ok = super::regsiter("liushui_new@126.com", "810272", "1", "1").await;
         println!("{:?}", ok)
     }
 

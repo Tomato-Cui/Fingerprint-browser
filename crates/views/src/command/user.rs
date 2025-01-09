@@ -1,21 +1,18 @@
 use crate::response::AppResponse;
 use cores::request::JsonRespnse;
 
-pub async fn get_user_id() -> Result<String, anyhow::Error> {
-    let token = states::auth::get_token().await;
-    if let Some(token_str) = token {
-        match commons::encryption::verify_token(&token_str) {
-            Ok(user_uuid) => Ok(user_uuid),
-            Err(_e) => Err(anyhow::anyhow!("token 异常")),
-        }
-    } else {
-        Err(anyhow::anyhow!("用户处于退出状态"))
-    }
-}
-
 #[tauri::command]
 pub async fn login(account: &str, password: &str) -> Result<JsonRespnse, tauri::Error> {
-    Ok(services_remote::requests::user::login(account, password).await?)
+    let res = services_remote::requests::user::login(account, password).await?;
+    if let Some(data) = &res.data {
+        if let Some(token) = data.get("token") {
+            let token = token.to_string();
+            let token_str = token.replace("\\", "").replace("\"", "");
+            states::auth::set_token(&token_str).await;
+        }
+    }
+
+    Ok(res)
 }
 
 #[tauri::command]
@@ -50,7 +47,6 @@ pub async fn is_login() -> Result<AppResponse<bool>, tauri::Error> {
 
 #[tauri::command]
 pub async fn user_query_search_by_email(email: &str) -> Result<JsonRespnse, tauri::Error> {
-    let _ = get_user_id().await?;
     Ok(services_remote::requests::user::query_search_by_email(email).await?)
 }
 
@@ -64,8 +60,9 @@ pub async fn reset_password(
 }
 
 #[tauri::command]
-pub async fn logout() -> Result<JsonRespnse, tauri::Error> {
-    Ok(services_remote::requests::user::logout().await?)
+pub async fn logout() -> Result<bool, tauri::Error> {
+    states::auth::clear_token().await;
+    Ok(true)
 }
 
 #[tauri::command]

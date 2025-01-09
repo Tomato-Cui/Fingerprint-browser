@@ -13,12 +13,14 @@ pub mod client {
     use once_cell::sync::Lazy;
     use reqwest::{
         header::{self, AUTHORIZATION},
-        Response, StatusCode, Url,
+        StatusCode, Url,
     };
     use states::auth::{clear_token, get_token};
-    use std::{future::Future, pin::Pin, time::Duration};
+    use std::{fmt::Debug, future::Future, pin::Pin, time::Duration};
 
-    pub const TIMEOUT_DURATION_SECS: u64 = 10;
+    use super::JsonRespnse;
+
+    pub const TIMEOUT_DURATION_SECS: u64 = 60;
 
     type BeforeCallFunction = fn(
         rb: reqwest::RequestBuilder,
@@ -56,15 +58,15 @@ pub mod client {
         }
 
         pub fn build_url(resource: &str) -> Result<Url, anyhow::Error> {
-            let server_url = &states::config::get_config()
-                .ok_or(anyhow::anyhow!("remote url not config."))?
-                .app
-                .remote_url;
+            let server_url = if let Some(app) = states::config::get_config() {
+                &app.app.remote_url
+            } else {
+                "127.0.0.1:5678"
+            };
+
             Ok(Url::parse(&server_url)
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
-                .join("/api/v1")
-                .map_err(|e| anyhow::anyhow!("{:?}", e))?
-                .join(resource)
+                .join(&format!("/api/v1{}", resource))
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?)
         }
 
@@ -72,26 +74,30 @@ pub mod client {
             &self,
             url: reqwest::Url,
             json: &T,
-        ) -> core::result::Result<Response, reqwest::Error>
+        ) -> core::result::Result<JsonRespnse, anyhow::Error>
         where
-            T: serde::Serialize,
+            T: serde::Serialize + Debug,
         {
             let mut request_builder = self.client.post(url);
             for call in &self.before {
                 request_builder = call(request_builder).await?;
             }
-
             let mut response = request_builder.json(json).send().await?;
+
             for call in &self.after {
                 response = call(response).await?;
             }
-            Ok(response)
+            let status = response.status();
+            response
+                .json()
+                .await
+                .map_err(|_| anyhow::anyhow!("StatusCode({:?})", status))
         }
 
         pub async fn get(
             &self,
             url: reqwest::Url,
-        ) -> core::result::Result<Response, reqwest::Error> {
+        ) -> core::result::Result<JsonRespnse, anyhow::Error> {
             let mut request_builder = self.client.get(url);
             for call in &self.before {
                 request_builder = call(request_builder).await?;
@@ -100,14 +106,19 @@ pub mod client {
             for call in &self.after {
                 response = call(response).await?;
             }
-            Ok(response)
+
+            let status = response.status();
+            response
+                .json()
+                .await
+                .map_err(|_| anyhow::anyhow!("访问错误: ({:?})", status))
         }
 
         pub async fn put<T>(
             &self,
             url: reqwest::Url,
             json: &T,
-        ) -> core::result::Result<Response, reqwest::Error>
+        ) -> core::result::Result<JsonRespnse, anyhow::Error>
         where
             T: serde::Serialize,
         {
@@ -119,14 +130,18 @@ pub mod client {
             for call in &self.after {
                 response = call(response).await?;
             }
-            Ok(response)
+            let status = response.status();
+            response
+                .json()
+                .await
+                .map_err(|_| anyhow::anyhow!("访问错误: ({:?})", status))
         }
 
         pub async fn delete<T>(
             &self,
             url: reqwest::Url,
             json: &T,
-        ) -> core::result::Result<Response, reqwest::Error>
+        ) -> core::result::Result<JsonRespnse, anyhow::Error>
         where
             T: serde::Serialize,
         {
@@ -138,7 +153,11 @@ pub mod client {
             for call in &self.after {
                 response = call(response).await?;
             }
-            Ok(response)
+            let status = response.status();
+            response
+                .json()
+                .await
+                .map_err(|_| anyhow::anyhow!("访问错误: ({:?})", status))
         }
 
         pub fn before(&mut self, call: BeforeCallFunction) {
@@ -155,7 +174,7 @@ pub mod client {
     ) -> core::result::Result<reqwest::RequestBuilder, reqwest::Error> {
         let mut headers = reqwest::header::HeaderMap::new();
         if let Some(token) = get_token().await {
-            if let Ok(header_value) = HeaderValue::from_str(&format!("{}", token)) {
+            if let Ok(header_value) = HeaderValue::from_str(&format!("Bearer {}", token)) {
                 headers.insert(AUTHORIZATION, header_value);
             }
         }
@@ -168,6 +187,8 @@ pub mod client {
             clear_token().await;
         }
 
+        // todo: 可以对错误进行处理
+
         Ok(response)
     }
 
@@ -176,7 +197,6 @@ pub mod client {
 
         client.before(|rb| Box::pin(before(rb)));
         client.after(|response| Box::pin(after(response)));
-
         client
     });
 }

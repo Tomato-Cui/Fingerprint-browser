@@ -59,7 +59,6 @@ impl TeamGroupPermission {
             }
         };
 
-        // 3. 检查用户是否是团队的领导者
         let is_leader = current_user_team_relation_info.4;
         if is_leader == 1 {
             return Ok(true);

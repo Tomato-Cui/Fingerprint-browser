@@ -7,11 +7,11 @@ pub async fn query_by_uuid(environment_uuid: &str) -> Result<JsonRespnse, anyhow
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments/uuid")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(
+            client::Client::build_url("/environments/query/uuid")?,
+            &data,
+        )
+        .await?;
 
     Ok(json_response)
 }
@@ -23,11 +23,8 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(client::Client::build_url("/environments/query")?, &data)
+        .await?;
 
     Ok(json_response)
 }
@@ -44,11 +41,11 @@ pub async fn query_by_group(
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments/group")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(
+            client::Client::build_url("/environments/query/group")?,
+            &data,
+        )
+        .await?;
 
     Ok(json_response)
 }
@@ -65,11 +62,11 @@ pub async fn query_by_team(
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments/team")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(
+            client::Client::build_url("/environments/query/team")?,
+            &data,
+        )
+        .await?;
 
     Ok(json_response)
 }
@@ -86,11 +83,11 @@ pub async fn query_by_extension(
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments/extension")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .post(
+            client::Client::build_url("/environments/query/extension")?,
+            &data,
+        )
+        .await?;
 
     Ok(json_response)
 }
@@ -102,10 +99,7 @@ pub async fn create(name: &str) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/environments/create")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -118,10 +112,7 @@ pub async fn detail_create(
             client::Client::build_url("/environments/detail/create")?,
             &environment_info,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -133,27 +124,20 @@ pub async fn batch_create(names: Vec<String>) -> Result<JsonRespnse, anyhow::Err
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/environments/batch")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
 
 pub async fn modify_info(
-    uuid: &str,
     environment_info: models::environment::EnvironmentInfo,
 ) -> Result<JsonRespnse, anyhow::Error> {
     let json_response = client::REQUEST
         .put(
-            client::Client::build_url(&format!("/environments/{}", uuid))?,
+            client::Client::build_url(&format!("/environments"))?,
             &environment_info,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -169,10 +153,7 @@ pub async fn modify_proxy(
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/environments/proxy")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -185,10 +166,7 @@ pub async fn modify_basic_info(
             client::Client::build_url("/environments/basic")?,
             &environment,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -207,10 +185,7 @@ pub async fn move_to_group(
             client::Client::build_url("/environments/move-to-group")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -229,10 +204,7 @@ pub async fn batch_move_to_group(
             client::Client::build_url("/environments/batch/move-to-group")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -244,10 +216,7 @@ pub async fn delete(environment_uuid: &str) -> Result<JsonRespnse, anyhow::Error
 
     let json_response = client::REQUEST
         .delete(client::Client::build_url("/environments")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -259,10 +228,7 @@ pub async fn batch_delete(environment_uuids: Vec<String>) -> Result<JsonRespnse,
 
     let json_response = client::REQUEST
         .delete(client::Client::build_url("/environments/batch")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

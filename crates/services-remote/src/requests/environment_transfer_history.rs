@@ -8,13 +8,10 @@ pub async fn query_by_uuid(environment_uuid: &str) -> Result<JsonRespnse, anyhow
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environmnet-transfer-historys/id")?,
+            client::Client::build_url("/environmnet-transfer-historys/query/id")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -27,13 +24,10 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environmnet-transfer-historys")?,
+            client::Client::build_url("/environmnet-transfer-historys/query")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -52,10 +46,7 @@ pub async fn batch_create(
             client::Client::build_url("/environmnet-transfer-historys/batch")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -70,10 +61,7 @@ pub async fn delete_by_uuid(environment_uuid: &str) -> Result<JsonRespnse, anyho
             client::Client::build_url("/environmnet-transfer-historys")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

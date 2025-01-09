@@ -15,10 +15,7 @@ pub async fn user_receive_query(
             client::Client::build_url("/messages/user/receive-query")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -39,10 +36,7 @@ pub async fn team_receive_query(
             client::Client::build_url("/messages/team/receive-query")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -60,10 +54,7 @@ pub async fn team_send(
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/messages/team/send")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("发送失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -76,10 +67,7 @@ pub async fn user_send(team_name: &str, description: &str) -> Result<JsonRespnse
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/messages/user/send")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("发送失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -91,10 +79,7 @@ pub async fn reject(id: u32) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/messages/reject")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("拒绝失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -112,10 +97,7 @@ pub async fn team_allow(
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/messages/team/allow")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("通过失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -128,10 +110,7 @@ pub async fn user_allow(id: u32, team_id: u32) -> Result<JsonRespnse, anyhow::Er
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/messages/user/allow")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("通过失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

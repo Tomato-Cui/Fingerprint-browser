@@ -104,25 +104,25 @@ impl Environment {
                 ?, ?, ?, ?, ?, ?, ?
             ) RETURNING id";
 
-            let proxy_id = sqlx::query_scalar(sql)
+            let proxy_id: u32 = sqlx::query_scalar(sql)
                 .bind(&proxy.kind)
                 .bind(&proxy.host)
                 .bind(&proxy.port)
                 .bind(&proxy.username)
                 .bind(&proxy.password)
                 .bind(&proxy.user_uuid)
-                .fetch_one(pool)
+                .fetch_one(&mut *tx)
                 .await?;
-            proxy_id
+            Some(proxy_id)
         } else {
-            0
+            None
         };
 
         let sql = r#"
         INSERT INTO environments (
             uuid, user_uuid, team_id, proxy_id, fp_info_id, name, description, default_urls, 
             proxy_enable
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
 
         let row = sqlx::query(sql)
             .bind(&environment.uuid)
@@ -139,7 +139,7 @@ impl Environment {
 
         tx.commit().await?;
 
-        Ok(row.rows_affected() == 1)
+        Ok(row.rows_affected() >= 1)
     }
 
     #[allow(dead_code)]

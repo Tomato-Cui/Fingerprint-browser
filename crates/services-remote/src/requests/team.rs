@@ -8,10 +8,7 @@ pub async fn query_by_id(id: u32) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/teams/query/id")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -25,10 +22,7 @@ pub async fn is_leader(team_id: u32) -> Result<JsonRespnse, anyhow::Error> {
             client::Client::build_url(&format!("/teams/query/is-leader",))?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -42,10 +36,7 @@ pub async fn query_search_by_name(team_name: &str) -> Result<JsonRespnse, anyhow
             client::Client::build_url("/teams/query/search-by-name")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -58,10 +49,7 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/teams/query")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -69,10 +57,7 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 pub async fn query_current_team() -> Result<JsonRespnse, anyhow::Error> {
     let json_response = client::REQUEST
         .get(client::Client::build_url("/teams/query/current")?)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -90,10 +75,7 @@ pub async fn query_team_all_user(
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/teams/query/all-user")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -114,10 +96,7 @@ pub async fn query_team_all_blocked_user(
             client::Client::build_url("/teams/query/all-blocked-user")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -140,10 +119,7 @@ pub async fn query_team_group_all_user(
             client::Client::build_url("/teams/query/group/all-user")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -156,10 +132,7 @@ pub async fn blocked(current_user_uuid: &str, team_id: u32) -> Result<JsonRespns
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/teams/blocked")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("拉黑失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -175,10 +148,7 @@ pub async fn unblocked(
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/teams/un-blocked")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("取消拉黑失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -191,10 +161,7 @@ pub async fn create(name: &str, description: &str) -> Result<JsonRespnse, anyhow
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/teams/create")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -208,10 +175,7 @@ pub async fn modify(id: u32, name: &str, description: &str) -> Result<JsonRespns
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/teams")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -222,10 +186,7 @@ pub async fn switch_team(id: u32) -> Result<JsonRespnse, anyhow::Error> {
     });
     let json_response = client::REQUEST
         .put(client::Client::build_url(&format!("/teams/switch"))?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("切换失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -241,10 +202,7 @@ pub async fn remove_current_user(
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/teams/remove-user")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("移除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -264,10 +222,7 @@ pub async fn modify_team_user_info(
 
     let json_response = client::REQUEST
         .put(client::Client::build_url("/teams/user-info")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -279,10 +234,7 @@ pub async fn delete(id: u32) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .delete(client::Client::build_url("/teams")?, &data)
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

@@ -8,13 +8,10 @@ pub async fn query_by_uuid(environment_uuid: &str) -> Result<JsonRespnse, anyhow
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environment-cookies/environment/id")?,
+            client::Client::build_url("/environment-cookies/environment/query/id")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("查询失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -33,10 +30,7 @@ pub async fn create(
             client::Client::build_url("/environment-cookies/environment")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("创建失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -55,10 +49,7 @@ pub async fn modify(
             client::Client::build_url("/environment-cookies/environment")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("更新失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }
@@ -73,10 +64,7 @@ pub async fn delete(environment_uuid: &str) -> Result<JsonRespnse, anyhow::Error
             client::Client::build_url("/environment-cookies/environment")?,
             &data,
         )
-        .await?
-        .json()
-        .await
-        .map_err(|e| anyhow::anyhow!("删除失败: {}", e))?;
+        .await?;
 
     Ok(json_response)
 }

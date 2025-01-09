@@ -5,9 +5,11 @@ edition = "2021"
 
 [dependencies]
 serde = { workspace = true }
+tokio = { workspace = true }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
 
 cores = { workspace = true }
 states = { workspace = true }
 models = { workspace = true }
+services = { workspace = true }
