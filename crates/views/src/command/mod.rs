@@ -37,6 +37,18 @@ use services::command::Actuator;
 use tauri::ipc::Invoke;
 use tauri::{AppHandle, Emitter};
 
+pub async fn get_user_id() -> Result<String, anyhow::Error> {
+    let token = states::auth::get_token().await;
+    if let Some(token_str) = token {
+        match commons::encryption::verify_token(&token_str) {
+            Ok(user_uuid) => Ok(user_uuid),
+            Err(_e) => Err(anyhow::anyhow!("token 异常")),
+        }
+    } else {
+        Err(anyhow::anyhow!("用户处于退出状态"))
+    }
+}
+
 #[tauri::command]
 pub async fn ip_info() -> Result<crate::response::AppResponse<Value>, tauri::Error> {
     let (success_msg, warn_msg) = (Some("获取成功".to_string()), |v| {

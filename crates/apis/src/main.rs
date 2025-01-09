@@ -1,6 +1,7 @@
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    apis::run().await?;
+    let port = std::env::args().nth(1);
 
+    apis::run(port).await?;
     Ok(())
 }

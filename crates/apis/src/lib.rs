@@ -1,6 +1,7 @@
 use axum::{http::StatusCode, middleware, routing::get, Router};
 use commons::config::Location;
 use std::{path::PathBuf, str::FromStr};
+use tracing::info;
 
 pub mod entities;
 pub mod handles;
@@ -60,7 +61,7 @@ fn init_logger() {
 }
 
 static CONFIG: &str = include_str!("../../../config.toml");
-pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn run(port: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
     // init config
     states::init_config_state_str(CONFIG).await;
 
@@ -98,9 +99,12 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("database migrate failed:{:?}", e)
     }
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:5678").await?;
-    let routes = build_root_router();
+    let host = format!("0.0.0.0:{}", port.unwrap_or_else(|| "5678".to_string()));
+    let listener = tokio::net::TcpListener::bind(&host).await?;
 
+    info!("api server running: {}", host);
+
+    let routes = build_root_router();
     axum::serve(listener, routes).await?;
     Ok(())
 }

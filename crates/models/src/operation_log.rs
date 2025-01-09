@@ -25,7 +25,7 @@ impl OperationLog {
         let log = sqlx::query(
             "INSERT INTO operation_logs 
              (team_id, user_uuid, allowed_operation_id, operation_status) 
-             VALUES (?, ?, ?, ?, ?, ?) 
+             VALUES (?, ?, ?, ?) 
              RETURNING *",
         )
         .bind(team_id)

@@ -4801,6 +4801,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "serde_json",
+ "services_remote",
  "sqlx",
  "states",
  "thiserror 1.0.69",
@@ -4819,7 +4820,6 @@ dependencies = [
  "models",
  "serde",
  "serde_json",
- "services",
  "states",
  "tokio",
 ]
@@ -5050,7 +5050,6 @@ dependencies = [
  "indexmap 2.6.0",
  "log",
  "memchr",
- "native-tls",
  "once_cell",
  "paste",
  "percent-encoding",

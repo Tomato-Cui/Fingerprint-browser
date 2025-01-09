@@ -33,6 +33,7 @@ use serde::Serialize;
 use serde_json::Value;
 #[cfg(windows)]
 use std::{ffi::CString, ptr};
+#[cfg(windows)]
 use winapi::um::{
     winnt::KEY_READ,
     winreg::{RegOpenKeyExA, RegQueryValueExA, HKEY_CURRENT_USER},

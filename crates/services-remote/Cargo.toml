@@ -12,4 +12,3 @@ anyhow = { workspace = true }
 cores = { workspace = true }
 states = { workspace = true }
 models = { workspace = true }
-services = { workspace = true }

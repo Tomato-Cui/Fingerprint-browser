@@ -12,24 +12,18 @@ use tokio::{
 };
 
 pub struct BrowserChildInfo {
-    environemnt_info: models::environment::Environment,
-    fingerprint_info: models::environment_fingerprint::EnvironmentFingerprint,
-    proxy_info: models::environment_proxies::Proxy,
+    pub environemnt_info: models::dto::environment_info::EnvironmentWithDetails,
     pub port: u16,
     pub browser_exe_path: String,
 }
 impl BrowserChildInfo {
     pub fn new(
-        environemnt_info: models::environment::Environment,
-        fingerprint_info: models::environment_fingerprint::EnvironmentFingerprint,
-        proxy_info: models::environment_proxies::Proxy,
+        environemnt_info: models::dto::environment_info::EnvironmentWithDetails,
         port: u16,
         browser_exe_path: &str,
     ) -> Self {
         BrowserChildInfo {
             environemnt_info,
-            fingerprint_info,
-            proxy_info,
             port,
             browser_exe_path: browser_exe_path.to_string(),
         }
@@ -38,13 +32,13 @@ impl BrowserChildInfo {
     pub async fn format(&self) -> Result<Vec<String>, anyhow::Error> {
         let breeze_fp = format!(
             "--breeze-fp={}",
-            commons::encryption::base64_encode(&serde_json::to_string(&self.fingerprint_info)?)
+            commons::encryption::base64_encode(&serde_json::to_string(&self.environemnt_info)?)
         );
         let new_window = "--new-window".to_string();
         let window_size = format!(
             "--window-size={},{}",
-            self.fingerprint_info.width.unwrap_or_else(|| 888),
-            self.fingerprint_info.height.unwrap_or_else(|| 888)
+            self.environemnt_info.width.unwrap_or_else(|| 888),
+            self.environemnt_info.height.unwrap_or_else(|| 888)
         );
 
         let system_time_millis = commons::time::get_system_time_mills();
@@ -52,16 +46,22 @@ impl BrowserChildInfo {
 
         let window_position = format!(
             "--window-position={},{}",
-            self.fingerprint_info
+            self.environemnt_info
                 .longitude
                 .unwrap_or_else(|| 100 + offset),
-            self.fingerprint_info
+            self.environemnt_info
                 .latitude
                 .unwrap_or_else(|| 100 + offset),
         );
 
-        let user_agent = format!("--user-agent={}", self.fingerprint_info.ua);
-        let accept_lang = format!("--accept-lang={}", self.fingerprint_info.languages);
+        let user_agent = format!(
+            "--user-agent={}",
+            self.environemnt_info.ua.clone().unwrap_or_default()
+        );
+        let accept_lang = format!(
+            "--accept-lang={}",
+            self.environemnt_info.languages.clone().unwrap_or_default()
+        );
         let no_first_run = "--no-first-run".to_string();
 
         let app_config = states::config::get_config().unwrap();
@@ -74,14 +74,14 @@ impl BrowserChildInfo {
             "--user-data-dir={}/{}/{}",
             app_data,
             app_config.app.location.user_data_location,
-            self.environemnt_info.uuid.clone().unwrap_or_default(),
+            self.environemnt_info.uuid.clone(),
         );
 
         let no_default_browser_check = "--no-default-browser-check".to_string();
         let browser_unique = format!(
             "--app-browser-unique={}.{}",
             app_config.app.id,
-            self.environemnt_info.uuid.clone().unwrap_or_default(),
+            self.environemnt_info.uuid.clone(),
         );
         let debugger_address = format!("--remote-debugging-port={}", self.port);
 
@@ -100,12 +100,14 @@ impl BrowserChildInfo {
         ];
 
         if self.environemnt_info.proxy_enable == 1 {
-            let (kind, value) = (
-                &self.proxy_info.kind,
-                format!("{}:{}", &self.proxy_info.host, &self.proxy_info.port),
+            let (kind, host, port) = (
+                self.environemnt_info.proxy_kind.clone().unwrap_or_default(),
+                &self.environemnt_info.proxy_host.clone().unwrap_or_default(),
+                &self.environemnt_info.proxy_port.clone().unwrap_or_default(),
             );
 
-            args.push(if !value.is_empty() {
+            let value = format!("{}:{}", host, port);
+            args.push(if !host.is_empty() {
                 format!("--proxy-server={}://{}", kind, value,)
             } else {
                 format!(
@@ -149,7 +151,7 @@ impl Processer {
         &mut self,
         payload: BrowserChildInfo,
     ) -> core::result::Result<bool, anyhow::Error> {
-        let environment_uuid = payload.environemnt_info.clone().uuid.unwrap_or_default();
+        let environment_uuid = payload.environemnt_info.uuid.clone();
         if let Ok(ok) = self.status(&environment_uuid).await {
             if ok {
                 return Ok(ok);

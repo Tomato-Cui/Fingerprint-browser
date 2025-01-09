@@ -88,6 +88,5 @@ async fn test_auth() {
         .map_err(|_| StatusCode::UNAUTHORIZED)
         .unwrap();
 
-    eprintln!("ok: {}", ok);
     let _ = operation_log::record_operation_log(&uuid, resource);
 }

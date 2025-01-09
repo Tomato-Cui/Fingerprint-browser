@@ -16,6 +16,25 @@ pub async fn query_by_uuid(environment_uuid: &str) -> Result<JsonRespnse, anyhow
     Ok(json_response)
 }
 
+#[tokio::test]
+async fn test_query_by_uuid() {
+    crate::setup().await;
+    let _t = crate::requests::user::login("1", "1").await;
+
+    let environment_uuid = "d34f3e32-f0c1-44a2-a4c0-e43e2c7b0033";
+    match query_by_uuid(&environment_uuid).await {
+        Ok(json_response) => {
+            if let Some(data) = json_response.data {
+                let data = serde_json::from_value::<
+                    models::dto::environment_info::EnvironmentWithDetails,
+                >(data);
+                eprintln!("{:?}", data);
+            }
+        }
+        Err(_) => {}
+    }
+}
+
 pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
         "page_num": page_num,

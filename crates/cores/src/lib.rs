@@ -8,9 +8,9 @@ pub mod requests;
 
 #[cfg(not(windows))]
 mod not_win_imports {
-    pub use aes::Aes128;
-    pub use block_modes::{BlockMode, Cbc};
-    pub use block_padding::Pkcs7;
+    //pub use aes::Aes128;
+    //pub use block_modes::{BlockMode, Cbc};
+    //pub use block_padding::Pkcs7;
 }
 
 pub async fn init_location(locations: Vec<PathBuf>) -> Result<(), std::io::Error> {

@@ -23,3 +23,4 @@ commons = { workspace = true }
 states = { workspace = true }
 models = { workspace = true }
 cores = { workspace = true }
+services_remote = { workspace = true }

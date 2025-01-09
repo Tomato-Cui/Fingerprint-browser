@@ -1,7 +1,6 @@
-use anyhow::anyhow;
 use base64::{engine::general_purpose, DecodeError, Engine};
 use rand::Rng;
-use std::{fs, path::PathBuf};
+use std::fs;
 
 pub fn uuid() -> String {
     let uuid = uuid::Uuid::new_v4();
@@ -57,7 +56,9 @@ pub fn verify_token(token_str: &str) -> Result<String, anyhow::Error> {
     }
 }
 
+#[cfg(windows)]
 use crate::win_imports::*;
+
 #[cfg(windows)]
 fn aes_gcm_encrypt(key: &[u8], data: &[u8]) -> std::result::Result<Vec<u8>, aes_gcm::Error> {
     pub use rand::RngCore;
@@ -105,6 +106,8 @@ fn aes_gcm_decrypt(key: &[u8], data: &[u8]) -> std::result::Result<Vec<u8>, aes_
     Ok(plaintext)
 }
 
+#[cfg(windows)]
+use std::path::PathBuf;
 #[cfg(windows)]
 ///获取加密密钥(windows 直接读取 Local State 文件)
 pub async fn get_encrypt_key(path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
@@ -172,14 +175,14 @@ fn decrypt_string_with_dpapi(encrypted_data: &[u8]) -> std::result::Result<Vec<u
 
 #[cfg(windows)]
 pub fn dec_cookie(en_cookie: &[u8], key: &[u8]) -> Result<String, anyhow::Error> {
-    let dec_str = aes_gcm_decrypt(&key, &en_cookie).map_err(|e| anyhow!(e.to_string()))?;
+    let dec_str = aes_gcm_decrypt(&key, &en_cookie).map_err(|e| anyhow::anyhow!(e.to_string()))?;
     Ok(String::from_utf8(dec_str)?)
 }
 
 #[cfg(windows)]
 pub fn enc_cookie(cookie_str: &str, key: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
     let enc_str =
-        aes_gcm_encrypt(&key, cookie_str.as_bytes()).map_err(|e| anyhow!(e.to_string()))?;
+        aes_gcm_encrypt(&key, cookie_str.as_bytes()).map_err(|e| anyhow::anyhow!(e.to_string()))?;
     Ok(enc_str)
 }
 
@@ -199,7 +202,7 @@ const AES_128_IV: [u8; 16] = [
 
 #[cfg(not(windows))]
 /// aes-128-cbc 字符串加密(linux 和 mac)
-fn aes_cbc_encrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>> {
+fn aes_cbc_encrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
     let cipher = Aes128Cbc::new_from_slices(key, &AES_128_IV)?; // 创建 AES-128-CBC 实例
     let ciphertext = cipher.encrypt_vec(data); // 加密明文
                                                // 在密文前面插入版本前缀
@@ -212,7 +215,7 @@ fn aes_cbc_encrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>> {
 
 #[cfg(not(windows))]
 /// aes-128-cbc 字符串解密(linux 和 mac)
-fn aes_cbc_decrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>> {
+fn aes_cbc_decrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
     // 创建 AES-128-CBC 实例
     let cipher = Aes128Cbc::new_from_slices(key, &AES_128_IV)?;
     // 去掉版本前缀
@@ -223,23 +226,15 @@ fn aes_cbc_decrypt(key: &[u8], data: &[u8]) -> Result<Vec<u8>> {
 
 #[cfg(not(windows))]
 /// (非windows) 我们修改了浏览器的密钥读写方式 直接读取用户缓存目录的Breeze_key
-pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>> {
-    use crate::config::get_config;
-    use crate::public::app_file;
-
-    let path_str: PathBuf = app_file()
-        .join(get_config()?.get_user_data_location()?)
-        .join(path)
-        .join("Breeze_Key");
-    //读取文件内容
-    let file_content = fs::read_to_string(path_str)?;
+pub fn get_encrypt_key(path: &str) -> Result<Vec<u8>, anyhow::Error> {
+    let file_content = fs::read_to_string(path)?;
     let password = base64_decode(&file_content)?;
     Ok(password)
 }
 
 #[cfg(not(windows))]
 /// 解密cookie(非windows)
-pub fn dec_cookie(en_cookie: &[u8], key: &[u8]) -> Result<String> {
+pub fn dec_cookie(en_cookie: &[u8], key: &[u8]) -> Result<String, anyhow::Error> {
     let dec_str = aes_cbc_decrypt(&key, &en_cookie)?;
 
     Ok(String::from_utf8(dec_str)?)
@@ -247,7 +242,7 @@ pub fn dec_cookie(en_cookie: &[u8], key: &[u8]) -> Result<String> {
 
 #[cfg(not(windows))]
 /// 加密cookie(非windows)
-pub fn enc_cookie(cookie_str: &str, key: &[u8]) -> Result<Vec<u8>> {
+pub fn enc_cookie(cookie_str: &str, key: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
     let enc_str = aes_cbc_encrypt(&key, cookie_str.as_bytes())?;
     Ok(enc_str)
 }

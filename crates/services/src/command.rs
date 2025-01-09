@@ -1,9 +1,5 @@
-use crate::{environment, environment_fingerprint, environment_proxy};
-use commons::util::{get_chrome_install_path, get_debug_port};
-use cores::processor::{self, Processer};
-use models::environment_fingerprint::EnvironmentFingerprint;
+use cores::processor::Processer;
 use once_cell::sync::Lazy;
-use serde_json::{json, Value};
 use std::{collections::HashMap, sync::Arc};
 
 use tokio::sync::{mpsc::Receiver, Mutex};
@@ -76,61 +72,47 @@ pub async fn stop(
     Ok(data)
 }
 
+#[cfg(windows)]
+mod import_crate {
+    pub use commons::util::get_chrome_install_path;
+    pub use commons::util::get_debug_port;
+    pub use cores::processor;
+    pub use models::dto::environment_info::EnvironmentWithDetails;
+    pub use serde_json::{json, Value};
+}
+#[cfg(windows)]
+use import_crate::*;
+
+#[cfg(windows)]
 pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Error> {
     let port = get_debug_port().await?;
     let mut stauts = false;
-    let message;
+    let mut message = "启动失败, 指定环境不存在".to_string();
+    if let Ok(json_response) =
+        services_remote::requests::environment::query_by_uuid(environment_uuid).await
+    {
+        let current_environment_json =
+            json_response.data.ok_or(anyhow::anyhow!(message.clone()))?;
+        let current_environment =
+            serde_json::from_value::<EnvironmentWithDetails>(current_environment_json)
+                .map_err(|_| anyhow::anyhow!(message.clone()))?;
 
-    match environment::query_by_uuid(environment_uuid).await {
-        Ok(current_environement) => {
-            let user_uuid = &current_environement.user_uuid;
+        let chrome_install_path =
+            get_chrome_install_path().ok_or(anyhow::anyhow!("chrome location get fail !"))?;
+        let browser_child_info =
+            processor::BrowserChildInfo::new(current_environment, port, &chrome_install_path);
+        let mut actuator = ACTUATOR.controller.lock().await;
 
-            let fp_info = if let Some(fp_info_id) = current_environement.fp_info_id {
-                environment_fingerprint::query_by_id(&user_uuid, fp_info_id as u32).await?
-            } else {
-                EnvironmentFingerprint {
-                    ..Default::default()
-                }
-            };
-
-            let proxy_info = if let Some(proxy_id) = current_environement.proxy_id {
-                match environment_proxy::query_by_id(&user_uuid, proxy_id as u32).await {
-                    Ok(v) => v,
-                    Err(_) => models::environment_proxies::Proxy {
-                        ..Default::default()
-                    },
-                }
-            } else {
-                models::environment_proxies::Proxy {
-                    ..Default::default()
-                }
-            };
-
-            let chrome_install_path =
-                get_chrome_install_path().ok_or(anyhow::anyhow!("chrome location get fail !"))?;
-            let browser_child_info = processor::BrowserChildInfo::new(
-                current_environement,
-                fp_info,
-                proxy_info,
-                port,
-                &chrome_install_path,
-            );
-            let mut actuator = ACTUATOR.controller.lock().await;
-
-            match actuator.start_browser(browser_child_info).await {
-                Ok(ok) => {
-                    stauts = ok;
-                    message = "启动成功".to_string();
-                }
-                Err(err) => {
-                    message = err.to_string();
-                }
-            };
-        }
-        Err(_) => {
-            message = "启动失败，指定环境不存在".to_string();
-        }
-    };
+        match actuator.start_browser(browser_child_info).await {
+            Ok(ok) => {
+                stauts = ok;
+                message = "启动成功".to_string();
+            }
+            Err(err) => {
+                message = err.to_string();
+            }
+        };
+    }
 
     Ok(json!({
         "environment_uuid": environment_uuid,
@@ -139,10 +121,15 @@ pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Erro
     }))
 }
 
+#[cfg(not(windows))]
+use serde_json::Value;
+#[cfg(not(windows))]
+pub async fn start_browser(_environment_uuid: &str) -> Result<Value, anyhow::Error> {
+    todo!();
+}
+
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
-
     use super::*;
 
     #[tokio::test]
@@ -177,17 +164,14 @@ mod tests {
         }
     }
 
+    #[cfg(windows)]
     #[tokio::test]
     async fn test_start_browser() {
         crate::setup().await;
-        let environment_uuid = "d7e2d896-8e09-4713-8f53-c2225e224afd";
+        let _t = services_remote::requests::user::login("1", "1").await;
+        let environment_uuid = "d34f3e32-f0c1-44a2-a4c0-e43e2c7b0033";
         let result = start_browser(environment_uuid).await;
-        println!("{:?}", result);
-
-        tokio::time::sleep(Duration::from_secs(1)).await;
-
-        let ids = vec![environment_uuid.to_string()];
-        let result = stop(ids.clone()).await;
-        println!("{:?}", result);
+        eprintln!("{:?}", result);
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
     }
 }

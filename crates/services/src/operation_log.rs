@@ -28,6 +28,16 @@ pub async fn record_operation_log(
 
     Ok(ok)
 }
+#[tokio::test]
+async fn test_record() {
+    crate::setup().await;
+    let res = record_operation_log(
+        "6cce7b5f-0721-4302-8fb0-c1b9115858df",
+        "/api/v1/teams/query/is-leader+POST",
+    )
+    .await;
+    eprintln!("{:?}", res);
+}
 
 pub async fn insert(
     user_uuid: &str,
