@@ -67,7 +67,7 @@ onMounted(() => {
 
 <template>
     <!-- {{ menus }} -->
-    <ul ref="hsSortable" class="max-w-xs flex flex-col hs-handle max-h-[230px] overflow-auto">
+    <ul ref="hsSortable" class="max-w-xs flex flex-col hs-handle">
         <SidebarMenuItem v-for="item in menus" :key="item.id" class="ml-2 mt-2 group ">
             <SidebarMenuButton asChild :class="`  text-[16px] rounded-md h-12 cursor-grab min-h-12 flex justify-start items-center px-6 text-[#858C94] ${item.title == '分组管理' ? 'h-10 min-h-10' : ''} ${item.url == route.path && 'bg-white text-primary'
                 }`">

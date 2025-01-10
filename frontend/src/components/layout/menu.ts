@@ -123,22 +123,22 @@ export const menuBottom = [
         icon: IconProxy,
         activeIcon: IconProxyActive,
         active: false,
-        children: [
-            {
-                title: `未分组`,
-                url: `/mydaili/1`,
-                icon: ComponentIcon,
-                activeIcon: ComponentIcon,
-                active: true,
-            },
-            {
-                title: `分组2`,
-                url: `/mydaili/2`,
-                icon: ComponentIcon,
-                activeIcon: ComponentIcon,
-                active: true,
-            }
-        ]
+        // children: [
+        //     {
+        //         title: `未分组`,
+        //         url: `/mydaili/1`,
+        //         icon: ComponentIcon,
+        //         activeIcon: ComponentIcon,
+        //         active: true,
+        //     },
+        //     {
+        //         title: `分组2`,
+        //         url: `/mydaili/2`,
+        //         icon: ComponentIcon,
+        //         activeIcon: ComponentIcon,
+        //         active: true,
+        //     }
+        // ]
     },
     {
         title: "我的账户",

@@ -94,8 +94,7 @@ const paginationClickHandle = (index: number) => {
   pagination.pageIndex = index;
 };
 const openGroup = async () => {
-  let ids = [...selectData.value].map((item) => item as any);
-  console.log("ids:::", ids);
+  let ids = [...selectData.value].map((item) => item) as string[];
 
   try {
     let data = await browser_starts(ids);

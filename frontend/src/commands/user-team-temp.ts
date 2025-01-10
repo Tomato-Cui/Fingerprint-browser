@@ -1,4 +1,4 @@
-import { invoke } from './index'
+import { invoke } from '@tauri-apps/api/core'
 
 export const user_receive_query = async (
     pageNum: number,

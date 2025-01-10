@@ -60,11 +60,8 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
-        数据为空，没有成员
-      </div>
       <!-- Table -->
-      <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg" v-else>
+      <div class="flex overflow-auto flex-col flex-1 justify-between bg-white rounded-lg">
         <!-- Table Header -->
         <div class="grid grid-cols-6 px-6 py-3 bg-gray-50 text-sm text-gray-500">
           <div>姓名</div>
@@ -78,7 +75,7 @@
         </div>
 
         <!-- Table Body -->
-        <div class="divide-y flex-1 flex flex-col overflow-auto">
+        <div class="divide-y flex-1 flex flex-col overflow-auto" v-if="users?.length !== 0">
           <div v-for="user in filterUsers" :key="user.id"
             class="grid grid-cols-6 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
             :class="{ 'border-t border-gray-100': true }">
@@ -108,6 +105,12 @@
                 {{ getActionText(user.allow_2) }}
               </template>
             </div>
+          </div>
+        </div>
+        <div class="flex-1" v-else>
+          <div
+            class="flex justify-center items-center w-full h-[80px] hover:bg-gray-50 translate ease-in-out delay-100 duration-100">
+            数据为空，没有成员
           </div>
         </div>
       </div>
@@ -180,7 +183,7 @@ const selectVal = ref(""); //搜索值
 const selectT = (type) => {
   selectType.value = type;
 };
-onMounted(() => {});
+onMounted(() => { });
 const pagination = reactive({
   pageIndex: 1,
   pageSize: 16,

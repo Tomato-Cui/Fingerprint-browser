@@ -1,4 +1,4 @@
-import { invoke } from './index'
+import { invoke } from '@tauri-apps/api/core'
 
 export const team_query_id = async (id: number): Promise<any> => {
     return await invoke('team_query_id', { id })

@@ -4,7 +4,7 @@ import { PrimaryButton, CancelButton } from "@/components/button";
 import { ref, defineEmits, defineProps, reactive, watch } from 'vue'
 import { UserPlus2Icon, UsersIcon } from 'lucide-vue-next'
 import { IconCreateTeam, IconJoinTeam } from "@/assets/icons";
-import { environment_group_create } from "@/commands/environment-group";
+import { environment_group_create, environment_group_query } from "@/commands/environment-group";
 import { toast } from "vue-sonner";
 import Input from "@/components/input.vue";
 
@@ -22,17 +22,33 @@ const clearForm = () => {
     addGroup.groupName = ""
     addGroup.description = ""
 }
+const errorRepeat = ref(false)  //分组名称是否重复
 //确认
 const subMit = () => {
-    emit('update:createGroupDialog', false)
     if (addGroup.groupName === "") {
         toast.error("团队名称不能为空")
         return
     }
+
+    // environment_group_query(1, 1000).then(res => {
+    //     console.log("add", addGroup.description);
+        
+    //     res.data.data.forEach(item => {
+    //         console.log(item.name === addGroup.groupName);
+            
+    //         if (item.name === addGroup.groupName) {
+    //             errorRepeat.value = true
+    //             console.log("分组名称重复");
+                
+    //             return
+    //         }
+    //     })
+    // })
     environment_group_create(addGroup.groupName, addGroup.description).then(res => {
         // console.log("res", res)
         toast.message(res.message)
     })
+    emit('update:createGroupDialog', false)
 }
 watch(() => props.createGroupDialog, (val) => {
     clearForm()
@@ -41,12 +57,16 @@ watch(() => props.createGroupDialog, (val) => {
 
 <template>
     <!-- 创建团队 -->
-    <Model class="" title="添加环境分组" :open="props.createGroupDialog" @close="() => emit('update:createGroupDialog', false)">
+    <Model class="" title="添加环境分组" :open="props.createGroupDialog"
+        @close="() => emit('update:createGroupDialog', false)">
         <!-- 主体 -->
         <div class="flex flex-col mb-6 gap-y-4 px-2">
             <div class="flex items-center gap-4">
                 <label class="w-[80px] flex justify-end">分组名称</label>
-                <Input v-model="addGroup.groupName" type="text" placeholder="请输入分组名称" class="flex-1"/>
+                <div class="w-full">
+                    <Input v-model="addGroup.groupName" type="text" placeholder="请输入分组名称" class="flex-1 w-full" />
+                    <p v-show="errorRepeat" class="text-red-500 text-sm">分组名称重复</p>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <label class="w-[80px] flex justify-end">备注</label>

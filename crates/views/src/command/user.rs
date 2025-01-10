@@ -60,9 +60,12 @@ pub async fn reset_password(
 }
 
 #[tauri::command]
-pub async fn logout() -> Result<bool, tauri::Error> {
+pub async fn logout() -> Result<AppResponse<bool>, tauri::Error> {
     states::auth::clear_token().await;
-    Ok(true)
+    Ok(AppResponse::success(
+        Some("退出成功".to_string()),
+        Some(true),
+    ))
 }
 
 #[tauri::command]

@@ -1,4 +1,5 @@
-import { invoke } from './index'
+
+import { invoke } from '@tauri-apps/api/core'
 
 export interface ProxyGroup {
     name: string;                    // 分组名称

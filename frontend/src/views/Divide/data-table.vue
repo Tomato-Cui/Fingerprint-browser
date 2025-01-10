@@ -91,7 +91,7 @@ const columns = [
           table.toggleAllPageRowsSelected(!!value);
           emits(
             "onSelect",
-            table.getSelectedRowModel().rows.map((item) => item.getValue("id"))
+            table.getSelectedRowModel().rows.map((item) => item.getValue("uuid"))
           );
         },
         ariaLabel: "Select all",

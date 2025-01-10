@@ -1,4 +1,5 @@
-import { invoke } from './index'
+
+import { invoke } from '@tauri-apps/api/core'
 
 export const environment_cookie_query_environment_uuid = async (environmentUuid: string) => {
     return await invoke('environment_cookie_query_environment_uuid', { environmentUuid })

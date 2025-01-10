@@ -10,6 +10,7 @@ pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod extension;
 pub mod message;
+pub mod operation_log;
 pub mod team;
 pub mod team_group;
 pub mod user;

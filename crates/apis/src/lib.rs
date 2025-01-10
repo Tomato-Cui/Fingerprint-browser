@@ -33,6 +33,7 @@ pub fn build_root_router() -> Router {
                 .merge(routes::team_group::build_router())
                 .merge(routes::team::build_router())
                 .merge(routes::user::build_router())
+                .merge(routes::operation_log::build_router())
                 .merge(
                     Router::new()
                         .route("/status", get(|| async { String::from("status: running") })),

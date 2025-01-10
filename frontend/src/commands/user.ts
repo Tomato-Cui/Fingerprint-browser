@@ -1,4 +1,4 @@
-import { invoke } from './index'
+import { invoke } from '@tauri-apps/api/core'
 
 export const login = async (account: String, password: String): Promise<any> => {
     return await invoke('login', { account, password })

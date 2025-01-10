@@ -71,15 +71,13 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
-        数据为空，没有成员
-      </div>
+
       <!-- Table -->
-      <div class="flex-1 overflow-auto" v-else>
+      <div class="flex-1 overflow-auto">
         <table class="w-full border-none flex-1">
-          <thead class="bg-gray-50 sticky top-0 z-10">
-            <tr>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 w-[100px]">
+          <thead class="bg-gray-50 sticky top-0 z-10 ">
+            <tr class="">
+              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 w-[100px] ">
                 序号
               </th>
               <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">
@@ -140,12 +138,12 @@
               </td>
             </tr>
           </tbody>
-
         </table>
+        <div class="flex items-center justify-center w-full h-[80px] hover:bg-gray-50 translate ease-in-out delay-100 duration-100" v-if="members?.length === 0">
+          数据为空，没有成员
+        </div>
       </div>
-      <!-- <div class="flex items-center justify-center w-full h-full" v-if="members?.length === 0">
-        数据为空，没有成员
-      </div> -->
+
       <!-- Pagination -->
       <div class="flex items-center justify-end space-x-2 py-1">
         <div class="flex-1 text-sm text-muted-foreground">
@@ -291,11 +289,11 @@
     <!-- 禁用成员 -->
     <AlertModel :title="'禁用成员'" :open="forbidMem" @close="forbidMem = false" @cancel="forbidMem = false"
       @submit="subForbid">
-      确定禁用成员 "{{ memberObj.name }}" 吗
+      确定禁用成员 "{{ memberObj.nickname }}" 吗
     </AlertModel>
     <!-- 删除成员 -->
     <AlertModel :title="'删除成员'" :open="delM" @close="delM = false" @cancel="delM = false" @submit="subDel">
-      确定删除成员 "{{ memberObj.name }}" 吗
+      确定删除成员 "{{ memberObj.nickname }}" 吗
     </AlertModel>
   </div>
 </template>

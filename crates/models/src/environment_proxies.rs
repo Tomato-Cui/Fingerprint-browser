@@ -91,6 +91,7 @@ impl Proxy {
             LIMIT ? OFFSET ?
         "#,
         )
+        .bind(user_uuid)
         .bind(proxy_group_id)
         .bind(page_size)
         .bind(offset)

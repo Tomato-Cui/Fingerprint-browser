@@ -14,7 +14,9 @@
       {
         "title": "ads-hubstudio",
         "width": 1285,
+        "minWidth": 985,
         "height": 825,
+        "minHeight": 685,
         "resizable": true,
         "fullscreen": false,
         "center": true,

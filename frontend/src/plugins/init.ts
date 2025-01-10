@@ -15,25 +15,25 @@ export default {
             browserStore.updateStatus(environment_uuid, false)
         });
 
-        // document.addEventListener('contextmenu', (e) => {
-        //     e.preventDefault();
-        //     return false;
-        // }, { capture: true });
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        }, { capture: true });
 
-        // document.addEventListener('keydown', (e) => {
-        //     if (e.key === 'F12') {
-        //         e.preventDefault();
-        //         return false;
-        //     }
-        //     if (e.key === 'F5') {
-        //         e.preventDefault();
-        //         return false;
-        //     }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            if (e.key === 'F5') {
+                e.preventDefault();
+                return false;
+            }
 
-        //     if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-        //         e.preventDefault();
-        //         return false;
-        //     }
-        // }, { capture: true });
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+                return false;
+            }
+        }, { capture: true });
     }
 }

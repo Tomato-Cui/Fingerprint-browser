@@ -55,8 +55,9 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 }
 
 pub async fn query_current_team() -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({});
     let json_response = client::REQUEST
-        .get(client::Client::build_url("/teams/query/current")?)
+        .post(client::Client::build_url("/teams/query/current")?, &data)
         .await?;
 
     Ok(json_response)

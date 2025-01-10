@@ -10,6 +10,7 @@ pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod extension;
 pub mod message;
+pub mod operation_log;
 pub mod os;
 pub mod team;
 pub mod team_group;
@@ -28,6 +29,7 @@ pub use environment_transfer_history as environment_transfer_history_command;
 pub use environment_trash as environment_trash_command;
 pub use extension as extension_command;
 pub use message as message_command;
+pub use operation_log as operation_log_command;
 pub use team as team_command;
 pub use team_group as team_group_command;
 pub use user as user_command;
@@ -202,6 +204,8 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         browser_command::starts::browser_starts,
         browser_command::browser_stops,
         browser_command::browser_status,
+        operation_log_command::opeartion_query,
+        operation_log_command::opeartion_query_by_team,
         os::platform,
         ip_info,
         init_command,

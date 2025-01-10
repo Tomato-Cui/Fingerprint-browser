@@ -6,7 +6,7 @@ CREATE TABLE
         user_uuid INTEGER,
         allowed_operation_id INTEGER NOT NULL, -- 操作 ID（关联 allowed_operations 表）
         operation_target TEXT, -- 操作目标（例如：具体的资源 ID）
-        operation_status TEXT, -- 操作状态（例如：success, failed）
+        operation_status INTEGER, -- 操作状态（例如：success, failed）
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 创建时间
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 更新时间
         deleted_at DATETIME, -- 删除时间（软删除）

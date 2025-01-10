@@ -1,51 +1,30 @@
 <script setup>
-import {
-  IconLinuxOs,
-  IconMacOs,
-  IconWindowOs,
-  IconFirefox,
-  IconChrome,
-} from "@/assets/icons/index";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/select";
+import {IconChrome, IconFirefox, IconLinuxOs, IconMacOs, IconWindowOs,} from "@/assets/icons/index";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion";
+import {Switch} from "@/components/ui/switch";
+import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,} from "@/components/select";
 import Input from "@/components/input.vue";
-import { CopyIcon } from "lucide-vue-next";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {CopyIcon} from "lucide-vue-next";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import Alignment from "../components/alignment.vue";
-import { useEnvironmentCreateFromStore } from "@/stores/form/environment-create";
+import {useEnvironmentCreateFromStore} from "@/stores/form/environment-create";
+import {ref} from "vue";
+
 
 const environmentCreateFrom = useEnvironmentCreateFromStore();
+// 选择操作系统的方法
+const selectOs = (os) => {
+  environmentCreateFrom.forms.os = os; // 更新选中的操作系统
+};
+
 </script>
 <template>
-  <Accordion
-    type="single"
-    class="w-full px-6"
-    collapsible
-    default-value="basic-setting"
-  >
+  <Accordion type="single" class="w-full px-6" collapsible default-value="basic-setting">
     <AccordionItem class="border-0" value="basic-setting">
-      <AccordionTrigger
-        class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-        >基础设置</AccordionTrigger
-      >
+      <AccordionTrigger class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2">基础设置</AccordionTrigger>
       <AccordionContent class="px-4 space-y-4">
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
+          <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
             名称
           </p>
           <div class="relative text-sm w-full">
@@ -66,20 +45,16 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
           </div>
         </div>
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
+          <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
             浏览器
           </p>
           <div class="w-full">
             <div class="w-1/2 flex gap-x-4">
-              <Select>
+
+              <Select v-model="environmentCreateFrom.forms.browser" v-bind="environmentCreateFrom.forms.browserProps">
                 <SelectTrigger>
                   <IconChrome class="w-6 h-6" />
-                  <SelectValue
-                    placeholder="Chrome"
-                    class="w-full pl-4 rounded-lg outline-none"
-                  />
+                  <SelectValue placeholder="Chrome" class="w-full pl-4 rounded-lg outline-none" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -87,13 +62,10 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Select>
+              <Select v-model="environmentCreateFrom.forms.browser" v-bind="environmentCreateFrom.forms.browserProps">
                 <SelectTrigger>
                   <IconFirefox class="w-6 h-6" />
-                  <SelectValue
-                    placeholder="FireFox"
-                    class="w-full pl-4 rounded-lg outline-none"
-                  />
+                  <SelectValue placeholder="FireFox" class="w-full pl-4 rounded-lg outline-none" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -101,71 +73,82 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
                   </SelectGroup>
                 </SelectContent>
               </Select>
+
+              <span class="text-red-400">{{
+                  environmentCreateFrom.errors.browser
+                }}</span>
             </div>
           </div>
         </div>
 
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
+          <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
             操作系统
           </p>
+
           <div class="w-full">
             <div class="flex gap-4">
+              <!-- Windows 操作系统按钮 -->
               <button
-                class="flex items-center gap-2 px-4 py-2 border rounded-md bg-blue-50 border-blue-200 text-blue-600"
+                  class="flex items-center gap-2 px-4 py-2 border rounded-md"
+                  :class="{ 'bg-blue-50 border-blue-200 text-blue-600': environmentCreateFrom.forms.os === 'Windows' }"
+                  @click="selectOs('Windows')"
+                  v-bind="environmentCreateFrom.forms.osProps"
               >
-                <Input type="checkbox" checked class="rounded" />
                 <IconWindowOs class="w-5 h-5" />
                 Windows
               </button>
+
+              <!-- MacOS 操作系统按钮 -->
               <button
-                class="flex items-center gap-2 px-4 py-2 border rounded-md"
+                  class="flex items-center gap-2 px-4 py-2 border rounded-md"
+                  :class="{ 'bg-blue-50 border-blue-200 text-blue-600': environmentCreateFrom.forms.os === 'MacOs' }"
+                  @click="selectOs('MacOs')"
+                  v-bind="environmentCreateFrom.forms.osProps"
               >
-                <Input type="checkbox" class="rounded" />
                 <IconMacOs class="w-5 h-5" />
                 MacOs
               </button>
+
+              <!-- Linux 操作系统按钮 -->
               <button
-                class="flex items-center gap-2 px-4 py-2 border rounded-md"
+                  class="flex items-center gap-2 px-4 py-2 border rounded-md"
+                  :class="{ 'bg-blue-50 border-blue-200 text-blue-600': environmentCreateFrom.forms.os === 'Linux' }"
+                  @click="selectOs('Linux')"
+                  v-bind="environmentCreateFrom.forms.osProps"
               >
-                <Input type="checkbox" class="rounded" />
                 <IconLinuxOs class="w-5 h-5" />
                 Linux
               </button>
             </div>
+            <span class="text-red-400">{{
+                environmentCreateFrom.errors.os
+              }}</span>
           </div>
+
         </div>
 
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
+          <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
             User-Agent
           </p>
           <div class="w-full">
             <div class="flex gap-4">
               <Select>
                 <SelectTrigger class="w-1/4">
-                  <SelectValue
-                    placeholder="全部"
-                    class="w-full p-2 rounded-lg outline-none"
-                  />
+                  <SelectValue placeholder="全部" class="w-full p-2 rounded-lg outline-none" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="all"> 全部 </SelectItem>
+                    <SelectItem value="1"> 版本1 </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
               <div class="flex-auto relative">
-                <Input
-                  type="text"
-                  value="Mozilla/5.0(Windows NT 10.0;Win64; x64)..."
-                  class="w-full text-sm text-gray-500"
-                  readonly
-                />
+                <Input type="text" placeholder="Mozilla/5.0(Windows NT 10.0;Win64; x64)..."
+                       v-model="environmentCreateFrom.forms.ua"
+                       v-bind="environmentCreateFrom.forms.uaProps"
+                       class="w-full text-sm text-gray-500" />
                 <div class="absolute right-2 top-2 flex gap-2">
                   <button class="p-1 hover:bg-gray-100 rounded">
                     <CopyIcon class="w-4 h-4 text-gray-400" />
@@ -175,57 +158,13 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
                   </button>
                 </div>
               </div>
+              <span class="text-red-400">{{
+                  environmentCreateFrom.errors.ua
+                }}</span>
             </div>
           </div>
         </div>
 
-        <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
-            分组
-          </p>
-          <div class="w-full">
-            <div class="flex gap-x-4">
-              <Select>
-                <SelectTrigger class="w-full">
-                  <SelectValue
-                    placeholder="全部"
-                    class="w-full p-2 rounded-lg outline-none"
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="all"> 全部 </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
-            Cookie
-          </p>
-          <div class="w-full">
-            <div class="flex gap-x-4">
-              <Input
-                type="text"
-                value="支持格式：JSON、Netscape、Name=Value"
-                class="text-gray-500 text-sm flex-auto"
-                readonly
-              />
-              <button
-                class="px-4 py-2 hover:text-blue-600 border rounded-md hover:border-blue-200"
-              >
-                合并
-              </button>
-            </div>
-          </div>
-        </div>
 
         <!-- Notes -->
         <div class="space-y-2 flex items-center">
@@ -258,10 +197,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
   <Accordion type="single" class="w-full px-6 mb-2" collapsible>
     <AccordionItem class="border-0" value="proxy-setting">
-      <AccordionTrigger
-        class="hover:no-underline rounded-md text-sm p-3 bg-gray-50"
-        >代理信息</AccordionTrigger
-      >
+      <AccordionTrigger class="hover:no-underline rounded-md text-sm p-3 bg-gray-50">代理信息</AccordionTrigger>
       <AccordionContent class="px-4 pt-2">
         <Tabs default-value="custom" class="">
           <TabsList class="flex w-72 ml-[8.25rem]">
@@ -271,46 +207,40 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
           </TabsList>
           <TabsContent value="custom" class="space-y-2">
             <div class="flex items-center">
-              <p
-                class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-              >
+              <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
                 代理类型
               </p>
               <div class="w-full flex gap-x-4">
-                <Select>
+                <Select
+                    v-model="environmentCreateFrom.forms.kind"
+                    v-bind="environmentCreateFrom.forms.kindProps"
+                >
                   <SelectTrigger class="w-1/3">
-                    <SelectValue
-                      placeholder="No Proxy (本地直连)"
-                      class="w-full p-2 rounded-lg outline-none"
-                    />
+                    <SelectValue placeholder="No Proxy (本地直连)" class="w-full p-2 rounded-lg outline-none" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="no"> No Proxy (本地直连) </SelectItem>
+                      <SelectItem value="kind1"> No Proxy (本地直连) </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <button
-                  class="px-4 py-2 border rounded-md hover:bg-gray-50 whitespace-nowrap"
-                >
+                <button class="px-4 py-2 border rounded-md hover:bg-gray-50 whitespace-nowrap">
                   检查网络
                 </button>
+                <span class="text-red-400 pl-[7.85rem]">{{
+                    environmentCreateFrom.errors.kind
+                  }}</span>
               </div>
             </div>
             <div class="flex items-center">
-              <p
-                class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-              >
+              <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
                 IP查询渠道
               </p>
               <div class="w-full">
                 <div class="flex gap-4">
                   <Select>
                     <SelectTrigger class="w-1/3">
-                      <SelectValue
-                        placeholder="IP2Location"
-                        class="w-full p-2 rounded-lg outline-none"
-                      />
+                      <SelectValue placeholder="IP2Location" class="w-full p-2 rounded-lg outline-none" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -334,24 +264,17 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
   <!-- Account Platform -->
   <Accordion type="single" class="w-full px-6" collapsible>
     <AccordionItem value="account-setting" class="border-0">
-      <AccordionTrigger
-        class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-        >账号平台
+      <AccordionTrigger class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2">账号平台
       </AccordionTrigger>
       <AccordionContent class="px-4 space-y-4">
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
+          <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
             账号平台
           </p>
           <div class="w-full flex gap-x-4">
             <Select>
               <SelectTrigger class="w-full">
-                <SelectValue
-                  placeholder="无"
-                  class="w-full p-2 rounded-lg outline-none"
-                />
+                <SelectValue placeholder="无" class="w-full p-2 rounded-lg outline-none" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -362,17 +285,12 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
           </div>
         </div>
         <div class="space-y-2 flex items-center">
-          <p
-            class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-          >
+          <p class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
             标签页
           </p>
           <div class="w-full flex gap-x-4">
-            <textarea
-              rows="4"
-              placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
-              class="w-full px-3 py-2 border rounded-md placeholder-gray-400"
-            ></textarea>
+            <textarea rows="4" placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
+                      class="w-full px-3 py-2 border rounded-md placeholder-gray-400"></textarea>
           </div>
         </div>
       </AccordionContent>
@@ -381,52 +299,32 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
   <Accordion type="single" class="w-full px-6" collapsible>
     <AccordionItem value="webrtc-setting" class="border-0">
-      <AccordionTrigger
-        class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-        >WebRTC
+      <AccordionTrigger class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2">WebRTC
       </AccordionTrigger>
       <AccordionContent class="px-4 space-y-4">
         <!-- WebRTC -->
         <Alignment title="WebRTC">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm"
-            :class="
-              webRTC === '转发' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-            "
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm" :class="webRTC === '转发' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+            ">
             转发
           </button>
-          <button
-            class="px-4 py-1.5 rounded-md text-sm"
-            :class="
-              webRTC === '替换' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-            "
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm" :class="webRTC === '替换' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+            ">
             替换
           </button>
-          <button
-            class="px-4 py-1.5 rounded-md text-sm"
-            :class="
-              webRTC === '真实' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-            "
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm" :class="webRTC === '真实' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+            ">
             真实
           </button>
-          <button
-            class="px-4 py-1.5 rounded-md text-sm"
-            :class="
-              webRTC === '禁用' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
-            "
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm" :class="webRTC === '禁用' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+            ">
             禁用
           </button>
         </Alignment>
 
         <!-- Time Zone -->
         <Alignment title="时区">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
             基于 IP
           </button>
           <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
@@ -451,9 +349,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
         <!-- Language -->
         <Alignment title="语言">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
             基于 IP
           </button>
           <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
@@ -463,9 +359,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
         <!-- Interface Language -->
         <Alignment title="界面语言">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
             基于语言
           </button>
           <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
@@ -479,9 +373,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
         <!-- Resolution -->
         <Alignment title="分辨率">
           <div class="flex gap-2">
-            <button
-              class="px-4 py-1.5 rounded-md text-sm text-gray-600 bg-blue-50"
-            >
+            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600 bg-blue-50">
               随机
             </button>
             <button class="px-4 py-1.5 rounded-md text-sm">预定义</button>
@@ -492,10 +384,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
           <div class="relative">
             <Select>
               <SelectTrigger class="w-full">
-                <SelectValue
-                  placeholder="基于 User-Agent"
-                  class="w-full p-2 rounded-lg outline-none"
-                />
+                <SelectValue placeholder="基于 User-Agent" class="w-full p-2 rounded-lg outline-none" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -508,9 +397,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
         <!-- Font -->
         <Alignment title="界面语言">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
             默认
           </button>
           <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
@@ -562,15 +449,11 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
         <!-- WebGL Data -->
         <div class="space-y-2">
           <div class="flex">
-            <p
-              class="w-32 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
+            <p class="w-32 flex justify-end items-center text-sm font-medium text-gray-700 pr-8">
               操作系统
             </p>
             <div class="flex gap-2">
-              <button
-                class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-              >
+              <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
                 默认
               </button>
               <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
@@ -583,10 +466,8 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
             <div class="relative">
               <Select>
                 <SelectTrigger class="w-full">
-                  <SelectValue
-                    placeholder="ANGLE (Intel, Intel(R) UHD Graphics 610 Dir..."
-                    class="p-2 rounded-lg outline-none"
-                  />
+                  <SelectValue placeholder="ANGLE (Intel, Intel(R) UHD Graphics 610 Dir..."
+                               class="p-2 rounded-lg outline-none" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -598,16 +479,12 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
               </Select>
             </div>
 
-            <label class="block text-sm font-medium text-gray-700"
-              >渲染器</label
-            >
+            <label class="block text-sm font-medium text-gray-700">渲染器</label>
             <div class="relative">
               <Select>
                 <SelectTrigger class="w-full">
-                  <SelectValue
-                    placeholder="ANGLE (Intel, Intel(R) UHD Graphics 610 Dir..."
-                    class="p-2 rounded-lg outline-none"
-                  />
+                  <SelectValue placeholder="ANGLE (Intel, Intel(R) UHD Graphics 610 Dir..."
+                               class="p-2 rounded-lg outline-none" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -623,9 +500,7 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
 
         <!-- WebGPU -->
         <Alignment title="WebGPU">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
             基于 WebGL
           </button>
           <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
@@ -642,15 +517,10 @@ const environmentCreateFrom = useEnvironmentCreateFromStore();
   <!-- Advanced Settings -->
   <Accordion type="single" class="w-full px-6" collapsible>
     <AccordionItem value="software-setting" class="border-0">
-      <AccordionTrigger
-        class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-        >应用</AccordionTrigger
-      >
+      <AccordionTrigger class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2">应用</AccordionTrigger>
       <AccordionContent class="px-4 space-y-4">
         <Alignment title="应用">
-          <button
-            class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-          >
+          <button class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600">
             跟随团队
           </button>
           <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">

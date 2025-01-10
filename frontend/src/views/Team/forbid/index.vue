@@ -34,12 +34,9 @@
       <!-- </div> -->
 
       <!-- Table -->
-      <!-- <div class="bg-white rounded-lg flex flex-col flex-1">  -->
-      <div class="flex items-center justify-center w-full h-full" v-if="users?.length === 0">
-        数据为空，还没有黑名单用户
-      </div>
+
       <!-- Table Header -->
-      <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500" v-else>
+      <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 border-b text-sm text-gray-500">
         <div>姓名</div>
         <div>分组</div>
         <div>备注</div>
@@ -51,7 +48,7 @@
 
       <!-- <div class="flex flex-col flex-1 justify-between"> -->
       <!-- Table Body -->
-      <div class="divide-y overflow-auto flex-1">
+      <div class="divide-y overflow-auto flex-1" v-if="users?.length !== 0">
         <div v-for="user in filterUsers" :key="user.id"
           class="grid grid-cols-5 px-6 py-4 items-center hover:bg-gray-50 hover:bg-custom-light-blue"
           :class="{ 'border-t border-gray-100': true }">
@@ -68,8 +65,11 @@
           <!-- <div></div> -->
         </div>
       </div>
-
-
+      <div v-else class="flex-1">
+        <div class="flex justify-center items-center w-full h-[80px] hover:bg-gray-50 translate ease-in-out delay-100 duration-100">
+          数据为空，没有成员
+        </div>
+      </div>
 
       <!-- Pagination -->
       <div class="flex items-center justify-end space-x-2 py-1">
@@ -109,12 +109,12 @@
   <!-- 启用消息弹出框 -->
   <AlertModel :title="'启用成员'" :open="alertEnable" @close="() => (alertEnable = false)"
     @cancel="() => (alertEnable = false)" @submit="subEnAbleUser">
-    确定启用成员 "{{ userObj.name }}" 吗？
+    确定启用成员 "{{ userObj.nickname }}" 吗？
   </AlertModel>
   <!-- 删除消息弹出框 -->
   <AlertModel :title="'恢复成员'" :open="alertDelUser" @close="() => (alertDelUser = false)"
     @cancel="() => (alertDelUser = false)" @submit="subRecoverUser">
-    确定恢复成员 "{{ userObj.name }}" 吗？
+    确定恢复成员 "{{ userObj.nickname }}" 吗？
   </AlertModel>
 </template>
 
@@ -228,7 +228,7 @@ const subRecoverUser = () => {  //确认恢复成员
   console.log("----!!!:", userObj.value);
 
   un_blocked(userObj.value.user_uuid, userObj.value.team_id).then(res => {
-    if (res.data){
+    if (res.data) {
       toast.success('恢复成功')
       getList()
     }

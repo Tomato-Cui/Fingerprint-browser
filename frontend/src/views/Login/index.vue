@@ -9,7 +9,7 @@
       <div class="flex items-center md:p-8 p-6 bg-white md:rounded-tl-[55px] md:rounded-bl-[55px] h-full">
         <Transition name="fade" mode="out-in">
           <!-- 登录 -->
-          <form v-if="isLoginOrRegister === 'login'" key="login" class="max-w-lg w-full mx-auto">
+          <form v-if="isLoginOrRegister === 'login'" key="login" class="max-w-lg w-full mx-auto" @keydown.enter="handleLogin">
             <div class="mb-12">
               <h3 class="text-gray-800 text-4xl font-extrabold">登录</h3>
               <p class="text-gray-800 text-sm mt-4">没有账号？
@@ -79,7 +79,7 @@
           </form>
 
           <!-- 注册 -->
-          <form v-else key="register" class="max-w-lg w-full mx-auto">
+          <form v-else key="register" class="max-w-lg w-full mx-auto" @keydown.enter="handleRegister">
             <div class="mb-6">
               <h3 class="text-gray-800 text-2xl font-bold">创建一个账号</h3>
             </div>
@@ -88,7 +88,7 @@
               <div>
                 <label class="text-gray-800 text-sm mb-2 block">用户名</label>
                 <div class="relative flex items-center">
-                  <input name="name" type="text" required v-model="registerForm.username"
+                  <input name="name" type="text" required v-model="registerForm.username" @keydown.enter.prevent
                     class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                     placeholder="请输入您的名字" />
                   <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-4 h-4 absolute right-4"
@@ -104,7 +104,7 @@
               <div>
                 <label class="text-gray-800 text-sm mb-2 block">邮箱</label>
                 <div class="relative flex items-center">
-                  <input name="email" type="email" required v-model="registerForm.email"
+                  <input name="email" type="email" required v-model="registerForm.email" @keydown.enter.prevent
                     class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                     placeholder="请输入您的邮箱" />
                   <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="w-4 h-4 absolute right-4"
@@ -129,7 +129,7 @@
               <div class="mt-8">
                 <label class="text-gray-800 text-xs block mb-2">密码</label>
                 <div class="relative flex items-center">
-                  <input v-model="registerForm.password" :type="showPassword ? 'text' : 'password'" required
+                  <input v-model="registerForm.password" :type="showPassword ? 'text' : 'password'" required @keydown.enter.prevent
                     class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                     placeholder="请输入密码" />
                   <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
@@ -145,7 +145,7 @@
               <div>
                 <label class="text-gray-800 text-sm mb-2 block">验证码</label>
                 <div class="relative flex items-center">
-                  <input type="text" required v-model="registerForm.code"
+                  <input type="text" required v-model="registerForm.code" @keydown.enter.prevent
                     class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                     placeholder="请输入验证码" />
                   <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
@@ -155,9 +155,13 @@
                       d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
                       data-original="#000000"></path>
                   </svg>
-                  <PrimaryButton @click="registerSendCode" class="whitespace-nowrap ml-2 bg-slate-500">
-                    发送验证码
+                  <PrimaryButton @click="timeVal !== 0 ? null : registerSendCode()"
+                    :disabled="timeVal !== 0 ? true : false"
+                    class="whitespace-nowrap ml-2 bg-slate-500 w-[212px] hover:bg-slate-600"
+                    :class="{ 'hover:bg-slate-500': timeVal !== 0 }">
+                    {{ timeVal !== 0 ? timeVal + '秒后再次发送' : '发送验证码' }}
                   </PrimaryButton>
+                  <!-- <PrimaryButton @click="registerSendCode">11</PrimaryButton> -->
                 </div>
               </div>
             </div>
@@ -192,6 +196,8 @@ const showPassword = ref(false);
 const loading = ref(false);
 const router = useRouter();
 const userStore = useUserStore();
+const sendBtnFlag = ref(false);
+const timeVal = ref(0); //倒计时时间
 
 const loginForm = ref({
   username: "",
@@ -242,7 +248,12 @@ const handleRegister = () => {
   )
     .then((res) => {
       loading.value = false;
-      res.code ? toast.success(res.message) : toast.warning(res.message);
+      if(res.code){
+        toast.success(res.message + '，请登录')
+        isLoginOrRegister.value = 'login'
+      }else{
+        toast.warning(res.message)
+      }
     })
     .catch(() => {
       loading.value = false;
@@ -250,10 +261,32 @@ const handleRegister = () => {
     });
 };
 
+//倒计时函数
+const countDown = (time) => {
+
+  timeVal.value = time;  // 更新时间
+  if (time === 0) {
+    console.log('倒计时结束');
+    return;
+  }
+
+  setTimeout(() => {
+    countDown(time - 1);  // 递归调用自己，倒计时减少 1   
+  }, 1000);
+};
+
+
 const registerSendCode = () => {
+  console.log("asdjasdnabaf");
+
   if (registerForm.value.email) {
     register_send(registerForm.value.email).then((res) => {
       res.code ? toast.success(res.message) : toast.warning(res.message);
+      if (res.code === 1) {
+        //倒计时
+        timeVal.value = 60;
+        countDown(timeVal.value);
+      }
     });
   }
 };
