@@ -53,10 +53,10 @@ pub async fn user_query_search_by_email(email: &str) -> Result<JsonRespnse, taur
 #[tauri::command]
 pub async fn reset_password(
     email: &str,
-    password1: &str,
-    password2: &str,
+    code: &str,
+    password: &str,
 ) -> Result<JsonRespnse, tauri::Error> {
-    Ok(services_remote::requests::user::reset_password(email, password1, password2).await?)
+    Ok(services_remote::requests::user::reset_password(email, code, password).await?)
 }
 
 #[tauri::command]
@@ -71,4 +71,9 @@ pub async fn logout() -> Result<AppResponse<bool>, tauri::Error> {
 #[tauri::command]
 pub async fn register_send(email: &str) -> Result<JsonRespnse, tauri::Error> {
     Ok(services_remote::requests::user::register_send(email).await?)
+}
+
+#[tauri::command]
+pub async fn reset_password_send(email: &str) -> Result<JsonRespnse, tauri::Error> {
+    Ok(services_remote::requests::user::reset_password_send(email).await?)
 }

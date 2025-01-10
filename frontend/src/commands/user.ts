@@ -23,16 +23,20 @@ export const user_query_search_by_email = async (email: String): Promise<boolean
 
 export const reset_password = async (
     email: string,
-    password1: string,
-    password2: string,
+    code: string,
+    password: string,
 ): Promise<boolean> => {
     return await invoke('reset_password', {
         email,
-        password1,
-        password2
+        code,
+        password
     })
 };
 
 export const register_send = async (email: string): Promise<boolean> => {
     return await invoke('register_send', { email })
+};
+
+export const reset_password_send = async (email: string): Promise<boolean> => {
+    return await invoke('reset_password_send', { email })
 };

@@ -64,13 +64,13 @@ pub async fn query_search_by_email(email: &str) -> Result<JsonRespnse, anyhow::E
 
 pub async fn reset_password(
     email: &str,
-    password1: &str,
-    password2: &str,
+    code: &str,
+    password: &str,
 ) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
         "email": email,
-        "password1": password1,
-        "password2": password2,
+        "code": password1,
+        "password": password2,
     });
 
     let json_response = client::REQUEST
@@ -87,6 +87,21 @@ pub async fn register_send(email: &str) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .post(client::Client::build_url("/users/register/send")?, &data)
+        .await?;
+
+    Ok(json_response)
+}
+
+pub async fn reset_password_send(email: &str) -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({
+        "email": email,
+    });
+
+    let json_response = client::REQUEST
+        .post(
+            client::Client::build_url("/users/reset/password/send")?,
+            &data,
+        )
         .await?;
 
     Ok(json_response)

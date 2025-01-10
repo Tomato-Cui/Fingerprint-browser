@@ -186,6 +186,7 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         user_command::reset_password,
         user_command::is_login,
         user_command::register_send,
+        user_command::reset_password_send,
         extension_command::extension_info_by_chrome_store_url,
         extension_command::extension_create,
         extension_command::extension_user_create,
