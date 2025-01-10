@@ -4,7 +4,7 @@ use crate::error::ServiceError;
 
 pub async fn login(nickname: &str, password: &str) -> Result<String, ServiceError> {
     let pool = states::database::get_database_pool()?;
-    let user = models::user::User::query_nickname(pool, nickname).await;
+    let user = models::user::User::query_email(pool, nickname).await;
     let user_info = match user {
         Ok(user) => user,
         Err(_) => return Err(ServiceError::Error("current user not exist.".to_string())),
