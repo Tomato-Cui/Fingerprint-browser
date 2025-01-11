@@ -1,20 +1,25 @@
 [workspace]
 resolver = "1"
 members = [
-  "crates/apis",
-  "crates/commons",
-  "crates/cores",
-  "crates/models",
-  "crates/services",
-  "crates/services-remote",
-  "crates/states",
-  "crates/views",
+  "crates/lp-apis",
+  "crates/lp-cores",
+  "crates/lp-commons",
+  "crates/lp-models",
+  "crates/lp-services",
+  "crates/lp-services-remote",
+  "crates/lp-states",
+  "crates/lp-views",
 ]
 
 [workspace.dependencies]
 axum = { version = "0.7", features = ["macros", "multipart"] }
 tower-http = { version = "0.6", features = ["cors"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "process"] }
+tokio = { version = "1", features = [
+  "macros",
+  "rt-multi-thread",
+  "process",
+  "io-std",
+] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 base64 = "0.22.1"
@@ -54,13 +59,11 @@ regex = "1.5.4"
 lettre = "0.11"
 
 # internal crate dependencies
-cores = { path = "./crates/cores" }
-server = { path = "./crates/server" }
-views = { path = "./crates/views" }
-
-commons = { path = "./crates/commons" }
-services = { path = "./crates/services" }
-services_remote = { path = "./crates/services-remote" }
-models = { path = "./crates/models" }
-states = { path = "./crates/states" }
-apis = { path = "./crates/apis" }
+lp_apis = { path = "./crates/lp-apis" }
+lp_cores = { path = "./crates/lp-cores" }
+lp_commons = { path = "./crates/lp-commons" }
+lp_models = { path = "./crates/lp-models" }
+lp_services = { path = "./crates/lp-services" }
+lp_services_remote = { path = "./crates/lp-services-remote" }
+lp_states = { path = "./crates/lp-states" }
+lp_views = { path = "./crates/lp-views" }

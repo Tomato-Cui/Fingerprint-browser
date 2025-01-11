@@ -1,0 +1,22 @@
+[package]
+name = "lp_apis"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
+lazy_static = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+lp_commons = { workspace = true }
+lp_cores = { workspace = true }
+lp_services = { workspace = true }
+lp_models = { workspace = true }
+lp_states = { workspace = true }
