@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { cn } from "@/util/lib";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +51,7 @@ import EditAccount from "@/views/Environment/com/edit-account.vue";
 import { useRouter } from "vue-router";
 import { AlertModel } from "@/components/alert-model";
 import CreateGroup from "@/views/Divide/com/create-group.vue";
+import { IconBookMark } from "../../assets/icons/environment-image";
 
 const router = useRouter();
 const browserStatusStore = useBrowserStatusStore();
@@ -181,9 +182,19 @@ const groupOperationBtns = computed(() => [
     disabled: selectData.value.length <= 0,
   },
 ]);
+
+const editMember = (member) => {
+  memberObj.value = member;
+
+  addMemModel.value = true;
+};
 const groupSelectHandle = (value: string) => {
   groupSelect.value = value;
 };
+
+const addMemModel = ref(false); //添加成员
+
+const memberObj = ref();
 
 const environmentName = ref<string[]>([]);
 /**
@@ -299,6 +310,12 @@ const removeSubmitHandle = () => {
             >
               <component :is="Boxes" class="w-5 h-5 text-gray-600" />
             </TooltipButton>
+
+            <addMember
+              v-model:addMemModel="addMemModel"
+              v-model:memberObj="memberObj"
+            />
+
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <TooltipButton
@@ -480,10 +497,10 @@ const removeSubmitHandle = () => {
     >
       删除成功后，可以前往回收站恢复
     </div>
-    <div class="text-sm flex flex-col gap-y-4 py-4">
+    <div class="flex flex-col gap-y-4 py-4 text-sm">
       <p>
         环境UUID
-        <span class="bg-blue-200 p-2 rounded-md text-blue-600 ml-4">{{
+        <span class="p-2 ml-4 text-blue-600 bg-blue-200 rounded-md">{{
           environmentUuid
         }}</span>
       </p>
