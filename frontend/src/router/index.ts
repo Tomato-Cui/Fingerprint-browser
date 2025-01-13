@@ -25,6 +25,7 @@ import Divide from '@/views/Divide/index.vue';
 import TransferEnvironment from '@/views/transferEnvironment/index.vue';
 import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
+import EnvironmentN from '@/views/EnvironmentN/index.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -35,7 +36,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/environment',
     name: 'environment',
-    component: Environment,
+    component: EnvironmentN,
   },
   {
     path: '/environment-action',
