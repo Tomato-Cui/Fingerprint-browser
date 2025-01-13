@@ -279,10 +279,8 @@ const removeSubmitHandle = () => {
 </script>
 
 <template>
-  <div class="flex flex-col p-3 bg-gray-50 h-main">
-    <div
-      class="flex overflow-hidden flex-col flex-1 px-2 bg-white rounded-lg shadow"
-    >
+  <div class="flex flex-col h-full">
+    <div class="flex overflow-hidden flex-col flex-1">
       <div class="flex flex-col pb-2 space-y-4">
         <div class="flex w-full">
           <div class="flex gap-2 items-center py-2 w-3/4">

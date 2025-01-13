@@ -30,6 +30,13 @@ pub async fn login(nickname: &str, password: &str) -> Result<JsonRespnse, anyhow
     Ok(json_response)
 }
 
+#[tokio::test]
+async fn feature() {
+    crate::setup().await;
+    let abc = login("liushui_new@126.com", "1").await;
+    eprintln!("{:?}", abc);
+}
+
 pub async fn regsiter(
     email: &str,
     code: &str,

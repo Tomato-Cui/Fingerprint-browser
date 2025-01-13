@@ -68,10 +68,14 @@ pub mod client {
                 "127.0.0.1:5678"
             };
 
-            Ok(Url::parse(&server_url)
+            let t = Url::parse(&server_url)
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
                 .join(&format!("/api/v1{}", resource))
-                .map_err(|e| anyhow::anyhow!("{:?}", e))?)
+                .map_err(|e| anyhow::anyhow!("{:?}", e))?;
+
+            eprintln!("{:?}", t);
+
+            Ok(t)
         }
 
         pub async fn post<T>(

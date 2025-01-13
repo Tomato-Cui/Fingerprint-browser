@@ -22,14 +22,22 @@ module.exports = {
       },
     },
     extend: {
-      spacing: {
-        'topbar': '66px', // 动态计算值
-        'main': 'calc(100vh - 66px)', // 动态计算值
+      fontFamily: {
+        'alimama-shuheiti': ['AlimamaShuHeiTi'],
       },
       colors: {
         'custom-light-blue': 'rgba(58, 132, 255, 0.05)', // 自定义浅蓝色
         'custom-white-blue': 'rgba(255, 255, 255, 1)', // 自定义白色
-        sidebar: "rgba(221, 230, 247, 1)",
+        sidebar: {
+          'DEFAULT': 'hsl(var(--sidebar-background))',
+          'foreground': 'hsl(var(--sidebar-foreground))',
+          'primary': 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          'accent': 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          'border': 'hsl(var(--sidebar-border))',
+          'ring': 'hsl(var(--sidebar-ring))',
+        },
         scrollbar: "rgb(176 195 230)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

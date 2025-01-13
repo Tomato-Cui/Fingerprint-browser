@@ -18,6 +18,7 @@ pub(crate) mod win_imports {
         Aes256Gcm, Key, Nonce,
     };
     pub use rand::RngCore;
+    extern crate winapi;
 
     pub use std::ptr;
     pub use winapi::shared::minwindef::DWORD;
