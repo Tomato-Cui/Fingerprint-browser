@@ -7,7 +7,7 @@ import { useEnvironmentCreateFromStore } from "@/stores/form/environment-create"
 import { useEnvironmentCreatesFromStore } from "@/stores/form/environment-creates";
 import { useImportCenterFromStore } from "@/stores/form/import-center";
 import {
-  environment_create,
+  environment_simple_create,
   environment_batch_create,
   environment_modify_info,
   environment_detail_create,
@@ -116,7 +116,7 @@ const onSubmit = () => {
           toast.success("环境信息更新成功：" + res.message);
         } else {
           // 创建逻辑
-          let res = await environment_create(name);
+          let res = await environment_simple_create(name);
           toast.success("环境创建成功：" + res.message);
         }
       } catch (error) {

@@ -20,12 +20,12 @@ import myAccout from '@/views/myAccout/myaccout.vue';
 import mydaili from '@/views/mydaili/mydaili.vue';
 import adddaili from '@/views/adddaili/adddaili.vue';
 import mylog from '@/views/mylog/mylog.vue';
-import Environment from '@/views/Environment/index.vue';
 import Divide from '@/views/Divide/index.vue';
 import TransferEnvironment from '@/views/transferEnvironment/index.vue';
 import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
-import EnvironmentN from '@/views/EnvironmentN/index.vue'
+import Environment from '@/views/EnvironmentN/index.vue'
+import { EnvironmentSimpleCreate, EnvironmentAdvancedCreate, EnvironmentBatchImport } from '@/views/environment-creates/index'
 
 import extensions from '@/views/extensions/index.vue'
 
@@ -38,7 +38,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/environment',
     name: 'environment',
-    component: EnvironmentN,
+    component: Environment,
+  },
+  {
+    path: '/environment-simple-create',
+    name: 'simple-create',
+    component: EnvironmentSimpleCreate,
+  },
+  {
+    path: '/environment-advanced-create',
+    name: 'advanced-create',
+    component: EnvironmentAdvancedCreate,
+  },
+  {
+    path: '/environment-batch-import',
+    name: 'batch-import',
+    component: EnvironmentBatchImport,
   },
   {
     path: '/environment-action',

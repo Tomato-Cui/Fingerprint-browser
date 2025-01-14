@@ -107,15 +107,27 @@ export const environment_detail_create = async (payload: EnvironmentInfo): Promi
     return await invoke('environment_detail_create', { payload })
 };
 
-export const environment_create = async (environmentName: String): Promise<any> => {
-    return await invoke('environment_create', { environmentName })
+export const environment_simple_create = async (
+    browserType: string,
+    osType: string,
+    numbers: number,
+    useEncrypt: boolean,
+    groupId?: number,
+): Promise<any> => {
+    return await invoke('environment_simple_create', {
+        browserType,
+        osType,
+        numbers,
+        useEncrypt,
+        groupId
+    })
 };
 
 export const environment_batch_create = async (environmentNames: Array<String>): Promise<any> => {
     return await invoke('environment_batch_create', { environmentNames })
 }
 
-export const  environment_modify_info= async (
+export const environment_modify_info = async (
     environmentUuid: String, payload: EnvironmentInfo): Promise<any> => {
     return await invoke('environment_modify_info', { environmentUuid, payload })
 };

@@ -13,10 +13,10 @@
     "windows": [
       {
         "title": "ads-hubstudio",
-        "width": 1285,
-        "minWidth": 985,
-        "height": 825,
-        "minHeight": 685,
+        "width": 1444,
+        "minWidth": 1333,
+        "height": 844,
+        "minHeight": 799,
         "resizable": true,
         "fullscreen": false,
         "center": true,

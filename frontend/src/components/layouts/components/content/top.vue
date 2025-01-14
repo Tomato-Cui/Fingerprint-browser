@@ -10,6 +10,9 @@ import {
   IconGlobal,
   IconImport,
 } from "@/assets/icons/sidebar/index";
+import { useRouter } from "vue-router";
+const router = useRouter();
+const toEnvrionmentCreatePage = () => router.push("/environment-simple-create");
 </script>
 
 <template>
@@ -19,6 +22,7 @@ import {
         <SidebarMenuButton
           tooltip="新建环境"
           class="p-0 pl-4 h-12 flex bg-gradient-to-l from-[#7D41FF] to-[#5E51FF] rounded-sm group-data-[state=collapsed]:justify-center"
+          @click="toEnvrionmentCreatePage"
         >
           <component :is="IconAddCircle" class="size-6" />
           <p
