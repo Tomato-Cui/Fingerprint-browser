@@ -83,7 +83,8 @@ const loadStoreExtension = () => {
     .catch((err) => {
       toast.warning(err);
     });
-};
+}
+
 const loadUserExtension = () => {
   extension_query_by_user(1, 10)
     .then((res) => {
@@ -107,8 +108,9 @@ const loadUserExtension = () => {
       toast.warning(err);
     });
 };
+
 onMounted(() => {
-  if (activeTab.value == "team") {
+  if (activeTab.value === "team") {
     loadUserExtension();
   }
 });
@@ -340,6 +342,7 @@ watch(activeTab, (newV) => {
                     下载完成
                   </p>
                 </div>
+
               </div>
               <button
                 v-if="activeTab === 'recommended'"
@@ -468,6 +471,7 @@ watch(activeTab, (newV) => {
         :extensionUuid="settingModelProps.extension_uuid"
         @close="() => (settingModelProps.open = false)"
       />
+
       <UpdateModel
         :open="updateModelProps.open"
         :title="updateModelProps.title"

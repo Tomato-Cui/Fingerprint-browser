@@ -27,6 +27,8 @@ import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
 import EnvironmentN from '@/views/EnvironmentN/index.vue'
 
+import extensions from '@/views/extensions/index.vue'
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -81,9 +83,9 @@ const routes: Array<RouteRecordRaw> = [
     component: WindowSync,
   },
   {
-    path: '/application-center',
-    name: 'application-center',
-    component: ApplicationCenter,
+    path: '/extensions',
+    name: 'extensions',
+    component: extensions,
   },
   {
     path: '/team/group',
