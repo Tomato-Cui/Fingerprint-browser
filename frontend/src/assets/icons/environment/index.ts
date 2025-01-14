@@ -1,5 +1,5 @@
 export { default as AssCircleIcon } from "./Add Circle.svg"
-export { default as AddCardIcon } from './add-card.svg'
+export { default as AddCardIcon } from './add-card.vue'
 export { default as AltArrowDownIcon } from './Alt Arrow Down.svg'
 export { default as ApiIcon } from './api.svg'
 export { default as BookmarkCircleIcon } from './Bookmark Circle.svg'

@@ -28,7 +28,8 @@
                     <FrameIcon class="size-5" />
                     <div class="flex items-center bg-[#EDEDFF80] w-full h-[40px] pl-[10px] rounded-lg">
                         <component :is="action.icon" class="mr-2 h-4 w-4" />
-                        <span class="text-sm">{{ action.label }}</span>
+                        <span class="text-sm flex-1">{{ action.label }}</span>
+                        <AltArrowDownIcon v-show="action.children" class="size-5"/>
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" v-model="action.visible" class="peer sr-only">
@@ -53,7 +54,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
+import { AltArrowDownIcon, RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
 
 onMounted(() => {
     emit('select', allActions.value)
@@ -70,9 +71,9 @@ const showQuickSettings = ref(false)
 const allActions = ref([
     { key: 'start', label: '启动', icon: StopCircleIcon, visible: true },
     { key: 'stop', label: '停止', icon: StopCircleIcon, visible: true },
-    { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true },
-    { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true },
-    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true },
+    { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, children:[{name: '标签1'}] },
+    { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, children:[{name: '分组1'}] },
+    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, children:[{name: '导出1'}] },
     { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true },
     { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true },
     { key: 'proxy', label: '修改代理', icon: PlateIcon, visible: true },
