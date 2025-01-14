@@ -73,8 +73,6 @@ pub mod client {
                 .join(&format!("/api/v1{}", resource))
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?;
 
-            eprintln!("{:?}", t);
-
             Ok(t)
         }
 

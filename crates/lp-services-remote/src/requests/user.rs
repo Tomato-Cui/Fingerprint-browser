@@ -33,7 +33,7 @@ pub async fn login(nickname: &str, password: &str) -> Result<JsonRespnse, anyhow
 #[tokio::test]
 async fn feature() {
     crate::setup().await;
-    let abc = login("liushui_new@126.com", "1").await;
+    let abc = login("1", "1").await;
     eprintln!("{:?}", abc);
 }
 

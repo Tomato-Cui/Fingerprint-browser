@@ -24,6 +24,7 @@ module.exports = {
     extend: {
       fontFamily: {
         'alimama-shuheiti': ['AlimamaShuHeiTi'],
+        'ping-fang-sc': ['PingFangSc'],
       },
       colors: {
         'custom-light-blue': 'rgba(58, 132, 255, 0.05)', // 自定义浅蓝色

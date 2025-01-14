@@ -6,8 +6,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useRouter } from "vue-router";
 
 import { menus } from "../../menu";
+const router = useRouter();
 </script>
 
 <template>
@@ -16,6 +18,7 @@ import { menus } from "../../menu";
       <SidebarMenuItem v-for="item in menus" :key="item.title" as-child>
         <SidebarMenuButton
           :tooltip="item.title"
+          @click="router.push(item.url)"
           :class="
             cn(
               'p-0 h-12 rounded-sm group-data-[state=collapsed]:!p-0',

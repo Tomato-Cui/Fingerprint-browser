@@ -52,8 +52,21 @@ pub async fn environment_detail_create(
 }
 
 #[tauri::command]
-pub async fn environment_create(environment_name: String) -> Result<JsonRespnse, tauri::Error> {
-    Ok(lp_services_remote::requests::environment::create(&environment_name).await?)
+pub async fn environment_simple_create(
+    browser_type: &str,
+    os_type: &str,
+    numbers: u32,
+    group_id: Option<u32>,
+    use_encrypt: bool,
+) -> Result<JsonRespnse, tauri::Error> {
+    Ok(lp_services_remote::requests::environment::simple_create(
+        browser_type,
+        os_type,
+        numbers,
+        group_id,
+        use_encrypt,
+    )
+    .await?)
 }
 
 #[tauri::command]

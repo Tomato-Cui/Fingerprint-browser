@@ -111,13 +111,26 @@ pub async fn query_by_extension(
     Ok(json_response)
 }
 
-pub async fn create(name: &str) -> Result<JsonRespnse, anyhow::Error> {
+pub async fn simple_create(
+    browser_type: &str,
+    os_type: &str,
+    numbers: u32,
+    group_id: Option<u32>,
+    use_encrypt: bool,
+) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
-        "name": name,
+        "browser_type": browser_type,
+        "os_type": os_type,
+        "numbers": numbers,
+        "group_id": group_id,
+        "use_encrypt": use_encrypt,
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments/create")?, &data)
+        .post(
+            client::Client::build_url("/environments/simple-create")?,
+            &data,
+        )
         .await?;
 
     Ok(json_response)
