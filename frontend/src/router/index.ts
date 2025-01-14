@@ -26,6 +26,8 @@ import TransferEnvironment from '@/views/transferEnvironment/index.vue';
 import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
 import EnvironmentN from '@/views/EnvironmentN/index.vue'
+import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/index.vue'
+import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -38,6 +40,18 @@ const routes: Array<RouteRecordRaw> = [
     name: 'environment',
     component: EnvironmentN,
   },
+
+  {
+    path: '/environment-manager-bookmark',
+    name: 'environment-manager-bookmark',
+    component: EnvironmentManagerBookmark,
+  },
+  {
+    path: '/environment-group-manager',
+    name: 'environment-group-manager',
+    component: EnvironmentGroupManager,
+  },
+
   {
     path: '/environment-action',
     name: 'environment-action',

@@ -1,72 +1,79 @@
 <script setup lang="ts">
 import { ref } from "vue";
-
+import { Circle, Filter, File } from "@/assets/icons/environment-group-manage";
 import {
-  AddCircle,
-  IconApple,
-  NewBookmark,
   SearchIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
 } from "@/assets/icons/environment-bookmark-image";
-
+import NewGroup from "./new-group.vue";
 interface Tab {
   id: string;
   name: string;
 }
 
-interface Bookmark {
+interface Groupmanage {
   id: number;
   name: string;
-  url: string;
+  top: string;
+  environment_count: number;
+  grant_user: string;
   selected: boolean;
 }
 
 const selectAll = ref(false);
 
-const bookmarks = ref<Bookmark[]>([
+const groupmanage = ref<Groupmanage[]>([
   {
     id: 1,
     name: "feishu",
-    url: "https://gcn1b5cn2pro.feishu.cn/wiki/EcX8w9yw2iCh87kFGyrctxQknQe",
+    top: "--",
+    environment_count: 1,
+    grant_user: "--",
     selected: false,
   },
   {
     id: 2,
     name: "feishu2",
-    url: "https://gcn1b5cn2pro.feishu.cn/wiki/EcX8w9yw2iCh87kFGyrctxQknQe",
+    top: "--",
+    environment_count: 1,
+    grant_user: "--",
     selected: false,
   },
   {
     id: 3,
-    name: "feishu3",
-    url: "https://gcn1b5cn2pro.feishu.cn/wiki/EcX8w9yw2iCh87kFGyrctxQknQe",
+    name: "feishu2",
+    top: "--",
+    environment_count: 1,
+    grant_user: "--",
     selected: false,
   },
   {
     id: 4,
-    name: "feishu4",
-    url: "https://gcn1b5cn2pro.feishu.cn/wiki/EcX8w9yw2iCh87kFGyrctxQknQe",
+    name: "feishu2",
+    top: "--",
+    environment_count: 1,
+    grant_user: "--",
     selected: false,
   },
 ]);
 
 const toggleSelectAll = () => {
-  bookmarks.value.forEach((bookmark) => {
-    bookmark.selected = selectAll.value;
+  groupmanage.value.forEach((Groupmanage) => {
+    Groupmanage.selected = selectAll.value;
   });
 };
 
-const editBookmark = (bookmark: Bookmark) => {
-  console.log("Edit bookmark:", bookmark);
+const editGroupmanage = (Groupmanage: Groupmanage) => {
+  console.log("Edit Groupmanage:", Groupmanage);
 };
 
-const copyBookmark = (bookmark: Bookmark) => {
-  console.log("Copy bookmark:", bookmark);
+const copyGroupmanage = (Groupmanage: Groupmanage) => {
+  console.log("Copy Groupmanage:", Groupmanage);
 };
 
-const deleteBookmark = (bookmark: Bookmark) => {
-  console.log("Delete bookmark:", bookmark);
+const deleteGroupmanage = (Groupmanage: Groupmanage) => {
+  console.log("Delete Groupmanage:", Groupmanage);
 };
 
 const tabs: Tab[] = [
@@ -82,10 +89,7 @@ const pageSize = ref(10);
 const pageSizes = [10, 20, 50];
 const totalPages = ref(1);
 
-const createBookmark = () => {
-  // Implement bookmark creation logic
-  console.log("Creating new bookmark");
-};
+const createGroupManage = ref(false);
 
 const prevPage = () => {
   if (currentPage.value > 1) {
@@ -104,8 +108,15 @@ const nextPage = () => {
   <div class="flex flex-col h-full">
     <!-- Header -->
     <div class="flex justify-between items-center mt-1">
-      <h4 class="text-2xl font-semibold leading-8">书签</h4>
-      <div class="flex gap-4 items-center">
+      <h4 class="text-2xl font-semibold leading-8">分组管理</h4>
+
+      <div class="flex gap-2 items-center">
+        <button
+          class="inline-flex items-center px-2 py-2 text-white rounded-md hover:bg-[#4338CA] transition-colors border border-gray-300"
+        >
+          <Circle class="w-[17.5px] h-[18.3px] text-gray-400" />
+        </button>
+
         <div class="relative">
           <span class="absolute left-2 top-1/2 transform -translate-y-1/2">
             <SearchIcon class="w-[14px] h-[14px] text-left text-gray-400" />
@@ -117,39 +128,32 @@ const nextPage = () => {
             class="pl-8 w-64 h-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
+
         <button
-          class="inline-flex items-center px-4 py-2 bg-[#4F46E5] text-white rounded-md hover:bg-[#4338CA] transition-colors"
-          @click="createBookmark"
+          class="inline-flex items-center px-2 py-2 text-black rounded-md hover:bg-[#4338CA] transition-colors border border-gray-300"
         >
-          <NewBookmark class="mr-2 w-5 h-5" />
-          新建书签
+          <Filter
+            class="w-[10.21px] h-[10.21px] text-gray-400 items-center justify-center mx-1"
+          />
+          <span class="font-sans text-base font-semibold leading-6 text-center">
+            筛选
+          </span>
+        </button>
+
+        <button
+          class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 bg-[#4F46E5] text-white outline-gray-50 hover:outline-gray-100"
+          @click="createGroupManage = true"
+        >
+          <File class="mr-2 w-[11.67px] h-[11.67px]" />
+          新建分组
         </button>
       </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="mb-3 border-b border-gray-200">
-      <nav class="flex -mb-px space-x-8">
-        <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          @click="activeTab = tab.id"
-          :class="[
-            activeTab === tab.id
-              ? 'border-indigo-500 text-indigo-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
-          ]"
-        >
-          {{ tab.name }}
-        </button>
-      </nav>
     </div>
 
     <!-- Empty State -->
     <!-- <div class="flex flex-col justify-center items-center py-16">
       <div class="relative mb-6 w-48 h-48">
-        <IconApple class="w-[239px] h-[191px]" />
+        <IconApple class="w-[239px] h-[191px] border " />
       </div>
       <p
         class="mb-6 max-w-lg text-base font-normal leading-6 text-center text-gray-500"
@@ -158,14 +162,14 @@ const nextPage = () => {
       </p>
       <button
         class="inline-flex items-center px-4 py-2 bg-[#4F46E5] text-white rounded-md hover:bg-[#4338CA] transition-colors"
-        @click="createBookmark"
+        @click="createGroupmanage"
       >
         <AddCircle class="mr-2 w-5 h-5" />
         新建书签
       </button>
     </div> -->
 
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col mt-2 h-full">
       <div class="w-full rounded-lg border border-gray-200">
         <table class="min-w-full">
           <!-- Table Header -->
@@ -184,15 +188,33 @@ const nextPage = () => {
                 class="py-3.5 pr-3 pl-4 text-sm font-semibold text-left text-gray-900"
               >
                 <span class="font-thin text-gray-300">|&nbsp;</span>
-                书签名称
+                分组名称
               </th>
+
               <th
                 scope="col"
                 class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
               >
                 <span class="font-thin text-gray-300">|&nbsp;</span>
-                链接
+                置顶
               </th>
+
+              <th
+                scope="col"
+                class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+              >
+                <span class="font-thin text-gray-300">|&nbsp;</span>
+                环境数
+              </th>
+
+              <th
+                scope="col"
+                class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+              >
+                <span class="font-thin text-gray-300">|&nbsp;</span>
+                授权成员
+              </th>
+
               <th
                 scope="col"
                 class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
@@ -206,41 +228,45 @@ const nextPage = () => {
           <!-- Table Body -->
           <tbody class="bg-white divide-y divide-gray-200">
             <tr
-              v-for="bookmark in bookmarks"
-              :key="bookmark.id"
+              v-for="Groupmanage in groupmanage"
+              :key="Groupmanage.id"
               class="hover:bg-gray-50"
             >
               <td class="py-4 pr-3 pl-4 whitespace-nowrap">
                 <input
                   type="checkbox"
                   class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-600"
-                  v-model="bookmark.selected"
+                  v-model="Groupmanage.selected"
                 />
               </td>
               <td
                 class="py-4 pr-3 pl-4 text-sm text-gray-900 whitespace-nowrap"
               >
-                {{ bookmark.name }}
+                {{ Groupmanage.name }}
               </td>
               <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                {{ bookmark.url }}
+                {{ Groupmanage.top }}
               </td>
+
+              <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
+                {{ Groupmanage.environment_count }}
+              </td>
+
+              <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
+                {{ Groupmanage.grant_user }}
+              </td>
+
               <td class="px-3 py-4 text-sm whitespace-nowrap">
                 <div class="flex gap-2 justify-start items-center">
                   <button
-                    @click="editBookmark(bookmark)"
+                    @click="editGroupmanage(Groupmanage)"
                     class="text-[#4F46E5] hover:bg-indigo-50 px-2 py-1 rounded border border-[#5050FA] border-[#5050FA] bg-[#F0F5FF]"
                   >
-                    编辑
+                    授权
                   </button>
+
                   <button
-                    @click="copyBookmark(bookmark)"
-                    class="text-[#FA8C16] hover:bg-indigo-50 px-2 py-1 rounded border border-[#FA8C16] border-[#FA8C16] bg-[#FFF1E8]"
-                  >
-                    复制到
-                  </button>
-                  <button
-                    @click="deleteBookmark(bookmark)"
+                    @click="deleteGroupmanage(Groupmanage)"
                     class="px-2 py-1 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] border-[#ED003F] bg-[#FFE2E2]"
                   >
                     删除
@@ -282,4 +308,5 @@ const nextPage = () => {
       </select>
     </div>
   </div>
+  <NewGroup v-model:createGroupManage="createGroupManage" />
 </template>
