@@ -21,8 +21,8 @@ const allColumns = ref([
     { key: 'proxy', label: '代理信息', visible: true },
     { key: 'description', label: '备注', visible: false },
     { key: 'tab', label: '标签', visible: false },
-    { key: 'group', label: '分组', visible: false },
-    { key: 'create', label: '创建信息', visible: false },
+    { key: 'groupName', label: '分组', visible: false },
+    { key: 'create_at', label: '创建信息', visible: false },
     { key: 'lastOpen', label: '最后启动信息', visible: false },
 ])
 
@@ -39,8 +39,7 @@ const cancelChoose = () => {
 </script>
 
 <template>
-    <!-- <div v-show="props.open" class="fixed inset-0 z-50 flex items-start justify-end"> -->
-        <!-- <div class="fixed inset-0 bg-black/20" @click="emit('close')"></div> -->
+        <!-- <div v-show="props.open" class="fixed inset-0 bg-black/0" @click="emit('close')"></div> -->
         <div v-show="props.open" class="mt-16 mr-4 min-w-72 rounded-lg bg-white p-4 shadow-lg border">
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="text-lg font-medium">自定义表格字段</h3>
@@ -53,10 +52,10 @@ const cancelChoose = () => {
                     <FrameIcon class="size-5"/>
                     <span class="text-sm w-full bg-[#EDEDFF80] h-[40px] pl-4 rounded-lg flex items-center mx-4">{{ column.label }}</span>
                     <label class="relative inline-flex cursor-pointer items-center">
-                        <input type="checkbox" v-model="column.visible" :disabled="column.key == 'id'" class="peer sr-only">
+                        <input type="checkbox" v-model="column.visible" :disabled="column.key == 'id'" class="peer sr-only" :class="{'cursor-not-allowed': column.key == 'id'}">
                         <div
                             class="h-5 w-9 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full"
-                            :class="column.key=='id' ? 'peer-checked:bg-blue-300' : 'peer-checked:bg-blue-600'"
+                            :class="column.key == 'id' ? 'peer-checked:bg-blue-300' : 'peer-checked:bg-blue-600'"
                             >
                         </div>
                     </label>
@@ -73,5 +72,4 @@ const cancelChoose = () => {
                 </button>
             </div>
         </div>
-    <!-- </div> -->
 </template>

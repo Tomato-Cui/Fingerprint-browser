@@ -29,6 +29,9 @@ import { EnvironmentSimpleCreate, EnvironmentAdvancedCreate, EnvironmentBatchImp
 
 import extensions from '@/views/extensions/index.vue'
 
+import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/index.vue'
+import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -55,6 +58,18 @@ const routes: Array<RouteRecordRaw> = [
     name: 'batch-import',
     component: EnvironmentBatchImport,
   },
+
+  {
+    path: '/environment-manager-bookmark',
+    name: 'environment-manager-bookmark',
+    component: EnvironmentManagerBookmark,
+  },
+  {
+    path: '/environment-group-manager',
+    name: 'environment-group-manager',
+    component: EnvironmentGroupManager,
+  },
+
   {
     path: '/environment-action',
     name: 'environment-action',

@@ -51,7 +51,7 @@ import EditAccount from "@/views/Environment/com/edit-account.vue";
 import { useRouter } from "vue-router";
 import { AlertModel } from "@/components/alert-model";
 import CreateGroup from "@/views/Divide/com/create-group.vue";
-import { IconBookMark } from "../../assets/icons/environment-image";
+import { IconBookMark } from "../../assets/icons/environment-bookmark-image";
 
 const router = useRouter();
 const browserStatusStore = useBrowserStatusStore();
