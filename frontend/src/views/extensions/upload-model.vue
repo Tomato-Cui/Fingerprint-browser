@@ -250,7 +250,7 @@ const addExtensionHandle = async () => {
   </Model>
 </template>
 
-<style scoped>
+<style >
 .description-wrapper p:first-of-type {
   @apply h-auto text-sm py-4 text-gray-800;
 }
