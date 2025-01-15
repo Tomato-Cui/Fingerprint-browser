@@ -176,6 +176,7 @@ const addExtensionHandle = async () => {
           </div>
         </div>
       </TabsContent>
+
       <TabsContent value="package">
         <div class="flex flex-col justify-start gap-x-8 py-4">
           <div class="flex flex-col gap-x-8 py-4">
@@ -250,7 +251,7 @@ const addExtensionHandle = async () => {
   </Model>
 </template>
 
-<style scoped>
+<style >
 .description-wrapper p:first-of-type {
   @apply h-auto text-sm py-4 text-gray-800;
 }
