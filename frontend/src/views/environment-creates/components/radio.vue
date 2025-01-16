@@ -19,16 +19,17 @@ const emits = defineEmits<Emits>();
 </script>
 
 <template>
-  <div class="flex gap-x-4 border-[1.4px] border-[#C5CEE0] p-1 rounded-lg h-10">
+  <div class="flex gap-x-2 border-[1.4px] border-[#C5CEE0] p-1 rounded-lg">
     <div
       v-for="item in props.data"
       :class="
         cn(
-          'flex items-center space-x-2 p-1 px-2 rounded-lg cursor-pointer',
+          'flex items-center space-x-1 py-1.5 px-2 rounded-lg cursor-pointer',
           props.check.value == item.value
             ? item.icon
               ? 'bg-[#5050FA] text-white fill-white'
-              : 'bg-[#7171FF] text-white fill-white'
+              // : 'bg-[#7171FF] text-white fill-white'
+              : 'bg-[#5050FA] text-white fill-white'
             : ''
         )
       "

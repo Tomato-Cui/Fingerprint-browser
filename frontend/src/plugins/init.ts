@@ -25,10 +25,6 @@ export default {
                 e.preventDefault();
                 return false;
             }
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                return false;
-            }
             if (e.key === 'F5') {
                 e.preventDefault();
                 return false;
