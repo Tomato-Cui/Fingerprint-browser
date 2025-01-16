@@ -34,12 +34,12 @@
 
                 <div class="flex gap-2 relative">
                     <button v-for="item in headOperate" @click="item.go"
-                        class="flex border border-gray-300 px-2 py-1 gap-2 rounded-lg h-[35px] items-center">
+                        class="flex border border-gray-300 px-2 py-1 gap-2 rounded-lg h-[35px] items-center hover:bg-blue-50">
                         <component :is="item.icon" class="size-5" />
                         {{ item.label }}
                     </button>
                     <SynchronizerIndex :open="synchronizerDialog" @close="synchronizerDialog = false"
-                        class="absolute top-10 z-[30]" />
+                        class="absolute top-10" />
                 </div>
             </div>
         </header>
@@ -48,11 +48,21 @@
         <GroupChoose class="flex flex-col flex-1">
             <!-- Action Buttons -->
             <div class="mb-4 flex items-center space-x-2 h-[60px]">
-                <OpenBrowserIcon class="w-[106px] h-[43px] cursor-pointer" @click="startAll" />
+                <!-- <OpenBrowserIcon class="w-[106px] h-[43px]" :class="{'cursor-not-allowed': selectedItems.length==0, 'hover:bg-gray-50 cursor-pointer': selectedItems.length!=0}" @click="selectedItems.length!=0 ? startAll() : void(0)" /> -->
+                <div class="w-[100px] h-[40px] bg-[#7744ff] flex rounded-lg items-center relative"
+                    :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'cursor-pointer': selectedItems.length != 0 }"
+                    @click="selectedItems.length != 0 ? startAll() : void (0)">
+                    <RoundArrowRight class="size-6 mx-3" />
+                    <span class="text-white absolute left-12">启动</span>
+                    <div class="flex-1 flex justify-end">
+                        <HelfGlobalIcon class="size-[51px] opacity-10" />
+                    </div>
+                </div>
                 <div class="flex flex-1 overflow-x-auto space-x-2">
                     <button v-for="action in visibleActions" :key="action.key" v-show="action.key !== 'start'"
-                        @click="action.action"
-                        class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm hover:bg-gray-50 min-w-fit h-[35px] gap-2">
+                        @click="selectedItems.length != 0 ? action.action : void (0)"
+                        :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'hover:bg-gray-50': selectedItems.length != 0 }"
+                        class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
                         <component :is="action.icon" class="mr-1.5 h-4 w-4" />
                         <span>{{ action.label }}</span>
                         <AltArrowDownIcon v-show="action.children" class="size-5" />
@@ -135,7 +145,7 @@
                                     <!-- 操作格 -->
                                     <div v-if="key === 'action'" class="flex justify-between items-center ">
                                         <span @click="startEnv(item.uuid)"
-                                            class="border px-2 py-1 rounded-lg border-[#5050fa] bg-[#EDEDFF] cursor-pointer">{{
+                                            class="border w-[70px] flex justify-center py-1 rounded-lg border-[#5050fa] bg-[#EDEDFF] cursor-pointer hover:bg-blue-100">{{
                                                 value
                                             }}</span>
                                         <span class="">
@@ -171,7 +181,7 @@
                         class=" size-[200px]  text-blue-400 border-gray-300 flex items-center justify-center" />
                     <p>您可创建具有独立高质量指纹的profile，也可自定义编辑指纹信息</p>
                     <button @click="router.push('/environment-action/create')"
-                        class="p-4 bg-[#5050FA] text-white rounded-lg flex items-center gap-3">
+                        class="p-2 bg-[#5050FA] text-white rounded-lg flex items-center gap-3">
                         <AssCircleIcon class="size-5" />
                         新建环境
                     </button>
@@ -196,6 +206,7 @@ import GroupChoose from './com/group-choose.vue'
 // import Auth from './synchronizer/auth.vue'
 import SynchronizerIndex from './synchronizer/index.vue'
 import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, OpenBrowserIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index.ts"
+import { HelfGlobalIcon, RoundArrowRight } from '@/assets/icons/environment/index'
 import { environment_query, environment_query_by_group } from '@/commands/environment'
 import { useRouter, useRoute } from 'vue-router'
 import { OneFrameIcon } from '@/assets/icons/environment/index.ts'

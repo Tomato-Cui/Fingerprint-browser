@@ -15,3 +15,4 @@ export { default as IconHeadphonesRound } from "./Electronic  Devices/Headphones
 export { default as IconMailbox } from "./Messages Conversation/Mailbox.svg";
 export { default as IconVector } from "./Vector.svg";
 export { default as IconGroup1 } from "./Group 1.svg";
+export { default as IconSettings } from "./Settings.svg";

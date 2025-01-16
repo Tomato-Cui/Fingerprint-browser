@@ -1,6 +1,6 @@
 <template>
     <div v-if="props.open"
-        class="absolute top-10 flex flex-col w-full max-w-md rounded-2xl overflow-hidden bg-white p-3 max-h-[500px] min-h-[400px] border shadow-xl z-10">
+        class="absolute top-10 flex flex-col w-full max-w-md rounded-2xl overflow-hidden bg-white p-3 max-h-[500px] min-h-[400px] border shadow-xl z-50">
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-2 border-b">
             <h2 class="text-lg font-medium">同步器</h2>
