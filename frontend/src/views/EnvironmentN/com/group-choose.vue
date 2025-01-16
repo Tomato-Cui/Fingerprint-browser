@@ -35,7 +35,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card className="w-full flex flex-col p-0 flex-1 overflow-auto">
+  <Card className="flex flex-col p-0 flex-1 overflow-y-auto">
     <CardHeader class="p-0">
       <ul class="bg-white border-b rounded-none w-full flex justify-start pb-0 px-0 text-sm mb-3 space-x-6">
         <li :key="item.id" v-for="item in tabs" @click="router.push(item.href)" :class="cn(
