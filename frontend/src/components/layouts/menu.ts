@@ -9,7 +9,7 @@ import {
 export const menus = [
     {
         title: "环境管理",
-        url: "/environment",
+        url: "/environment/0",
         icon: IconHomeSmile,
         isActive: true,
     },

@@ -359,7 +359,7 @@ const handleLogin = () => {
       if (res.code == 1 && token) {
         if (token) {
           toast.success(res.message);
-          router.push("/environment");
+          router.push("/environment/0");
           userStore.login({
             account: loginForm.value.username,
           });

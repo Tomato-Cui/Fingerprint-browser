@@ -39,7 +39,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Login,
   },
   {
-    path: '/environment',
+    path: '/environment/:id',
     name: 'environment',
     component: Environment,
   },
