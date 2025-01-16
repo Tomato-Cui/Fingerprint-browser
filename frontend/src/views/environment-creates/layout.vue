@@ -67,6 +67,8 @@ const tabs = [
         </li>
       </ul>
     </CardHeader>
-    <slot />
+    <div class="grow flex flex-col overflow-hidden">
+      <slot />
+    </div>
   </Card>
 </template>

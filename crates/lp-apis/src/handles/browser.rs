@@ -27,7 +27,7 @@ pub async fn starts(Json(payload): Json<StartsPayload>) -> impl IntoResponse {
                 result.insert(
                     environment_uuid.to_string(),
                     json!({
-                        "environment_id": environment_uuid.to_string(),
+                        "environment_uuid": environment_uuid.to_string(),
                         "status":  false,
                         "message": format!("启动失败: {}", e),
                     }),

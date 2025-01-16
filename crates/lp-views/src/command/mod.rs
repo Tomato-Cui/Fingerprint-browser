@@ -6,6 +6,7 @@ pub mod environment_fingerprint;
 pub mod environment_group;
 pub mod environment_proxies;
 pub mod environment_proxy_group;
+pub mod environment_tag;
 pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod extension;
@@ -25,6 +26,7 @@ pub use environment_fingerprint as environment_fingerprint_command;
 pub use environment_group as environment_group_command;
 pub use environment_proxies as environment_proxies_command;
 pub use environment_proxy_group as environment_proxy_group_command;
+pub use environment_tag as environment_tag_command;
 pub use environment_transfer_history as environment_transfer_history_command;
 pub use environment_trash as environment_trash_command;
 pub use extension as extension_command;
@@ -116,6 +118,11 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         environment_group_command::environment_group_create,
         environment_group_command::environment_group_modify,
         environment_group_command::environment_group_delete,
+        environment_tag_command::environment_tag_query_id,
+        environment_tag_command::environment_tag_query,
+        environment_tag_command::environment_tag_create,
+        environment_tag_command::environment_tag_modify,
+        environment_tag_command::environment_tag_delete,
         environment_proxies_command::environment_proxies_query_id,
         environment_proxies_command::environment_proxies_query,
         environment_proxies_command::environment_proxies_query_by_group,

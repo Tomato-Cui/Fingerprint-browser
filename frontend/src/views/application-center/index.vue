@@ -481,11 +481,10 @@ watch(activeTab, (newV) => {
   </div>
 </template>
 
-<style>
+<style >
 .toggle-checkbox:checked {
   @apply right-0 border-blue-600;
 }
-
 .toggle-checkbox:checked + .toggle-label {
   @apply bg-blue-600;
 }
