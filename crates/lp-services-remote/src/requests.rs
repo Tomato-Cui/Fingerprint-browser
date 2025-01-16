@@ -6,6 +6,7 @@ pub mod environment_fingerprint;
 pub mod environment_group;
 pub mod environment_proxies;
 pub mod environment_proxy_group;
+pub mod environment_tag;
 pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod extension;

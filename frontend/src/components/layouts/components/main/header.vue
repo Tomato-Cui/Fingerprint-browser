@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   IconRestart,
@@ -53,21 +45,6 @@ import {
           <IconHeadphonesRound />联系我们
         </button>
       </div>
-    </div>
-    <div class="flex items-center gap-2 px-4 mt-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="#" class="text-xs">
-              Building Your Application
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator> / </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage class="text-xs">Data Fetching</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
     </div>
   </header>
 </template>

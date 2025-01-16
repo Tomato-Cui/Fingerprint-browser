@@ -4,8 +4,15 @@ import {
   IconMacOs,
   IconWindowOs,
   IconFirefox,
-  IconChrome,
 } from "@/assets/icons/index";
+import {
+  IconChrome,
+  IconFrame,
+  IconFrame1,
+  IconFrame2,
+  IconFrame3,
+  IconFrame4,
+} from "@/assets/icons/environment-creates/simple-create/index";
 import {
   Accordion,
   AccordionContent,
@@ -22,13 +29,19 @@ import {
   SelectValue,
 } from "@/components/select";
 import Input from "@/components/input.vue";
+import { Textarea } from "@/components/ui/textarea";
 import { CopyIcon, FolderIcon, FolderPlusIcon } from "lucide-vue-next";
 import Alignment from "../components/alignment.vue";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import * as XLSX from "xlsx";
+import { useEnvironmentCreatesFromStore } from "@/stores/form/environment-creates";
 import { useImportCenterFromStore } from "@/stores/form/import-center.js";
+import { useRouter } from "vue-router";
 import Layout from "../layout.vue";
+import Radio, { type RadioInterface } from "../components/radio.vue";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+const environmentCreatesFrom = useEnvironmentCreatesFromStore();
 const importFrom = useImportCenterFromStore() as any;
 // 状态管理
 const isDragging = ref(false);
@@ -109,537 +122,656 @@ const handleDrop = async (e: any) => {
     }
   }
 };
+
+const router = useRouter();
+
+const data = {
+  browserTypes: [
+    { value: "chrome", icon: IconChrome },
+    { value: "firefox", icon: IconFrame },
+  ] as RadioInterface[],
+  osTypes: [
+    { value: "Windows", icon: IconFrame1 },
+    { value: "MacOs", icon: IconFrame2 },
+    { value: "Android", icon: IconFrame3 },
+    { value: "IOS", icon: IconFrame4 },
+  ] as RadioInterface[],
+  encrypts: [{ value: "开启" }, { value: "关闭" }] as RadioInterface[],
+  groups: [{ id: 0, value: "未知分组" }] as any[],
+  proxy_methods: [
+    { id: 0, value: "新代理" },
+    { id: 1, value: "使用现有代理" },
+  ],
+  timezones: [
+    { id: 0, value: "匹配IP" },
+    { id: 1, value: "自定义" },
+  ],
+  webRtcs: [
+    { id: 0, value: "转发" },
+    { id: 1, value: "隐私" },
+    { id: 2, value: "替换" },
+    { id: 3, value: "真实" },
+    { id: 4, value: "禁用" },
+  ],
+  geolocations: [
+    { id: 0, value: "询问" },
+    { id: 1, value: "禁用" },
+  ],
+  languages: [
+    { id: 0, value: "匹配IP" },
+    { id: 1, value: "自定义" },
+  ],
+  resolution: [
+    { id: 0, value: "真实" },
+    { id: 1, value: "自定义" },
+  ],
+  font: [
+    { id: 0, value: "真实" },
+    { id: 1, value: "自定义" },
+  ],
+  canvas: [
+    { id: 0, value: "噪音" },
+    { id: 1, value: "真实" },
+  ],
+  webGLI: [
+    { id: 0, value: "噪音" },
+    { id: 1, value: "真实" },
+  ],
+  webGLM: [
+    { id: 0, value: "真实" },
+    { id: 1, value: "关闭硬件加速" },
+  ],
+  webGPU: [
+    { id: 0, value: "真实" },
+    { id: 1, value: "禁用" },
+    { id: 2, value: "基于WebGL匹配" },
+  ],
+  zz: [
+    { id: 0, value: "噪音" },
+    { id: 1, value: "真实" },
+  ],
+  yz: [
+    { id: 0, value: "隐私" },
+    { id: 1, value: "真实" },
+  ],
+  kg: [
+    { id: 0, value: "开启" },
+    { id: 1, value: "关闭" },
+  ],
+};
+
+const proxy_method = ref<RadioInterface>({ value: "新代理" });
+const forms = reactive({
+  browserType: ref<RadioInterface>({
+    value: "chrome",
+  }),
+  osType: ref<RadioInterface>({
+    value: "Windows",
+  }),
+  encryPtSwitch: ref<RadioInterface>({
+    value: "关闭",
+  }),
+  numbers: ref<number>(1),
+  group: ref<any>(0),
+});
 </script>
 <template>
   <Layout>
-    <div class="space-y-4 px-6 py-3">
-      <p class="text-gray-600 text-sm">
-        请点击下载窗口导入模板，一次性最多导入500个窗口
-      </p>
-
-      <div
-        class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center"
-        @dragover.prevent="handleDragOver"
-        @dragleave.prevent="handleDragLeave"
-        @drop.prevent="handleDrop"
-        :class="{ 'bg-blue-50 border-blue-200': isDragging }"
-      >
-        <!-- 上传成功后的显示区域 -->
-        <div v-if="isUploaded" class="mb-4">
-          <CheckCircleIcon class="w-12 h-12 mx-auto text-green-500" />
-          <p class="text-green-600 mt-2">文件上传成功！</p>
-          <p class="text-sm text-gray-500">文件名：{{ uploadedFileName }}</p>
-        </div>
-
-        <!-- 上传前的显示区域 -->
-        <div v-else>
-          <div class="mb-4">
-            <FolderIcon class="w-12 h-12 mx-auto text-gray-300" />
-          </div>
-
-          <p class="text-gray-600 mb-2">请拖拽到此处或点击上传</p>
-          <p class="text-sm text-gray-500">
-            请将编辑好的文件在此处上传，仅支持.xlsx类型文件，最大不超过5MB。
-          </p>
-        </div>
-
-        <!-- 文件输入 -->
-        <input
-          type="file"
-          ref="fileInput"
-          accept=".xlsx"
-          class="hidden"
-          v-bind="importFrom.forms.fileProps"
-          @change="handleFileSelect"
-        />
-
-        <!-- 上传按钮 -->
-        <div class="flex justify-center">
-          <button
-            class="mt-4 px-6 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50 flex justify-center items-center"
-            @click="triggerFileInput"
-          >
-            <FolderPlusIcon class="w-6 h-6 mx-auto text-gray-300 mr-2" />
-            上传文件
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <Accordion type="single" class="w-full px-6 py-3" collapsible>
-      <AccordionItem class="border-0" value="basic-setting">
-        <AccordionTrigger
-          class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-          >基础设置</AccordionTrigger
+    <div class="grow overflow-hidden">
+      <div class="overflow-y-auto h-full my-3">
+        <Accordion
+          type="single"
+          class="w-full px-4"
+          collapsible
+          default-value="basic-setting"
         >
-        <AccordionContent class="px-4 space-y-4">
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
+          <AccordionItem class="border-0" value="basic-setting">
+            <AccordionTrigger
+              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              >基础设置</AccordionTrigger
             >
-              名称
-            </p>
-            <div class="relative text-sm w-full">
-              <Input type="text" placeholder="请输入环境名称" class="w-full" />
-              <span class="absolute right-3 top-2 text-xs text-gray-400"
-                >0/100</span
-              >
-            </div>
-          </div>
-
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
-              浏览器
-            </p>
-            <div class="w-full">
-              <div class="w-1/2 flex gap-x-4">
-                <Select>
-                  <SelectTrigger>
-                    <IconChrome class="w-6 h-6" />
-                    <SelectValue
-                      placeholder="Chrome"
-                      class="w-full pl-4 rounded-lg outline-none"
+            <AccordionContent class="px-10 space-y-4 py-1">
+              <div class="flex items-center">
+                <p class="w-32 text-left">名称</p>
+                <div>
+                  <div class="relative text-sm w-full">
+                    <Input
+                      v-model="environmentCreatesFrom.forms.environmentName"
+                      v-bind="environmentCreatesFrom.forms.environmentNameProps"
+                      type="text"
+                      placeholder="请输入浏览器名称"
+                      class="w-full"
+                      maxlength="10"
                     />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="chrome"> Chrome </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Select>
-                  <SelectTrigger>
-                    <IconFirefox class="w-6 h-6" />
-                    <SelectValue
-                      placeholder="FireFox"
-                      class="w-full pl-4 rounded-lg outline-none"
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="firefox"> FireFox </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
-              操作系统
-            </p>
-            <div class="w-full">
-              <div class="flex gap-4">
-                <button
-                  class="flex items-center gap-2 px-4 py-2 border rounded-md bg-blue-50 border-blue-200 text-blue-600"
-                >
-                  <Input type="checkbox" checked class="rounded" />
-                  <IconWindowOs class="w-5 h-5" />
-                  Windows
-                </button>
-                <button
-                  class="flex items-center gap-2 px-4 py-2 border rounded-md"
-                >
-                  <Input type="checkbox" class="rounded" />
-                  <IconMacOs class="w-5 h-5" />
-                  MacOs
-                </button>
-                <button
-                  class="flex items-center gap-2 px-4 py-2 border rounded-md"
-                >
-                  <Input type="checkbox" class="rounded" />
-                  <IconLinuxOs class="w-5 h-5" />
-                  Linux
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
-              User-Agent
-            </p>
-            <div class="w-full">
-              <div class="flex gap-4">
-                <Select>
-                  <SelectTrigger class="w-1/4">
-                    <SelectValue
-                      placeholder="全部"
-                      class="w-full p-2 rounded-lg outline-none"
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="all"> 全部 </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <div class="flex-auto relative">
-                  <Input
-                    type="text"
-                    value="Mozilla/5.0(Windows NT 10.0;Win64; x64)..."
-                    class="w-full text-sm text-gray-500"
-                    readonly
-                  />
-                  <div class="absolute right-2 top-2 flex gap-2">
-                    <button class="p-1 hover:bg-gray-100 rounded">
-                      <CopyIcon class="w-4 h-4 text-gray-400" />
-                    </button>
-                    <button class="p-1 hover:bg-gray-100 rounded">
-                      <Link class="w-4 h-4 text-blue-600" />
-                    </button>
+                    <span class="absolute right-3 top-2 text-xs text-gray-400"
+                      >{{
+                        environmentCreatesFrom.forms.environmentName?.length ||
+                        0
+                      }}/10</span
+                    >
+                    <span class="text-red-400 text-xs">{{
+                      environmentCreatesFrom.errors.name
+                    }}</span>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+              <div class="flex items-center">
+                <p class="w-32 text-left">浏览器</p>
+                <Radio
+                  :check="forms.browserType"
+                  :data="data.browserTypes"
+                  @update:check="(v) => (forms.browserType = v)"
+                />
+              </div>
 
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
-              分组
-            </p>
-            <div class="w-full">
-              <div class="flex gap-x-4">
+              <div class="space-y-2 flex items-center">
+                <p class="w-32 text-left">操作系统</p>
+                <Radio
+                  :check="forms.osType"
+                  :data="data.osTypes"
+                  @update:check="(v) => (forms.osType = v)"
+                />
+              </div>
+
+              <div class="flex">
+                <div class="flex items-start justify-start">
+                  <p class="w-32 text-left text-sm">UA</p>
+                </div>
+                <div class="w-1/2">
+                  <div class="flex flex-col gap-4">
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder="全部"
+                          class="w-full p-2 rounded-lg outline-none"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="all"> 全部 </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <div class="w-full relative">
+                      <Textarea />
+                      <div class="absolute -right-2 top-2 flex gap-2">
+                        <button class="p-1 hover:bg-gray-100 rounded">
+                          <CopyIcon class="w-4 h-4 text-gray-400" />
+                        </button>
+                        <button class="p-1 hover:bg-gray-100 rounded">
+                          <Link class="w-4 h-4 text-blue-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <div class="flex">
+                  <p class="w-32 text-left text-sm">端对端加密</p>
+
+                  <Radio
+                    :check="forms.encryPtSwitch"
+                    :data="data.encrypts"
+                    @update:check="(v) => (forms.encryPtSwitch = v)"
+                  />
+                </div>
+                <div className="text-muted-foreground pl-32 pt-2 text-xs">
+                  开启后，只有通过密钥授权的账号和设备可以解密和访问此环境
+                </div>
+              </div>
+
+              <div class="flex">
+                <p class="w-32 text-left text-sm">批量导入</p>
+
+                <div>
+                  <div
+                    class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center"
+                    @dragover.prevent="handleDragOver"
+                    @dragleave.prevent="handleDragLeave"
+                    @drop.prevent="handleDrop"
+                    :class="{ 'bg-blue-50 border-blue-200': isDragging }"
+                  >
+                    <!-- 上传成功后的显示区域 -->
+                    <div v-if="isUploaded" class="mb-4">
+                      <CheckCircleIcon
+                        class="w-12 h-12 mx-auto text-green-500"
+                      />
+                      <p class="text-green-600 mt-2">文件上传成功！</p>
+                      <p class="text-sm text-gray-500">
+                        文件名：{{ uploadedFileName }}
+                      </p>
+                    </div>
+
+                    <!-- 上传前的显示区域 -->
+                    <div v-else>
+                      <div class="mb-4">
+                        <FolderIcon class="w-12 h-12 mx-auto text-gray-300" />
+                      </div>
+
+                      <p class="text-gray-600 mb-2">请拖拽到此处或点击上传</p>
+                      <p class="text-sm text-gray-500">
+                        请将编辑好的文件在此处上传，仅支持.xlsx类型文件，最大不超过5MB。
+                      </p>
+                    </div>
+
+                    <!-- 文件输入 -->
+                    <input
+                      type="file"
+                      ref="fileInput"
+                      accept=".xlsx"
+                      class="hidden"
+                      v-bind="importFrom.forms.fileProps"
+                      @change="handleFileSelect"
+                    />
+
+                    <!-- 上传按钮 -->
+                    <div class="flex justify-center">
+                      <button
+                        class="mt-4 px-6 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50 flex justify-center items-center"
+                        @click="triggerFileInput"
+                      >
+                        <FolderPlusIcon
+                          class="w-6 h-6 mx-auto text-gray-300 mr-2"
+                        />
+                        上传文件
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-between mt-2">
+                    <button
+                      class="text-sm border whitespace-nowrap rounded-md px-2 py-2 flex justify-center items-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
+                    >
+                      下载模板
+                    </button>
+                    <p class="text-[#5050FA] underline">从其他浏览器导入</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex">
+                <div class="w-32">
+                  <p class="text-left text-sm">启动后</p>
+                </div>
+                <div class="grow">
+                  <RadioGroup defaultValue="option-one">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="option-one"
+                        id="option-one"
+                        class="text-[#5050FA] border-gray-400 data-[state=checked]:border-[#5050FA]"
+                      />
+                      <Label htmlFor="option-one">继续浏览上次打开的网页</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="option-two"
+                        id="option-two"
+                        class="text-[#5050FA] border-gray-400 data-[state=checked]:border-[#5050FA]"
+                      />
+                      <Label htmlFor="option-two">打开指定网页</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+
+              <div className="flex">
+                <div class="w-32">
+                  <p class="text-left text-sm">其他设置</p>
+                </div>
+                <div class="grow flex flex-col gap-y-1">
+                  <div class="flex gap-x-2">
+                    <Switch class="data-[state=checked]:bg-[#5050FA]" />
+                    <p>同时打开「账号」已配置的平台网页</p>
+                  </div>
+                  <div class="flex gap-x-2">
+                    <Switch class="data-[state=checked]:bg-[#5050FA]" />
+                    <p>打开后默认停留在检测页</p>
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <Accordion type="single" class="w-full px-4" collapsible>
+          <AccordionItem value="webrtc-setting" class="border-0">
+            <AccordionTrigger
+              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              >高级配置
+            </AccordionTrigger>
+            <AccordionContent class="px-10 space-y-4 py-1">
+              <div className="flex">
+                <div class="w-32">
+                  <button
+                    class="text-sm border whitespace-nowrap rounded-md px-2 py-2 flex justify-center items-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
+                  >
+                    <Iconrefresh class="size-4" />
+                    恢复默认设置
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">时区</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.timezones"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">WebRTC</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.webRtcs"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">地理位置</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.geolocations"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">语言</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.languages"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">分辨率</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.resolution"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">字体</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.font"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">Canvas</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.canvas"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">WebGL图像</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.webGLI"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">WebRTC</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.webGLM"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">WebGPU</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.webGPU"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">AudioContext</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.zz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">媒体设备</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.zz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">ClientRects</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.zz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">SpeechVoices</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.yz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">硬件并发数</p>
                 <Select>
-                  <SelectTrigger class="w-full">
+                  <SelectTrigger class="w-1/3">
                     <SelectValue
-                      placeholder="全部"
+                      placeholder="4"
                       class="w-full p-2 rounded-lg outline-none"
                     />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="all"> 全部 </SelectItem>
+                      <SelectItem value="no"> No Proxy (本地直连) </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          </div>
-
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
-              Cookie
-            </p>
-            <div class="w-full">
-              <div class="flex gap-x-4">
-                <Input
-                  type="text"
-                  value="支持格式：JSON、Netscape、Name=Value"
-                  class="text-gray-500 text-sm flex-auto"
-                  readonly
-                />
-                <button
-                  class="px-4 py-2 hover:text-blue-600 border rounded-md hover:border-blue-200"
-                >
-                  合并
-                </button>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">设备内存</p>
+                <Select>
+                  <SelectTrigger class="w-1/3">
+                    <SelectValue
+                      placeholder="4"
+                      class="w-full p-2 rounded-lg outline-none"
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="no"> No Proxy (本地直连) </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          </div>
 
-          <!-- Notes -->
-          <div class="space-y-2 flex items-center">
-            <p
-              class="w-36 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-            >
-              备注
-            </p>
-            <div class="w-full">
-              <div class="flex gap-x-4 relative">
-                <Input
-                  placeholder="请输入备注"
-                  rows="3"
-                  class="w-full px-3 py-2 border rounded-md"
-                ></Input>
-                <span class="absolute right-3 top-2 text-gray-400 text-xs"
-                  >0/1500</span
-                >
+              <div className="flex">
+                <div class="w-32">
+                  <p class="text-left text-sm">设备名称</p>
+                </div>
+                <div class="grow space-y-2">
+                  <div class="w-32">
+                    <Radio
+                      :check="proxy_method"
+                      :data="data.font"
+                      @update:check="(v) => (proxy_method.value = v.value)"
+                    />
+                  </div>
+                  <Select>
+                    <SelectTrigger class="w-1/2">
+                      <SelectValue
+                        placeholder="选择或输入分组"
+                        class="w-full p-2 rounded-lg outline-none"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="no">
+                          No Proxy (本地直连)
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+              <div className="flex">
+                <div class="w-32">
+                  <p class="text-left text-sm">MAC地址</p>
+                </div>
+                <div class="grow space-y-2">
+                  <div class="w-[7.6rem]">
+                    <Radio
+                      :check="proxy_method"
+                      :data="data.font"
+                      @update:check="(v) => (proxy_method.value = v.value)"
+                    />
+                  </div>
+                  <Select>
+                    <SelectTrigger class="w-1/2">
+                      <SelectValue
+                        placeholder="选择或输入分组"
+                        class="w-full p-2 rounded-lg outline-none"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="no">
+                          No Proxy (本地直连)
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-    <!-- Fingerprint Configuration -->
-    <Accordion
-      type="single"
-      class="w-full px-6 py-3"
-      collapsible
-      default-value="webrtc-setting"
-    >
-      <AccordionItem value="webrtc-setting" class="border-0">
-        <AccordionTrigger
-          class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-          >高级指纹信息
-        </AccordionTrigger>
-        <AccordionContent class="px-4 space-y-4">
-          <!-- WebRTC -->
-          <Alignment title="WebRTC">
-            <button class="px-4 py-1.5 rounded-md text-sm">转发</button>
-          </Alignment>
-
-          <!-- Time Zone -->
-          <Alignment title="时区">
-            <button
-              class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-            >
-              基于 IP
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              真实
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              自定义
-            </button>
-          </Alignment>
-
-          <!-- Geolocation -->
-          <Alignment title="地理位置">
-            <label class="flex items-center gap-2">
-              <Input type="radio" checked class="text-blue-600" />
-              <span class="text-sm">每次询问</span>
-            </label>
-            <label class="flex items-center gap-2">
-              <Input type="radio" class="text-blue-600" />
-              <span class="text-sm">始终允许</span>
-            </label>
-          </Alignment>
-
-          <!-- Language -->
-          <Alignment title="语言">
-            <button
-              class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-            >
-              基于 IP
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              自定义
-            </button>
-          </Alignment>
-
-          <!-- Interface Language -->
-          <Alignment title="界面语言">
-            <button
-              class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-            >
-              基于语言
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              真实
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              自定义
-            </button>
-          </Alignment>
-
-          <!-- Resolution -->
-          <Alignment title="分辨率">
-            <div class="flex gap-2">
-              <button
-                class="px-4 py-1.5 rounded-md text-sm text-gray-600 bg-blue-50"
-              >
-                随机
-              </button>
-              <button class="px-4 py-1.5 rounded-md text-sm">预定义</button>
-              <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-                自定义
-              </button>
-            </div>
-            <div class="relative">
-              <Select>
-                <SelectTrigger class="w-full">
-                  <SelectValue
-                    placeholder="基于 User-Agent"
-                    class="w-full p-2 rounded-lg outline-none"
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">Do Not Track</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.yz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
                   />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="user-agent">
-                      基于 User-Agent
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </Alignment>
-
-          <!-- Font -->
-          <Alignment title="界面语言">
-            <button
-              class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-            >
-              默认
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              自定义
-            </button>
-          </Alignment>
-
-          <!-- Hardware Noise -->
-          <Alignment title="硬件噪音">
-            <div class="space-y-4">
-              <label class="block text-sm font-medium text-gray-700"></label>
-              <div class="flex items-center gap-6">
-                <label class="flex items-center gap-2">
-                  <Switch />
-                  <span class="text-sm">Canvas</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <Switch />
-                  <span class="text-sm">AudioContext</span>
-                </label>
+                </div>
               </div>
-              <div class="flex items-center gap-6">
-                <label class="flex items-center gap-2">
-                  <Switch />
-                  <span class="text-sm">WebGL图像</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <Switch />
-                  <span class="text-sm">SpeechVoices</span>
-                </label>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">蓝牙</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.yz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <p class="w-32 text-left text-sm">电池</p>
+                <div>
+                  <Radio
+                    :check="proxy_method"
+                    :data="data.yz"
+                    @update:check="(v) => (proxy_method.value = v.value)"
+                  />
+                </div>
               </div>
 
-              <div class="flex items-center gap-6">
-                <label class="flex items-center gap-2">
-                  <Switch />
-                  <span class="text-sm">ClientRects</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <Switch />
-                  <span class="text-sm">媒体设备[Auto]</span>
-                  <button class="text-blue-600 text-sm hover:underline">
-                    编辑
-                  </button>
-                </label>
-              </div>
-            </div>
-          </Alignment>
-
-          <!-- WebGL Data -->
-          <div class="space-y-2">
-            <div class="flex">
-              <p
-                class="w-32 flex justify-end items-center text-sm font-medium text-gray-700 pr-8"
-              >
-                操作系统
-              </p>
-              <div class="flex gap-2">
-                <button
-                  class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-                >
-                  默认
-                </button>
-                <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-                  自定义
-                </button>
-              </div>
-            </div>
-            <div class="w-full ml-32 space-y-2 pt-4">
-              <label class="block text-sm font-medium text-gray-700"
-                >厂商</label
-              >
-              <div class="relative">
-                <Select>
-                  <SelectTrigger class="w-full">
-                    <SelectValue
-                      placeholder="ANGLE (Intel, Intel(R) UHD Graphics 610 Dir..."
-                      class="p-2 rounded-lg outline-none"
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="user-agent">
-                        Google Inc. (Intel)
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+              <div className="flex">
+                <div class="w-32">
+                  <p class="text-left text-sm">端口扫描保护</p>
+                </div>
+                <div class="grow">
+                  <div class="w-full space-y-2">
+                    <div class="w-[7.6rem]">
+                      <Radio
+                        :check="proxy_method"
+                        :data="data.font"
+                        @update:check="(v) => (proxy_method.value = v.value)"
+                      />
+                    </div>
+                    <Textarea
+                      rows="4"
+                      placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
+                      class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+                    ></Textarea>
+                  </div>
+                </div>
               </div>
 
-              <label class="block text-sm font-medium text-gray-700"
-                >渲染器</label
-              >
-              <div class="relative">
-                <Select>
-                  <SelectTrigger class="w-full">
-                    <SelectValue
-                      placeholder="ANGLE (Intel, Intel(R) UHD Graphics 610 Dir..."
-                      class="p-2 rounded-lg outline-none"
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="user-agent">
-                        ANGLE (Intel, Intel(R) UHD Graphics 610 Dir...
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+              <div className="flex">
+                <div class="w-32">
+                  <p class="text-left text-sm">启动参数</p>
+                </div>
+                <Textarea
+                  rows="4"
+                  placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
+                  class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+                ></Textarea>
               </div>
-            </div>
-          </div>
-
-          <!-- WebGPU -->
-          <Alignment title="WebGPU">
-            <button
-              class="px-4 py-1.5 rounded-md text-sm bg-blue-50 text-blue-600"
-            >
-              基于 WebGL
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              真实
-            </button>
-            <button class="px-4 py-1.5 rounded-md text-sm text-gray-600">
-              禁用
-            </button>
-          </Alignment>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-
-    <!-- Advanced Settings -->
-    <Accordion type="single" class="w-full px-6 py-3" collapsible>
-      <AccordionItem value="software-setting" class="border-0">
-        <AccordionTrigger
-          class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
-          >高级设置
-        </AccordionTrigger>
-        <AccordionContent class="px-4">
-          <Alignment title="应用">
-            <Select>
-              <SelectTrigger class="w-full">
-                <SelectValue
-                  placeholder="跟随团队应用"
-                  class="p-2 rounded-lg outline-none"
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="user-agent"> 跟随团队应用 </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Alignment>
-          <p class="text-sm text-gray-500 ml-[8.25rem] mt-1">
-            [应用中心-团队应用] 中已开启的应用将安装到浏览器。
-          </p>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    </div>
+    <div class="border-t flex gap-x-4 justify-end items-center p-3">
+      <button
+        @click="router.go(-1)"
+        class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 active:scale-[.98]"
+      >
+        取消
+      </button>
+      <button
+        @click=""
+        class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
+      >
+        确认
+      </button>
+    </div>
   </Layout>
 </template>

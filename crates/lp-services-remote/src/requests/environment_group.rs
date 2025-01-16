@@ -8,7 +8,7 @@ pub async fn query_by_id(id: u32) -> Result<JsonRespnse, anyhow::Error> {
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environmnet-groups/query/id")?,
+            client::Client::build_url("/environment-groups/query/id")?,
             &data,
         )
         .await?;
@@ -24,7 +24,7 @@ pub async fn query(page_num: u32, page_size: u32) -> Result<JsonRespnse, anyhow:
 
     let json_response = client::REQUEST
         .post(
-            client::Client::build_url("/environmnet-groups/query")?,
+            client::Client::build_url("/environment-groups/query")?,
             &data,
         )
         .await?;
@@ -39,7 +39,7 @@ pub async fn create(name: &str, description: Option<String>) -> Result<JsonRespn
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environmnet-groups")?, &data)
+        .post(client::Client::build_url("/environment-groups")?, &data)
         .await?;
 
     Ok(json_response)
@@ -57,7 +57,7 @@ pub async fn modify(
     });
 
     let json_response = client::REQUEST
-        .put(client::Client::build_url("/environmnet-groups")?, &data)
+        .put(client::Client::build_url("/environment-groups")?, &data)
         .await?;
 
     Ok(json_response)
@@ -69,7 +69,7 @@ pub async fn delete(id: u32) -> Result<JsonRespnse, anyhow::Error> {
     });
 
     let json_response = client::REQUEST
-        .delete(client::Client::build_url("/environmnet-groups")?, &data)
+        .delete(client::Client::build_url("/environment-groups")?, &data)
         .await?;
 
     Ok(json_response)
