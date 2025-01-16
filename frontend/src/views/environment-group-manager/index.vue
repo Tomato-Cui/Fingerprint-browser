@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Circle, Filter, File } from "@/assets/icons/environment-group-manage";
 import {
   SearchIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
 } from "@/assets/icons/environment-bookmark-image";
+
 import NewGroup from "./new-group.vue";
-interface Tab {
-  id: string;
-  name: string;
-}
+import { environment_group_query } from "@/commands/environment-group";
 
 interface Groupmanage {
   id: number;
@@ -21,42 +19,19 @@ interface Groupmanage {
   selected: boolean;
 }
 
+const loadData = () => {
+  environment_group_query(1, 1000).then((res) => {
+    let { data: data_, total } = res.data;
+    totalItems.value = total;
+    groupmanage.value = data_;
+  });
+};
+
+onMounted(() => loadData());
+
 const selectAll = ref(false);
 
-const groupmanage = ref<Groupmanage[]>([
-  {
-    id: 1,
-    name: "feishu",
-    top: "--",
-    environment_count: 1,
-    grant_user: "--",
-    selected: false,
-  },
-  {
-    id: 2,
-    name: "feishu2",
-    top: "--",
-    environment_count: 1,
-    grant_user: "--",
-    selected: false,
-  },
-  {
-    id: 3,
-    name: "feishu2",
-    top: "--",
-    environment_count: 1,
-    grant_user: "--",
-    selected: false,
-  },
-  {
-    id: 4,
-    name: "feishu2",
-    top: "--",
-    environment_count: 1,
-    grant_user: "--",
-    selected: false,
-  },
-]);
+const groupmanage = ref<Groupmanage[]>([]);
 
 const toggleSelectAll = () => {
   groupmanage.value.forEach((Groupmanage) => {
@@ -68,21 +43,12 @@ const editGroupmanage = (Groupmanage: Groupmanage) => {
   console.log("Edit Groupmanage:", Groupmanage);
 };
 
-const copyGroupmanage = (Groupmanage: Groupmanage) => {
-  console.log("Copy Groupmanage:", Groupmanage);
-};
-
 const deleteGroupmanage = (Groupmanage: Groupmanage) => {
   console.log("Delete Groupmanage:", Groupmanage);
 };
 
-const tabs: Tab[] = [
-  { id: "all", name: "所有环境" },
-  { id: "group", name: "分组环境" },
-];
-
 const searchQuery = ref("");
-const activeTab = ref("all");
+
 const totalItems = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
@@ -105,14 +71,14 @@ const nextPage = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col p-2 h-full">
     <!-- Header -->
     <div class="flex justify-between items-center mt-1">
       <h4 class="text-2xl font-semibold leading-8">分组管理</h4>
 
       <div class="flex gap-2 items-center">
         <button
-          class="inline-flex items-center px-2 py-2 text-white rounded-md hover:bg-[#4338CA] transition-colors border border-gray-300"
+          class="text-white hover:bg-[#4338CA] border font-[500] border-gray-300 text-sm rounded-md px-2 py-1.5 flex items-center outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
         >
           <Circle class="w-[17.5px] h-[18.3px] text-gray-400" />
         </button>
@@ -125,17 +91,17 @@ const nextPage = () => {
             type="search"
             v-model="searchQuery"
             placeholder="搜索"
-            class="pl-8 w-64 h-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            class="pl-8 w-64 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           />
         </div>
 
         <button
-          class="inline-flex items-center px-2 py-2 text-black rounded-md hover:bg-[#4338CA] transition-colors border border-gray-300"
+          class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
         >
           <Filter
             class="w-[10.21px] h-[10.21px] text-gray-400 items-center justify-center mx-1"
           />
-          <span class="font-sans text-base font-semibold leading-6 text-center">
+          <span class="font-sans font-semibold text-center text-black">
             筛选
           </span>
         </button>
@@ -260,14 +226,14 @@ const nextPage = () => {
                 <div class="flex gap-2 justify-start items-center">
                   <button
                     @click="editGroupmanage(Groupmanage)"
-                    class="text-[#4F46E5] hover:bg-indigo-50 px-2 py-1 rounded border border-[#5050FA] border-[#5050FA] bg-[#F0F5FF]"
+                    class="text-[#4F46E5] hover:bg-indigo-50 px-2 py-1 rounded border border-[#5050FA] bg-[#F0F5FF]"
                   >
                     授权
                   </button>
 
                   <button
                     @click="deleteGroupmanage(Groupmanage)"
-                    class="px-2 py-1 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] border-[#ED003F] bg-[#FFE2E2]"
+                    class="px-2 py-1 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFE2E2]"
                   >
                     删除
                   </button>

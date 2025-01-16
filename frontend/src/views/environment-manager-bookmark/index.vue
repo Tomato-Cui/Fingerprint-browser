@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import NewBookmarks from "./new-bookmark.vue";
 
 import {
-  AddCircle,
-  IconApple,
   NewBookmark,
   SearchIcon,
   ChevronRightIcon,
@@ -82,11 +81,7 @@ const pageSize = ref(10);
 const pageSizes = [10, 20, 50];
 const totalPages = ref(1);
 
-const createBookmark = () => {
-  // Implement bookmark creation logic
-  console.log("Creating new bookmark");
-};
-
+const createBookmark = ref(false);
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
@@ -101,7 +96,7 @@ const nextPage = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col p-2 h-full">
     <!-- Header -->
     <div class="flex justify-between items-center mt-1">
       <h4 class="text-2xl font-semibold leading-8">书签</h4>
@@ -114,15 +109,15 @@ const nextPage = () => {
             type="search"
             v-model="searchQuery"
             placeholder="搜索"
-            class="pl-8 w-64 h-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            class="pl-8 w-64 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm border rounded-md px-2 py-1.5 flex items-center outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           />
         </div>
         <button
-          class="inline-flex items-center px-4 py-2 bg-[#4F46E5] text-white rounded-md hover:bg-[#4338CA] transition-colors"
-          @click="createBookmark"
+          class="bg-[#4F46E5] mr-3 rounded-md hover:bg-[#4338CA] text-sm border px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 text-white outline-gray-50 hover:outline-gray-100"
+          @click="createBookmark = true"
         >
-          <NewBookmark class="mr-2 w-5 h-5" />
-          新建书签
+          <NewBookmark class="w-[14px] h-[14px]" />
+          <span class="mx-1"> 新建书签</span>
         </button>
       </div>
     </div>
@@ -229,19 +224,19 @@ const nextPage = () => {
                 <div class="flex gap-2 justify-start items-center">
                   <button
                     @click="editBookmark(bookmark)"
-                    class="text-[#4F46E5] hover:bg-indigo-50 px-2 py-1 rounded border border-[#5050FA] border-[#5050FA] bg-[#F0F5FF]"
+                    class="text-[#4F46E5] hover:bg-indigo-50 px-2 py-1 rounded border border-[#5050FA] bg-[#F0F5FF]"
                   >
                     编辑
                   </button>
                   <button
                     @click="copyBookmark(bookmark)"
-                    class="text-[#FA8C16] hover:bg-indigo-50 px-2 py-1 rounded border border-[#FA8C16] border-[#FA8C16] bg-[#FFF1E8]"
+                    class="text-[#FA8C16] hover:bg-indigo-50 px-2 py-1 rounded border border-[#FA8C16] bg-[#FFF1E8]"
                   >
                     复制到
                   </button>
                   <button
                     @click="deleteBookmark(bookmark)"
-                    class="px-2 py-1 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] border-[#ED003F] bg-[#FFE2E2]"
+                    class="px-2 py-1 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFE2E2]"
                   >
                     删除
                   </button>
@@ -282,4 +277,5 @@ const nextPage = () => {
       </select>
     </div>
   </div>
+  <NewBookmarks v-model:createBookmark="createBookmark" />
 </template>
