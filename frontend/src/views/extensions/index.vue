@@ -23,7 +23,6 @@ import {toast} from "vue-sonner";
 import {app} from "@tauri-apps/api";
 import { Switch } from "@/components/ui/switch";
 import { AlertModel } from "@/components/alert-model";
-import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover/index";
 import TooltipButton from "@/components/tooltip-button.vue";
 
