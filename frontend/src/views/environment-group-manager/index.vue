@@ -71,9 +71,9 @@ const nextPage = () => {
 </script>
 
 <template>
-  <div class="flex flex-col p-2 h-full">
+  <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="flex justify-between items-center mt-1">
+    <div class="flex justify-between items-center px-2 mx-2 mt-1">
       <h4 class="text-2xl font-semibold leading-8">分组管理</h4>
 
       <div class="flex gap-2 items-center">
@@ -135,7 +135,7 @@ const nextPage = () => {
       </button>
     </div> -->
 
-    <div class="flex flex-col mt-2 h-full">
+    <div class="flex flex-col mx-2 mt-2 h-full">
       <div class="w-full rounded-lg border border-gray-200">
         <table class="min-w-full">
           <!-- Table Header -->
@@ -247,7 +247,7 @@ const nextPage = () => {
 
     <!-- pagination -->
     <div
-      class="flex justify-end items-center pt-3 m-2 border-t border-gray-200"
+      class="flex justify-end items-center pt-3 mb-2 border-t border-gray-200"
     >
       <span class="text-sm text-gray-500">共 {{ totalItems }} 项</span>
       <div class="flex gap-2 items-center">
@@ -258,7 +258,11 @@ const nextPage = () => {
         >
           <ChevronLeftIcon class="w-[12px] h-[12px]" />
         </button>
-        <span class="min-w-[2rem] text-center">{{ currentPage }}</span>
+
+        <span class="px-2 text-center rounded-md border border-gray-300">{{
+          currentPage
+        }}</span>
+
         <button
           class="justify-center items-center p-1 rounded border-gray-300 disabled:opacity-50"
           :disabled="currentPage === totalPages"
@@ -267,7 +271,7 @@ const nextPage = () => {
           <ChevronRightIcon class="w-[12px] h-[12px]" />
         </button>
       </div>
-      <select v-model="pageSize" class="px-2 py-1 text-sm rounded border">
+      <select v-model="pageSize" class="px-2 py-1 mr-2 text-sm rounded border">
         <option v-for="size in pageSizes" :key="size" :value="size">
           {{ size }}条/页
         </option>

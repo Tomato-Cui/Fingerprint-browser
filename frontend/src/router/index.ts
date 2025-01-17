@@ -31,6 +31,7 @@ import extensions from '@/views/extensions/index.vue'
 
 import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/index.vue'
 import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
+import ProxyManage from '@/views/proxy-manage/index.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -69,7 +70,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'environment-group-manager',
     component: EnvironmentGroupManager,
   },
-
+  {
+    path: '/proxy-manage',
+    name: 'proxy-manage',
+    component: ProxyManage,
+  },
   {
     path: '/environment-action',
     name: 'environment-action',
