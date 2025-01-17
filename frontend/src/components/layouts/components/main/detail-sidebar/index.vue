@@ -7,10 +7,16 @@ import SidebarInset from "./SidebarInset.vue";
 import Breadcrumb from "../breadcrumb.vue";
 import { SidebarHeader, SidebarContent } from "@/components/ui/sidebar/index";
 import { useEnvironmentAdvancedFormStore } from "@/stores/form/environment-advanced";
-import { ref } from "vue";
+import { Iconrefresh } from "@/assets/icons/index";
+import { ref, watch } from "vue";
 
 const open = ref<boolean>(true);
-const forms = useEnvironmentAdvancedFormStore().forms;
+const store = useEnvironmentAdvancedFormStore();
+const data = ref<any>(store.getData());
+
+watch(store.forms, (_newV) => {
+  data.value = store.getData();
+});
 </script>
 
 <template>
@@ -36,14 +42,29 @@ const forms = useEnvironmentAdvancedFormStore().forms;
             </p>
           </div>
           <button
-            class="group-data-[state=collapsed]:hidden mr-2 text-xs border rounded-md px-2 py-1 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
+            class="group-data-[state=collapsed]:hidden mr-2 text-xs border rounded-md p-1 flex justify-center gap-x-1 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
+            @click="store.randomUA"
           >
+            <Iconrefresh class="size-4 fill-white" />
             刷新指纹
           </button>
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {{ forms }}
+        <div class="px-2 space-y-2 text-[0.775rem] pb-4">
+          <div
+            v-for="(value, key) of data"
+            :key="key"
+            class="bg-[#eef3f9] rounded-md py-2 px-1 flex"
+          >
+            <div class="w-1/3 overflow-hidden">
+              <p class="text-left whitespace-nowrap truncate">{{ key }}:</p>
+            </div>
+            <div class="flex-1">
+              {{ value }}
+            </div>
+          </div>
+        </div>
       </SidebarContent>
     </Sidebar>
     <SidebarInset class="grow">

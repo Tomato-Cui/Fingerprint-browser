@@ -45,13 +45,6 @@ pub async fn environment_query_by_extension(
 }
 
 #[tauri::command]
-pub async fn environment_detail_create(
-    payload: lp_models::environment::EnvironmentInfo,
-) -> Result<JsonRespnse, tauri::Error> {
-    Ok(lp_services_remote::requests::environment::detail_create(payload).await?)
-}
-
-#[tauri::command]
 pub async fn environment_simple_create(
     browser_type: &str,
     os_type: &str,
@@ -70,10 +63,17 @@ pub async fn environment_simple_create(
 }
 
 #[tauri::command]
-pub async fn environment_batch_create(
-    environment_names: Vec<String>,
+pub async fn environment_advanced_create(
+    numbers: u32,
+    use_encrypt: bool,
+    environment: lp_models::dto::environment_info::EnvironmentDetailWithAdvanceCreateRequest,
 ) -> Result<JsonRespnse, tauri::Error> {
-    Ok(lp_services_remote::requests::environment::batch_create(environment_names).await?)
+    Ok(lp_services_remote::requests::environment::advanced_create(
+        numbers,
+        use_encrypt,
+        environment,
+    )
+    .await?)
 }
 
 #[tauri::command]

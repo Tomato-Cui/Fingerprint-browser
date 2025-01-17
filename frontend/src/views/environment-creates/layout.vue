@@ -35,7 +35,7 @@ const tabs = [
 ];
 </script>
 <template>
-  <Card className="w-full h-full flex flex-col p-0">
+  <Card className="w-full h-full flex flex-col p-0 select-none">
     <CardHeader class="p-0 px-4">
       <CardTitle class="mt-1 mb-2 text-xl">新建环境</CardTitle>
       <ul

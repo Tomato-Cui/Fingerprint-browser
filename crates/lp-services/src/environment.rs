@@ -1,5 +1,5 @@
 use crate::error::ServiceError;
-use lp_models::environment::{Environment, EnvironmentInfo};
+use lp_models::environment::{Environment};
 use serde_json::{json, Value};
 
 pub async fn query_by_uuid(uuid: &str) -> Result<Environment, ServiceError> {
@@ -85,63 +85,7 @@ pub async fn query_by_group_id(
     }))
 }
 
-pub async fn create_and_other_info(
-    user_uuid: &str,
-    mut payload: EnvironmentInfo,
-) -> Result<bool, ServiceError> {
-    let pool = lp_states::database::get_database_pool()?;
 
-    payload.uuid = Some(lp_commons::encryption::uuid());
-
-    let ok =
-        lp_models::environment::Environment::insert_and_other_info(pool, user_uuid, &payload).await?;
-    Ok(ok)
-}
-
-pub async fn create(user_uuid: &str, name: String) -> Result<bool, ServiceError> {
-    let pool = lp_states::database::get_database_pool()?;
-
-    let team_id =
-        lp_models::user_use_team::UserUseTeam::query_current_team_id_by_user_uuid(pool, user_uuid)
-            .await?;
-
-    let mut environment = Environment {
-        name: name.clone(),
-        team_id: Some(team_id as i32),
-        ..Default::default()
-    };
-    environment.user_uuid = user_uuid.to_string();
-    environment.uuid = Some(lp_commons::encryption::uuid());
-
-    let ok = lp_models::environment::Environment::insert(pool, &environment).await?;
-    Ok(ok)
-}
-
-pub async fn create_batch(
-    user_uuid: &str,
-    payload: Vec<String>,
-) -> Result<Vec<Value>, ServiceError> {
-    let pool = lp_states::database::get_database_pool()?;
-
-    let mut response = vec![];
-    for environmnet_name in payload {
-        let mut environment = Environment {
-            name: environmnet_name.clone(),
-            ..Default::default()
-        };
-
-        environment.uuid = Some(lp_commons::encryption::uuid());
-        environment.user_uuid = user_uuid.to_string();
-
-        let ok = lp_models::environment::Environment::insert(pool, &environment).await?;
-        response.push(json!({
-            "name": environmnet_name,
-            "success": ok
-        }));
-    }
-
-    Ok(response)
-}
 
 pub async fn move_to_group(env_uuid: &str, group_id: u32) -> Result<bool, ServiceError> {
     let pool = lp_states::database::get_database_pool()?;
@@ -280,36 +224,7 @@ mod tests {
         println!("{:?}", result);
     }
 
-    #[tokio::test]
-    async fn test_create() {
-        crate::setup().await;
-        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7".to_string();
-        let result = create(&user_uuid, "133".to_string()).await;
-        println!("{:?}", result);
-    }
 
-    #[tokio::test]
-    async fn test_create_and_other_info() {
-        crate::setup().await;
-        let user_uuid = "6cce7b5f-0721-4302-8fb0-c1b9115858df".to_string();
-        let result = create_and_other_info(
-            &user_uuid,
-            EnvironmentInfo {
-                ..Default::default()
-            },
-        )
-        .await;
-        println!("{:?}", result);
-    }
-
-    #[tokio::test]
-    async fn test_create_batch() {
-        crate::setup().await;
-        let user_uuid = "ac19b5cc-5a84-490d-b913-452ee71c52c7".to_string();
-        let payload = vec!["abc".to_string(), "a1bc".to_string()];
-        let result = create_batch(&user_uuid, payload).await;
-        println!("{:?}", result);
-    }
 
     #[tokio::test]
     async fn test_move_to_group() {
@@ -350,7 +265,7 @@ mod tests {
         let result = modify_info(
             uuid,
             environment_uuid,
-            EnvironmentInfo {
+            lp_models::environment::EnvironmentInfo {
                 id: 0,
                 fp_info: EnvironmentFingerprint {
                     id: Some(5),

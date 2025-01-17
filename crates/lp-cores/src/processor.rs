@@ -12,13 +12,13 @@ use tokio::{
 };
 
 pub struct BrowserChildInfo {
-    pub environemnt_info: lp_models::dto::environment_info::EnvironmentWithDetails,
+    pub environemnt_info: lp_models::dto::environment_info::EnvironmentDetailWithResponse,
     pub port: u16,
     pub browser_exe_path: String,
 }
 impl BrowserChildInfo {
     pub fn new(
-        environemnt_info: lp_models::dto::environment_info::EnvironmentWithDetails,
+        environemnt_info: lp_models::dto::environment_info::EnvironmentDetailWithResponse,
         port: u16,
         browser_exe_path: &str,
     ) -> Self {
@@ -42,22 +42,11 @@ impl BrowserChildInfo {
         );
 
         let system_time_millis = lp_commons::time::get_system_time_mills();
-        let offset = (system_time_millis % 100) as i32;
+        let offset = 100.0 + (system_time_millis % 100) as f64;
 
-        let window_position = format!(
-            "--window-position={},{}",
-            self.environemnt_info
-                .longitude
-                .unwrap_or_else(|| 100 + offset),
-            self.environemnt_info
-                .latitude
-                .unwrap_or_else(|| 100 + offset),
-        );
+        let window_position = format!("--window-position={},{}", offset, offset);
 
-        let user_agent = format!(
-            "--user-agent={}",
-            self.environemnt_info.ua.clone().unwrap_or_default()
-        );
+        let user_agent = format!("--user-agent={}", self.environemnt_info.ua.clone(),);
         let accept_lang = format!(
             "--accept-lang={}",
             self.environemnt_info.languages.clone().unwrap_or_default()
@@ -99,7 +88,7 @@ impl BrowserChildInfo {
             debugger_address,
         ];
 
-        if self.environemnt_info.proxy_enable == 1 {
+        if self.environemnt_info.proxy_id.is_some() {
             let (kind, host, port) = (
                 self.environemnt_info.proxy_kind.clone().unwrap_or_default(),
                 &self.environemnt_info.proxy_host.clone().unwrap_or_default(),

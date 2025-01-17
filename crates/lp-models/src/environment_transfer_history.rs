@@ -94,7 +94,7 @@ impl EnvironmentTransferHistory {
         LIMIT ? OFFSET ?
     ";
 
-        let environments: Vec<crate::dto::environment_info::EnvironmentWithDetails> = sqlx::query_as(query)
+        let environments: Vec<crate::dto::environment_info::EnvironmentDetailWithResponse> = sqlx::query_as(query)
             .bind(from_user_uuid)
             .bind(page_size)
             .bind(offset)

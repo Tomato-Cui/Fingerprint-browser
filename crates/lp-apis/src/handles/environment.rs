@@ -78,37 +78,6 @@ pub async fn query_by_team(
     }
 }
 
-pub async fn create(
-    state: Extension<CurrentUser>,
-    Json(payload): Json<CreatePayload>,
-) -> impl IntoResponse {
-    let user_id = &state.user_uuid;
-    match lp_services::environment::create(user_id, payload.name).await {
-        Ok(ok) => AppResponse::<bool>::success(success_message("创建成功"), Some(ok)),
-        Err(r) => AppResponse::<bool>::fail(warn_message(&format!("创建失败: {}", r))),
-    }
-}
-
-pub async fn detail_create(
-    state: Extension<CurrentUser>,
-    Json(payload): Json<lp_models::environment::EnvironmentInfo>,
-) -> impl IntoResponse {
-    match lp_services::environment::create_and_other_info(&state.user_uuid, payload).await {
-        Ok(ok) => AppResponse::<bool>::success(success_message("创建成功"), Some(ok)),
-        Err(r) => AppResponse::<bool>::fail(warn_message(&format!("创建失败: {}", r))),
-    }
-}
-
-pub async fn batch_create(
-    state: Extension<CurrentUser>,
-    Json(payload): Json<BatchCreatePayload>,
-) -> impl IntoResponse {
-    match lp_services::environment::create_batch(&state.user_uuid, payload.names).await {
-        Ok(data) => AppResponse::<Vec<Value>>::success(success_message("创建成功"), Some(data)),
-        Err(r) => AppResponse::<Vec<Value>>::fail(warn_message(&format!("创建失败: {}", r))),
-    }
-}
-
 pub async fn modify_info(
     state: Extension<CurrentUser>,
     Json(payload): Json<lp_models::environment::EnvironmentInfo>,

@@ -26,7 +26,7 @@ async fn test_query_by_uuid() {
         Ok(json_response) => {
             if let Some(data) = json_response.data {
                 let data = serde_json::from_value::<
-                    lp_models::dto::environment_info::EnvironmentWithDetails,
+                    lp_models::dto::environment_info::EnvironmentDetailWithResponse,
                 >(data);
                 eprintln!("{:?}", data);
             }
@@ -136,26 +136,22 @@ pub async fn simple_create(
     Ok(json_response)
 }
 
-pub async fn detail_create(
-    environment_info: lp_models::environment::EnvironmentInfo,
+pub async fn advanced_create(
+    numbers: u32,
+    use_encrypt: bool,
+    environment: lp_models::dto::environment_info::EnvironmentDetailWithAdvanceCreateRequest,
 ) -> Result<JsonRespnse, anyhow::Error> {
-    let json_response = client::REQUEST
-        .post(
-            client::Client::build_url("/environments/detail/create")?,
-            &environment_info,
-        )
-        .await?;
-
-    Ok(json_response)
-}
-
-pub async fn batch_create(names: Vec<String>) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
-        "names": names,
+        "numbers": numbers,
+        "use_encrypt": use_encrypt,
+        "environment": environment,
     });
 
     let json_response = client::REQUEST
-        .post(client::Client::build_url("/environments/batch")?, &data)
+        .post(
+            client::Client::build_url("/environments/advanced-create")?,
+            &data,
+        )
         .await?;
 
     Ok(json_response)

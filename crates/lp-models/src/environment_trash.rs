@@ -67,7 +67,7 @@ impl EnvironmentTrash {
         .bind(user_uuid)
         .fetch_one(pool).await?;
 
-        let environments: Vec<crate::dto::environment_info::EnvironmentWithInfo> = sqlx::query_as(&format!(
+        let environments: Vec<crate::dto::environment_info::EnvironmentDetailWithResponse> = sqlx::query_as(&format!(
             "
             SELECT 
                 e.id, e.uuid, e.user_uuid, e.team_id, e.proxy_id, e.fp_info_id, e.group_id, eg.name as group_name, e.name, e.description, e.default_urls, e.proxy_enable, e.created_at, e.updated_at, e.lasted_at, e.deleted_at,

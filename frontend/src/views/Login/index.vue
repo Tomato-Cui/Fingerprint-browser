@@ -364,7 +364,7 @@ const handleLogin = () => {
             account: loginForm.value.username,
           });
         }
-        wsStore.connect(token).then((res) => console.log(res));
+        wsStore.connect(token).then(() => {});
       } else {
         toast.warning(res.message);
       }

@@ -3,8 +3,19 @@ import { invoke as core_invoke, type InvokeArgs, type InvokeOptions } from '@tau
 export function invoke<T>(cmd: string, args?: InvokeArgs, options?: InvokeOptions): Promise<T> {
     return core_invoke(cmd, args, options)
 }
-export const ip_info = async (): Promise<any> => {
-    return await invoke('ip_info')
+export const ip_info = async (
+    kind: string,
+    host: string,
+    port: string,
+    username?: string,
+    password?: string,
+
+): Promise<any> => {
+    return await invoke('ip_info',
+        {
+            kind, host, port, username, password
+        }
+    )
 }
 
 export const init_command = async (): Promise<any> => {
