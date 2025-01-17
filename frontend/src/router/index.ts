@@ -25,6 +25,8 @@ import TransferEnvironment from '@/views/transferEnvironment/index.vue';
 import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
 import Environment from '@/views/EnvironmentN/index.vue'
+import AccountSet from '@/views/system-operation/system-set/account-set.vue';
+import NotifySet from '@/views/system-operation/system-set/notify-set.vue'
 import { EnvironmentSimpleCreate, EnvironmentAdvancedCreate, EnvironmentBatchImport } from '@/views/environment-creates/index'
 
 import extensions from '@/views/extensions/index.vue'
@@ -188,6 +190,16 @@ const routes: Array<RouteRecordRaw> = [
         component: local,
       },
     ],
+  },
+  {
+    path: '/accountSet',
+    name: 'accountSet',
+    component: AccountSet,
+  },
+  {
+    path: '/notifySet',
+    name: 'notifySet',
+    component: NotifySet,
   },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];

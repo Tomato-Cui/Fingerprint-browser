@@ -69,7 +69,7 @@ const selectPageSize = (size: number) => {
         </div>
 
         <!-- Page size selector -->
-        <div class="relative w-24">
+        <div class="relative">
             <!-- Dropdown -->
             <More class="w-full">
                 <MoreTrigger @click="" class="w-full">
