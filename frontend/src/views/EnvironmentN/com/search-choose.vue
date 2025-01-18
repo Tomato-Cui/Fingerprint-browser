@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal-fade">
 
-    <div v-show="props.open" class="w-full max-w-md rounded-lg bg-white p-4 shadow-sm z-30 border">
+    <div v-show="props.open" ref="targetDiv" class="w-full max-w-md rounded-lg bg-white p-4 shadow-sm z-30 border">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-medium">筛选</h2>
         <button class="text-gray-600">
@@ -13,7 +13,7 @@
         <!-- Filter Sections -->
         <div v-for="(section, index) in sections" :key="index">
           <button @click="toggleSection(index)"
-            class="flex w-full items-center justify-between rounded-lg border border-gray-100 p-4 hover:bg-gray-50">
+            class="flex w-full items-center justify-between rounded-lg border border-gray-100 p-2 hover:bg-gray-50">
             <div class="flex items-center">
               {{ section.title }}
               <div v-if="section.hasNotification" class="ml-2 h-1.5 w-1.5 rounded-full bg-red-500"></div>
@@ -45,13 +45,13 @@
   </Transition>
 </template>
 
-<script setup>
-import { ref, defineEmits, defineProps, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, defineEmits, defineProps, onMounted, onUnmounted } from 'vue'
 import { RefreshSquareIcon, AltArrowDownIcon } from '@/assets/icons/environment/index'
 
 const emit = defineEmits(['close'])
 const props = defineProps({
-  open: false
+  open: Boolean
 })
 const sections = ref([
   {
@@ -94,9 +94,31 @@ const sections = ref([
   }
 ])
 
-const toggleSection = (index) => {
+const toggleSection = (index: number) => {
   sections.value[index].isOpen = !sections.value[index].isOpen
 }
+
+// 获取指定的 div 元素
+const targetDiv = ref<any>(null);
+
+// 监听点击事件
+const handleClick = (event: MouseEvent) => {
+
+    // 判断是否点击到了指定的 div
+    if (targetDiv.value && !targetDiv.value.contains(event.target)) {
+        if (props.open === true) emit('close');  //未点击到则关闭弹窗
+    }
+};
+
+// 在组件挂载时添加事件监听
+onMounted(() => {
+    document.addEventListener('click', handleClick);
+});
+
+// 在组件卸载时移除事件监听
+onUnmounted(() => {
+    document.removeEventListener('click', handleClick);
+});
 </script>
 
 <style scoped>

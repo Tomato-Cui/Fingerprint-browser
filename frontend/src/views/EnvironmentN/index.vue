@@ -34,7 +34,7 @@
 
                 <div class="flex gap-2 relative">
                     <button v-for="item in headOperate" @click="item.go"
-                        class="flex border border-gray-300 px-2 py-1 gap-2 rounded-lg h-[35px] items-center hover:bg-blue-50">
+                        class="flex border text-[14px] border-gray-300 px-2 py-1 gap-2 rounded-lg h-[35px] items-center hover:bg-blue-50">
                         <component :is="item.icon" class="size-5" />
                         {{ item.label }}
                     </button>
@@ -59,14 +59,33 @@
                     </div>
                 </div>
                 <div class="flex flex-1 overflow-x-auto space-x-2">
-                    <button v-for="action in visibleActions" :key="action.key" v-show="action.key !== 'start'"
+                    <!-- <button v-for="action in visibleActions" :key="action.key" v-show="action.key !== 'start'"
                         @click="selectedItems.length != 0 ? action.action : void (0)"
                         :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'hover:bg-gray-50': selectedItems.length != 0 }"
                         class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
                         <component :is="action.icon" class="mr-1.5 h-4 w-4" />
                         <span>{{ action.label }}</span>
                         <AltArrowDownIcon v-show="action.children" class="size-5" />
-                    </button>
+                    </button> -->
+
+                    <More class="flex min-w-fit" v-for="action in visibleActions" :key="action.key">
+                        <MoreTrigger class="min-w-fit">
+                            <button v-show="action.key !== 'start'"
+                                @click="selectedItems.length != 0 ? action.action : void (0)"
+                                :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'hover:bg-gray-50': selectedItems.length != 0 }"
+                                class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
+                                <component :is="action.icon" class="mr-1.5 h-4 w-4" />
+                                <span>{{ action.label }}</span>
+                                <AltArrowDownIcon v-show="action.children" class="size-5" />
+                            </button>
+                        </MoreTrigger>
+                        <MoreContent class="w-[140px]" v-if="action.children && selectedItems.length > 0">
+                            <MoreItem v-for="item in action.children" :key="item" class="cursor-pointer" :class="{'hover:bg-white': item.key === 'addGroup'}">
+                                <div v-if="item.key === 'addGroup'" class="border border-[#5050FA] bg-[#EDEDFF] w-full p-1 rounded-sm flex items-center justify-center"><GroupAddIcon class="size-5"/>{{ item.label }}</div>
+                                <div v-else>{{ item.label }}</div>
+                            </MoreItem>
+                        </MoreContent>
+                    </More>
                 </div>
 
                 <div class="relative">
@@ -144,7 +163,8 @@
                                 <td class="px-2 py-3 text-sm" v-if="key != 'uuid'">
                                     <!-- 操作格 -->
                                     <div v-if="key === 'action'" class="flex justify-between items-center ">
-                                        <span @click="startEnv(item.uuid)"
+                                        <span @click="true ? startEnv(item.uuid) : void (0)"
+                                            :class="{ 'border-[#5050fa] bg-[#EDEDFF] text-blue-500': value == '启动', 'border-red-300 bg-red-50 text-red-500': value == '停止' }"
                                             class="border w-[70px] flex justify-center py-1 rounded-lg border-[#5050fa] bg-[#EDEDFF] cursor-pointer hover:bg-blue-100">{{
                                                 value
                                             }}</span>
@@ -205,7 +225,7 @@ import Page from './com/page.vue'
 import GroupChoose from './com/group-choose.vue'
 // import Auth from './synchronizer/auth.vue'
 import SynchronizerIndex from './synchronizer/index.vue'
-import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, OpenBrowserIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index.ts"
+import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, GroupAddIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index.ts"
 import { HelfGlobalIcon, RoundArrowRight } from '@/assets/icons/environment/index'
 import { environment_query, environment_query_by_group } from '@/commands/environment'
 import { useRouter, useRoute } from 'vue-router'
@@ -286,7 +306,9 @@ const visibleColumns = computed(() => {
 })
 
 const filterOpt = () => {
-    showSearchChoose.value = !showSearchChoose.value
+    setTimeout(() => {
+        showSearchChoose.value = !showSearchChoose.value
+    }, 10)
 }
 // 打开同步器
 const openSynchronizer = () => {

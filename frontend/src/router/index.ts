@@ -26,8 +26,11 @@ import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
 import Environment from '@/views/EnvironmentN/index.vue'
 import AccountSet from '@/views/system-operation/system-set/account-set.vue';
-import NotifySet from '@/views/system-operation/system-set/notify-set.vue'
+import NotifySet from '@/views/system-operation/system-set/notify-set.vue';
+import GlobeSet from '@/views/system-operation/system-set/globe-set.vue'
 import { EnvironmentSimpleCreate, EnvironmentAdvancedCreate, EnvironmentBatchImport } from '@/views/environment-creates/index'
+import HelpLayout from '@/views/system-operation/help-center/layout.vue'; //以下为帮助中心
+import QuickStart from '@/views/system-operation/help-center/quick-start.vue'; 
 
 import extensions from '@/views/extensions/index.vue'
 
@@ -222,6 +225,16 @@ const routes: Array<RouteRecordRaw> = [
     path: '/notifySet',
     name: 'notifySet',
     component: NotifySet,
+  },
+  {
+    path: '/globeSet',
+    name: 'globeSet',
+    component: GlobeSet,
+  },
+  {
+    path: '/quickStart',
+    name: 'quickStart',
+    component: QuickStart
   },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];
