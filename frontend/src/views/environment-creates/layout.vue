@@ -16,21 +16,21 @@ const tabs = [
     title: "快速创建",
     value: "quick",
     icon: IconRulerCrossPen,
-    href: "/environment-simple-create",
+    href: "/environment/create/environment-simple-create",
   },
   {
     id: 2,
     title: "高级创建",
     value: "advanced",
     icon: IconStarFallMinimalistic,
-    href: "/environment-advanced-create",
+    href: "/environment/create/environment-advanced-create",
   },
   {
     id: 3,
     title: "批量导入",
     value: "batch",
     icon: IconLoginArrow,
-    href: "/environment-batch-import",
+    href: "/environment/create/environment-batch-import",
   },
 ];
 </script>
@@ -68,7 +68,7 @@ const tabs = [
       </ul>
     </CardHeader>
     <div class="grow flex flex-col overflow-hidden">
-      <slot />
+      <router-view />
     </div>
   </Card>
 </template>

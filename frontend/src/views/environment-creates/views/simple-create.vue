@@ -22,7 +22,6 @@ import {
   NumberFieldInput,
 } from "@/components/ui/number-field";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-vue-next";
-import Layout from "../layout.vue";
 import Radio, { type RadioInterface } from "../components/radio.vue";
 import EncryptModel from "../components/encrypt-model.vue";
 import { onMounted, onUnmounted, reactive, ref } from "vue";
@@ -138,153 +137,147 @@ const handleSubmit = async () => {
 };
 </script>
 <template>
-  <Layout>
-    <CardContent className="p-4 grow space-y-4 select-none">
-      <div className="flex items-center">
-        <Label class="w-48 text-left">浏览器</Label>
-        <Radio
-          :check="forms.browserType"
-          :data="data.browserTypes"
-          @update:check="(v) => (forms.browserType = v)"
-        />
-      </div>
+  <CardContent className="p-4 grow space-y-4 select-none">
+    <div className="flex items-center">
+      <Label class="w-48 text-left">浏览器</Label>
+      <Radio
+        :check="forms.browserType"
+        :data="data.browserTypes"
+        @update:check="(v) => (forms.browserType = v)"
+      />
+    </div>
 
-      <div className="flex items-center">
-        <Label class="w-48 text-left">操作系统</Label>
+    <div className="flex items-center">
+      <Label class="w-48 text-left">操作系统</Label>
 
-        <Radio
-          :check="forms.osType"
-          :data="data.osTypes"
-          @update:check="(v) => (forms.osType = v)"
-        />
-      </div>
+      <Radio
+        :check="forms.osType"
+        :data="data.osTypes"
+        @update:check="(v) => (forms.osType = v)"
+      />
+    </div>
 
-      <div className="flex items-center">
-        <Label class="w-48 text-left">创建环境数</Label>
-        <NumberField
-          id="numbers"
-          :min="numberBound.min"
-          :max="numberBound.max"
-          :default-value="forms.numbers"
-          class="w-28 number-group"
-        >
-          <NumberFieldContent
-            class="group flex border-[1.4px] border-[#C5CEE0] rounded-lg h-9 overflow-hidden focus-within:border-blue-500 focus-within:ring-2 ring-blue-200 transition-all ease-in-out"
-          >
-            <NumberFieldInput
-              class="outline-none ring-none focus:outline-none focus-visible:ring-0 focus-visible:outline-0 focus-visible:ring-offset-0 border-none h-full text-xs"
-              :value="forms.numbers"
-              v-model="forms.numbers"
-              @input="(v) => handleInput(v.target.value)"
-            />
-            <div class="border-l flex flex-col w-1/3">
-              <div
-                class="flex items-center flex-1 justify-center cursor-pointer"
-                @click="forms.numbers < numberBound.max && ++forms.numbers"
-              >
-                <ChevronUpIcon class="text-[#C5CEE0] size-4" />
-              </div>
-              <div
-                class="flex items-center border-t flex-1 justify-center cursor-pointer"
-                @click="forms.numbers > numberBound.min && --forms.numbers"
-              >
-                <ChevronDownIcon class="text-[#C5CEE0] size-4" />
-              </div>
-            </div>
-          </NumberFieldContent>
-        </NumberField>
-      </div>
-
-      <div className="flex items-center">
-        <p class="w-48 text-left text-sm">环境分组</p>
-        <div class="w-[30rem]">
-          <Select
-            class="flex"
-            v-model="forms.group"
-            :default-value="forms.group"
-          >
-            <SelectTrigger
-              className="w-full rounded-md flex p-2 border-[1.4px] border-[#C5CEE0] items-center justify-between"
-            >
-              <SelectValue placeholder="选择或新建分组" class="text-sm" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="item in data.groups" :value="item.id">{{
-                item.value
-              }}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="flex flex-col">
-        <div class="flex">
-          <p class="w-48 text-left text-sm">端对端密码</p>
-
-          <Radio
-            :check="forms.encryPtSwitch"
-            :data="data.encrypts"
-            @update:check="(v) => (forms.encryPtSwitch = v)"
-          />
-        </div>
-        <div className="text-muted-foreground pl-48 pt-2 text-xs">
-          开启后，只有通过密钥授权的账号和设备可以解密和访问此环境
-        </div>
-      </div>
-    </CardContent>
-    <CardFooter class="border-t flex gap-x-4 justify-end items-center p-3">
-      <button
-        @click="router.go(-1)"
-        class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 active:scale-[.98]"
+    <div className="flex items-center">
+      <Label class="w-48 text-left">创建环境数</Label>
+      <NumberField
+        id="numbers"
+        :min="numberBound.min"
+        :max="numberBound.max"
+        :default-value="forms.numbers"
+        class="w-28 number-group"
       >
-        取消
-      </button>
+        <NumberFieldContent
+          class="group flex border-[1.4px] border-[#C5CEE0] rounded-lg h-9 overflow-hidden focus-within:border-blue-500 focus-within:ring-2 ring-blue-200 transition-all ease-in-out"
+        >
+          <NumberFieldInput
+            class="outline-none ring-none focus:outline-none focus-visible:ring-0 focus-visible:outline-0 focus-visible:ring-offset-0 border-none h-full text-xs"
+            :value="forms.numbers"
+            v-model="forms.numbers"
+            @input="(v) => handleInput(v.target.value)"
+          />
+          <div class="border-l flex flex-col w-1/3">
+            <div
+              class="flex items-center flex-1 justify-center cursor-pointer"
+              @click="forms.numbers < numberBound.max && ++forms.numbers"
+            >
+              <ChevronUpIcon class="text-[#C5CEE0] size-4" />
+            </div>
+            <div
+              class="flex items-center border-t flex-1 justify-center cursor-pointer"
+              @click="forms.numbers > numberBound.min && --forms.numbers"
+            >
+              <ChevronDownIcon class="text-[#C5CEE0] size-4" />
+            </div>
+          </div>
+        </NumberFieldContent>
+      </NumberField>
+    </div>
+
+    <div className="flex items-center">
+      <p class="w-48 text-left text-sm">环境分组</p>
+      <div class="w-[30rem]">
+        <Select class="flex" v-model="forms.group" :default-value="forms.group">
+          <SelectTrigger
+            className="w-full rounded-md flex p-2 border-[1.4px] border-[#C5CEE0] items-center justify-between"
+          >
+            <SelectValue placeholder="选择或新建分组" class="text-sm" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="item in data.groups" :value="item.id">{{
+              item.value
+            }}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="flex flex-col">
+      <div class="flex">
+        <p class="w-48 text-left text-sm">端对端密码</p>
+
+        <Radio
+          :check="forms.encryPtSwitch"
+          :data="data.encrypts"
+          @update:check="(v) => (forms.encryPtSwitch = v)"
+        />
+      </div>
+      <div className="text-muted-foreground pl-48 pt-2 text-xs">
+        开启后，只有通过密钥授权的账号和设备可以解密和访问此环境
+      </div>
+    </div>
+  </CardContent>
+  <CardFooter class="border-t flex gap-x-4 justify-end items-center p-3">
+    <button
+      @click="router.go(-1)"
+      class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 active:scale-[.98]"
+    >
+      取消
+    </button>
+    <button
+      @click="handleSubmit"
+      class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
+    >
+      确认
+    </button>
+  </CardFooter>
+  <Loading :open="createing">
+    <LoadingIcon />
+    <span class="text-xs whitespace-nowrap">创建浏览器环境中, 稍等.</span>
+  </Loading>
+  <EncryptModel
+    :open="encrypts.length > 0"
+    title="密码本"
+    @close="encrypts = []"
+  >
+    <div
+      class="grid grid-cols-9 mx-8 py-6 rounded-md max-h-[24rem] overflow-auto"
+    >
+      <div class="col-span-2 border-b text-sm text-right py-1">环境名称</div>
+      <div class="col-span-1 border-b text-sm text-right py-1"></div>
+      <div class="col-span-6 border-b text-sm text-left py-1">密码</div>
+
+      <template v-for="item in encrypts" :key="item.name">
+        <div
+          class="col-span-2 text-xs flex items-center h-8 justify-end border-b"
+        >
+          {{ item.name }}
+        </div>
+        <div class="col-span-1 text-sm text-right border-b"></div>
+        <div
+          class="col-span-6 truncate overflow-hidden text-xs flex items-center h-8 justify-start border-b"
+        >
+          {{ item.encrypt }}
+        </div>
+      </template>
+    </div>
+
+    <div class="border-t py-4 flex justify-end px-4">
       <button
-        @click="handleSubmit"
+        @click="downloadCSV(convertToCSV(encrypts))"
         class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
       >
-        确认
+        下载
       </button>
-    </CardFooter>
-    <Loading :open="createing">
-      <LoadingIcon />
-      <span class="text-xs whitespace-nowrap">创建浏览器环境中, 稍等.</span>
-    </Loading>
-    <EncryptModel
-      :open="encrypts.length > 0"
-      title="密码本"
-      @close="encrypts = []"
-    >
-      <div
-        class="grid grid-cols-9 mx-8 py-6 rounded-md max-h-[24rem] overflow-auto"
-      >
-        <div class="col-span-2 border-b text-sm text-right py-1">环境名称</div>
-        <div class="col-span-1 border-b text-sm text-right py-1"></div>
-        <div class="col-span-6 border-b text-sm text-left py-1">密码</div>
-
-        <template v-for="item in encrypts" :key="item.name">
-          <div
-            class="col-span-2 text-xs flex items-center h-8 justify-end border-b"
-          >
-            {{ item.name }}
-          </div>
-          <div class="col-span-1 text-sm text-right border-b"></div>
-          <div
-            class="col-span-6 truncate overflow-hidden text-xs flex items-center h-8 justify-start border-b"
-          >
-            {{ item.encrypt }}
-          </div>
-        </template>
-      </div>
-
-      <div class="border-t py-4 flex justify-end px-4">
-        <button
-          @click="downloadCSV(convertToCSV(encrypts))"
-          class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
-        >
-          下载
-        </button>
-      </div>
-    </EncryptModel>
-  </Layout>
+    </div>
+  </EncryptModel>
 </template>

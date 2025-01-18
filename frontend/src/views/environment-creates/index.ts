@@ -1,6 +1,8 @@
 export { default as EnvironmentSimpleCreate } from './views/simple-create.vue'
 export { default as EnvironmentAdvancedCreate } from './views/advanced-create.vue'
 export { default as EnvironmentBatchImport } from './views/batch-import.vue'
+export { default as EnvironmentLayout } from './layout.vue'
+
 import { useEnvironmentAdvancedFormStore, templaeFormtData } from "@/stores/form/environment-advanced";
 import { type EnvironmentDetailWithAdvanceCreateRequest, environment_advanced_create } from '@/commands/environment';
 

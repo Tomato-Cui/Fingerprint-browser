@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import Layout from "../layout.vue";
 import BasicSetting from "../components/batch-import/basic-setting.vue";
 import AdvancedSetting from "../components/batch-import/advanced-setting.vue";
 import { batchCreateHandle } from "../index";
@@ -48,7 +47,6 @@ const handleSubmit = async () => {
 };
 </script>
 <template>
-  <Layout>
     <div class="grow overflow-hidden">
       <div class="overflow-y-auto h-full my-3">
         <BasicSetting :file="file" @reader="readerHandle" />
@@ -110,5 +108,4 @@ const handleSubmit = async () => {
         </button>
       </div>
     </EncryptModel>
-  </Layout>
 </template>
