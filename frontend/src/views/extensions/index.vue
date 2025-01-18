@@ -1,6 +1,9 @@
 <script setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {
+  cont1,Image
+} from "@/assets/icons"
+import {
   PlusIcon,
   ClockIcon,
   XIcon,
@@ -11,7 +14,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Download, TrashIcon, PencilIcon,
 } from 'lucide-vue-next'
-import UploadModel from "@/views/application-center/upload-model.vue";
+import UploadModel from "@/views/extensions/upload-model.vue";
 import { MoreVertical } from 'lucide-vue-next'
 import {
   extension_query,
@@ -242,15 +245,10 @@ const closeModal = () => {
     <!-- Content -->
     <div class=" overflow-y-auto">
       <div v-if="extensions.length === 0" class="text-center py-20">
-        <div class="w-32 h-32 mx-auto mb-6 relative">
-          <div class="absolute inset-0 bg-indigo-100 rounded-lg"></div>
-          <img
-              :src="'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-1v98O1EMy5KGJgQ2dbrP32Vn8myv8x.png'"
-              alt="Empty state illustration"
-              class="relative z-10"
-          />
-        </div>
-        <h3 class="text-xl font-medium mb-2">轻松把扩展加到环境里</h3>
+        <cont1
+            class="w-36 h-36 mx-auto mb-6 relative"
+        ></cont1>
+        <h3 class="text-xl font-bold mb-2">轻松把扩展加到环境里</h3>
         <p class="text-gray-500 mb-6">在浏览器扩展里加的扩展，会同步给有权限的成员，在环境里加的扩展就不会同步啦。</p>
         <button
             class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 inline-flex items-center space-x-2"

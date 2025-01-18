@@ -6,6 +6,9 @@ import Input from "@/components/input.vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useExtensionCenterFromStore } from "@/stores/form/extension-center";
 import {
+  Frame,Image
+} from "@/assets/icons"
+import {
   extension_info_by_chrome_store_url,
   extension_user_create,
   extension_create,
@@ -27,7 +30,7 @@ const loading = ref(false);
 const chromeSoftwareUrlInfo = ref(undefined);
 const extensionCenterFrom = useExtensionCenterFromStore();
 const onSubmit = () => {
-  if (tabCurrent.value == "chrome-software") {
+  if (tabCurrent.value === "chrome-software") {
     extensionCenterFrom.handleSubmit(async (values) => {
       try {
         let { url } = values;
@@ -54,15 +57,16 @@ const addExtensionHandle = async () => {
   let res = await extension_user_create(
     chromeSoftwareUrlInfo.value.extension_uuid
   );
-  res.code == 1 ? toast.success(res.message) : toast.warning(res.message);
+  res.code === 1 ? toast.success(res.message) : toast.warning(res.message);
   emit("close");
   emit("load");
 };
+
 </script>
 
 <template>
   <Model
-    class="max-w-[1125px]"
+    class="max-w-[825px]"
     :title="props.title"
     :open="props.open"
     @close="() => emit('close')"
@@ -71,40 +75,40 @@ const addExtensionHandle = async () => {
       :modelValue="tabCurrent"
       @update:modelValue="
         tabCurrent =
-          tabCurrent == 'chrome-software' ? 'pacakge' : 'chrome-software'
+          tabCurrent === 'chrome-software' ? 'pacakge' : 'chrome-software'
       "
-      class="w-full p-8"
+      class="w-full p-2"
     >
-      <div class="flex justify-start items-center gap-x-5">
+      <div class="flex justify-start items-center gap-x-4">
         <p class="whitespace-nowrap flex justify-end items-center w-24">
           上传类型
         </p>
         <div>
-          <TabsList class="grid w-full grid-cols-2">
-            <TabsTrigger
-              value="package"
-              :disabled="props.disableTab === 'package'"
-              @click="
-                tabCurrent =
-                  tabCurrent == 'chrome-software'
-                    ? 'package'
-                    : 'chrome-software'
-              "
+          <div class="flex items-center">
+            <div
+                class="flex gap-x-2 border-[1.4px] border-[#C5CEE0] p-1 rounded-lg"
             >
-              安装包
-            </TabsTrigger>
-            <TabsTrigger
-              value="chrome-software"
-              @click="
-                tabCurrent =
-                  tabCurrent == 'chrome-software'
-                    ? 'package'
-                    : 'chrome-software'
-              "
-            >
-              Chrome应用商店
-            </TabsTrigger>
-          </TabsList>
+              <div
+                  :class="[
+                  'flex items-center space-x-1 py-1.5 px-2 rounded-lg cursor-pointer',
+                  tabCurrent === 'package' ? 'bg-[#5050FA] text-white' : 'text-gray-700'
+                ]"
+                  @click=" tabCurrent ='package'"
+              >
+                <span class="text-[12px]">安装包</span>
+              </div>
+              <div
+                  :class="[
+                  'flex items-center space-x-1 py-1.5 px-2 rounded-lg cursor-pointer',
+                  tabCurrent === 'chrome-software' ? 'bg-[#5050FA] text-white' : 'text-gray-700'
+                ]"
+                  @click="tabCurrent = 'chrome-software'"
+              >
+                <span class="text-[12px]">Chrome应用商店</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
       <TabsContent value="chrome-software">
@@ -177,17 +181,17 @@ const addExtensionHandle = async () => {
         </div>
       </TabsContent>
       <TabsContent value="package">
-        <div class="flex flex-col justify-start gap-x-8 py-4">
-          <div class="flex flex-col gap-x-8 py-4">
+        <div class="flex flex-col justify-start gap-x-8 ">
+          <div class="flex flex-col gap-x-8 ">
             <div class="flex gap-x-8 py-2">
               <p class="whitespace-nowrap flex items-center justify-end w-20">
                 安装包
               </p>
               <button
-                class="flex border-blue-200 border-[1.5px] rounded-md px-1 py-1 text-xs items-center border-dashed"
+                class="w-[200px] h-[80px] flex  border-[1.5px] rounded-md px-1 py-1 text-xs items-center border-dashed justify-center bg-[#F7F9FC] border-[#C5CEE0] focus:bg-[#EDEDFF] focus:border-[#5050FA]"
               >
-                <CloudUploadIcon class="text-blue-400" />
-                上传应用
+                <Frame class="w-16 h-16" />
+                点击上传应用安装包
               </button>
             </div>
             <span class="text-gray-400 text-xs pl-28">
@@ -202,9 +206,9 @@ const addExtensionHandle = async () => {
                 图标
               </p>
               <button
-                class="flex flex-col w-32 h-32 justify-center border-blue-200 border-[1.5px] rounded-md px-1 py-1 text-xs items-center border-dashed"
+                class="flex flex-col w-32 h-28 justify-center border-[1.5px] rounded-md px-1 py-1 text-xs items-center border-dashed bg-[#F7F9FC] border-[#C5CEE0] focus:bg-[#EDEDFF] focus:border-[#5050FA]"
               >
-                <CloudUploadIcon class="text-blue-400" />
+                <Image class="text-blue-400 w-12 h-12 " />
                 点击上传或将图片拖拽到此处
               </button>
             </div>
@@ -212,26 +216,44 @@ const addExtensionHandle = async () => {
               选填，至少60*60像素, 比例1:1，支持jpg/jpeg/png格式，限制1M
             </span>
           </div>
-          <div class="flex gap-x-8 py-4">
+
+          <div class="flex flex-col gap-x-8">
+            <div class="flex gap-x-8 py-2">
+              <p class="whitespace-nowrap flex items-center justify-end w-20">
+                图标
+              </p>
+              <button
+                  class="flex flex-col w-[300px] h-28 justify-center border-[1.5px] rounded-md px-1 py-1 text-xs items-center border-dashed bg-[#F7F9FC] border-[#C5CEE0] focus:bg-[#EDEDFF] focus:border-[#5050FA]"
+              >
+                <Image class="text-blue-400 w-12 h-12 " />
+                点击上传或将图片拖拽到此处
+              </button>
+            </div>
+            <span class="text-gray-400 text-xs pl-28">
+              选填，至少60*60像素, 比例1:1，支持jpg/jpeg/png格式，限制5M
+            </span>
+          </div>
+
+          <div class="flex gap-x-4 py-2">
             <p class="whitespace-nowrap flex items-center justify-end w-24">
               应用名称
             </p>
-            <Input class="" placeholder="必填，请填写应用名称" />
+            <Input class="w-[400px]" placeholder="必填，请填写应用名称" />
           </div>
-          <div class="flex gap-x-8 py-4">
+          <div class="flex gap-x-4 py-2">
             <p class="whitespace-nowrap flex items-center justify-end w-24">
               简介
             </p>
-            <Input class="" placeholder="选填，请填写应用的简介说明" />
+            <Input class="w-[400px]" placeholder="选填，请填写应用的简介说明" />
           </div>
         </div>
       </TabsContent>
-      <div class="pl-28">
+      <div class="flex justify-end border-t-[1px]">
         <div class="flex gap-4 mt-2">
           <ModelClose>
             <button
               @click.prevent="onSubmit"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              class="px-6 py-2 bg-[#5050FA] text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               确定
             </button>
