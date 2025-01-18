@@ -77,7 +77,7 @@ mod import_crate {
     pub use lp_commons::util::get_chrome_install_path;
     pub use lp_commons::util::get_debug_port;
     pub use lp_cores::processor;
-    pub use lp_models::dto::environment_info::EnvironmentWithDetails;
+    pub use lp_models::dto::environment_info::EnvironmentDetailWithResponse;
     pub use serde_json::{json, Value};
 }
 #[cfg(windows)]
@@ -93,8 +93,9 @@ pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Erro
     {
         let current_environment_json =
             json_response.data.ok_or(anyhow::anyhow!(message.clone()))?;
+
         let current_environment =
-            serde_json::from_value::<EnvironmentWithDetails>(current_environment_json)
+            serde_json::from_value::<EnvironmentDetailWithResponse>(current_environment_json)
                 .map_err(|_| anyhow::anyhow!(message.clone()))?;
 
         let chrome_install_path =
@@ -169,7 +170,7 @@ mod tests {
     async fn test_start_browser() {
         crate::setup().await;
         let _t = lp_services_remote::requests::user::login("1", "1").await;
-        let environment_uuid = "d34f3e32-f0c1-44a2-a4c0-e43e2c7b0033";
+        let environment_uuid = "8cf8641f-e5eb-440d-b676-6175480e4521";
         let result = start_browser(environment_uuid).await;
         eprintln!("{:?}", result);
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;

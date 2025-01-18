@@ -54,15 +54,23 @@ pub async fn get_user_id() -> Result<String, anyhow::Error> {
 }
 
 #[tauri::command]
-pub async fn ip_info() -> Result<crate::response::AppResponse<Value>, tauri::Error> {
+pub async fn ip_info(
+    kind: &str,
+    host: &str,
+    port: &str,
+    username: Option<&str>,
+    password: Option<&str>,
+) -> Result<crate::response::AppResponse<Value>, tauri::Error> {
     let (success_msg, warn_msg) = (Some("获取成功".to_string()), |v| {
         Some(format!("获取失败: {}", v))
     });
 
-    Ok(match lp_cores::requests::iprust_info().await {
-        Ok(ok) => crate::response::AppResponse::<Value>::success(success_msg, Some(ok)),
-        Err(r) => crate::response::AppResponse::<Value>::fail(warn_msg(r.to_string())),
-    })
+    Ok(
+        match lp_cores::requests::iprust_info(kind, host, port, username, password).await {
+            Ok(ok) => crate::response::AppResponse::<Value>::success(success_msg, Some(ok)),
+            Err(r) => crate::response::AppResponse::<Value>::fail(warn_msg(r.to_string())),
+        },
+    )
 }
 
 #[tauri::command]
@@ -152,8 +160,7 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         environment_command::environment_query_by_team,
         environment_command::environment_query_by_extension,
         environment_command::environment_simple_create,
-        environment_command::environment_detail_create,
-        environment_command::environment_batch_create,
+        environment_command::environment_advanced_create,
         environment_command::environment_modify_info,
         environment_command::environment_modify_basic_info,
         environment_command::environment_move_to_group,

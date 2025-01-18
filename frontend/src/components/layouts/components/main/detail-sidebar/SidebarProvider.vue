@@ -8,10 +8,9 @@ import {
   SIDEBAR_COOKIE_MAX_AGE,
   SIDEBAR_COOKIE_NAME,
   SIDEBAR_KEYBOARD_SHORTCUT,
-  SIDEBAR_WIDTH,
-  // SIDEBAR_WIDTH_ICON,
 } from "@/components/ui/sidebar/utils";
 
+const SIDEBAR_WIDTH = "20rem";
 const SIDEBAR_WIDTH_ICON = "2.5rem";
 const props = withDefaults(
   defineProps<{

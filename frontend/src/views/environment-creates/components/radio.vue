@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { cn } from "@/util/lib";
 
-export interface RadioInterface {
+export interface RadioInterface<T = any> {
   icon?: any;
-  value: string;
+  value: T;
+  label?: string;
 }
 
 interface PropsInterface {
@@ -28,7 +29,6 @@ const emits = defineEmits<Emits>();
           props.check.value == item.value
             ? item.icon
               ? 'bg-[#5050FA] text-white fill-white'
-              // : 'bg-[#7171FF] text-white fill-white'
               : 'bg-[#5050FA] text-white fill-white'
             : ''
         )
@@ -45,7 +45,7 @@ const emits = defineEmits<Emits>();
           )
         "
       />
-      <span>{{ item.value }}</span>
+      <span>{{ item.label || item.value }}</span>
     </div>
   </div>
 </template>

@@ -20,7 +20,7 @@ export const menus = [
     },
     {
         title: "回收站",
-        url: "#",
+        url: "/environment-trash",
         icon: IconTrashBin,
     },
     {

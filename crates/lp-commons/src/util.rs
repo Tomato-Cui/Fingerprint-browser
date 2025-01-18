@@ -174,3 +174,16 @@ pub fn send_email(
         Err(_e) => Err(anyhow::anyhow!("email send failed.")),
     }
 }
+
+pub fn calculate_pagination(page_num: u32, page_size: u32, total: i64) -> (u32, u32) {
+    let page_num = if page_num <= 0 {
+        1
+    } else if (page_num * page_size) as i64 > total {
+        (total as f64 / page_size as f64).ceil() as u32
+    } else {
+        page_num
+    };
+    let mut offset = (page_num - 1) * page_size;
+    offset = if offset <= 0 { 0 } else { offset };
+    (offset, page_size)
+}

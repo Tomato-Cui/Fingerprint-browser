@@ -16,26 +16,26 @@ const tabs = [
     title: "快速创建",
     value: "quick",
     icon: IconRulerCrossPen,
-    href: "/environment-simple-create",
+    href: "/environment/create/environment-simple-create",
   },
   {
     id: 2,
     title: "高级创建",
     value: "advanced",
     icon: IconStarFallMinimalistic,
-    href: "/environment-advanced-create",
+    href: "/environment/create/environment-advanced-create",
   },
   {
     id: 3,
     title: "批量导入",
     value: "batch",
     icon: IconLoginArrow,
-    href: "/environment-batch-import",
+    href: "/environment/create/environment-batch-import",
   },
 ];
 </script>
 <template>
-  <Card className="w-full h-full flex flex-col p-0">
+  <Card className="w-full h-full flex flex-col p-0 select-none">
     <CardHeader class="p-0 px-4">
       <CardTitle class="mt-1 mb-2 text-xl">新建环境</CardTitle>
       <ul
@@ -67,8 +67,8 @@ const tabs = [
         </li>
       </ul>
     </CardHeader>
-    <div class="flex overflow-hidden flex-col grow">
-      <slot />
+    <div class="grow flex flex-col overflow-hidden">
+      <router-view />
     </div>
   </Card>
 </template>

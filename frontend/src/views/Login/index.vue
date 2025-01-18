@@ -358,12 +358,15 @@ const handleLogin = () => {
   login(loginForm.value.email, loginForm.value.password)
     .then((res) => {
       loading.value = false;
-      if (res.code == 1) {
-        toast.success(res.message);
-        router.push("/environment/0");
-        userStore.login({
-          account: loginForm.value.username,
-        });
+      if (res.code == 1 && token) {
+        if (token) {
+          toast.success(res.message);
+          router.push("/environment/0");
+          userStore.login({
+            account: loginForm.value.username,
+          });
+        }
+        wsStore.connect(token).then(() => {});
       } else {
         toast.warning(res.message);
       }

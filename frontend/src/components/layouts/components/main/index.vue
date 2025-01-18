@@ -7,8 +7,8 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 
 const detailRoutes = [
-  "/environment-advanced-create",
-  "/environment-batch-import",
+  "/environment/create/environment-advanced-create",
+  "/environment/create/environment-batch-import",
 ];
 </script>
 

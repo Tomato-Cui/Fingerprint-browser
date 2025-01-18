@@ -237,11 +237,53 @@ pub async fn download_file(url: &str, dest: &str) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub async fn iprust_info() -> Result<Value, anyhow::Error> {
+pub async fn iprust_info(
+    kind: &str,
+    host: &str,
+    port: &str,
+    username: Option<&str>,
+    password: Option<&str>,
+) -> Result<Value, anyhow::Error> {
     let url = "http://iprust.io/ip.json";
-    let response = reqwest::Client::new().get(url).send().await?;
+
+    let request = if kind == "no" {
+        reqwest::Client::builder().build()?
+    } else {
+        let current_proxy = if !host.is_empty() && !port.is_empty() {
+            format!("{}:{}", host, port)
+        } else {
+            return Err(anyhow::anyhow!("host or port is not empty"));
+        };
+
+        let mut auth = if let None = username {
+            "".to_string()
+        } else {
+            vec![username.unwrap_or_default(), password.unwrap_or_default()].join(":")
+        };
+        if !auth.is_empty() && !current_proxy.is_empty() {
+            auth.push('@');
+        }
+
+        let current_proxy = format!("{}://{}{}", kind, auth, current_proxy);
+        let proxy = match kind.to_lowercase().as_str() {
+            "http" => reqwest::Proxy::http(current_proxy)?,
+            "https" => reqwest::Proxy::https(current_proxy)?,
+            "socket5" => reqwest::Proxy::all(current_proxy)?,
+            "ssh" => reqwest::Proxy::all(current_proxy)?,
+            _ => {
+                return Err(anyhow::anyhow!("not allow proxy kind."));
+            }
+        };
+        reqwest::Client::builder().proxy(proxy).build()?
+    };
+
+    let response = request
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| anyhow::anyhow!("check proxy fail: {}", e))?;
     if !response.status().is_success() {
-        return Err(anyhow::anyhow!("download {} resource fail.", url));
+        return Err(anyhow::anyhow!("send {} fail.", url));
     }
 
     let res: Value = response.json().await?;

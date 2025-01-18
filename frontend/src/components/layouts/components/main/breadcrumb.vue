@@ -2,25 +2,41 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
+
+function isNumber(str: any) {
+  str = str.trim();
+  return !isNaN(parseFloat(str)) && isFinite(str);
+}
 </script>
 <template>
   <div class="flex items-center gap-2 px-4 mt-2">
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="#" class="text-xs">
-            Building Your Application
-          </BreadcrumbLink>
+        <BreadcrumbItem
+          @click="router.push('/environment/0')"
+          class="text-xs cursor-pointer"
+        >
+          Home
         </BreadcrumbItem>
-        <BreadcrumbSeparator> / </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbPage class="text-xs">Data Fetching</BreadcrumbPage>
-        </BreadcrumbItem>
+
+        <template
+          v-for="item in route.path
+            .split('/')
+            .filter((item) => item.length > 0)
+            .filter((item) => !isNumber(item))"
+        >
+          <BreadcrumbSeparator> / </BreadcrumbSeparator>
+          <BreadcrumbItem class="text-xs cursor-pointer">
+            {{ item }}
+          </BreadcrumbItem>
+        </template>
       </BreadcrumbList>
     </Breadcrumb>
   </div>
