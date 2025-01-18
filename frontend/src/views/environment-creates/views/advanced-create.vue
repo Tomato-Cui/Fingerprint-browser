@@ -83,14 +83,14 @@ onMounted(() => {
 </script>
 <template>
   <Layout>
-    <div class="grow overflow-hidden">
+    <div class="overflow-hidden grow">
       <div class="overflow-y-auto h-full">
-        <div class="w-full px-2 py-3 flex items-center justify-between">
+        <div class="flex justify-between items-center px-2 py-3 w-full">
           <div class="p-2">
-            <h3 class="font-medium mb-1">窗口数量</h3>
+            <h3 class="mb-1 font-medium">窗口数量</h3>
             <p class="text-sm text-gray-500">最多一次最多可批量创建1000个</p>
           </div>
-          <div class="flex flex-col items-center gap-2 rounded-md">
+          <div class="flex flex-col gap-2 items-center rounded-md">
             <NumberField
               v-bind="environmentCreatesFrom.forms.environmentNumbersProps"
             >
@@ -106,20 +106,20 @@ onMounted(() => {
         </div>
         <Accordion
           type="single"
-          class="w-full px-4"
+          class="px-4 w-full"
           collapsible
           default-value="basic-setting"
         >
           <AccordionItem class="border-0" value="basic-setting">
             <AccordionTrigger
-              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
               >基础设置</AccordionTrigger
             >
-            <AccordionContent class="px-10 space-y-4 py-1">
+            <AccordionContent class="px-10 py-1 space-y-4">
               <div class="flex items-center">
                 <p class="w-32 text-left">名称</p>
                 <div>
-                  <div class="relative text-sm w-full">
+                  <div class="relative w-full text-sm">
                     <Input
                       v-model="environmentCreatesFrom.forms.environmentName"
                       v-bind="environmentCreatesFrom.forms.environmentNameProps"
@@ -128,13 +128,13 @@ onMounted(() => {
                       class="w-full"
                       maxlength="10"
                     />
-                    <span class="absolute right-3 top-2 text-xs text-gray-400"
+                    <span class="absolute top-2 right-3 text-xs text-gray-400"
                       >{{
                         environmentCreatesFrom.forms.environmentName?.length ||
                         0
                       }}/10</span
                     >
-                    <span class="text-red-400 text-xs">{{
+                    <span class="text-xs text-red-400">{{
                       environmentCreatesFrom.errors.name
                     }}</span>
                   </div>
@@ -149,7 +149,7 @@ onMounted(() => {
                 />
               </div>
 
-              <div class="space-y-2 flex items-center">
+              <div class="flex items-center space-y-2">
                 <p class="w-32 text-left">操作系统</p>
                 <Radio
                   :check="forms.os"
@@ -159,23 +159,23 @@ onMounted(() => {
               </div>
 
               <div class="flex">
-                <div class="flex items-start justify-start">
-                  <p class="w-32 text-left text-sm">UA</p>
+                <div class="flex justify-start items-start">
+                  <p class="w-32 text-sm text-left">UA</p>
                 </div>
-                <div class="w-full relative">
+                <div class="relative w-full">
                   <Textarea class="w-full" :placeholder="forms.ua" disabled />
                   <div
-                    class="absolute right-2 top-2 flex gap-2"
+                    class="flex absolute top-2 right-2 gap-2"
                     @click="() => (forms.ua = generateRandomUserAgent())"
                   >
-                    <Iconrefresh class="w-4 h-4 fill-gray-800 cursor-pointer" />
+                    <Iconrefresh class="w-4 h-4 cursor-pointer fill-gray-800" />
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col">
                 <div class="flex">
-                  <p class="w-32 text-left text-sm">端对端加密</p>
+                  <p class="w-32 text-sm text-left">端对端加密</p>
                   <Radio
                     :check="forms.encryPtSwitch"
                     :data="data.encrypts"
@@ -188,7 +188,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">环境分组</p>
+                <p class="w-32 text-sm text-left">环境分组</p>
                 <div class="w-1/2">
                   <Select
                     class="flex"
@@ -215,7 +215,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">环境标签</p>
+                <p class="w-32 text-sm text-left">环境标签</p>
                 <div class="w-1/2">
                   <Select
                     class="flex"
@@ -241,7 +241,7 @@ onMounted(() => {
 
               <div class="flex items-center">
                 <p class="w-32 text-left">备注</p>
-                <div class="relative text-sm w-2/3 pt-1">
+                <div class="relative pt-1 w-2/3 text-sm">
                   <Input
                     v-model="forms.description"
                     type="text"
@@ -249,7 +249,7 @@ onMounted(() => {
                     class="w-full text-gray-600 px-[0.45rem]"
                     maxlength="28"
                   />
-                  <span class="absolute right-3 top-2 text-xs text-gray-400"
+                  <span class="absolute top-2 right-3 text-xs text-gray-400"
                     >{{ forms.description.length || 0 }}/28</span
                   >
                 </div>
@@ -258,15 +258,15 @@ onMounted(() => {
           </AccordionItem>
         </Accordion>
 
-        <Accordion type="single" class="w-full px-4" collapsible>
+        <Accordion type="single" class="px-4 w-full" collapsible>
           <AccordionItem class="border-0" value="proxy-setting">
             <AccordionTrigger
-              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
               >代理信息</AccordionTrigger
             >
-            <AccordionContent class="px-10 space-y-4 py-1">
+            <AccordionContent class="px-10 py-1 space-y-4">
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">代理方式</p>
+                <p class="w-32 text-sm text-left">代理方式</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -276,12 +276,12 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">代理类型</p>
+                <p class="w-32 text-sm text-left">代理类型</p>
                 <Select>
                   <SelectTrigger class="w-1/3">
                     <SelectValue
                       placeholder="No Proxy (本地直连)"
-                      class="w-full p-2 rounded-lg outline-none"
+                      class="p-2 w-full rounded-lg outline-none"
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -292,15 +292,15 @@ onMounted(() => {
                 </Select>
               </div>
               <div class="flex">
-                <div class="flex items-start justify-start">
-                  <p class="w-32 text-left text-sm">IP查询渠道</p>
+                <div class="flex justify-start items-start">
+                  <p class="w-32 text-sm text-left">IP查询渠道</p>
                 </div>
-                <div class="w-1/2 space-y-2">
+                <div class="space-y-2 w-1/2">
                   <Select>
                     <SelectTrigger class="w-2/3" disabled>
                       <SelectValue
                         placeholder="IP2Location"
-                        class="w-full p-2 rounded-lg outline-none"
+                        class="p-2 w-full rounded-lg outline-none"
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -323,20 +323,20 @@ onMounted(() => {
         </Accordion>
 
         <!-- Account Platform -->
-        <Accordion type="single" class="w-full px-4" collapsible>
+        <Accordion type="single" class="px-4 w-full" collapsible>
           <AccordionItem value="account-setting" class="border-0">
             <AccordionTrigger
-              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
               >账号平台
             </AccordionTrigger>
-            <AccordionContent class="px-10 space-y-4 py-1">
+            <AccordionContent class="px-10 py-1 space-y-4">
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">账号平台</p>
+                <p class="w-32 text-sm text-left">账号平台</p>
                 <Select>
                   <SelectTrigger class="w-1/3">
                     <SelectValue
                       placeholder="无"
-                      class="w-full p-2 rounded-lg outline-none"
+                      class="p-2 w-full rounded-lg outline-none"
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -347,12 +347,12 @@ onMounted(() => {
                 </Select>
               </div>
 
-              <div class="space-y-2 flex items-center">
-                <p class="w-32 text-left text-sm">标签页</p>
+              <div class="flex items-center space-y-2">
+                <p class="w-32 text-sm text-left">标签页</p>
                 <Textarea
                   rows="4"
                   placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
-                  class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+                  class="px-3 py-2 w-1/2 placeholder-gray-400 rounded-md border"
                 ></Textarea>
               </div>
             </AccordionContent>
@@ -360,19 +360,19 @@ onMounted(() => {
         </Accordion>
 
         <!-- Cookie -->
-        <Accordion type="single" class="w-full px-4" collapsible>
+        <Accordion type="single" class="px-4 w-full" collapsible>
           <AccordionItem value="cookie-setting" class="border-0">
             <AccordionTrigger
-              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
               >Cookie
             </AccordionTrigger>
-            <AccordionContent class="px-10 space-y-4 py-1">
+            <AccordionContent class="px-10 py-1 space-y-4">
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">Cookie</p>
+                  <p class="text-sm text-left">Cookie</p>
                 </div>
                 <div class="grow">
-                  <div class="w-full space-y-2">
+                  <div class="space-y-2 w-full">
                     <button
                       class="w-24 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 hover:outline-[#5050FA] bg-[#5050FA] text-white active:scale-[.98]"
                     >
@@ -381,7 +381,7 @@ onMounted(() => {
                     <Textarea
                       rows="4"
                       placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
-                      class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+                      class="px-3 py-2 w-1/2 placeholder-gray-400 rounded-md border"
                     ></Textarea>
                   </div>
                 </div>
@@ -390,16 +390,16 @@ onMounted(() => {
           </AccordionItem>
         </Accordion>
 
-        <Accordion type="single" class="w-full px-4" collapsible>
+        <Accordion type="single" class="px-4 w-full" collapsible>
           <AccordionItem value="startup-page-setting" class="border-0">
             <AccordionTrigger
-              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
               >浏览器启动页
             </AccordionTrigger>
-            <AccordionContent class="px-10 space-y-4 py-1">
+            <AccordionContent class="px-10 py-1 space-y-4">
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">启动后</p>
+                  <p class="text-sm text-left">启动后</p>
                 </div>
                 <div class="grow">
                   <RadioGroup defaultValue="option-one">
@@ -424,9 +424,9 @@ onMounted(() => {
               </div>
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">其他设置</p>
+                  <p class="text-sm text-left">其他设置</p>
                 </div>
-                <div class="grow flex flex-col gap-y-1">
+                <div class="flex flex-col gap-y-1 grow">
                   <div class="flex gap-x-2">
                     <Switch class="data-[state=checked]:bg-[#5050FA]" />
                     <p>同时打开「账号」已配置的平台网页</p>
@@ -441,13 +441,13 @@ onMounted(() => {
           </AccordionItem>
         </Accordion>
 
-        <Accordion type="single" class="w-full px-4" collapsible>
+        <Accordion type="single" class="px-4 w-full" collapsible>
           <AccordionItem value="webrtc-setting" class="border-0">
             <AccordionTrigger
-              class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+              class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
               >高级配置
             </AccordionTrigger>
-            <AccordionContent class="px-10 space-y-4 py-1">
+            <AccordionContent class="px-10 py-1 space-y-4">
               <div className="flex">
                 <div class="w-32">
                   <button
@@ -460,7 +460,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">时区</p>
+                <p class="w-32 text-sm text-left">时区</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -471,7 +471,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">WebRTC</p>
+                <p class="w-32 text-sm text-left">WebRTC</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -482,7 +482,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">地理位置</p>
+                <p class="w-32 text-sm text-left">地理位置</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -493,7 +493,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">语言</p>
+                <p class="w-32 text-sm text-left">语言</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -504,7 +504,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">分辨率</p>
+                <p class="w-32 text-sm text-left">分辨率</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -514,7 +514,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">字体</p>
+                <p class="w-32 text-sm text-left">字体</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -524,7 +524,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">Canvas</p>
+                <p class="w-32 text-sm text-left">Canvas</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -534,7 +534,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">WebGL图像</p>
+                <p class="w-32 text-sm text-left">WebGL图像</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -544,7 +544,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">WebRTC</p>
+                <p class="w-32 text-sm text-left">WebRTC</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -554,7 +554,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">WebGPU</p>
+                <p class="w-32 text-sm text-left">WebGPU</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -564,7 +564,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">AudioContext</p>
+                <p class="w-32 text-sm text-left">AudioContext</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -574,7 +574,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">媒体设备</p>
+                <p class="w-32 text-sm text-left">媒体设备</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -584,7 +584,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">ClientRects</p>
+                <p class="w-32 text-sm text-left">ClientRects</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -594,7 +594,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">SpeechVoices</p>
+                <p class="w-32 text-sm text-left">SpeechVoices</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -605,12 +605,12 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">硬件并发数</p>
+                <p class="w-32 text-sm text-left">硬件并发数</p>
                 <Select>
                   <SelectTrigger class="w-1/3">
                     <SelectValue
                       placeholder="4"
-                      class="w-full p-2 rounded-lg outline-none"
+                      class="p-2 w-full rounded-lg outline-none"
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -621,12 +621,12 @@ onMounted(() => {
                 </Select>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">设备内存</p>
+                <p class="w-32 text-sm text-left">设备内存</p>
                 <Select>
                   <SelectTrigger class="w-1/3">
                     <SelectValue
                       placeholder="4"
-                      class="w-full p-2 rounded-lg outline-none"
+                      class="p-2 w-full rounded-lg outline-none"
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -639,9 +639,9 @@ onMounted(() => {
 
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">设备名称</p>
+                  <p class="text-sm text-left">设备名称</p>
                 </div>
-                <div class="grow space-y-2">
+                <div class="space-y-2 grow">
                   <div class="w-32">
                     <Radio
                       :check="proxy_method"
@@ -653,7 +653,7 @@ onMounted(() => {
                     <SelectTrigger class="w-1/2">
                       <SelectValue
                         placeholder="选择或输入分组"
-                        class="w-full p-2 rounded-lg outline-none"
+                        class="p-2 w-full rounded-lg outline-none"
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -668,9 +668,9 @@ onMounted(() => {
               </div>
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">MAC地址</p>
+                  <p class="text-sm text-left">MAC地址</p>
                 </div>
-                <div class="grow space-y-2">
+                <div class="space-y-2 grow">
                   <div class="w-[7.6rem]">
                     <Radio
                       :check="proxy_method"
@@ -682,7 +682,7 @@ onMounted(() => {
                     <SelectTrigger class="w-1/2">
                       <SelectValue
                         placeholder="选择或输入分组"
-                        class="w-full p-2 rounded-lg outline-none"
+                        class="p-2 w-full rounded-lg outline-none"
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -697,7 +697,7 @@ onMounted(() => {
               </div>
 
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">Do Not Track</p>
+                <p class="w-32 text-sm text-left">Do Not Track</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -707,7 +707,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">蓝牙</p>
+                <p class="w-32 text-sm text-left">蓝牙</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -717,7 +717,7 @@ onMounted(() => {
                 </div>
               </div>
               <div className="flex items-center">
-                <p class="w-32 text-left text-sm">电池</p>
+                <p class="w-32 text-sm text-left">电池</p>
                 <div>
                   <Radio
                     :check="proxy_method"
@@ -729,10 +729,10 @@ onMounted(() => {
 
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">端口扫描保护</p>
+                  <p class="text-sm text-left">端口扫描保护</p>
                 </div>
                 <div class="grow">
-                  <div class="w-full space-y-2">
+                  <div class="space-y-2 w-full">
                     <div class="w-[7.6rem]">
                       <Radio
                         :check="proxy_method"
@@ -743,7 +743,7 @@ onMounted(() => {
                     <Textarea
                       rows="4"
                       placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
-                      class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+                      class="px-3 py-2 w-1/2 placeholder-gray-400 rounded-md border"
                     ></Textarea>
                   </div>
                 </div>
@@ -751,12 +751,12 @@ onMounted(() => {
 
               <div className="flex">
                 <div class="w-32">
-                  <p class="text-left text-sm">启动参数</p>
+                  <p class="text-sm text-left">启动参数</p>
                 </div>
                 <Textarea
                   rows="4"
                   placeholder="输入网址 (每行一个网址)&#10;www.google.com&#10;www.facebook.com"
-                  class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+                  class="px-3 py-2 w-1/2 placeholder-gray-400 rounded-md border"
                 ></Textarea>
               </div>
             </AccordionContent>
@@ -764,7 +764,7 @@ onMounted(() => {
         </Accordion>
       </div>
     </div>
-    <div class="border-t flex gap-x-4 justify-end items-center p-3">
+    <div class="flex gap-x-4 justify-end items-center p-3 border-t">
       <button
         @click="router.go(-1)"
         class="w-28 text-sm border rounded-md px-2 py-2 flex justify-center gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 active:scale-[.98]"

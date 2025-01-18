@@ -9,35 +9,30 @@ import {
 import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+
 const route = useRoute();
 const tabs = [
   {
     id: 1,
-    title: "快速创建",
+    title: "单个添加",
     value: "quick",
     icon: IconRulerCrossPen,
-    href: "/environment-simple-create",
+    href: "/single-new-proxy",
   },
   {
     id: 2,
-    title: "高级创建",
+    title: "批量添加",
     value: "advanced",
     icon: IconStarFallMinimalistic,
-    href: "/environment-advanced-create",
-  },
-  {
-    id: 3,
-    title: "批量导入",
-    value: "batch",
-    icon: IconLoginArrow,
-    href: "/environment-batch-import",
+    href: "/batch-new-proxy",
   },
 ];
 </script>
 <template>
-  <Card className="w-full h-full flex flex-col p-0">
-    <CardHeader class="p-0 px-4">
-      <CardTitle class="mt-1 mb-2 text-xl">新建环境</CardTitle>
+  <div class="h-full">
+    <div class="flex flex-col h-full">
+      <h4 class="text-2xl font-semibold leading-8">书签</h4>
+
       <ul
         class="flex justify-start px-0 pb-0 w-full text-sm bg-white rounded-none border-b"
       >
@@ -66,9 +61,9 @@ const tabs = [
           </div>
         </li>
       </ul>
-    </CardHeader>
-    <div class="flex overflow-hidden flex-col grow">
-      <slot />
+      <div class="flex-col h-full">
+        <slot></slot>
+      </div>
     </div>
-  </Card>
+  </div>
 </template>

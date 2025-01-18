@@ -35,6 +35,13 @@ import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/ind
 import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
 import ProxyManage from '@/views/proxy-manage/index.vue'
 
+
+import EmptyProxy from '@/views/proxy-manage/empty-proxy.vue'
+
+import SingleNewProxy from '@/views/proxy-manage/create-proxy-view/single-new-proxy.vue'
+import BatchNewProxy from '@/views/proxy-manage/create-proxy-view/batch-new-proxy.vue'
+
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -76,6 +83,21 @@ const routes: Array<RouteRecordRaw> = [
     path: '/proxy-manage',
     name: 'proxy-manage',
     component: ProxyManage,
+  },
+  {
+    path: '/enpty-proxy',
+    name: 'enpty-proxy',
+    component: EmptyProxy,
+  },
+  {
+    path: '/single-new-proxy',
+    name: 'single-new-proxy',
+    component: SingleNewProxy,
+  },
+  {
+    path: '/batch-new-proxy',
+    name: 'batch-new-proxy',
+    component: BatchNewProxy,
   },
   {
     path: '/environment-action',
