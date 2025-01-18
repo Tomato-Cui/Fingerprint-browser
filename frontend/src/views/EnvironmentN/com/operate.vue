@@ -54,6 +54,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
 import { AltArrowDownIcon, RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
+import { environment_group_query } from '@/commands/environment-group'
 
 onMounted(() => {
     emit('select', allActions.value)
@@ -61,7 +62,7 @@ onMounted(() => {
 })
 
 const props = defineProps<{
-    open: false,
+    open: boolean,
 }>()
 const emit = defineEmits(['select', 'close', 'startAll', 'stopAll'])
 
@@ -70,9 +71,9 @@ const showQuickSettings = ref(false)
 const allActions = ref([
     { key: 'start', label: '启动', icon: StopCircleIcon, visible: true, action: () => emit('startAll') },
     { key: 'stop', label: '停止', icon: StopCircleIcon, visible: true, action: () => emit('stopAll') },
-    { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ name: '标签1' }] },
-    { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ name: '分组1' }] },
-    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: void (0), children: [{ name: '导出1' }] },
+    { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ key: 'addTab', label: '新增标签' }, { key: 'reset', label: '重设标签' }, { key: 'clean', label: '清空标签' }] },
+    { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ key: 'addGroup', label: '新增分组' }] },
+    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: void (0), children: [{ key: 'export1', label: '导出已选' }, { key: 'export2', label: '导出最近50条' }] },
     { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true, action: void (0) },
     { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true, action: void (0) },
     { key: 'proxy', label: '修改代理', icon: PlateIcon, visible: true, action: void (0) },
@@ -83,9 +84,6 @@ const allActions = ref([
     { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: void (0) },
 ])
 const copyActions = ref([])
-// watch(() => props.open, (v) => {
-//     if (v) copyActions.value = JSON.parse(JSON.stringify(allActions.value))  //数组深拷贝
-// })
 
 const saveQuickSettings = () => {
     //返回数组
@@ -132,6 +130,22 @@ watch(() => props.open, (_) => {
 onMounted(() => {
     window.addEventListener('resize', updateHeight);
 });
+onMounted(() => {
+    environment_group_query(1, 1000).then((res: any) => {
+        allActions.value.find((item: any) => {  //找到分组的操作
+            if (item.key === 'group') {
+                res.data.data.reverse().forEach((e: any) => {
+                    //
+                    let groupV = { key: '', label: '' }
+                    groupV.key = e.id
+                    groupV.label = e.name
+                    item.children = [groupV, ...item.children];
+                })
+            }
+        })
+    })
+    // console.log(".....:", allActions.value);
+})
 onUnmounted(() => {
     window.removeEventListener('resize', updateHeight);
 });

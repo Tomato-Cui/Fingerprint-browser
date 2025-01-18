@@ -26,7 +26,7 @@ const tabs = [
         id: 3,
         title: "全局设置",
         value: "globe",
-        href: "",
+        href: "/globeSet",
     },
     {
         id: 4,

@@ -112,10 +112,6 @@ const targetDiv = ref<any>(null);
 
 // 监听点击事件
 const handleClick = (event: MouseEvent) => {
-    // 获取鼠标点击的位置
-    const clickX = event.clientX;
-    const clickY = event.clientY;
-    console.log('点击位置:', clickX, clickY);
 
     // 判断是否点击到了指定的 div
     if (targetDiv.value && !targetDiv.value.contains(event.target)) {

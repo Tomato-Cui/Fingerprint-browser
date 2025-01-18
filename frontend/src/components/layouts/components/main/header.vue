@@ -12,9 +12,12 @@ import { logout as useLogout } from "@/commands/user";
 import Update from "@/views/system-operation/update.vue";
 import Message from "@/views/system-operation/message.vue";
 import PersonCen from '@/views/system-operation/personality/index.vue'
+import Connect from "@/views/system-operation/connect.vue";
 import { toast } from "vue-sonner";
 import { useRouter, useRoute } from "vue-router";
 import { AlertModel } from "@/components/alert-model";
+import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
+import { Model } from "@/components/model/index";
 
 const router = useRouter()
 const route = useRoute()
@@ -22,6 +25,7 @@ const updateDialog = ref(false)
 const messageDialog = ref(false)
 const personDialog = ref(false)
 const logoutDialog = ref(false)
+const connectModel = ref(false)
 
 const skipV = () => {
   updateDialog.value = false
@@ -110,10 +114,23 @@ const funPer = () => {
         <!-- <div ref="targetDiv"> -->
         <Message :open="messageDialog" @close="messageDialog = false" class="absolute top-[45px] right-[220px]" />
         <!-- </div> -->
-        <button
-          class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white">
-          <IconHeadphonesRound />联系我们
-        </button>
+        <More class="flex w-5">
+          <MoreTrigger class="min-w-fit">
+            <button
+              class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white">
+              <IconHeadphonesRound />联系我们
+            </button>
+          </MoreTrigger>
+          <MoreContent class="w-5">
+            <MoreItem @click="connectModel = true">
+              联系方式
+            </MoreItem>
+            <MoreItem @click="router.push('/quickStart')">
+              帮助中心
+            </MoreItem>
+          </MoreContent>
+        </More>
+
         <button @click="router.push('/accountSet')"
           class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white">
           <IconSettings />系统设置
@@ -127,4 +144,5 @@ const funPer = () => {
       <p>确定退出登录吗？</p>
     </div>
   </AlertModel>
+  <Connect :open="connectModel" @close="connectModel = false"/>
 </template>
