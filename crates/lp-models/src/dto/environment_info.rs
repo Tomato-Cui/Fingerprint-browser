@@ -1,15 +1,17 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct EnvironmentDetailWithResponse {
     pub id: i32,
     pub uuid: String,
-    pub user_uuid: Option<String>,
-    pub team_id: Option<i32>,
+    pub user_uuid: String,
+    pub team_id: i32,
     pub proxy_id: Option<i32>,
     pub fp_info_id: Option<i32>,
     pub group_id: Option<i32>,
+    pub tag_id: Option<i32>,
     pub name: String,
     pub description: Option<String>,
     pub default_urls: Option<String>,
@@ -54,6 +56,15 @@ pub struct EnvironmentDetailWithResponse {
     pub fp_created_at: Option<String>,
     pub fp_updated_at: Option<String>,
     pub fp_deleted_at: Option<String>,
+
+    pub group_name: Option<String>,        // 环境分组
+    pub group_description: Option<String>, //分组描述
+
+    pub tag_name: Option<String>,        // 环境分组
+    pub tag_description: Option<String>, //分组描述
+
+    pub accounts: Option<Value>,
+
 
     // Fields from Proxy
     pub proxy_kind: Option<String>,

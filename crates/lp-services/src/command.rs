@@ -170,7 +170,7 @@ mod tests {
     async fn test_start_browser() {
         crate::setup().await;
         let _t = lp_services_remote::requests::user::login("1", "1").await;
-        let environment_uuid = "da69d77b-0d55-458b-bd8e-b971fe47b71a";
+        let environment_uuid = "8cf8641f-e5eb-440d-b676-6175480e4521";
         let result = start_browser(environment_uuid).await;
         eprintln!("{:?}", result);
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
