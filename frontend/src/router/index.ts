@@ -11,7 +11,6 @@ import preference from '@/views/personalCenter/Preference/index.vue';
 import local from '@/views/personalCenter/Local/index.vue';
 import Api from '@/views/Api/index.vue';
 import WindowSync from '@/views/window-sync/index.vue';
-import ApplicationCenter from '@/views/application-center/index.vue';
 import EnvironmentActionLayout from '@/views/environment-action/layout.vue';
 import EnvironmentActionCreate from '@/views/environment-action/views/create.vue';
 import EnvironmentActionCreates from '@/views/environment-action/views/creates.vue';
@@ -28,18 +27,16 @@ import Environment from '@/views/EnvironmentN/index.vue'
 import AccountSet from '@/views/system-operation/system-set/account-set.vue';
 import NotifySet from '@/views/system-operation/system-set/notify-set.vue'
 import { EnvironmentSimpleCreate, EnvironmentAdvancedCreate, EnvironmentBatchImport } from '@/views/environment-creates/index'
-
 import extensions from '@/views/extensions/index.vue'
-
 import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/index.vue'
 import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
 import ProxyManage from '@/views/proxy-manage/index.vue'
-
-
 import EmptyProxy from '@/views/proxy-manage/empty-proxy.vue'
-
 import SingleNewProxy from '@/views/proxy-manage/create-proxy-view/single-new-proxy.vue'
 import BatchNewProxy from '@/views/proxy-manage/create-proxy-view/batch-new-proxy.vue'
+import PrivateProxy from '@/views/proxy-manage/manage-proxy-view/private-proxy.vue'
+import PlatformProxy from '@/views/proxy-manage/manage-proxy-view/platform-proxy.vue'
+import NewProxy from '@/views/proxy-manage/manage-proxyLayout.vue'
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -88,6 +85,21 @@ const routes: Array<RouteRecordRaw> = [
     path: '/enpty-proxy',
     name: 'enpty-proxy',
     component: EmptyProxy,
+  },
+  {
+    path: '/new-proxy',
+    name: 'new-proxy',
+    component: NewProxy,
+  },
+  {
+    path: '/private-proxy',
+    name: 'private-proxy',
+    component: PrivateProxy,
+  },
+  {
+    path: '/platform-proxy',
+    name: 'platform-proxy',
+    component: PlatformProxy,
   },
   {
     path: '/single-new-proxy',
