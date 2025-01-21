@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { cn } from "@/util/lib";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   IconRulerCrossPen,
   IconStarFallMinimalistic,
-  IconLoginArrow,
 } from "@/assets/icons/environment-creates/simple-create/index";
 import { useRouter, useRoute } from "vue-router";
 
@@ -31,7 +29,7 @@ const tabs = [
 <template>
   <div class="h-full">
     <div class="flex flex-col h-full">
-      <h4 class="text-2xl font-semibold leading-8">书签</h4>
+      <h4 class="ml-6 text-2xl font-semibold leading-8">添加代理</h4>
 
       <ul
         class="flex justify-start px-0 pb-0 w-full text-sm bg-white rounded-none border-b"
@@ -61,8 +59,8 @@ const tabs = [
           </div>
         </li>
       </ul>
-      <div class="flex-col h-full">
-        <slot></slot>
+      <div class="flex flex-col h-full">
+        <slot name="new-proxy-content"></slot>
       </div>
     </div>
   </div>

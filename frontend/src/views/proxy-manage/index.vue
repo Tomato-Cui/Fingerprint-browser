@@ -10,7 +10,7 @@ import {
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
 
-import BuyProxy from "./buy-proxy.vue";
+import BuyProxy from "./manage-proxy-view/buy-proxy.vue";
 import { environment_group_query } from "@/commands/environment-group";
 import {
   AddCheck,

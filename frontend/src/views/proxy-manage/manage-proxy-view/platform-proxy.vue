@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
+import Layout from "@/views/proxy-manage/manage-proxyLayout.vue";
 import { AddCheckWhite } from "@/assets/icons/proxy-manage-image/index";
 
 interface Proxy {
@@ -59,7 +59,7 @@ const proxyItems = ref<ProxyItem[]>([
 
 <template>
   <Layout>
-    <template v-slot:new-proxy-content>
+    <template v-slot:manage-proxy-content>
       <div class="flex-auto p-6 w-full bg-white rounded-lg grow">
         <div class="flex gap-6">
           <!-- Header Controls -->
