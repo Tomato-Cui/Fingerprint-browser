@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import Login from '@/views/login/index.vue';
-import group from '@/views/Team/Group/index.vue';
-import member from '@/views/Team/Member/index.vue';
-import forbid from '@/views/Team/Forbid/index.vue';
-import apply from '@/views/Team/Apply/index.vue';
+import group from '@/views/Teams/Group/index.vue';
+import member from '@/views/Teams/Member/index.vue';
+import forbid from '@/views/Teams/Forbid/index.vue';
+import apply from '@/views/Teams/Apply/index.vue';
 import personalCenter from '@/views/personalCenter/index.vue';
 import account from '@/views/personalCenter/Account/index.vue';
 import preference from '@/views/personalCenter/Preference/index.vue';
@@ -34,6 +34,7 @@ import Extensions from '@/views/extensions/index.vue'
 import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/index.vue'
 import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
 import ProxyManage from '@/views/proxy-manage/index.vue'
+import Team from '@/views/team/index.vue';
 import EmptyProxy from '@/views/proxy-manage/empty-proxy.vue'
 import SingleNewProxy from '@/views/proxy-manage/create-proxy-view/single-new-proxy.vue'
 import BatchNewProxy from '@/views/proxy-manage/create-proxy-view/batch-new-proxy.vue'
@@ -173,6 +174,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/extensions',
     name: 'extensions',
     component: Extensions,
+  },
+  {
+    path: '/team/:id?',
+    name: '/team',
+    component: Team,
   },
   {
     path: '/team/group',

@@ -12,7 +12,10 @@ pub mod response;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let mut ctx = tauri::generate_context!();
+
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_theme::init(ctx.config_mut()))
         .invoke_handler(command::register_handles())
         .setup(|app| {
             register_plugins(app.app_handle());
@@ -21,7 +24,7 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(window_event_handle)
-        .build(tauri::generate_context!())
+        .build(ctx)
         .expect("error while building tauri application");
 
     app.run(run_event_handle);
@@ -70,9 +73,6 @@ fn register_plugins(app_handle: &AppHandle) {
     app_handle
         .plugin(tauri_plugin_updater::Builder::new().build())
         .unwrap();
-
-    #[cfg(desktop)]
-    app_handle.plugin(tauri_plugin_websocket::init()).unwrap();
 }
 
 fn regsister_update_processor(app: AppHandle) {

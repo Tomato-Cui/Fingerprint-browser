@@ -6,10 +6,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 import { menus } from "../../menu";
 const router = useRouter();
+const route = useRoute();
 </script>
 
 <template>
@@ -21,8 +22,10 @@ const router = useRouter();
           @click="router.push(item.url)"
           :class="
             cn(
-              'p-0 h-12 rounded-sm group-data-[state=collapsed]:!p-0',
-              item.isActive ? 'bg-[#D8DCF3] text-[#5050FA]' : ''
+              'p-0 h-12 rounded-sm group-data-[state=collapsed]:!p-0  dark:fill-white dark:text-[#C5CEE0] transition-all duration-200 ease-in-out delay-50',
+              route.path === item.url
+                ? 'bg-[#D8DCF3]  text-[#5050FA] dark:text-[#7171FF] dark:bg-[#3366FF33]'
+                : ' '
             )
           "
         >
@@ -30,7 +33,7 @@ const router = useRouter();
             :class="
               cn(
                 'flex gap-x-4 h-2/3 items-center justify-start',
-                item.isActive
+                route.path === item.url
                   ? 'border-l-[3px] border-[#6A6AFF]'
                   : 'border-l-[3px] border-transparent'
               )
@@ -43,7 +46,18 @@ const router = useRouter();
                 )
               "
             >
-              <component :is="item.icon" class="size-5" />
+              <component
+                :is="item.icon"
+                :stroke="route.path === item.url ? '#5050FA' : ''"
+                :class="
+                  cn(
+                    'size-5  fill-black',
+                    route.path === item.url
+                      ? 'fill-[#5050FA]'
+                      : 'dark:fill-white'
+                  )
+                "
+              />
               <p
                 class="'flex-1 flex items-center text-[15px] whitespace-nowrap group-data-[state=collapsed]:hidden'"
               >

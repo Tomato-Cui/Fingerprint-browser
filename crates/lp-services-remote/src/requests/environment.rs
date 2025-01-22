@@ -237,6 +237,25 @@ pub async fn batch_move_to_group(
     Ok(json_response)
 }
 
+pub async fn batch_move_to_tag(
+    environment_ids: Vec<String>,
+    tag_id: u32,
+) -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({
+        "environment_ids": environment_ids,
+        "tag_id": tag_id,
+    });
+
+    let json_response = client::REQUEST
+        .put(
+            client::Client::build_url("/environments/batch/move-to-tag")?,
+            &data,
+        )
+        .await?;
+
+    Ok(json_response)
+}
+
 pub async fn delete(environment_uuid: &str) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
         "environment_uuid": environment_uuid,

@@ -70,8 +70,10 @@
 
                     <More class="flex min-w-fit" v-for="action in visibleActions" :key="action.key">
                         <MoreTrigger class="min-w-fit">
-                            <button v-show="action.key !== 'start'"
-                                @click="selectedItems.length != 0 ? action.action : void (0)"
+                            <button 
+                                @click="action.action"
+                                :disabled="selectedItems.length == 0"
+                                v-show="action.key !== 'start'"
                                 :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'hover:bg-gray-50': selectedItems.length != 0 }"
                                 class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
                                 <component :is="action.icon" class="mr-1.5 h-4 w-4" />

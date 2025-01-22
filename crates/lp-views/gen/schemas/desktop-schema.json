@@ -1672,6 +1672,31 @@
           "const": "log:deny-log"
         },
         {
+          "description": "Allow all",
+          "type": "string",
+          "const": "theme:default"
+        },
+        {
+          "description": "Enables the get_theme command without any pre-configured scope.",
+          "type": "string",
+          "const": "theme:allow-get-theme"
+        },
+        {
+          "description": "Enables the set_theme command without any pre-configured scope.",
+          "type": "string",
+          "const": "theme:allow-set-theme"
+        },
+        {
+          "description": "Denies the get_theme command without any pre-configured scope.",
+          "type": "string",
+          "const": "theme:deny-get-theme"
+        },
+        {
+          "description": "Denies the set_theme command without any pre-configured scope.",
+          "type": "string",
+          "const": "theme:deny-set-theme"
+        },
+        {
           "description": "This permission set configures which kind of\nupdater functions are exposed to the frontend.\n\n#### Granted Permissions\n\nThe full workflow from checking for updates to installing them\nis enabled.\n\n",
           "type": "string",
           "const": "updater:default"
@@ -1715,31 +1740,6 @@
           "description": "Denies the install command without any pre-configured scope.",
           "type": "string",
           "const": "updater:deny-install"
-        },
-        {
-          "description": "Allows connecting and sending data to a WebSocket server",
-          "type": "string",
-          "const": "websocket:default"
-        },
-        {
-          "description": "Enables the connect command without any pre-configured scope.",
-          "type": "string",
-          "const": "websocket:allow-connect"
-        },
-        {
-          "description": "Enables the send command without any pre-configured scope.",
-          "type": "string",
-          "const": "websocket:allow-send"
-        },
-        {
-          "description": "Denies the connect command without any pre-configured scope.",
-          "type": "string",
-          "const": "websocket:deny-connect"
-        },
-        {
-          "description": "Denies the send command without any pre-configured scope.",
-          "type": "string",
-          "const": "websocket:deny-send"
         }
       ]
     },

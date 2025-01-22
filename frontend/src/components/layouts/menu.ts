@@ -15,7 +15,7 @@ export const menus = [
     },
     {
         title: "代理",
-        url: "#",
+        url: "/private-proxy",
         icon: IconPlate,
     },
     {
@@ -30,7 +30,7 @@ export const menus = [
     },
     {
         title: "团队",
-        url: "#",
+        url: "/team/",
         icon: IconUsersGroupRounded,
     },
 ];
