@@ -1,6 +1,7 @@
 <template>
     <Transition name="modal-fade">
-        <div v-show="props.open" class="mt-16 mr-4 min-w-72 rounded-lg bg-white p-4 shadow-lg z-40">
+        <div v-show="props.open"
+            class="mt-16 absolute border mr-4 w-[320px] rounded-lg bg-white p-4 shadow-lg z-40 right-0 top-0">
             <div class="mb-4 flex items-center justify-between border-b pb-1">
                 <h3 class="text-lg font-medium">快捷设置</h3>
                 <RefreshSquareIcon class="size-6" />
@@ -28,7 +29,7 @@
                     <div class="flex items-center bg-[#EDEDFF80] w-full h-[40px] pl-[10px] rounded-lg">
                         <component :is="action.icon" class="mr-2 h-4 w-4" />
                         <span class="text-sm flex-1">{{ action.label }}</span>
-                        <AltArrowDownIcon v-show="action.children" class="size-5" />
+                        <!-- <AltArrowDownIcon v-show="action.children" class="size-5" /> -->
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" v-model="action.visible" class="peer sr-only">
@@ -38,6 +39,7 @@
                     </label>
                 </div>
             </div>
+            {{ props.groupData }}
             <div class="mt-4 flex justify-end space-x-2">
                 <button @click="cancelSet" class="rounded-md px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">
                     取消
@@ -49,12 +51,14 @@
             </div>
         </div>
     </Transition>
+
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
+import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
 import { AltArrowDownIcon, RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
 import { environment_group_query } from '@/commands/environment-group'
+
 
 onMounted(() => {
     emit('select', allActions.value)
@@ -63,26 +67,38 @@ onMounted(() => {
 
 const props = defineProps<{
     open: boolean,
+    groupData: Array<any>,
 }>()
-const emit = defineEmits(['select', 'close', 'startAll', 'stopAll'])
+const emit = defineEmits(['select', 'close', 'startAll', 'stopAll', 'addLabel', 'exportEnv', 'editProxy', 'editEnvInfo', 'transferEnv', 'untransferEnv', 'cleanCache', 'delEnv', 'addLabel', 'resetLabel', 'cleanLabel', 'addGroup', 'editStartPage', 'editUa'])
 
-
-const showQuickSettings = ref(false)
 const allActions = ref([
     { key: 'start', label: '启动', icon: StopCircleIcon, visible: true, action: () => emit('startAll') },
     { key: 'stop', label: '停止', icon: StopCircleIcon, visible: true, action: () => emit('stopAll') },
-    { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ key: 'addTab', label: '新增标签' }, { key: 'reset', label: '重设标签' }, { key: 'clean', label: '清空标签' }] },
-    { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ key: 'addGroup', label: '新增分组' }] },
-    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: void (0), children: [{ key: 'export1', label: '导出已选' }, { key: 'export2', label: '导出最近50条' }] },
-    { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true, action: void (0) },
-    { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true, action: void (0) },
-    { key: 'proxy', label: '修改代理', icon: PlateIcon, visible: true, action: void (0) },
-    { key: 'env', label: '修改环境信息', icon: HomeSmileIcon, visible: true, action: void (0) },
-    { key: 'transfer', label: '转移', icon: RoundTransferHorizontal, visible: true, action: void (0) },
-    { key: 'cancelTransfer', label: '取消转移', icon: ForbidRoundTransferHorizontal, visible: true, action: void (0) },
-    { key: 'clearCache', label: '清除缓存', icon: ClearCacheIcon, visible: true, action: void (0) },
-    { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: void (0) },
+    { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ key: 'addTab', label: '新增标签', active: () => emit('addLabel') }, { key: 'reset', label: '重设标签', active: () => emit('resetLabel') }, { key: 'clean', label: '清空标签', active: () => emit('cleanLabel') }] },
+    { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ key: 'addGroup', label: '增加分组', active: () => emit('addGroup') }] },
+    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: void (0), children: [{ key: 'export1', label: '导出已选', active: () => emit('exportEnv') }, { key: 'export2', label: '导出最近50条', active: () => emit('exportEnv') }] },
+    { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true, action: () => emit('editStartPage') },
+    { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true, action: () => emit('editUa') },
+    { key: 'proxy', label: '修改代理', icon: PlateIcon, visible: true, action: () => emit('editProxy') },
+    { key: 'env', label: '修改环境信息', icon: HomeSmileIcon, visible: true, action: () => emit('editEnvInfo') },
+    { key: 'transfer', label: '转移', icon: RoundTransferHorizontal, visible: true, action: () => emit('transferEnv') },
+    { key: 'cancelTransfer', label: '取消转移', icon: ForbidRoundTransferHorizontal, visible: true, action: () => emit('untransferEnv') },
+    { key: 'clearCache', label: '清除缓存', icon: ClearCacheIcon, visible: true, action: () => emit('cleanCache') },
+    { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: () => emit('delEnv') },
 ])
+
+watch(() => props.groupData, (newVal) => {
+    if (!newVal)return;
+    if (newVal.length === 0) return;
+    allActions.value = allActions.value.map((item: any) => {  //找到分组的操作
+        if (item.key === 'group') {
+            return { ...item, children: [...newVal] }
+        } else {
+            return item
+        }
+    })
+})
+
 const copyActions = ref([])
 
 const saveQuickSettings = () => {
@@ -136,7 +152,7 @@ onMounted(() => {
             if (item.key === 'group') {
                 res.data.data.reverse().forEach((e: any) => {
                     //
-                    let groupV = { key: '', label: '' }
+                    let groupV = { key: '', label: '', active: void (0) }
                     groupV.key = e.id
                     groupV.label = e.name
                     item.children = [groupV, ...item.children];
@@ -144,7 +160,6 @@ onMounted(() => {
             }
         })
     })
-    // console.log(".....:", allActions.value);
 })
 onUnmounted(() => {
     window.removeEventListener('resize', updateHeight);

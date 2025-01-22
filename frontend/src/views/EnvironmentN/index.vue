@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white rounded-xl flex-1 px-4 py-2 w-full h-full flex flex-col">
+    <div class="rounded-xl flex-1 px-4 py-2 w-full h-full flex flex-col">
         <!-- Header Section -->
         <header class="mb-4 flex items-c enter justify-between h-[40px]">
             <div class="flex items-center space-x-4 w-auto">
@@ -45,7 +45,7 @@
         </header>
 
         <!-- Tabs -->
-        <GroupChoose class="flex flex-col flex-1">
+        <GroupChoose class="flex flex-col flex-1" :data="groupList">
             <!-- Action Buttons -->
             <div class="mb-4 flex items-center space-x-2 h-[60px]">
                 <!-- <OpenBrowserIcon class="w-[106px] h-[43px]" :class="{'cursor-not-allowed': selectedItems.length==0, 'hover:bg-gray-50 cursor-pointer': selectedItems.length!=0}" @click="selectedItems.length!=0 ? startAll() : void(0)" /> -->
@@ -58,23 +58,15 @@
                         <HelfGlobalIcon class="size-[51px] opacity-10" />
                     </div>
                 </div>
-                <div class="flex flex-1 overflow-x-auto space-x-2">
-                    <!-- <button v-for="action in visibleActions" :key="action.key" v-show="action.key !== 'start'"
-                        @click="selectedItems.length != 0 ? action.action : void (0)"
-                        :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'hover:bg-gray-50': selectedItems.length != 0 }"
-                        class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
-                        <component :is="action.icon" class="mr-1.5 h-4 w-4" />
-                        <span>{{ action.label }}</span>
-                        <AltArrowDownIcon v-show="action.children" class="size-5" />
-                    </button> -->
-
+                <div class="flex flex-1 overflow-x-auto scrollbar-hide space-x-2 cursor-grab"
+                    @mousedown.stop="startDrag" @mousemove="onDrag" @mouseup="stopDrag" ref="scrollContainer">
                     <More class="flex min-w-fit" v-for="action in visibleActions" :key="action.key">
                         <MoreTrigger class="min-w-fit">
-                            <button 
-                                @click="action.action"
-                                :disabled="selectedItems.length == 0"
-                                v-show="action.key !== 'start'"
-                                :class="{ 'cursor-not-allowed opacity-50': selectedItems.length == 0, 'hover:bg-gray-50': selectedItems.length != 0 }"
+                            <button v-show="action.key !== 'start'" :disabled="selectedItems.length === 0"
+                                @click="selectedItems.length !== 0 ? action.action() : void (0)" :class="{
+                                    'cursor-not-allowed opacity-50': selectedItems.length == 0,
+                                    'hover:bg-gray-50': selectedItems.length != 0
+                                }"
                                 class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
                                 <component :is="action.icon" class="mr-1.5 h-4 w-4" />
                                 <span>{{ action.label }}</span>
@@ -82,8 +74,16 @@
                             </button>
                         </MoreTrigger>
                         <MoreContent class="w-[140px]" v-if="action.children && selectedItems.length > 0">
-                            <MoreItem v-for="item in action.children" :key="item" class="cursor-pointer" :class="{'hover:bg-white': item.key === 'addGroup'}">
-                                <div v-if="item.key === 'addGroup'" class="border border-[#5050FA] bg-[#EDEDFF] w-full p-1 rounded-sm flex items-center justify-center"><GroupAddIcon class="size-5"/>{{ item.label }}</div>
+                            <MoreItem v-for="item in action.children" @click="item.active" :key="item"
+                                class="cursor-pointer" :class="{ 'hover:bg-white': item.key === 'addGroup' }">
+                                <div v-if="item.key === 'addGroup'"
+                                    class="border border-[#5050FA] bg-[#EDEDFF] w-full p-1 rounded-sm flex items-center justify-center">
+                                    <GroupAddIcon class="size-5" />{{ item.label }}
+                                </div>
+                                <div v-else-if="action.key === 'group'">
+                                    <Checkbox />
+                                    {{ item.label }}
+                                </div>
                                 <div v-else>{{ item.label }}</div>
                             </MoreItem>
                         </MoreContent>
@@ -96,16 +96,19 @@
                     </button>
                     <!-- Quick Settings Modal -->
                     <Operate :open="showQuickSettings" @close="showQuickSettings = false" @select="operateSelect"
-                        @stopAll="stopAll" class="absolute right-0 top-0 w-[320px]" />
+                        @edit-proxy="editProxy" @edit-env-info="editEnvInfo" @export-env="exportEnv" @stopAll="stopAll"
+                        @clean-cache="cleanCache" @transfer-env="transferEnv" @untransfer-env="untransferEnv"
+                        @add-label="addLabel" @add-group="addGroup" @reset-label="resetLabel" @clean-label="cleanLabel"
+                        @edit-start-page="editStartPage" @edit-ua="editUA" @del-env="delEnv" :group-data="groupList.filter((item: any) => item.value !== 'default') as any" class="w-[320px]" />
                 </div>
             </div>
 
             <!-- Table -->
-            <div class="rounded-lg bg-white flex-1 overflow-auto flex flex-col">
+            <div class="rounded-lg flex-1 overflow-auto flex flex-col">
                 <table class="min-w-full">
                     <!-- {{ sortColumn }} -->
                     <thead class="w-full sticky top-0 z-10">
-                        <tr class="border-b bg-gray-50">
+                        <tr class="border-b">
                             <th class="w-12 py-3 pl-4 text-left">
                                 <input type="checkbox" class="rounded border-gray-300" :checked="isAllSelected"
                                     @change="toggleSelectAll" :indeterminate="isIndeterminate" />
@@ -165,11 +168,11 @@
                                 <td class="px-2 py-3 text-sm" v-if="key != 'uuid'">
                                     <!-- 操作格 -->
                                     <div v-if="key === 'action'" class="flex justify-between items-center ">
-                                        <span @click="true ? startEnv(item.uuid) : void (0)"
-                                            :class="{ 'border-[#5050fa] bg-[#EDEDFF] text-blue-500': value == '启动', 'border-red-300 bg-red-50 text-red-500': value == '停止' }"
-                                            class="border w-[70px] flex justify-center py-1 rounded-lg border-[#5050fa] bg-[#EDEDFF] cursor-pointer hover:bg-blue-100">{{
-                                                value
-                                            }}</span>
+                                        <span
+                                            @click="!browserStatusStore.getStatus(item.uuid) ? startEnv(item.uuid) : stopEnv(item.uuid)"
+                                            :class="{ 'border-[#5050fa] bg-[#EDEDFF] text-blue-500 hover:bg-blue-100': !browserStatusStore.getStatus(item.uuid), 'border-red-300 bg-red-50 text-red-500 hover:bg-red-100': browserStatusStore.getStatus(item.uuid) }"
+                                            class="border w-[70px] flex justify-center py-1 rounded-lg border-[#5050fa] bg-[#EDEDFF] cursor-pointer">
+                                            {{ !browserStatusStore.getStatus(item.uuid) ? '启动' : '关闭' }}</span>
                                         <span class="">
                                             <More class="top-8 relative">
                                                 <MoreTrigger>
@@ -202,7 +205,7 @@
                     <AddCardIcon
                         class=" size-[200px]  text-blue-400 border-gray-300 flex items-center justify-center" />
                     <p>您可创建具有独立高质量指纹的profile，也可自定义编辑指纹信息</p>
-                    <button @click="router.push('/environment-action/create')"
+                    <button @click="router.push('/environment-simple-create')"
                         class="p-2 bg-[#5050FA] text-white rounded-lg flex items-center gap-3">
                         <AssCircleIcon class="size-5" />
                         新建环境
@@ -214,8 +217,21 @@
             <Page :total="PageObj.total" :modelValue="PageObj.pageNum" @update:model-value="getPageNum"
                 @update:page-size="getPageSize" />
         </GroupChoose>
-
     </div>
+    <ExportEnv :open="exportEnvModel" @close="exportEnvModel = false" :data="messageData" />
+    <EditProxy :open="editProxyModel" @close="editProxyModel = false" :data="messageData" />
+    <EditEnvInfo :open="editEnvInfoModel" @close="editEnvInfoModel = false" :data="messageData" />
+    <TransferEnv :open="transferEnvModel" @close="transferEnvModel = false" :data="messageData" />
+    <UntransferEnv :open="UntransferEnvModel" @close="UntransferEnvModel = false" :data="messageData" />
+    <CleanCache :open="cleanCacheModel" @close="cleanCacheModel = false" :data="messageData" />
+    <DelEnv :open="delEnvModel" @close="delEnvModel = false" :data="messageData" />
+
+    <AddLabel :open="addLabelModel" @close="addLabelModel = false" :data="messageData" />
+    <ResetLabel :open="resetLabelModel" @close="resetLabelModel = false" :data="messageData" />
+    <CleanLabel :open="cleanLabelMode" @close="cleanLabelMode = false" />
+    <AddGroup :open="addGroupModel" @close="addGroupModel = false" @search-group="searchGroup" />
+    <EditStartPage :open="editStartPageModel" @close="editStartPageModel = false" />
+    <EditUa :open="editUAModel" @close="editUAModel = false" />
 </template>
 
 <script setup lang="ts">
@@ -225,6 +241,19 @@ import TableTheadChoose from "./com/table-thead-choose.vue"
 import SearchChoose from "./com/search-choose.vue"
 import Page from './com/page.vue'
 import GroupChoose from './com/group-choose.vue'
+import ExportEnv from './pop-box/export/exportEnv.vue'
+import EditProxy from './pop-box/edit-proxy.vue'
+import EditEnvInfo from './pop-box/edit-env-info.vue'
+import TransferEnv from './pop-box/transfer-env.vue'
+import UntransferEnv from './pop-box/untransfer-env.vue'
+import CleanCache from './pop-box/clean-cache.vue'
+import DelEnv from './pop-box/del-env.vue'
+import AddLabel from './pop-box/label/addLabel.vue'
+import ResetLabel from './pop-box/label/resetLabel.vue'
+import CleanLabel from './pop-box/label/cleanLabel.vue'
+import AddGroup from './pop-box/group/addGroup.vue'
+import EditStartPage from './pop-box/edit-start-page.vue'
+import EditUa from './pop-box/edit-ua.vue'
 // import Auth from './synchronizer/auth.vue'
 import SynchronizerIndex from './synchronizer/index.vue'
 import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, GroupAddIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index.ts"
@@ -235,7 +264,11 @@ import { OneFrameIcon } from '@/assets/icons/environment/index.ts'
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { browser_starts, browser_stops, browser_start } from '@/commands/browser'
 import { toast } from 'vue-sonner'
+import { useBrowserStatusStore } from "@/stores/browser";
+import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
+import { environment_group_query } from "@/commands/environment-group"
 
+const browserStatusStore = useBrowserStatusStore();
 const router = useRouter()
 const route = useRoute()
 const showSearchChoose = ref(false)
@@ -243,14 +276,74 @@ const showQuickSettings = ref(false)
 const showColumnsModal = ref(false)
 const tableOperateModal = ref(false)
 const synchronizerDialog = ref(false)
+const exportEnvModel = ref(false)
+const editProxyModel = ref(false)
+const editEnvInfoModel = ref(false)
+const transferEnvModel = ref(false)
+const UntransferEnvModel = ref(false)
+const cleanCacheModel = ref(false)
+const delEnvModel = ref(false)
+const addLabelModel = ref(false)
+const resetLabelModel = ref(false)
+const cleanLabelMode = ref(false)
+const addGroupModel = ref(false)
+const editStartPageModel = ref(false)
+const editUAModel = ref(false)
 const searchQuery = ref('')
 const sortColumn = ref('id');
 const sortOrder = ref('asc');
 
-watch(() => tableOperateModal.value, (val) => {
-    // console.log("bianh：", chooseIndex.value);
-})
+// 拖拽状态
+const isDragging = ref(false);
+const startX = ref(0); // 拖拽起始位置
+const scrollLeft = ref(0); // 容器初始滚动位置
+const scrollContainer = ref<HTMLElement | null>(null); // 容器 DOM 引用
 
+// 开始拖拽
+const startDrag = (event: MouseEvent) => {
+    isDragging.value = true;
+    startX.value = event.pageX; // 记录鼠标按下时的位置
+    scrollLeft.value = scrollContainer.value?.scrollLeft || 0; // 记录容器当前的滚动位置
+    scrollContainer.value?.classList.add('cursor-grabbing'); // 添加抓取样式
+    scrollContainer.value?.classList.remove('cursor-grab');
+};
+
+// 拖拽中
+const onDrag = (event: MouseEvent) => {
+    if (!isDragging.value || !scrollContainer.value) return;
+    const x = event.pageX - startX.value; // 计算鼠标移动的距离
+    scrollContainer.value.scrollLeft = scrollLeft.value - x; // 调整容器的滚动位置
+};
+
+// 停止拖拽
+const stopDrag = () => {
+    isDragging.value = false;
+    scrollContainer.value?.classList.remove('cursor-grabbing'); // 移除抓取样式
+    scrollContainer.value?.classList.add('cursor-grab');
+};
+
+// 清理事件监听器
+onMounted(() => {
+    if (scrollContainer.value) {
+        scrollContainer.value.addEventListener('mousedown', startDrag);
+        scrollContainer.value.addEventListener('mousemove', onDrag);
+        scrollContainer.value.addEventListener('mouseup', stopDrag);
+        scrollContainer.value.addEventListener('mouseleave', stopDrag);
+    }
+});
+
+onUnmounted(() => {
+    if (scrollContainer.value) {
+        scrollContainer.value.removeEventListener('mousedown', startDrag);
+        scrollContainer.value.removeEventListener('mousemove', onDrag);
+        scrollContainer.value.removeEventListener('mouseup', stopDrag);
+        scrollContainer.value.removeEventListener('mouseleave', stopDrag);
+    }
+});
+//导出
+const exportEnv = () => {
+    exportEnvModel.value = true
+}
 const allActions = ref<any>([])  //全部操作
 const allColumns = ref<any>([])  //全部列
 const regularItems = [
@@ -289,20 +382,105 @@ const visibleActions = computed(() => {
 const startEnv = (uuid: string) => {
     browser_start(uuid).then((res: any) => {
         toast.success(res.message)
+        browserStatusStore.updateStatus(uuid, true)
+    })
+}
+// 单个关闭
+const stopEnv = (uuid: string) => {
+    browser_stops([uuid]).then((res: any) => {
+        toast.success(res.message)
+        browserStatusStore.updateStatus(uuid, false)
     })
 }
 // 批量启动
 const startAll = () => {
     browser_starts(selectedItems.value).then((res: any) => {
         toast.success(res.message)
+        selectedItems.value.forEach((item: string) => {
+            browserStatusStore.updateStatus(item, true)
+        })
     })
 }
 // 批量关闭
 const stopAll = () => {
     browser_stops(selectedItems.value).then((res: any) => {
         toast.success(res.message)
+        selectedItems.value.forEach((item: string) => {
+            browserStatusStore.updateStatus(item, false)
+        })
     })
 }
+//编辑代理
+const editProxy = () => {
+    editProxyModel.value = true
+}
+//编辑环境信息
+const editEnvInfo = () => {
+    editEnvInfoModel.value = true
+}
+//转移环境
+const transferEnv = () => {
+    transferEnvModel.value = true
+}
+//取消转移
+const untransferEnv = () => {
+    UntransferEnvModel.value = true
+}
+//清除缓存
+const cleanCache = () => {
+    cleanCacheModel.value = true
+}
+//删除环境
+const delEnv = () => {
+    delEnvModel.value = true
+}
+//添加标签
+const addLabel = () => {
+    addLabelModel.value = true
+}
+//重设标签
+const resetLabel = () => {
+    resetLabelModel.value = true
+}
+//清空标签
+const cleanLabel = () => {
+    cleanLabelMode.value = true
+}
+//添加分组
+const addGroup = () => {
+    addGroupModel.value = true
+}
+//编辑启动页
+const editStartPage = () => {
+    editStartPageModel.value = true
+}
+//编辑UA
+const editUA = () => {
+    editUAModel.value = true
+}
+// 添加分组后重新做分组查询
+const groupList = ref<any>([])
+const searchGroup = () => {
+    environment_group_query(1, 1000).then((res: any) => {
+        groupList.value = res.data.data.map((item: any) => {
+            return {
+                id: item.id,
+                title: item.name,
+                value: item.name,
+                href: '/environment/' + item.id,
+            }
+        })
+        groupList.value = [{
+            id: 0,
+            title: "默认分组",
+            value: "default",
+            href: "/environment/0",
+        }, ...groupList.value]
+    })
+}
+onMounted(() => {
+    searchGroup()
+})
 const visibleColumns = computed(() => {
     return allColumns.value.filter((column: any) => column.visible)
 })
@@ -351,7 +529,7 @@ const headOperate = ref([
 //     not_ready: '未准备好'
 // }
 
-const tableData = ref([])
+const tableData = ref<any>([])
 const filterData = computed(() => {
     // Filter the tableData based on the search query
     const filteredTableData = tableData.value.filter((item: any) =>
@@ -431,64 +609,68 @@ const toggleSelectItem = (envUuid: string) => {
 defineExpose({
     selectedItems
 })
+//监听多选框的变化
+watch(
+    () => selectedItems.value,
+    (newVal) => {
+        messageData.value = []
+        originData.value.forEach((item: any) => {
+            if (newVal.includes(item.uuid)) {
+                messageData.value.push(item)
+            }
+        })
+        // console.log("选择的数据：", messageData.value);
+
+    },
+    { deep: true } // 深度监听
+);
 
 //监听理由变化
 watch(() => route.params.id, () => {
     getList()
 })
 
+
+const originData = ref<any>([])
+const messageData = ref<any>([])
 const getList = () => {
     if (route.params.id === '0') {
         environment_query(PageObj.pageNum, PageObj.pageSize).then((res: any) => {
-            // tableData.value = res.data
-            // console.log("res:", res.data);
-            let ind = 1;
             PageObj.total = res.data.total
-            // PageObj.pageNum =
-            // 将字段与表头对上
-            tableData.value = res.data.data.map((item: any) => {
-                return {
-                    ind: ind++,
-                    id: item.id,
-                    name: item.name,
-                    action: '启动',
-                    status: '启动中',
-                    account: '账号',
-                    proxy: item.proxy_username,
-                    description: item.description,
-                    tab: '标签',
-                    groupName: item.group_name,
-                    create_at: item.created_at,
-                    lastOpen: '最后启动',
-                    uuid: item.uuid,
-                }
-            })
+            tableData.value = res.data.data
+            dealTableData()  //字段处理
         })
     } else {
         environment_query_by_group(+route.params.id, PageObj.pageNum, PageObj.pageSize).then((res: any) => {
-            let ind = 1;
             PageObj.total = res.data.total
-            // PageObj.pageNum =
-            // 将字段与表头对上
-            tableData.value = res.data.data.map((item: any) => {
-                return {
-                    ind: ind++,
-                    id: item.id,
-                    name: item.name,
-                    action: '启动',
-                    status: '启动中',
-                    account: '账号',
-                    proxy: item.proxy_username,
-                    description: item.description,
-                    tab: '标签',
-                    groupName: item.group_name,
-                    create_at: item.created_at,
-                    lastOpen: '最后启动',
-                    uuid: item.uuid,
-                }
-            })
+            tableData.value = res.data.data
+            dealTableData()
         })
     }
+}
+
+const dealTableData = () => {
+    let ind = 1;  //序号
+    originData.value = JSON.parse(JSON.stringify(tableData.value));
+    // console.log("originData:", originData.value);
+    // 将字段与表头对上
+    tableData.value = tableData.value.map((item: any) => {
+        return {
+            ind: ind++,
+            id: item.id,
+            name: item.name,
+            action: '启动',
+            status: '启动中',
+            account: item.accounts.platform + item.accounts.platform_account,
+            proxy: item.proxy_username,
+            description: item.description,
+            tab: item.tag_name,
+            groupName: item.group_name,
+            create_at: item.created_at,
+            lastOpen: '最后启动',
+            uuid: item.uuid,
+        }
+    })
 }
 onMounted(() => {
     getList()
@@ -502,3 +684,18 @@ const handleSort = (column: string) => {
     }
 };
 </script>
+
+<style scoped>
+/* 隐藏滚动条 */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* 兼容 Firefox */
+.scrollbar-hide {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 和 Edge */
+}
+</style>
