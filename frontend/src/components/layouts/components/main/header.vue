@@ -103,13 +103,13 @@ const funPer = () => {
       <div class="flex gap-x-4 items-center relative">
         <button @click="funUp"
           class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white">
-          <IconRestart class="text-white" /> 更新
+          <IconRestart class="hover:text-white fill-none" /> 更新
         </button>
         <Update :open="updateDialog" @close="updateDialog = false" @skip="skipV" @update="updateV"
           class="absolute top-[45px] right-[309px]" />
         <button @click="funMes"
           class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white">
-          <IconMailbox />信息
+          <IconMailbox class=""/>信息
         </button>
         <!-- <div ref="targetDiv"> -->
         <Message :open="messageDialog" @close="messageDialog = false" class="absolute top-[45px] right-[220px]" />

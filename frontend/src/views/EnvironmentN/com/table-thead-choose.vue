@@ -23,7 +23,7 @@ const allColumns = ref([
     { key: 'tab', label: '标签', visible: false },
     { key: 'groupName', label: '分组', visible: false },
     { key: 'create_at', label: '创建信息', visible: false },
-    { key: 'lastOpen', label: '最后启动信息', visible: false },
+    // { key: 'lastOpen', label: '最后启动信息', visible: false },
 ])
 
 const saveChoose = () => {

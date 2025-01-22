@@ -8,6 +8,9 @@ import { environment_group_query } from "@/commands/environment-group"
 const router = useRouter();
 const route = useRoute();
 const tabs = ref<any>([]);
+const props = defineProps<{
+  data: Array<any>,
+}>()
 
 const getList = () => {
   environment_group_query(1, 1000).then((res: any) => {
@@ -30,7 +33,7 @@ const getList = () => {
   })
 }
 onMounted(() => {
-  getList()
+  // getList()
 })
 </script>
 
@@ -38,7 +41,7 @@ onMounted(() => {
   <Card className="flex flex-col p-0 flex-1 overflow-y-auto">
     <CardHeader class="p-0">
       <ul class="bg-white border-b rounded-none w-full flex justify-start pb-0 px-0 text-sm mb-3 space-x-6">
-        <li :key="item.id" v-for="item in tabs" @click="router.push(item.href)" :class="cn(
+        <li :key="item.id" v-for="item in props.data" @click="router.push(item.href)" :class="cn(
           'border-transparent border-b-[3px] rounded-none flex items-center pb-1 cursor-pointer',
           route.path == item.href ? 'text-[#5050FA] border-[#5050FA]' : ''
         )
