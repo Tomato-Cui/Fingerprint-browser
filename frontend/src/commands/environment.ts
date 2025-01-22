@@ -213,6 +213,15 @@ export const environment_batch_move_to_group = async (
     })
 };
 
+export const environment_batch_move_to_tag = async (
+    environmentUuids: Array<string>,
+    tagId: number,
+): Promise<any> => {
+    return await invoke('environment_batch_move_to_tag', {
+        environmentUuids, tagId
+    })
+};
+
 export const environment_delete = async (environmentUuid: String,): Promise<any> => {
     return await invoke('environment_delete', { environmentUuid })
 };

@@ -15,7 +15,7 @@ const detailRoutes = [
 <template>
   <SidebarInset class="bg-sidebar overflow-hidden h-screen">
     <main
-      class="bg-white mx-2 my-4 rounded-xl shadow-lg flex flex-col h-[calc(100%_-_32px)]"
+      class="bg-background mx-2 my-4 rounded-xl shadow-lg flex flex-col h-[calc(100%_-_32px)]"
       v-if="detailRoutes.findIndex((item) => item == route.path) != -1"
     >
       <Header />
@@ -27,7 +27,7 @@ const detailRoutes = [
     </main>
 
     <main
-      class="bg-white mx-2 my-4 rounded-xl shadow-lg flex flex-col h-[calc(100%_-_32px)]"
+      class="bg-layout-background mx-2 my-4 rounded-xl shadow-lg flex flex-col h-[calc(100%_-_32px)]"
       v-else
     >
       <Header />

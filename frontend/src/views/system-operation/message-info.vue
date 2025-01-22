@@ -1,5 +1,5 @@
 <template>
-    <div v-if="props.open" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]"
+    <div v-if="props.open" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[99]"
         @click="() => emit('close')"></div>
     <Transition name="modal-fade">
         <Model :open="props.open" title="消息详情" @close="emit('close')" class="min-w-[900px] z-[1000]">
@@ -18,7 +18,7 @@
                 <div class="h-[200px] rounded-xl bg-gradient-to-r from-[#8B5CF6] via-[#6366F1] to-[#60A5FA]"></div>
 
                 <!-- Text Content -->
-                <div class="space-y-6 text-gray-700">
+                <div class="space-y-6 text-gray-700 text-sm">
                     <p class="text-lg">亲爱的 Roxy 用户，感谢您一直以来的信任与支持！</p>
 
                     <p>自最初版本上线至今8个月以来(2024.05.09-2025.01.09)Roxy 已完成:35次APP版本迭代、29次内核更新。若干UX/UI优化如今，Roxy

@@ -149,7 +149,10 @@ watch(selected, () => {
   actionBtnActiveHandle(selected.value.length == 0);
 });
 
-watch(pagination, loadData);
+watch(
+  () => [pagination.pageNum, pagination.pageSize],
+  () => loadData()
+);
 
 watch(selectFilterRef, (_) => {
   data.value = dataCache.value

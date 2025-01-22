@@ -22,7 +22,7 @@ const toEnvrionmentCreatePage = () =>
       <SidebarMenuItem>
         <SidebarMenuButton
           tooltip="新建环境"
-          class="p-0 pl-4 h-12 flex bg-gradient-to-l from-[#7D41FF] to-[#5E51FF] rounded-sm group-data-[state=collapsed]:justify-center"
+          class="p-0 pl-4 h-12 flex bg-gradient-to-l from-[#7D41FF] to-[#5E51FF] rounded-sm group-data-[state=collapsed]:justify-center overflow-hidden relative"
           @click="toEnvrionmentCreatePage"
         >
           <component :is="IconAddCircle" class="size-6" />
@@ -40,7 +40,7 @@ const toEnvrionmentCreatePage = () =>
       <SidebarMenuItem>
         <SidebarMenuButton
           tooltip="批量导入/创建"
-          class="p-0 pl-4 h-12 flex rounded-sm relative group-data-[state=collapsed]:justify-center gap-x-4 bg-white"
+          class="p-0 pl-4 h-12 flex rounded-sm relative group-data-[state=collapsed]:justify-center gap-x-4 bg-white dark:text-black dark:hover:bg-white"
         >
           <component :is="IconImport" class="size-5" />
           <p

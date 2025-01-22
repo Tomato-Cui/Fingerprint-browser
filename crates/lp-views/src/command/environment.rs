@@ -110,6 +110,17 @@ pub async fn environment_move_to_group(
 }
 
 #[tauri::command]
+pub async fn environment_batch_move_to_tag(
+    environment_uuids: Vec<String>,
+    tag_id: u32,
+) -> Result<JsonRespnse, tauri::Error> {
+    Ok(
+        lp_services_remote::requests::environment::batch_move_to_tag(environment_uuids, tag_id)
+            .await?,
+    )
+}
+
+#[tauri::command]
 pub async fn environment_batch_move_to_group(
     environment_uuids: Vec<String>,
     group_id: u32,
