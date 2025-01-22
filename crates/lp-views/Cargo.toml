@@ -12,7 +12,7 @@ tauri-plugin-log = { workspace = true }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-
+argon2 = { workspace = true }
 lp_cores = { workspace = true }
 lp_commons = { workspace = true }
 lp_models = { workspace = true }
@@ -20,6 +20,7 @@ lp_services = { workspace = true }
 lp_services_remote = { workspace = true }
 lp_states = { workspace = true }
 tauri-plugin-theme = "2.1.2"
+tauri-plugin-websocket = "2.2.1"
 
 [lib]
 name = "views"

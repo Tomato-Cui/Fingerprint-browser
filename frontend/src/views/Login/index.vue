@@ -108,6 +108,7 @@
                   name="remember-me"
                   type="checkbox"
                   class="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  @click="() => (loginForm.rememberMe = !loginForm.rememberMe)"
                 />
                 <label
                   for="remember-me"
@@ -116,7 +117,6 @@
                   记住密码
                 </label>
               </div>
-
               <div class="text-sm">
                 <a
                   href="javascript:void(0);"
@@ -180,10 +180,12 @@
                     ></circle>
                     <path
                       d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
-                      data-original="#000000"></path>
+                      data-original="#000000"
+                    ></path>
                   </svg>
                 </div>
-              </div> -->
+              </div>
+              -->
 
               <div>
                 <label class="text-gray-800 text-sm mb-2 block">邮箱</label>
@@ -565,11 +567,12 @@ const switchForm = (form) => {
 const handleLogin = () => {
   loading.value = true;
   login(loginForm.value.email, loginForm.value.password)
-    .then((res) => {
+    .then(async (res) => {
       loading.value = false;
       let token = res.data.token;
       if (res.code == 1 && token) {
         if (token) {
+          if (loginForm.value.rememberMe) localStorage.setItem("token", token);
           toast.success(res.message);
           userStore.setUserInfo({
             account: loginForm.value.email,

@@ -2,6 +2,12 @@ use crate::response::AppResponse;
 use lp_cores::requests::JsonRespnse;
 
 #[tauri::command]
+pub async fn set_token(token: &str) -> Result<(), tauri::Error> {
+    lp_states::auth::set_token(&token).await;
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn login(account: &str, password: &str) -> Result<JsonRespnse, tauri::Error> {
     let res = lp_services_remote::requests::user::login(account, password).await?;
     if let Some(data) = &res.data {

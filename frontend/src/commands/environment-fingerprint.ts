@@ -63,6 +63,14 @@ export const environment_fingerprint_modify = async (id: number, payload: Enviro
     return await invoke('environment_fingerprint_modify', { id, payload })
 };
 
+export const environment_fingerprint_modify_ua = async (id: number, ua: string): Promise<any> => {
+    return await invoke('environment_fingerprint_modify_ua', { id, ua })
+};
+
+export const environment_fingerprint_modify_by_colname = async (id: number, colName: string, colValue: string): Promise<any> => {
+    return await invoke('environment_fingerprint_modify_by_colname', { id, colName, colValue })
+};
+
 export const environment_fingerprint_delete = async (id: number): Promise<any> => {
     return await invoke('environment_fingerprint_delete', { id })
 };

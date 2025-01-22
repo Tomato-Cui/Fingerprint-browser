@@ -41,6 +41,7 @@ const logout = () => {
 const subLogout = () => {
   useLogout().then((res: any) => {
     toast.success(res.message);
+    localStorage.clear();
     router.push("/");
   });
 };

@@ -29,6 +29,28 @@ pub async fn environment_fingerprint_modify(
 }
 
 #[tauri::command]
+pub async fn environment_fingerprint_modify_ua(
+    id: i32,
+    ua: &str,
+) -> Result<JsonRespnse, tauri::Error> {
+    Ok(lp_services_remote::requests::environment_fingerprint::modify_ua(id, ua).await?)
+}
+
+#[tauri::command]
+pub async fn environment_fingerprint_modify_by_colname(
+    id: i32,
+    col_name: &str,
+    col_value: &str,
+) -> Result<JsonRespnse, tauri::Error> {
+    Ok(
+        lp_services_remote::requests::environment_fingerprint::modify_by_colname(
+            id, col_name, col_value,
+        )
+        .await?,
+    )
+}
+
+#[tauri::command]
 pub async fn environment_fingerprint_delete(id: u32) -> Result<JsonRespnse, tauri::Error> {
     Ok(lp_services_remote::requests::environment_fingerprint::delete(id).await?)
 }

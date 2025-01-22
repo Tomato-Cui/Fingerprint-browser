@@ -15,11 +15,23 @@
 <script setup>
 import Layout from "@/components/layouts/index.vue";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Toaster } from "@/components/ui/sonner";
 import { isLogin } from "@/commands/user";
 import { onMounted, ref, watch } from "vue";
 import Login from "@/views/Login/index.vue";
+import { set_token } from "@/commands/user";
 
 const route = useRoute();
+const router = useRouter();
+
+onMounted(() => {
+  if (route.path === "/") {
+    const token = localStorage.getItem("token");
+    if (token) {
+      set_token(token);
+      router.push("/environment/0");
+    }
+  }
+});
 </script>

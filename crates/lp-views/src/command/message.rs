@@ -26,12 +26,14 @@ pub async fn team_send(
     current_user_email: String,
     description: String,
 ) -> Result<JsonRespnse, tauri::Error> {
-    Ok(lp_services_remote::requests::message::team_send(
-        &current_user_email,
-        team_id,
-        &description,
+    Ok(
+        lp_services_remote::requests::message::team_send(
+            &current_user_email,
+            team_id,
+            &description,
+        )
+        .await?,
     )
-    .await?)
 }
 
 #[tauri::command]

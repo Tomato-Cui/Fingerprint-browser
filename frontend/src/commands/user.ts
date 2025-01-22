@@ -1,5 +1,10 @@
 import { invoke } from '@tauri-apps/api/core'
 
+
+export const set_token = async (token: String): Promise<any> => {
+    return await invoke('set_token', { token })
+};
+
 export const login = async (account: String, password: String): Promise<any> => {
     return await invoke('login', { account, password })
 };

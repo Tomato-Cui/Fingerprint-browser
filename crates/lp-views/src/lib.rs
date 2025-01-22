@@ -50,6 +50,7 @@ fn run_event_handle(_app_handle: &AppHandle, event: RunEvent) {
 }
 
 fn register_plugins(app_handle: &AppHandle) {
+    // Register the single instance plugin
     #[cfg(desktop)]
     app_handle
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -60,6 +61,7 @@ fn register_plugins(app_handle: &AppHandle) {
         }))
         .unwrap();
 
+    // Register the log plugin
     #[cfg(debug_assertions)]
     app_handle
         .plugin(
@@ -69,12 +71,19 @@ fn register_plugins(app_handle: &AppHandle) {
         )
         .unwrap();
 
+    // Register the updater plugin
     #[cfg(desktop)]
     app_handle
         .plugin(tauri_plugin_updater::Builder::new().build())
         .unwrap();
+
+    // Register websocket plugin
+    #[cfg(desktop)]
+    app_handle.plugin(tauri_plugin_websocket::init()).unwrap();
 }
 
+// Register the update processor
+// command::updator::app_updates::PendingUpdate 作为全局状态，可以提供给install_update和fetch_update方法作为参数。
 fn regsister_update_processor(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         app.manage(command::updator::app_updates::PendingUpdate(Mutex::new(

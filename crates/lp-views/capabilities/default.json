@@ -3,5 +3,10 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": ["main"],
-  "permissions": ["core:default", "theme:default"]
+  "permissions": [
+    "core:default",
+    "theme:default",
+    "updater:default",
+    "websocket:default"
+  ]
 }

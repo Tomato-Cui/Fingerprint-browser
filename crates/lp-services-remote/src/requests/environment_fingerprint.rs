@@ -58,6 +58,41 @@ pub async fn modify(
     Ok(json_response)
 }
 
+pub async fn modify_ua(id: i32, ua: &str) -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({
+        "id": id,
+        "ua": ua,
+    });
+    let json_response = client::REQUEST
+        .put(
+            client::Client::build_url("/environment-fingerprints/modify/ua")?,
+            &data,
+        )
+        .await?;
+
+    Ok(json_response)
+}
+
+pub async fn modify_by_colname(
+    id: i32,
+    col_name: &str,
+    col_value: &str,
+) -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({
+        "id": id,
+        "col_name": col_name,
+        "col_value": col_value,
+    });
+    let json_response = client::REQUEST
+        .put(
+            client::Client::build_url("/environment-fingerprints/modify/col/value")?,
+            &data,
+        )
+        .await?;
+
+    Ok(json_response)
+}
+
 pub async fn delete(id: u32) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
         "id": id,
