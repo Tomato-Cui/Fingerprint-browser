@@ -45,7 +45,7 @@
                 <button
                   v-for="lang in languages"
                   :key="lang.value"
-                  @click="selectLanguage(lang.value)"
+                  @click="lang.handle"
                   class="w-full text-left p-2 rounded-lg hover:bg-gray-100 transition-colors text-xs"
                   :class="{ 'bg-gray-100': currentLanguage === lang.value }"
                 >
@@ -114,6 +114,7 @@ import { ChevronRightIcon } from "lucide-vue-next";
 import { useUserStore } from "@/stores/user";
 import { useColorMode } from "@vueuse/core";
 import { set_theme } from "@/commands";
+import { setLocale } from "@/plugins/i18n";
 
 const userInfo = useUserStore().getUserInfo();
 
@@ -130,14 +131,28 @@ watch(
 const emit = defineEmits(["close", "logout"]);
 
 const activeSubmenu = ref<string | null>(null);
-const currentLanguage = ref("zh");
+const currentLanguage = ref<"zh-CN" | "en-US">("zh-CN");
 const currentTheme = ref<"light" | "dark" | "auto">("light");
 
 let mode = useColorMode();
 
 const languages = [
-  { label: "简体中文", value: "zh" },
-  { label: "English", value: "en" },
+  {
+    label: "简体中文",
+    value: "zh-CN",
+    handle: () => {
+      currentLanguage.value = "zh-CN";
+      setLocale("zh-CN");
+    },
+  },
+  {
+    label: "English",
+    value: "en-US",
+    handle: () => {
+      currentLanguage.value = "en-US";
+      setLocale("en-US");
+    },
+  },
 ];
 
 const themes = [
@@ -172,12 +187,6 @@ const themes = [
 
 const toggleSubmenu = (menu: string) => {
   activeSubmenu.value = activeSubmenu.value === menu ? null : menu;
-};
-
-const selectLanguage = (lang: string) => {
-  // TOOD:
-  currentLanguage.value = lang;
-  activeSubmenu.value = null;
 };
 
 const logout = () => {

@@ -165,6 +165,7 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         environment_command::environment_modify_basic_info,
         environment_command::environment_move_to_group,
         environment_command::environment_batch_move_to_group,
+        environment_command::environment_batch_move_to_tag,
         environment_command::environment_delete,
         environment_command::environment_batch_delete,
         environment_command::environment_modify_proxy,

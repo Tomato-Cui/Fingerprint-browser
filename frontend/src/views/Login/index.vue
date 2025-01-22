@@ -584,7 +584,6 @@ const handleLogin = () => {
     .catch((e) => {
       loading.value = false;
       toast.warning("登录失败");
-      router.push("/environment/0");
     });
 
   // cleanForm();

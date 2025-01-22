@@ -5,6 +5,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n({});
 </script>
 
 <template>
@@ -25,7 +28,7 @@ import {
         <div
           class="flex-1 text-left font-alimama-shuheiti font-bold text-[22px] whitespace-nowrap group-data-[state=collapsed]:hidden"
         >
-          幻境浏览器
+          {{ t("message.appName") }}
         </div>
       </SidebarMenuButton>
     </SidebarMenu>
