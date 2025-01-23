@@ -1,28 +1,37 @@
 <script setup lang="ts">
+import Model from "@/components/model/model.vue";
+import { reactive } from "vue";
 import { PlusIcon, ListIcon, EyeIcon, EyeOffIcon } from "lucide-vue-next";
-import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
 import router from "@/router";
 import { environment_proxies_create } from "@/commands/environment-proxy";
+import { ref } from "vue";
 
-import { ref, watch } from "vue";
+// interface Props {
+//   modelValue?: "warning" | "block";
+// }
 
-interface Props {
-  modelValue?: "warning" | "block";
-}
+// const props = withDefaults(defineProps<Props>(), {
+//   modelValue: "warning",
+// });
 
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: "warning",
+const props = defineProps({
+  editProxy: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits<{
-  (e: "update:modelValue", value: "warning" | "block"): void;
-}>();
+// const emit = defineEmits<{
+//   (e: "update:modelValue", value: "warning" | "block"): void;
+// }>();
 
-const selected = ref<"warning" | "block">(props.modelValue);
+const emit = defineEmits(["update:editProxy"]);
 
-watch(selected, (newValue) => {
-  emit("update:modelValue", newValue);
-});
+// const selected = ref<"warning" | "block">(props.modelValue);
+
+// watch(selected, (newValue) => {
+//   emit("update:modelValue", newValue);
+// });
 
 interface FormData {
   proxyType: string;
@@ -34,7 +43,6 @@ interface FormData {
   ipChangeAction: "warning" | "block";
 }
 
-const activeTab = ref("single");
 const showPassword = ref(false);
 
 const formData = ref<FormData>({
@@ -77,23 +85,39 @@ const handleSubmit = () => {
   environment_proxies_create(payload);
 
   // Add your form submission logic here
-  router.push("/private-proxy");
+  emit("update:editProxy", false);
 };
+
+const addGroup = reactive({
+  groupName: "",
+  description: "",
+});
+
+const clearForm = () => {
+  addGroup.groupName = "";
+  addGroup.description = "";
+};
+//确认
 </script>
 
 <template>
-  <Layout>
-    <template v-slot:new-proxy-content>
+  <Model
+    class=""
+    title="编辑代理"
+    :open="props.editProxy"
+    @close="() => emit('update:editProxy', false)"
+  >
+    <div class="flex flex-col gap-y-4 mb-2">
       <!-- Form -->
       <div
         @submit.prevent="handleSubmit"
-        class="flex flex-col justify-start pt-3 space-y-6 w-full h-full"
+        class="flex flex-col justify-start pt-3 space-y-6 border border-yellow-500"
       >
         <div
           class="flex flex-col justify-start px-12 pt-3 space-y-6 w-full h-full"
         >
           <!-- Proxy Type -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -110,7 +134,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- IP Query Channel -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -127,7 +151,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- Proxy Server -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -143,7 +167,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- Proxy Account -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -159,7 +183,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- Proxy Password -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -184,7 +208,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- IP Change Monitoring -->
-          <div class="flex gap-4 w-[500px]">
+          <div class="flex gap-4 w-[400px]">
             <div class="flex flex-row items-end">
               <label
                 class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
@@ -215,7 +239,7 @@ const handleSubmit = () => {
           <!-- Additional IP Monitoring Settings -->
           <div
             v-if="formData.ipMonitoring"
-            class="flex flex-row mt-4 space-y-4 w-[500px]"
+            class="flex flex-row mt-4 space-y-4 w-[400px]"
           >
             <div class="flex flex-row">
               <div class="flex items-start">
@@ -254,7 +278,7 @@ const handleSubmit = () => {
                 </label>
               </div> -->
 
-              <div class="flex flex-col gap-y-3 justify-start w-[95px]">
+              <div class="flex flex-col ml-4 gap-y-3 justify-start w-[95px]">
                 <label class="flex items-start cursor-pointer">
                   <div
                     class="flex relative justify-center items-center w-6 h-6"
@@ -285,7 +309,10 @@ const handleSubmit = () => {
                       "
                     ></div>
                   </div>
-                  <span class="text-[15px] text-gray-800">警告</span>
+                  <span
+                    class="flex gap-1 w-24 ml-2 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
+                    >警告</span
+                  >
                 </label>
 
                 <label class="flex items-start cursor-pointer">
@@ -318,7 +345,10 @@ const handleSubmit = () => {
                       "
                     ></div>
                   </div>
-                  <span class="text-[15px] text-gray-800">禁止访问</span>
+                  <span
+                    class="flex gap-1 ml-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
+                    >禁止访问</span
+                  >
                 </label>
               </div>
             </div>
@@ -331,19 +361,29 @@ const handleSubmit = () => {
         >
           <button
             type="button"
-            class="px-6 py-2 rounded-lg border hover:bg-gray-50"
+            class="py-2 text-blue-500 rounded-lg"
+            @click="() => emit('update:editProxy', false)"
           >
             代理检测
           </button>
+
+          <button
+            type="button"
+            @click="() => emit('update:editProxy', false)"
+            class="px-6 py-2 rounded-lg border hover:bg-gray-50"
+          >
+            取消
+          </button>
+
           <button
             type="submit"
-            class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            class="px-6 py-2 mr-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             @click="handleSubmit"
           >
-            确认添加
+            确认
           </button>
         </div>
       </div>
-    </template>
-  </Layout>
+    </div>
+  </Model>
 </template>

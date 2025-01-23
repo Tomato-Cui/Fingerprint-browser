@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Layout from "@/views/proxy-manage/manage-proxyLayout.vue";
 import { AddCheckWhite } from "@/assets/icons/proxy-manage-image/index";
 
@@ -15,8 +15,16 @@ import {
 
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
+import EditProxy from "./edit-proxy.vue";
 
 import BuyProxy from "./manage-proxy-view/buy-proxy.vue";
+
+import {
+  FileText,
+  PenModify,
+  Plate,
+  Round,
+} from "@/assets/icons/proxy-manage-image";
 
 import {
   AddCheck,
@@ -25,18 +33,30 @@ import {
   Setting,
 } from "@/assets/icons/proxy-manage-image";
 
+import SingleDeleteProxy from "./single-delete-proxy.vue";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  environment_proxies_delete,
+  environment_proxies_modify,
+  environment_proxies_query,
+} from "@/commands/environment-proxy";
+import { setCheckRow, getCheckRow } from "../proxy-operation-store";
+import { checkRows } from "../proxy-operation-store";
+import { environment_proxies_batch_delete } from "@/commands/environment-proxy";
+import { toast } from "vue-sonner";
 
 interface Proxy {
   id: string;
-  type: string;
+  kind: string;
   host: string;
   port: number;
+  type: string;
   username?: string;
   password?: string;
   refreshUrl?: string;
@@ -85,8 +105,41 @@ const proxyItems = ref<ProxyItem[]>([
   },
 ]);
 
+const setField = ref(false);
+
+const createProxymanage = ref(false);
+
+const selectAll = ref(false);
+
+const proxyList = ref<Proxymanage[]>([]);
+
+watch(proxyList, (newVal) => {
+  setCheckRow(newVal.map((item) => item.id));
+});
+
+const toggleSelectAll = () => {
+  proxyList.value.forEach((proxyList) => {
+    proxyList.selected = selectAll.value;
+  });
+};
+
+const editProxymanage = (Proxymanage: Proxymanage) => {
+  console.log("Edit Proxymanage:", Proxymanage);
+  environment_proxies_modify(Proxymanage.id, Proxymanage);
+};
+
+const deleteProxymanage = (Proxymanage: Proxymanage) => {
+  environment_proxies_delete(Proxymanage.id);
+  privateproxyloadData();
+};
+
+const searchQuery = ref("");
+
 interface Proxymanage {
   id: number;
+  kind: string;
+  host: string;
+  port: string;
   name: string;
   attribution: string;
   state: string;
@@ -97,39 +150,6 @@ interface Proxymanage {
   create_message: string;
   selected: boolean;
 }
-
-const setField = ref(false);
-
-const createProxymanage = ref(false);
-const loadData = () => {
-  environment_group_query(1, 1000).then((res) => {
-    let { data: data_, total } = res.data;
-    totalItems.value = total;
-    Proxymanage.value = data_;
-  });
-};
-
-onMounted(() => loadData());
-
-const selectAll = ref(false);
-
-const Proxymanage = ref<Proxymanage[]>([]);
-
-const toggleSelectAll = () => {
-  Proxymanage.value.forEach((Proxymanage) => {
-    Proxymanage.selected = selectAll.value;
-  });
-};
-
-const editProxymanage = (Proxymanage: Proxymanage) => {
-  console.log("Edit Proxymanage:", Proxymanage);
-};
-
-const deleteProxymanage = (Proxymanage: Proxymanage) => {
-  console.log("Delete Proxymanage:", Proxymanage);
-};
-
-const searchQuery = ref("");
 
 const totalItems = ref(0);
 const currentPage = ref(1);
@@ -143,11 +163,43 @@ const prevPage = () => {
   }
 };
 
+const privateproxyloadData = () => {
+  environment_proxies_query(1, 1000).then((res) => {
+    let { data: data_, total } = res.data;
+    totalItems.value = total;
+    proxyList.value = data_;
+  });
+};
+
+onMounted(() => privateproxyloadData());
+
+const handleDeleteProxy = async (rows: any[]) => {
+  console.log("rows", [...Object.values(rows)]);
+  console.log("checkRows", checkRows.value);
+
+  // Ensure checkRows.value exists and is an array
+  if (!checkRows.value || !Array.isArray(checkRows.value)) {
+    console.error("No valid rows selected for deletion");
+    return;
+  }
+
+  try {
+    await environment_proxies_batch_delete(checkRows.value);
+  } catch (error) {
+    console.error("Failed to delete proxies:", error);
+  }
+  selectAll.value = false;
+  privateproxyloadData();
+};
+
 interface Field {
   id: string;
   label: string;
   enabled: boolean;
 }
+
+const singleDeleteProxy = ref(false);
+
 const fields = ref<Field[]>([
   { id: "proxy_number", label: "代理序号", enabled: true },
   { id: "proxy_name", label: "代理名称", enabled: true },
@@ -163,6 +215,8 @@ const fields = ref<Field[]>([
   { id: "creation_info", label: "创建信息", enabled: true },
 ]);
 
+const editProxy = ref(false);
+
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
@@ -173,13 +227,68 @@ const nextPage = () => {
 <template>
   <Layout>
     <template v-slot:manage-proxy-content>
-      <div
-        class="flex overflow-x-auto flex-col mt-2 max-w-full h-full bg-yellow-400 border border-blue-500"
-      >
-        <div class="min-w-max rounded-lg border border-gray-200">
-          <table class="min-w-full">
+      <div class="flex flex-col w-full h-full">
+        <div class="flex flex-row gap-x-2 m-2">
+          <button
+            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
+          >
+            <FileText
+              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
+            />
+            <span class="font-sans font-semibold text-center text-black">
+              设置分组
+            </span>
+          </button>
+
+          <button
+            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
+          >
+            <PenModify
+              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
+            />
+            <span class="font-sans font-semibold text-center text-black">
+              修改IP查询渠道
+            </span>
+          </button>
+
+          <button
+            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
+          >
+            <Plate
+              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
+            />
+            <span class="font-sans font-semibold text-center text-black">
+              修改代理
+            </span>
+          </button>
+
+          <button
+            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
+            @click="handleDeleteProxy(getCheckRow())"
+          >
+            <Round
+              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
+            />
+            <span class="font-sans font-semibold text-center text-black">
+              删除代理
+            </span>
+          </button>
+        </div>
+
+        <div>
+          <h1
+            class="ml-2 font-thin text-[14px] mb-1 leading-[18px] text-gray-300"
+          >
+            已选择1项
+          </h1>
+        </div>
+
+        <div
+          class="flex overflow-x-auto flex-col mx-2 h-full rounded-lg border border-gray-200 grow"
+        >
+          <table class="min-w-full border border-gray-200">
             <!-- Table Header -->
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50 border border-gray-200">
               <tr>
                 <th scope="col" class="py-3.5 pr-3 pl-4 w-12 text-left">
                   <input
@@ -191,7 +300,7 @@ const nextPage = () => {
                 </th>
                 <th
                   scope="col"
-                  class="py-3.5 pr-3 pl-4 text-sm font-semibold text-left text-gray-900"
+                  class="py-3.5 pr-3 pl-4 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   代理序号
@@ -199,7 +308,7 @@ const nextPage = () => {
 
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   代理名称
@@ -207,7 +316,7 @@ const nextPage = () => {
 
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   代理归属
@@ -215,7 +324,7 @@ const nextPage = () => {
 
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[205px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   操作
@@ -223,55 +332,56 @@ const nextPage = () => {
 
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   代理状态
                 </th>
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   IP查询渠道
                 </th>
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   分组
                 </th>
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   浏览器环境
                 </th>
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   云手机环境
                 </th>
                 <th
                   scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
                   创建信息
                 </th>
                 <th
                   scope="col"
-                  class="flex justify-end px-3 py-3.5 text-sm font-semibold text-left text-gray-900"
+                  class="flex justify-end items-center px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[60px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
+
                   <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                       <Setting
-                        class="w-[16px] h-[16px] text-gray-400 items-center justify-center mx-1 cursor-pointer"
+                        class="w-[16px] h-[16px] text-gray-400 mx-1 cursor-pointer"
                       />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" class="w-72">
@@ -286,7 +396,7 @@ const nextPage = () => {
                         </button>
                       </div>
 
-                      <div class="p-4 max-h-[70vh] overflow-y-auto">
+                      <div class="p-4 max-h-[70vh]">
                         <div class="space-y-3">
                           <div
                             v-for="field in fields"
@@ -337,7 +447,7 @@ const nextPage = () => {
             <!-- Table Body -->
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="Proxymanage in Proxymanage"
+                v-for="Proxymanage in proxyList"
                 :key="Proxymanage.id"
                 :class="{
                   'hover:bg-gray-50': !Proxymanage.selected, // 鼠标悬停时背景色
@@ -367,7 +477,7 @@ const nextPage = () => {
                 <td class="px-3 py-4 text-sm whitespace-nowrap">
                   <div class="flex gap-2 justify-start items-center">
                     <button
-                      @click="editProxymanage(Proxymanage)"
+                      @click="editProxy = true"
                       class="text-[#4F46E5] hover:bg-indigo-50 px-2 rounded border border-[#5050FA] bg-[#F0F5FF]"
                     >
                       编辑
@@ -381,7 +491,7 @@ const nextPage = () => {
                     </button>
 
                     <button
-                      @click="deleteProxymanage(Proxymanage)"
+                      @click="singleDeleteProxy = true"
                       class="px-2 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFE2E2]"
                     >
                       删除
@@ -414,34 +524,41 @@ const nextPage = () => {
             </tbody>
           </table>
         </div>
-      </div>
 
-      <!-- pagination -->
-      <div class="flex justify-end items-center pt-3 m-2 border border-red-500">
-        <span class="text-sm text-gray-500">共 {{ totalItems }} 项</span>
-        <div class="flex gap-2 items-center">
-          <button
-            class="justify-center items-center p-1 rounded border-gray-300 disabled:opacity-50"
-            :disabled="currentPage === 1"
-            @click="prevPage"
-          >
-            <ChevronLeftIcon class="w-[12px] h-[12px]" />
-          </button>
-          <span class="min-w-[2rem] text-center">{{ currentPage }}</span>
-          <button
-            class="justify-center items-center p-1 rounded border-gray-300 disabled:opacity-50"
-            :disabled="currentPage === totalPages"
-            @click="nextPage"
-          >
-            <ChevronRightIcon class="w-[12px] h-[12px]" />
-          </button>
+        <!-- pagination -->
+        <div
+          class="flex justify-end items-center px-2 pt-3 mt-2 mb-2 border-t border-gray-200"
+        >
+          <span class="text-sm text-gray-500">共 {{ totalItems }} 项</span>
+          <div class="flex gap-2 items-center">
+            <button
+              class="justify-center items-center p-1 rounded border-gray-300 disabled:opacity-50"
+              :disabled="currentPage === 1"
+              @click="prevPage"
+            >
+              <ChevronLeftIcon class="w-[12px] h-[12px]" />
+            </button>
+            <span
+              class="min-w-[2rem] text-center border border-gray-200 rounded-sm"
+              >{{ currentPage }}</span
+            >
+            <button
+              class="justify-center items-center p-1 rounded border-gray-300 disabled:opacity-50"
+              :disabled="currentPage === totalPages"
+              @click="nextPage"
+            >
+              <ChevronRightIcon class="w-[12px] h-[12px]" />
+            </button>
+          </div>
+          <select v-model="pageSize" class="px-2 py-1 text-sm rounded border">
+            <option v-for="size in pageSizes" :key="size" :value="size">
+              {{ size }}条/页
+            </option>
+          </select>
         </div>
-        <select v-model="pageSize" class="px-2 py-1 text-sm rounded border">
-          <option v-for="size in pageSizes" :key="size" :value="size">
-            {{ size }}条/页
-          </option>
-        </select>
       </div>
+      <EditProxy v-model:editProxy="editProxy" />
+      <SingleDeleteProxy v-model:singleDeleteProxy="singleDeleteProxy" />
     </template>
   </Layout>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cn } from "@/util/lib";
-
+import { getCheckRow } from "./proxy-operation-store";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -39,6 +39,10 @@ import {
   Plate,
   Round,
 } from "@/assets/icons/proxy-manage-image";
+import {
+  environment_proxies_batch_delete,
+  environment_proxies_query,
+} from "@/commands/environment-proxy";
 
 const router = useRouter();
 
@@ -62,9 +66,9 @@ const tabs = [
 </script>
 
 <template>
-  <div class="h-full border border-red-500">
+  <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="flex justify-between items-center mt-1">
+    <div class="flex justify-between items-center p-2 mt-1 w-full">
       <h4 class="text-2xl font-semibold leading-8">代理管理</h4>
 
       <div class="flex gap-2 items-center">
@@ -109,6 +113,7 @@ const tabs = [
 
         <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
+          @click="router.push('/single-new-proxy')"
         >
           <AddProxy
             class="w-[14px] h-[14px] text-gray-400 items-center justify-center mx-1"
@@ -127,87 +132,39 @@ const tabs = [
       </div>
     </div>
 
-    <div class="h-full">
-      <div class="flex flex-col h-full">
-        <ul
-          class="flex justify-start px-0 pb-0 w-full text-sm bg-white rounded-none border-b"
+    <div class="flex flex-col">
+      <ul
+        class="flex justify-start px-0 pb-0 w-full text-sm bg-white rounded-none border-b"
+      >
+        <li
+          :key="item.id"
+          v-for="item in tabs"
+          @click="router.push(item!.href)"
+          :class="
+            cn(
+              'border-transparent border-b-[3px] rounded-none flex items-center pb-1 px-6 cursor-pointer',
+              route.path == item.href ? 'text-[#5050FA] border-[#5050FA]' : ''
+            )
+          "
         >
-          <li
-            :key="item.id"
-            v-for="item in tabs"
-            @click="router.push(item!.href)"
-            :class="
-              cn(
-                'border-transparent border-b-[3px] rounded-none flex items-center pb-1 px-6 cursor-pointer',
-                route.path == item.href ? 'text-[#5050FA] border-[#5050FA]' : ''
-              )
-            "
-          >
-            <div class="flex gap-x-3 justify-center items-center">
-              <component
-                :is="item.icon"
-                :class="
-                  cn(
-                    'size-4 fill-[#8F9BB3]',
-                    route.path == item.href ? 'fill-[#5050FA]' : ''
-                  )
-                "
-              />
-              {{ item.title }}
-            </div>
-          </li>
-        </ul>
-
-        <div class="flex flex-row gap-x-2 m-2 w-full">
-          <button
-            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
-          >
-            <FileText
-              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
+          <div class="flex gap-x-3 justify-center items-center">
+            <component
+              :is="item.icon"
+              :class="
+                cn(
+                  'size-4 fill-[#8F9BB3]',
+                  route.path == item.href ? 'fill-[#5050FA]' : ''
+                )
+              "
             />
-            <span class="font-sans font-semibold text-center text-black">
-              设置分组
-            </span>
-          </button>
+            {{ item.title }}
+          </div>
+        </li>
+      </ul>
+    </div>
 
-          <button
-            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
-          >
-            <PenModify
-              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
-            />
-            <span class="font-sans font-semibold text-center text-black">
-              修改IP查询渠道
-            </span>
-          </button>
-
-          <button
-            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
-          >
-            <Plate
-              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
-            />
-            <span class="font-sans font-semibold text-center text-black">
-              修改代理
-            </span>
-          </button>
-
-          <button
-            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
-          >
-            <Round
-              class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
-            />
-            <span class="font-sans font-semibold text-center text-black">
-              删除代理
-            </span>
-          </button>
-        </div>
-
-        <div class="flex flex-col h-full">
-          <slot name="manage-proxy-content"></slot>
-        </div>
-      </div>
+    <div class="flex flex-col grow">
+      <slot name="manage-proxy-content"></slot>
     </div>
   </div>
 </template>

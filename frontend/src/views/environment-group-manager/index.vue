@@ -196,7 +196,10 @@ const nextPage = () => {
             <tr
               v-for="Groupmanage in groupmanage"
               :key="Groupmanage.id"
-              class="hover:bg-gray-50"
+              :class="{
+                'hover:bg-gray-50': !Groupmanage.selected, // 鼠标悬停时背景色
+                'bg-blue-100': Groupmanage.selected, // 选中时背景色
+              }"
             >
               <td class="py-4 pr-3 pl-4 whitespace-nowrap">
                 <input
