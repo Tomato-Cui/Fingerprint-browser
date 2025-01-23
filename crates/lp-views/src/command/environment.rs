@@ -77,6 +77,17 @@ pub async fn environment_advanced_create(
 }
 
 #[tauri::command]
+pub async fn environment_advanced_modify(
+    environmnet_uuid: &str,
+    payload: lp_models::dto::environment_info::EnvironmentDetailWithAdvanceCreateRequest,
+) -> Result<JsonRespnse, tauri::Error> {
+    Ok(
+        lp_services_remote::requests::environment::advanced_modify(environmnet_uuid, payload)
+            .await?,
+    )
+}
+
+#[tauri::command]
 pub async fn environment_modify_info(
     payload: lp_models::environment::EnvironmentInfo,
 ) -> Result<JsonRespnse, tauri::Error> {

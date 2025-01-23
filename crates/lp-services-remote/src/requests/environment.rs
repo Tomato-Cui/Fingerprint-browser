@@ -186,6 +186,25 @@ pub async fn modify_proxy(
     Ok(json_response)
 }
 
+pub async fn advanced_modify(
+    uuid: &str,
+    environment: lp_models::dto::environment_info::EnvironmentDetailWithAdvanceCreateRequest,
+) -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({
+        "uuid": uuid,
+        "environment": environment,
+    });
+
+    let json_response = client::REQUEST
+        .put(
+            client::Client::build_url("/environments/advanced-modify")?,
+            &data,
+        )
+        .await?;
+
+    Ok(json_response)
+}
+
 pub async fn modify_basic_info(
     environment: lp_models::environment::Environment,
 ) -> Result<JsonRespnse, anyhow::Error> {
