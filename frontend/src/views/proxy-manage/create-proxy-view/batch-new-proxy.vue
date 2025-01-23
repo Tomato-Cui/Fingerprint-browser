@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
 import { AddCheckWhite } from "@/assets/icons/proxy-manage-image/index";
+import router from "@/router";
 
 interface Proxy {
   id: string;
@@ -21,6 +22,10 @@ const ipQueryChannel = ref("IP2Location");
 const proxies = ref<Proxy[]>([]);
 
 const text = ref("");
+const handleSubmit = () => {
+  console.log("handleSubmit");
+  router.push("/private-proxy");
+};
 
 interface ProxyItem {
   id: number;
@@ -249,6 +254,7 @@ const proxyItems = ref<ProxyItem[]>([
         </button>
         <button
           class="px-6 py-2 text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700"
+          @click="handleSubmit"
         >
           确认
         </button>

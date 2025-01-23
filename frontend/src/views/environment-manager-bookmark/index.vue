@@ -203,7 +203,10 @@ const nextPage = () => {
             <tr
               v-for="bookmark in bookmarks"
               :key="bookmark.id"
-              class="hover:bg-gray-50"
+              :class="{
+                'hover:bg-gray-50': !bookmark.selected, // 鼠标悬停时背景色
+                'bg-blue-100': bookmark.selected, // 选中时背景色
+              }"
             >
               <td class="py-4 pr-3 pl-4 whitespace-nowrap">
                 <input
