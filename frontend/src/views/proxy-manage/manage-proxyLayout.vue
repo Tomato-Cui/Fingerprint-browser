@@ -2,36 +2,21 @@
 import { cn } from "@/util/lib";
 
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
-import {
   IconRulerCrossPen,
   IconStarFallMinimalistic,
-  IconLoginArrow,
 } from "@/assets/icons/environment-creates/simple-create/index";
 import { useRouter, useRoute } from "vue-router";
 
-import { onMounted, ref } from "vue";
 import { Circle, Filter } from "@/assets/icons/environment-group-manage";
 import {
   SearchIcon,
-  ChevronRightIcon,
-  ChevronLeftIcon,
 } from "@/assets/icons/environment-bookmark-image";
 
-import { PrimaryButton, CancelButton } from "@/components/button";
-
-import BuyProxy from "./manage-proxy-view/buy-proxy.vue";
-import { environment_group_query } from "@/commands/environment-group";
 import {
   AddCheck,
   AddProxy,
   Buy,
-  Setting,
 } from "@/assets/icons/proxy-manage-image";
-import SetField from "./setting.vue";
 
 import {
   FileText,

@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { AlertModel } from '@/components/alert-model';
 import { environment_batch_delete } from '@/commands/environment';
 import { useBrowserStatusStore } from "@/stores/browser";
 import { toast } from 'vue-sonner';
-import { itemFromKind } from '@tauri-apps/api/menu';
 
 const browserStatusStore = useBrowserStatusStore();
 const props = defineProps<{

@@ -71,13 +71,13 @@
 
 <script setup lang="ts">
 import { AlertModel } from '@/components/alert-model';
-import { Model } from '@/components/model'
-import primaryButton from '@/components/button/primary-button.vue'
-import cancelButton from '@/components/button/cancel-button.vue'
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import Switch from '@/components/ui/switch/Switch.vue';
-import { ref } from 'vue'
-import { InfoCircleIcon } from '@/assets/icons/system-operation'
+// import { Model } from '@/components/model'
+// import primaryButton from '@/components/button/primary-button.vue'
+// import cancelButton from '@/components/button/cancel-button.vue'
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import Switch from '@/components/ui/switch/Switch.vue';
+// import { ref } from 'vue'
+// import { InfoCircleIcon } from '@/assets/icons/system-operation'
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import { toast } from 'vue-sonner';
 
@@ -92,14 +92,10 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm'])
 
-const fileType = ref('excel')
-const syncPassword = ref(false)
-const verificationCode = ref('')
+// const fileType = ref('excel')
+// const syncPassword = ref(false)
+// const verificationCode = ref('')
 
-const sendVerificationCode = () => {
-    // Implement verification code sending logic
-    console.log('Sending verification code...')
-}
 
 const close = () => {
     emit('close')

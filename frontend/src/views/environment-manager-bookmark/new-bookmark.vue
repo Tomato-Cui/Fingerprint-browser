@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Model from "@/components/model/model.vue";
-import { reactive, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import {
   Select,
@@ -40,10 +40,6 @@ const subMit = () => {
 
 const emit = defineEmits(["update:createBookmark"]);
 
-const addBookmark = reactive({
-  bookmarkName: "",
-  description: "",
-});
 </script>
 
 <template>

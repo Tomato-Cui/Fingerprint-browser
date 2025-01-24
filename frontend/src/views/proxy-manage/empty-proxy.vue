@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ClockIcon, ShoppingCartIcon } from "lucide-vue-next";
-import { IconApple } from "@/assets/icons/environment-bookmark-image";
-import { Buy, AddCard } from "@/assets/icons/proxy-manage-image";
+// import { IconApple } from "@/assets/icons/environment-bookmark-image";
+import { AddCard } from "@/assets/icons/proxy-manage-image";
 import { useRouter } from "vue-router";
 
 const router = useRouter();

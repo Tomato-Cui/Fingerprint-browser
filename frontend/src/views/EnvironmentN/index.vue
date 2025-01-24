@@ -22,14 +22,21 @@
                             <input type="search" placeholder="搜索" v-model="searchQuery"
                                 class="rounded-md px-3 py-1.5 text-sm outline-none w-[260px] h-[35px]" />
                         </div>
-                        <button @click="filterOpt"
+                        <SelectFilter :data="dataCache" :selects="selectFilterRef"
+                            @update:on-proxy-select="(v) => (selectFilterRef.proxy = v)"
+                            @update:on-account-select="(v) => (selectFilterRef.account = v)"
+                            @update:on-tag-select="(v) => (selectFilterRef.tag = v)"
+                            @update:on-group-select="(v) => (selectFilterRef.group = v)"
+                            @update:reset="resetSelectFilterHandle" />
+                        <!-- <button @click="filterOpt"
                             class="flex border border-gray-300 px-2 py-1 gap-2 rounded-lg h-[35px] items-center">
                             <component :is="FilterIcon" class="size-5" />筛选
-                        </button>
+                        </button> -->
                     </div>
                     <!-- 筛选 -->
-                    <SearchChoose :open="showSearchChoose" @close="showSearchChoose = false"
-                        class="absolute top-10 shadow-xl border" />
+                    <!-- <SearchChoose :open="showSearchChoose" @close="showSearchChoose = false"
+                        class="absolute top-10 shadow-xl border" /> -->
+
                 </div>
 
                 <div class="flex gap-2 relative">
@@ -114,8 +121,10 @@
                     <thead class="w-full sticky top-0 z-10">
                         <tr class="border-b bg-popover">
                             <th class="w-12 py-3 pl-4 text-left">
-                                <input type="checkbox" class="rounded border-gray-300" :checked="isAllSelected"
-                                    @change="toggleSelectAll" :indeterminate="isIndeterminate" />
+                                <input type="checkbox"
+                                    class="rounded border-gray-300 data-[state=checked]:bg-[#5050FA] size-3.5"
+                                    :checked="isAllSelected" @change="toggleSelectAll"
+                                    :indeterminate="isIndeterminate" />
                             </th>
                             <template v-for="column in visibleColumns" :key="column.key">
                                 <th v-if="column.key === 'id'"
@@ -162,9 +171,9 @@
                         <tr v-for="(item, index) in filterData" :key="index" class="border-b"
                             :class="{ 'bg-[#EDF1F7]': selectedItems.includes(item.uuid) }">
                             <td class="py-3 pl-4">
-                                <input type="checkbox" class="rounded border-gray-300"
-                                    :checked="selectedItems.includes(item.uuid)"
-                                    @change="toggleSelectItem(item.uuid)" />
+                                <input type="checkbox"
+                                    class="rounded border-gray-300 data-[state=checked]:bg-[#5050FA] size-3.5"
+                                    :checked="selectedItems.includes(item.uuid)" @click="toggleSelectItem(item.uuid)" />
                             </td>
                             <!-- <td class="px-2 py-3">{{ item }}</td> -->
                             <!-- 每一格 -->
@@ -183,10 +192,6 @@
                                                     <OneFrameIcon class="h-5 w-5 cursor-pointer" />
                                                 </MoreTrigger>
                                                 <MoreContent class="min-w-[200px]">
-                                                    <!-- 小尖头 -->
-                                                    <!-- <div
-                                                class="size-4 bg-white border-l border-t transform rotate-45 absolute top-[-7px] left-5 z-[99999]">  
-                                            </div> -->
                                                     <MoreItem v-for="e in regularItems" :key="e.id"
                                                         class="cursor-pointer" @click="e.active?.(item.id)">
                                                         {{ e.label }}
@@ -233,7 +238,8 @@
     <ExportEnv :open="exportEnvModel" @close="exportEnvModel = false" :data="messageData" />
     <EditProxy :open="editProxyModel" @close="editProxyModel = false" :data="messageData" v-model:isChange="flag" />
     <EditEnvInfo :open="editEnvInfoModel" @close="editEnvInfoModel = false" :data="messageData" />
-    <TransferEnv :open="transferEnvModel" @close="transferEnvModel = false" :data="messageData" v-model:is-change="flag"/>
+    <TransferEnv :open="transferEnvModel" @close="transferEnvModel = false" :data="messageData"
+        v-model:is-change="flag" />
     <UntransferEnv :open="UntransferEnvModel" @close="UntransferEnvModel = false" :data="messageData" />
     <CleanCache :open="cleanCacheModel" @close="cleanCacheModel = false" :data="messageData" />
     <DelEnv :open="delEnvModel" @close="delEnvModel = false" :data="messageData" v-model:isChange="flag" />
@@ -242,7 +248,7 @@
     <ResetLabel :open="resetLabelModel" @close="resetLabelModel = false" :data="messageData" v-model:isChange="flag" />
     <CleanLabel :open="cleanLabelMode" @close="cleanLabelMode = false" />
     <AddGroup :open="addGroupModel" @close="addGroupModel = false" @search-group="searchGroup" />
-    <EditStartPage :open="editStartPageModel" @close="editStartPageModel = false" />
+    <EditStartPage :open="editStartPageModel" @close="editStartPageModel = false" :data="messageData" />
     <EditUa :open="editUAModel" @close="editUAModel = false" :data="messageData" />
 </template>
 
@@ -250,7 +256,7 @@
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import Operate from "./com/operate.vue"
 import TableTheadChoose from "./com/table-thead-choose.vue"
-import SearchChoose from "./com/search-choose.vue"
+import SelectFilter from './com/select-filter.vue'
 import Page from './com/page.vue'
 import GroupChoose from './com/group-choose.vue'
 import ExportEnv from './pop-box/export/exportEnv.vue'
@@ -268,7 +274,7 @@ import EditStartPage from './pop-box/edit-start-page.vue'
 import EditUa from './pop-box/edit-ua.vue'
 // import Auth from './synchronizer/auth.vue'
 import SynchronizerIndex from './synchronizer/index.vue'
-import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, GroupAddIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index"
+import { AssCircleIcon, AddCardIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, GroupAddIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index"
 import { HelfGlobalIcon, RoundArrowRight } from '@/assets/icons/environment/index'
 import { environment_query, environment_query_by_group, environment_batch_move_to_group } from '@/commands/environment'
 import { useRouter, useRoute } from 'vue-router'
@@ -276,10 +282,8 @@ import { OneFrameIcon } from '@/assets/icons/environment/index'
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { browser_starts, browser_stops, browser_start } from '@/commands/browser'
 import { toast } from 'vue-sonner'
-import { useBrowserStatusStore } from "@/stores/browser";
-import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
+import { useBrowserStatusStore } from "@/stores/browser"
 import { environment_group_query } from "@/commands/environment-group"
-import { setgroups } from 'process'
 
 const browserStatusStore = useBrowserStatusStore();
 const router = useRouter()
@@ -287,7 +291,6 @@ const route = useRoute()
 const showSearchChoose = ref(false)
 const showQuickSettings = ref(false)
 const showColumnsModal = ref(false)
-const tableOperateModal = ref(false)
 const synchronizerDialog = ref(false)
 const exportEnvModel = ref(false)
 const editProxyModel = ref(false)
@@ -315,7 +318,6 @@ watch(
     ([newDelEnvModel, newCleanCacheModel]) => {
         if (!newDelEnvModel && !newCleanCacheModel) {
             console.log("关闭弹窗:", newDelEnvModel, newCleanCacheModel);
-
             getM(); // 如果任意一个值变为 false，调用 getM
         }
     }
@@ -394,7 +396,7 @@ const syncCookie = (id: number) => {
 }
 //运维授权
 const auth = (id: number) => {
-    toast.warning("功能开发中")
+    toast.warning("功能开发中:" + id)
 }
 // 复制
 const copyEnvId = async (id: number) => {
@@ -424,14 +426,6 @@ const theadChoose = (val: any) => {
     allColumns.value = val
 }
 
-const chooseIndex = ref(0)
-const handleTableOperate = (index: number) => {
-    tableOperateModal.value = true
-    // console.log("HHHH:", tableData.value[index].id);
-    if (chooseIndex.value != index) {
-        chooseIndex.value = index
-    }
-}
 const visibleActions = computed(() => {
     // console.log("??:", allActions.value);
     return allActions.value.filter((action: any) => action.visible)
@@ -639,7 +633,7 @@ const PageObj = reactive({
     pageNum: 1,
     pageSize: 17,
 })
-watch(() => PageObj.pageSize, (v) => {
+watch(() => PageObj.pageSize, (_) => {
     console.log("??:", PageObj);
     getList()
 })
@@ -703,31 +697,64 @@ watch(
 watch(() => route.params.id, () => {
     getList()
 })
+const selectFilterRef = reactive<any>({
+    proxy: false,
+    account: "",
+    tag: "",
+    group: "",
+});
+watch(selectFilterRef, (_) => {
+    console.log("---:", dataCache.value);
 
+    let tData = dataCache.value
+        .filter((_: any) =>
+            selectFilterRef.proxy ? true : true
+        )
+        .filter((item: any) =>
+            selectFilterRef.account ? selectFilterRef.account == item.accounts.platform : true
+        )
+        .filter((item: any) =>
+            selectFilterRef.tag ? selectFilterRef.tag == item.tag_name : true
+        )
+        .filter((item: any) =>
+            selectFilterRef.group ? selectFilterRef.group == item.group_name : true
+        );
+
+        dealTableData(tData)
+});
+const resetSelectFilterHandle = () => {
+    selectFilterRef.proxy = false
+    selectFilterRef.account = ''
+    selectFilterRef.tag = ''
+    selectFilterRef.group = ''
+};
 
 const originData = ref<any>([])
-const messageData = ref<any>([])
+const messageData = ref<any>([])  //用于传入操作组件的数据
+const dataCache = ref<any>([])  //用于筛选
 const getList = () => {
     if (route.params.id === '0') {
         environment_query(PageObj.pageNum, PageObj.pageSize).then((res: any) => {
             PageObj.total = res.data.total
             tableData.value = res.data.data
-            dealTableData()  //字段处理
+            dealTableData(tableData.value)  //字段处理
+            dataCache.value = JSON.parse(JSON.stringify(res.data.data))
         })
     } else {
         environment_query_by_group(+route.params.id, PageObj.pageNum, PageObj.pageSize).then((res: any) => {
             PageObj.total = res.data.total
             tableData.value = res.data.data
-            dealTableData()
+            dealTableData(tableData.value)
+            dataCache.value = JSON.parse(JSON.stringify(res.data.data))
         })
     }
 }
 
-const dealTableData = () => {
+const dealTableData = (data: any) => {
     let ind = 1;  //序号
     originData.value = JSON.parse(JSON.stringify(tableData.value));
     // 将字段与表头对上
-    tableData.value = tableData.value.map((item: any) => {
+    tableData.value = data.map((item: any) => {
         return {
             ind: ind++,
             id: item.id,
@@ -735,7 +762,7 @@ const dealTableData = () => {
             action: '启动',
             status: '未启动',
             account: item.accounts.platform + item.accounts.platform_account,
-            proxy: (item.proxy_host || '--') + ':' + (item.proxy_port || '--'),
+            proxy: item.proxy_host ? item.proxy_host + ":" + item.proxy_port : "--",
             description: item.description,
             tab: item.tag_name,
             groupName: item.group_name,
@@ -744,12 +771,9 @@ const dealTableData = () => {
             uuid: item.uuid,
         }
     })
+    // dataCache.value = JSON.parse(JSON.stringify(tableData.value))
 }
-const getStatus = () => {
-    tableData.value.map((item: any) => {
-        return browserStatusStore.getStatus(item.uuid) ? item.status = '已启动' : item.status = '未启动'
-    })
-}
+
 onMounted(() => {
     getList()
 })

@@ -191,7 +191,7 @@ pub async fn modify_default_url(
     default_urls: &str,
 ) -> Result<JsonRespnse, anyhow::Error> {
     let data = json!({
-        "uuid": environment_uuid,
+        "environment_uuid": environment_uuid,
         "default_urls": default_urls
     });
 

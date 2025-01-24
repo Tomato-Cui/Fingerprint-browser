@@ -1,37 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { cn } from "@/util/lib";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { useRouter, useRoute } from "vue-router";
-import { environment_group_query } from "@/commands/environment-group"
 
 const router = useRouter();
 const route = useRoute();
-const tabs = ref<any>([]);
 const props = defineProps<{
   data: Array<any>,
 }>()
-
-const getList = () => {
-  environment_group_query(1, 1000).then((res: any) => {
-    console.log("res:", res.data);
-    let table: any[] = []
-    table = res.data.data.map((item: any) => {
-      return {
-        id: item.id,
-        title: item.name,
-        value: item.name,
-        href: '/environment/' + item.id,
-      }
-    })
-    tabs.value = [{
-      id: 1,
-      title: "默认分组",
-      value: "default",
-      href: "/environment/0",
-    }, ...table]
-  })
-}
 
 const isMouseDown = ref(false)
 const startX = ref(0)

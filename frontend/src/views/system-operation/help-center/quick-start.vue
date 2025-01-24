@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+// import { ref } from 'vue';
 import layout from './layout.vue';
 import {
-    Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
@@ -30,18 +29,18 @@ const quickStartItems = [
         content: '推广返现活动说明...'
     }
 ]
-const expandedItems = ref(Array(quickStartItems.length).fill(false))
+// const expandedItems = ref(Array(quickStartItems.length).fill(false))
 
 
 
-const toggleItem = (index: number) => {
-    expandedItems.value[index] = !expandedItems.value[index]
-}
+// const toggleItem = (index: number) => {
+//     expandedItems.value[index] = !expandedItems.value[index]
+// }
 </script>
 
 <template>
     <layout>
-        <Accordion v-for="(item, index) in quickStartItems" type="single" class="w-full px-4" collapsible>
+        <Accordion v-for="item in quickStartItems" type="single" class="w-full px-4" collapsible>
             <AccordionItem class="border-0" value="proxy-setting">
                 <AccordionTrigger class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2">{{ item.title }}
                 </AccordionTrigger>

@@ -120,7 +120,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import layout from './layout.vue';
-import { EditIcon, RefreshIcon, QRCodeIcon, BrowsersChromeIcon, BrowsersFoxIcon } from '@/assets/icons/system-operation/index';
+import { EditIcon, RefreshIcon, QRCodeIcon } from '@/assets/icons/system-operation/index';
 import ChromeP from '@/assets/icons/system-operation/Chome.png'
 import FoxP from '@/assets/icons/system-operation/Fox.png'
 

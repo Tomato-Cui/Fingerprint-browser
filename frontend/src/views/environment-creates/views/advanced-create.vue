@@ -15,7 +15,6 @@ import EncryptModel from "../components/encrypt-model.vue";
 import Loading from "@/components/loading/index.vue";
 import { toast } from "vue-sonner";
 import {
-  templaeFormtData as data,
   useEnvironmentAdvancedFormStore,
 } from "@/stores/form/environment-advanced";
 

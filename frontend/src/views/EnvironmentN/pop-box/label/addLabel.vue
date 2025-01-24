@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { XIcon, PlusIcon, CheckIcon } from 'lucide-vue-next'
+import { XIcon, PlusIcon } from 'lucide-vue-next'
 import { Model } from '@/components/model'
 import { toast } from 'vue-sonner'
 import { environment_tag_create, environment_tag_query } from '@/commands/environment-tag'
@@ -89,22 +89,20 @@ watch(() => props.open, (_) => {
 
 const emit = defineEmits(['close', 'confirm'])
 
-const colors = [
-    { value: 'gray', class: 'bg-gray-200' },
-    { value: 'blue', class: 'bg-blue-200' },
-    { value: 'green', class: 'bg-green-200' },
-    { value: 'yellow', class: 'bg-yellow-200' },
-    { value: 'pink', class: 'bg-pink-200' },
-    { value: 'purple', class: 'bg-purple-200' },
-    { value: 'orange', class: 'bg-orange-200' },
-    { value: 'indigo', class: 'bg-indigo-200' }
-]
+// const colors = [
+//     { value: 'gray', class: 'bg-gray-200' },
+//     { value: 'blue', class: 'bg-blue-200' },
+//     { value: 'green', class: 'bg-green-200' },
+//     { value: 'yellow', class: 'bg-yellow-200' },
+//     { value: 'pink', class: 'bg-pink-200' },
+//     { value: 'purple', class: 'bg-purple-200' },
+//     { value: 'orange', class: 'bg-orange-200' },
+//     { value: 'indigo', class: 'bg-indigo-200' }
+// ]
 const tagList = ref<{ id: number; name: string }[]>([])
 const searchList = ref<any[]>([])
-let tagId = 1
 
 const tagInput = ref('')
-const currentTag = ref('')
 const selectedColor = ref('indigo')
 const inputFocused = ref(false)
 const colorSelectionActive = ref(false)

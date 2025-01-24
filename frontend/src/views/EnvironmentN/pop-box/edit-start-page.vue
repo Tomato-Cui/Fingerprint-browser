@@ -1,24 +1,45 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
 import Input from '@/components/input.vue';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import Switch from '@/components/ui/switch/Switch.vue';
+import { environment_modify_default_url } from '@/commands/environment'
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{
-    open: Boolean
+    open: Boolean,
+    data: any[],
 }>()
 const emit = defineEmits(['close'])
 
 const cancel = () => {
     emit('close')
 }
-const commit = () => {
-    console.log("提交表单：", forms.value);
-    
-    // emit('close')
+const commit = async () => {
+    try {
+        let urlStr = ''
+        for (let i = 0; i < forms.value.length; i++) {
+            if (forms.value[i].value) {
+                let str = ''
+                if(i === 0){
+                    str = forms.value[i].value
+                }else{
+                    str = "," + forms.value[i].value
+                }
+                urlStr += str
+            }
+        }
+        props.data.forEach(async (item: any) => {
+            await environment_modify_default_url(item.uuid, urlStr).catch((res: any) => {
+                toast.warning("修改失败：",res.message)
+            })
+        })
+        toast.success('修改成功')
+        emit('close')
+    } catch {
+        toast.error("修改错误")
+    }
 }
 
 interface Form {
@@ -26,8 +47,13 @@ interface Form {
     value: string;
 }
 const forms = ref<Form[]>([
-    {id: 1, value: ''}
+    { id: 1, value: '' }
 ])
+watch(() => props.open, (_) => {
+    forms.value = [
+        { id: 1, value: '' }
+    ]
+})
 </script>
 
 <template>
@@ -79,15 +105,16 @@ const forms = ref<Form[]>([
         </div> -->
 
         <div class="w-full px-6 space-y-3">
-            <div><span class="text-gray-400">已选择项目 1</span>
+            <div><span class="text-gray-400">已选择项目 {{ props.data.length }}</span>
             </div>
             <div class="flex w-full space-x-4">
                 <span class="font-[600]">启动打开网页</span>
-                <div class="flex-1 space-y-3">
+                <div class="flex-1 space-y-3 max-h-[300px] overflow-auto p-1">
                     <Input v-for="item in forms" placeholder="输入网页地址" class="w-full" v-model="item.value"/>
                 </div>
             </div>
-            <a href="#" class="text-blue-300 hover:text-blue-600 w-full flex justify-end" @click="forms.push({id: forms.length+1, value: ''})">添加</a>
+            <a href="#" class="text-blue-300 hover:text-blue-600 w-full flex justify-end"
+                @click="forms.push({ id: forms.length + 1, value: '' })">添加</a>
         </div>
 
         <!-- footer -->

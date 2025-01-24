@@ -1,89 +1,30 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Layout from "@/views/proxy-manage/manage-proxyLayout.vue";
-import { AddCheckWhite } from "@/assets/icons/proxy-manage-image/index";
 
-import SetField from "./setting.vue";
-import { environment_group_query } from "@/commands/environment-group";
 
-import { Circle, Filter } from "@/assets/icons/environment-group-manage";
 import {
-  SearchIcon,
-  ChevronRightIcon,
   ChevronLeftIcon,
 } from "@/assets/icons/environment-bookmark-image";
 
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
 
-import BuyProxy from "./manage-proxy-view/buy-proxy.vue";
 
 import {
-  AddCheck,
-  AddProxy,
-  Buy,
   Setting,
 } from "@/assets/icons/proxy-manage-image";
 
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface Proxy {
-  id: string;
-  type: string;
-  host: string;
-  port: number;
-  username?: string;
-  password?: string;
-  refreshUrl?: string;
-  group?: string;
-  name?: string;
-  status?: string;
-}
 
-const protocolType = ref("auto");
-const ipQueryChannel = ref("IP2Location");
-const proxies = ref<Proxy[]>([]);
 
-const text = ref("");
 
-interface ProxyItem {
-  id: number;
-  name: string;
-  url: string;
-  selected: boolean;
-}
 
-const proxyItems = ref<ProxyItem[]>([
-  {
-    id: 1,
-    name: "feishu",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-  {
-    id: 2,
-    name: "feishu2",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-  {
-    id: 3,
-    name: "feishu3",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-  {
-    id: 4,
-    name: "feishu4",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-]);
 
 interface Proxymanage {
   id: number;
@@ -98,15 +39,12 @@ interface Proxymanage {
   selected: boolean;
 }
 
-const setField = ref(false);
-
-const createProxymanage = ref(false);
 const loadData = () => {
-  environment_group_query(1, 1000).then((res) => {
-    let { data: data_, total } = res.data;
-    totalItems.value = total;
-    Proxymanage.value = data_;
-  });
+  // environment_group_query(1, 1000).then((res) => {
+  //   let { data: data_, total } = res.data;
+  //   totalItems.value = total;
+  //   Proxymanage.value = data_;
+  // });
 };
 
 onMounted(() => loadData());
@@ -129,7 +67,6 @@ const deleteProxymanage = (Proxymanage: Proxymanage) => {
   console.log("Delete Proxymanage:", Proxymanage);
 };
 
-const searchQuery = ref("");
 
 const totalItems = ref(0);
 const currentPage = ref(1);

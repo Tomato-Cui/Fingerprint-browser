@@ -116,40 +116,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent, watch, reactive } from 'vue'
+import { ref, watch } from 'vue'
 import layout from './layout.vue'
-
-// Create a custom Switch component
-const Switch = defineComponent({
-    name: 'Switch',
-    props: {
-        modelValue: {
-            type: Boolean,
-            required: true
-        }
-    },
-    emits: ['update:modelValue'],
-    setup(props, { emit }) {
-        return {
-            toggle: () => emit('update:modelValue', !props.modelValue)
-        }
-    },
-    template: `
-      <button 
-        type="button" 
-        @click="toggle"
-        role="switch"
-        :aria-checked="modelValue"
-        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#5B5BFA] focus:ring-offset-2"
-        :class="[modelValue ? 'bg-[#5B5BFA]' : 'bg-gray-200']"
-      >
-        <span 
-          class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out"
-          :class="[modelValue ? 'translate-x-6' : 'translate-x-1']"
-        />
-      </button>
-    `
-})
 
 const noteSwitch = ref({
     agentExpiryReminder: true

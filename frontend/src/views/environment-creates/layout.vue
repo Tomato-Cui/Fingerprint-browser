@@ -7,7 +7,6 @@ import {
   IconLoginArrow,
 } from "@/assets/icons/environment-creates/simple-create/index";
 import { useRouter, useRoute } from "vue-router";
-import { onMounted } from "vue";
 
 const router = useRouter();
 const route = useRoute();

@@ -80,7 +80,6 @@ const proxy = ref([
 
 const activeTab = ref('same')
 const protocolType = ref('auto')
-const ipChannel = ref('IP2location')
 const chooseProxy = ref(1)
 const buyProxyModel = ref(false)
 
@@ -100,24 +99,24 @@ const protocolList = [
     { id: 3, value: 'SOCKS5' },
     { id: 4, value: 'SSH' }
 ]
-const IPFindList = [
-    { id: 1, value: 'IP2Location' },
-    { id: 2, value: 'MaxMind' },
-    { id: 3, value: 'DB-IP' },
-    { id: 4, value: 'IP-API' }
-]
+// const IPFindList = [
+//     { id: 1, value: 'IP2Location' },
+//     { id: 2, value: 'MaxMind' },
+//     { id: 3, value: 'DB-IP' },
+//     { id: 4, value: 'IP-API' }
+// ]
 
 const clearProxies = () => {
     proxyList.value.forEach(proxy => proxy.value = '')
 }
 
-const testProxy = () => {
-    console.log('Testing proxies...')
-}
-const proxyMenu = [
-    { value: 1, label: '新代理' },
-    { value: 2, label: '选择已有代理' }
-]
+// const testProxy = () => {
+//     console.log('Testing proxies...')
+// }
+// const proxyMenu = [
+//     { value: 1, label: '新代理' },
+//     { value: 2, label: '选择已有代理' }
+// ]
 const forms = reactive({
     kind: '',
     host: '',

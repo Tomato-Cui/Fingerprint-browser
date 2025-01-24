@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, watch, onMounted } from 'vue'
+import { ref, computed, defineProps, defineEmits } from 'vue'
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { AltArrowDownIcon } from "@/assets/icons/environment/index.ts"
 const props = defineProps({
@@ -19,7 +19,6 @@ const currentPage = computed({
 })
 const pageSize = ref(17)
 const pageSizeOptions = [3, 17, 20, 50, 100]
-const showPageSizeDropdown = ref(false)
 const isLastPage = computed(() => {
     return currentPage.value * pageSize.value >= props.total
 })

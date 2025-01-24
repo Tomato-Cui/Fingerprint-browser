@@ -4,7 +4,7 @@
             class="mt-16 absolute border mr-4 w-[320px] rounded-lg bg-white p-4 shadow-lg z-40 right-0 top-0">
             <div class="mb-4 flex items-center justify-between border-b pb-1">
                 <h3 class="text-lg font-medium">快捷设置</h3>
-                <RefreshSquareIcon class="size-6" />
+                <!-- <RefreshSquareIcon class="size-6" /> -->
             </div>
             <div class="space-y-3 pr-2" ref="divHeight">
                 <div class="flex items-center justify-between gap-4">
@@ -54,8 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits, computed } from 'vue'
-import { AltArrowDownIcon, RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
+import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
+import { StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
 import { environment_group_query } from '@/commands/environment-group'
 
 
@@ -87,7 +87,7 @@ const allActions = ref([
     { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: () => emit('delEnv') },
 ])
 
-watch(() => props.groupData.length, (newVal) => {
+watch(() => props.groupData.length, (_) => {
     if (!props.groupData) return;
     if (props.groupData.length === 0) return;
     allActions.value = allActions.value.map((item: any) => {  //找到分组的操作

@@ -14,33 +14,34 @@
             </div>
 
             <!-- 文件上传区域 -->
-            <div class="border-2 border-dashed border-[#C5CEE0] rounded-lg px-8 py-12 bg-[#F7F9FC]"
+            <div class="border-2 border-dashed border-[#C5CEE0] h-[204px] rounded-lg px-8 py-12 bg-[#F7F9FC] cursor-pointer flex items-center justify-center"
                 :class="{ 'border-blue-500 bg-blue-50': isDragging }" @dragenter.prevent="isDragging = true"
                 @dragleave.prevent="isDragging = false" @dragover.prevent @drop.prevent="handleDrop"
                 @click="triggerFileInput">
-                <div class="flex flex-col items-center justify-center space-y-4">
+                <!-- 已上传文件 -->
+                <div v-if="uploadedFile" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <FileIcon class="w-5 h-5 text-gray-500" />
+                        <span class="text-sm text-gray-700">{{ uploadedFile.name }}</span>
+                    </div>
+                    <button @click.stop="removeFile" class="text-gray-400 hover:text-gray-600">
+                        <XIcon class="w-5 h-5" />
+                    </button>
+                </div>
+                <div v-else class="flex flex-col items-center justify-center space-y-4">
                     <div class="w-16 h-16 bg-emerald-100 rounded-lg flex items-center justify-center">
                         <FormatIcon class="w-8 h-8 text-emerald-500" />
                     </div>
                     <div class="text-center">
-                        <span class="text-blue-500 cursor-pointer">点击上传</span>
-                        <span class="text-gray-500">或将文件拖拽至此</span>
+                        <span class="text-blue-500 cursor-pointer">点击</span>
+                        <span class="text-gray-500">上传文件</span>
                     </div>
                     <input type="file" ref="fileInput" class="hidden" @change="handleFileSelect"
                         accept=".xlsx,.xls,.csv" />
                 </div>
             </div>
 
-            <!-- 已上传文件 -->
-            <div v-if="uploadedFile" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div class="flex items-center gap-3">
-                    <FileIcon class="w-5 h-5 text-gray-500" />
-                    <span class="text-sm text-gray-700">{{ uploadedFile.name }}</span>
-                </div>
-                <button @click="removeFile" class="text-gray-400 hover:text-gray-600">
-                    <XIcon class="w-5 h-5" />
-                </button>
-            </div>
+
 
             <!-- 注意事项 -->
             <div class="space-y-2 text-sm text-gray-600">

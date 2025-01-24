@@ -44,7 +44,6 @@ import { GroupIcon, SocialMediaFlyBookIcon, SocialMediaWeChatIcon } from '@/asse
 import { CloseIcon } from '@/assets/icons/synchronizer';
 import WeChat from "@/assets/icons/system-operation/WeChat.png"
 import FlyBook from "@/assets/icons/system-operation/fly book.png"
-import Model from '@/components/model/model.vue'
 
 const props = defineProps<{
     open: boolean

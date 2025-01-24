@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { PlusIcon, ListIcon, EyeIcon, EyeOffIcon } from "lucide-vue-next";
+import { EyeIcon, EyeOffIcon } from "lucide-vue-next";
 import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
 
 interface FormData {
@@ -13,7 +13,7 @@ interface FormData {
   ipChangeAction: "warn" | "block";
 }
 
-const activeTab = ref("single");
+// const activeTab = ref("single");
 const showPassword = ref(false);
 
 const formData = ref<FormData>({

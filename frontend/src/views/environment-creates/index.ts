@@ -91,7 +91,7 @@ export const advancedCreateHandle = async () => {
 export const updateEnvironment = async (uuid: string) => {
     const forms = useEnvironmentAdvancedFormStore().forms;
 
-    let { numbers, encryPtSwitch }: { numbers: number, encryPtSwitch: any } = forms;
+    let { encryPtSwitch }: { numbers: number, encryPtSwitch: any } = forms;
     encryPtSwitch = encryPtSwitch.value == '关闭' ? false : true;
 
     let payload: EnvironmentDetailWithAdvanceCreateRequest = {

@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
@@ -94,26 +94,26 @@ const emit = defineEmits(['close', 'confirm', 'update:isChange'])
 
 const syncProxy = ref(false)
 const recipientEmail = ref('')
-const verificationCode = ref('')
-const isVerificationCodeSent = ref(false)
+// const verificationCode = ref('')
+// const isVerificationCodeSent = ref(false)
 
 const toggleSyncProxy = () => {
     syncProxy.value = !syncProxy.value
 }
 
-const isFormValid = computed(() => {
-    return (
-        recipientEmail.value &&
-        verificationCode.value &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.value)
-    )
-})
+// const isFormValid = computed(() => {
+//     return (
+//         recipientEmail.value &&
+//         verificationCode.value &&
+//         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.value)
+//     )
+// })
 
-const sendVerificationCode = () => {
-    isVerificationCodeSent.value = true
-    // 实现发送验证码的逻辑
-    console.log('Sending verification code...')
-}
+// const sendVerificationCode = () => {
+//     isVerificationCodeSent.value = true
+//     // 实现发送验证码的逻辑
+//     console.log('Sending verification code...')
+// }
 
 const cancel = () => {
     emit('close')
