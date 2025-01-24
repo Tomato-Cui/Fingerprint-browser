@@ -88,6 +88,20 @@ pub async fn environment_advanced_modify(
 }
 
 #[tauri::command]
+pub async fn environment_modify_default_url(
+    environment_uuid: &str,
+    default_urls: &str,
+) -> Result<JsonRespnse, tauri::Error> {
+    Ok(
+        lp_services_remote::requests::environment::modify_default_url(
+            environment_uuid,
+            default_urls,
+        )
+        .await?,
+    )
+}
+
+#[tauri::command]
 pub async fn environment_modify_info(
     payload: lp_models::environment::EnvironmentInfo,
 ) -> Result<JsonRespnse, tauri::Error> {

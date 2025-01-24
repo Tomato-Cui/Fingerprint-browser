@@ -186,6 +186,25 @@ pub async fn modify_proxy(
     Ok(json_response)
 }
 
+pub async fn modify_default_url(
+    environment_uuid: &str,
+    default_urls: &str,
+) -> Result<JsonRespnse, anyhow::Error> {
+    let data = json!({
+        "uuid": environment_uuid,
+        "default_urls": default_urls
+    });
+
+    let json_response = client::REQUEST
+        .put(
+            client::Client::build_url("/environments/modify/default-url")?,
+            &data,
+        )
+        .await?;
+
+    Ok(json_response)
+}
+
 pub async fn advanced_modify(
     uuid: &str,
     environment: lp_models::dto::environment_info::EnvironmentDetailWithAdvanceCreateRequest,

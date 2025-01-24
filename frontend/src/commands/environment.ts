@@ -203,6 +203,10 @@ export const environment_modify_basic_info = async (environmentUuid: string, pay
     return await invoke('environment_modify_basic_info', { environmentUuid, payload })
 };
 
+export const environment_modify_default_url = async (environmentUuid: string, defaultUrls: String): Promise<any> => {
+    return await invoke('environment_modify_default_url', { environmentUuid, defaultUrls })
+};
+
 export const environment_move_to_group = async (
     environmentUuid: string,
     groupId: number,
