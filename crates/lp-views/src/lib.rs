@@ -19,7 +19,7 @@ pub fn run() {
         .invoke_handler(command::register_handles())
         .setup(|app| {
             register_plugins(app.app_handle());
-            regsister_update_processor(app.app_handle().clone());
+            // regsister_update_processor(app.app_handle().clone());
             tray::menu(app)?;
             Ok(())
         })
@@ -80,10 +80,20 @@ fn register_plugins(app_handle: &AppHandle) {
     // Register websocket plugin
     #[cfg(desktop)]
     app_handle.plugin(tauri_plugin_websocket::init()).unwrap();
+
+    // Register process plugin
+    #[cfg(desktop)]
+    app_handle.plugin(tauri_plugin_process::init()).unwrap();
+
+    #[cfg(desktop)]
+    app_handle
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .unwrap();
 }
 
 // Register the update processor
 // command::updator::app_updates::PendingUpdate 作为全局状态，可以提供给install_update和fetch_update方法作为参数。
+#[allow(dead_code)]
 fn regsister_update_processor(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         app.manage(command::updator::app_updates::PendingUpdate(Mutex::new(

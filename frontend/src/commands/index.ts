@@ -33,3 +33,6 @@ export const set_theme = async (theme: 'dark' | 'light' | 'auto'): Promise<any> 
 export const fetch_update = async (): Promise<any> => {
     return await invoke('fetch_update')
 }
+export const install_update = async (): Promise<any> => {
+    return await invoke('install_update')
+}

@@ -51,7 +51,7 @@ pub mod app_updates {
         pending_update: State<'_, PendingUpdate>,
     ) -> Result<Option<UpdateMetadata>> {
         let url = Url::parse(&format!(
-            "https://github.com/liusnew/lpbrowser-release/releases/latest/download/latest.json"
+            "http://localhost:5678/api/v1/versions/latest/version" // "https://localhost:5678/liusnew/lpbrowser-release/releases/latest/download/latest.json"
         ))
         .expect("invalid URL");
 

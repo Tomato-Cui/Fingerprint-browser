@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use std::{
+    net::{IpAddr, SocketAddr},
+    path::PathBuf,
+};
 
 pub fn cookie_file(path: &str) -> PathBuf {
     let path_str: PathBuf = PathBuf::from(path)
@@ -33,6 +36,7 @@ use serde::Serialize;
 use serde_json::Value;
 #[cfg(windows)]
 use std::{ffi::CString, ptr};
+use tokio::net::TcpStream;
 use winapi::um::{
     winnt::KEY_READ,
     winreg::{RegOpenKeyExA, RegQueryValueExA, HKEY_CURRENT_USER},
@@ -118,8 +122,19 @@ pub async fn get_debug_port() -> Result<u16, std::io::Error> {
     let loopback = Ipv4Addr::new(127, 0, 0, 1);
     let socket = SocketAddrV4::new(loopback, 0);
     let listener = TcpListener::bind(socket).await?;
-    let port = listener.local_addr()?;
-    Ok(port.port())
+    let port = listener.local_addr()?.port();
+
+    drop(listener);
+
+    Ok(port)
+}
+
+pub async fn get_network_ip() -> Result<IpAddr, anyhow::Error> {
+    let remote_addr: SocketAddr = "8.8.8.8:80".parse()?;
+    let stream = TcpStream::connect(remote_addr).await?;
+    let local_addr = stream.local_addr()?;
+
+    Ok(local_addr.ip())
 }
 
 pub fn delete_data_file(path: PathBuf) -> Result<(), anyhow::Error> {

@@ -68,3 +68,6 @@ lp_services = { path = "./crates/lp-services" }
 lp_services_remote = { path = "./crates/lp-services-remote" }
 lp_states = { path = "./crates/lp-states" }
 lp_views = { path = "./crates/lp-views" }
+
+[profile.release]
+debug = false

@@ -10,6 +10,7 @@
     </TooltipProvider>
   </template>
   <Toaster :rich-colors="true" position="top-center" />
+  <Updator />
 </template>
 
 <script setup>
@@ -21,6 +22,7 @@ import { isLogin } from "@/commands/user";
 import { onMounted, ref, watch } from "vue";
 import Login from "@/views/Login/index.vue";
 import { set_token } from "@/commands/user";
+import Updator from "./components/updator.vue";
 
 const route = useRoute();
 const router = useRouter();
