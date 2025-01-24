@@ -29,3 +29,7 @@ export const init_porcessor = async (): Promise<any> => {
 export const set_theme = async (theme: 'dark' | 'light' | 'auto'): Promise<any> => {
     return await invoke('plugin:theme|set_theme', { theme })
 }
+
+export const fetch_update = async (): Promise<any> => {
+    return await invoke('fetch_update')
+}
