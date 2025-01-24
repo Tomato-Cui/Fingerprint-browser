@@ -4,7 +4,7 @@ export { default as EnvironmentBatchImport } from './views/batch-import.vue'
 export { default as EnvironmentLayout } from './layout.vue'
 
 import { useEnvironmentAdvancedFormStore, templaeFormtData } from "@/stores/form/environment-advanced";
-import { type EnvironmentDetailWithAdvanceCreateRequest, environment_advanced_create } from '@/commands/environment';
+import { type EnvironmentDetailWithAdvanceCreateRequest, environment_advanced_create, environment_advanced_modify } from '@/commands/environment';
 
 export const batchCreateHandle = async (name: string) => {
     const forms = useEnvironmentAdvancedFormStore().forms;
@@ -84,6 +84,47 @@ export const advancedCreateHandle = async () => {
     };
 
     return await environment_advanced_create(numbers, encryPtSwitch, payload)
+
+}
+
+//修改环境
+export const updateEnvironment = async (uuid: string) => {
+    const forms = useEnvironmentAdvancedFormStore().forms;
+
+    let { numbers, encryPtSwitch }: { numbers: number, encryPtSwitch: any } = forms;
+    encryPtSwitch = encryPtSwitch.value == '关闭' ? false : true;
+
+    let payload: EnvironmentDetailWithAdvanceCreateRequest = {
+        id: forms.id,
+        name: forms.name || templaeFormtData.name.default,
+        description: forms.description || templaeFormtData.description.default,
+        group_id: forms.group || undefined,
+        tag_id: forms.tag || undefined,
+        browser: forms.browser.value,
+        ua: forms.ua,
+        os: forms.os.value || 'windows',
+        language: getRandomLanguage() || navigator.language,
+        languages: navigator.languages.join(','),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        height: 888,// || window.screen.height,
+        width: 888,// || window.screen.width,
+        fonts: Array.from(document.fonts).map(font => font.family).join(','),
+        web_rtc: forms.fingerprint.webRTC.value != 'disabled',
+        web_rtc_local_ip: await getLocalIP(),
+        canvas: getCanvasFingerprint(),
+        webgl: true,
+        hardware_acceleration: true,
+        webgl_info: getWebGLInfo(),
+        audio_context: !!window.AudioContext,
+        speech_voices: !!window.speechSynthesis,
+        media: !!navigator.mediaDevices,
+        cpu: parseInt(forms.fingerprint.hardwareConcurrency.value),
+        memory: parseInt(forms.fingerprint.deviceMemory.value),
+        do_not_track: forms.fingerprint.doNotTrack.value,
+        battery: forms.fingerprint.battery.value == 'real',
+        port_scan: forms.fingerprint.portScanning.value,
+    };
+    return await environment_advanced_modify(uuid, payload)
 
 }
 

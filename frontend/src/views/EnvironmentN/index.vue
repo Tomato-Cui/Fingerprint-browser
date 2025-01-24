@@ -65,7 +65,7 @@
                             <button v-show="action.key !== 'start'" :disabled="selectedItems.length === 0"
                                 @click="selectedItems.length !== 0 ? action.action() : void (0)" :class="{
                                     'cursor-not-allowed opacity-50': selectedItems.length == 0,
-                                    'hover:bg-gray-50': selectedItems.length != 0
+                                    'hover:bg-[#5050FA] hover:text-white': selectedItems.length != 0
                                 }"
                                 class="flex items-center rounded-md bg-[#EDEDFF] px-3 py-[2px] text-sm shadow-sm min-w-fit h-[35px] gap-2">
                                 <component :is="action.icon" class="mr-1.5 h-4 w-4" />
@@ -74,14 +74,16 @@
                             </button>
                         </MoreTrigger>
                         <MoreContent class="w-[140px]" v-if="action.children && selectedItems.length > 0">
-                            <MoreItem v-for="item in action.children" @click="item.active" :key="item"
-                                class="cursor-pointer" :class="{ 'hover:bg-white': item.key === 'addGroup' }">
+                            <MoreItem v-for="item in action.children"
+                                @click="(action.key === 'group' && item.key !== 'addGroup') ? setGroups(item) : item.active()"
+                                :key="item" class="cursor-pointer"
+                                :class="{ 'hover:bg-white': item.key === 'addGroup' }">
                                 <div v-if="item.key === 'addGroup'"
                                     class="border border-[#5050FA] bg-[#EDEDFF] w-full p-1 rounded-sm flex items-center justify-center">
                                     <GroupAddIcon class="size-5" />{{ item.label }}
                                 </div>
                                 <div v-else-if="action.key === 'group'">
-                                    <Checkbox />
+                                    <!-- <Checkbox /> -->
                                     {{ item.label }}
                                 </div>
                                 <div v-else>{{ item.label }}</div>
@@ -99,7 +101,9 @@
                         @edit-proxy="editProxy" @edit-env-info="editEnvInfo" @export-env="exportEnv" @stopAll="stopAll"
                         @clean-cache="cleanCache" @transfer-env="transferEnv" @untransfer-env="untransferEnv"
                         @add-label="addLabel" @add-group="addGroup" @reset-label="resetLabel" @clean-label="cleanLabel"
-                        @edit-start-page="editStartPage" @edit-ua="editUA" @del-env="delEnv" :group-data="groupList.filter((item: any) => item.value !== 'default') as any" class="w-[320px]" />
+                        @edit-start-page="editStartPage" @edit-ua="editUA" @del-env="delEnv"
+                        :group-data="groupList.filter((item: any) => item.value !== 'default') as any"
+                        class="w-[320px]" />
                 </div>
             </div>
 
@@ -108,7 +112,7 @@
                 <table class="min-w-full">
                     <!-- {{ sortColumn }} -->
                     <thead class="w-full sticky top-0 z-10">
-                        <tr class="border-b">
+                        <tr class="border-b bg-popover">
                             <th class="w-12 py-3 pl-4 text-left">
                                 <input type="checkbox" class="rounded border-gray-300" :checked="isAllSelected"
                                     @change="toggleSelectAll" :indeterminate="isIndeterminate" />
@@ -165,7 +169,7 @@
                             <!-- <td class="px-2 py-3">{{ item }}</td> -->
                             <!-- 每一格 -->
                             <template v-for="(value, key) in item as Record<string, any>" :key="key">
-                                <td class="px-2 py-3 text-sm" v-if="key != 'uuid'">
+                                <td class="px-2 py-3 text-sm" v-if="key != 'uuid' && key != 'id'">
                                     <!-- 操作格 -->
                                     <div v-if="key === 'action'" class="flex justify-between items-center ">
                                         <span
@@ -183,13 +187,21 @@
                                                     <!-- <div
                                                 class="size-4 bg-white border-l border-t transform rotate-45 absolute top-[-7px] left-5 z-[99999]">  
                                             </div> -->
-                                                    <MoreItem v-for="item in regularItems" :key="item"
-                                                        class="cursor-pointer" @click="">
-                                                        {{ item }}
+                                                    <MoreItem v-for="e in regularItems" :key="e.id"
+                                                        class="cursor-pointer" @click="e.active?.(item.id)">
+                                                        {{ e.label }}
                                                     </MoreItem>
                                                 </MoreContent>
                                             </More>
                                         </span>
+                                    </div>
+                                    <!-- 状态格 -->
+                                    <div v-else-if="key === 'status'" class="flex items-center gap-x-2">
+                                        <div class="size-1.5 rounded-full" :class="{
+                                            'bg-green-500': browserStatusStore.getStatus(item.uuid),
+                                            'bg-red-500': !browserStatusStore.getStatus(item.uuid)
+                                        }"></div>
+                                        {{ !browserStatusStore.getStatus(item.uuid) ? '未启动' : '已启动' }}
                                     </div>
                                     <!-- 其他格 -->
                                     <div v-else class="flex justify-between items-center text-sm">
@@ -205,7 +217,7 @@
                     <AddCardIcon
                         class=" size-[200px]  text-blue-400 border-gray-300 flex items-center justify-center" />
                     <p>您可创建具有独立高质量指纹的profile，也可自定义编辑指纹信息</p>
-                    <button @click="router.push('/environment-simple-create')"
+                    <button @click="router.push('/environment/create/environment-simple-create')"
                         class="p-2 bg-[#5050FA] text-white rounded-lg flex items-center gap-3">
                         <AssCircleIcon class="size-5" />
                         新建环境
@@ -219,19 +231,19 @@
         </GroupChoose>
     </div>
     <ExportEnv :open="exportEnvModel" @close="exportEnvModel = false" :data="messageData" />
-    <EditProxy :open="editProxyModel" @close="editProxyModel = false" :data="messageData" />
+    <EditProxy :open="editProxyModel" @close="editProxyModel = false" :data="messageData" v-model:isChange="flag" />
     <EditEnvInfo :open="editEnvInfoModel" @close="editEnvInfoModel = false" :data="messageData" />
-    <TransferEnv :open="transferEnvModel" @close="transferEnvModel = false" :data="messageData" />
+    <TransferEnv :open="transferEnvModel" @close="transferEnvModel = false" :data="messageData" v-model:is-change="flag"/>
     <UntransferEnv :open="UntransferEnvModel" @close="UntransferEnvModel = false" :data="messageData" />
     <CleanCache :open="cleanCacheModel" @close="cleanCacheModel = false" :data="messageData" />
-    <DelEnv :open="delEnvModel" @close="delEnvModel = false" :data="messageData" />
+    <DelEnv :open="delEnvModel" @close="delEnvModel = false" :data="messageData" v-model:isChange="flag" />
 
     <AddLabel :open="addLabelModel" @close="addLabelModel = false" :data="messageData" />
-    <ResetLabel :open="resetLabelModel" @close="resetLabelModel = false" :data="messageData" />
+    <ResetLabel :open="resetLabelModel" @close="resetLabelModel = false" :data="messageData" v-model:isChange="flag" />
     <CleanLabel :open="cleanLabelMode" @close="cleanLabelMode = false" />
     <AddGroup :open="addGroupModel" @close="addGroupModel = false" @search-group="searchGroup" />
     <EditStartPage :open="editStartPageModel" @close="editStartPageModel = false" />
-    <EditUa :open="editUAModel" @close="editUAModel = false" />
+    <EditUa :open="editUAModel" @close="editUAModel = false" :data="messageData" />
 </template>
 
 <script setup lang="ts">
@@ -256,17 +268,18 @@ import EditStartPage from './pop-box/edit-start-page.vue'
 import EditUa from './pop-box/edit-ua.vue'
 // import Auth from './synchronizer/auth.vue'
 import SynchronizerIndex from './synchronizer/index.vue'
-import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, GroupAddIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index.ts"
+import { AssCircleIcon, AddCardIcon, FilterIcon, SearchIcon, GroupIcon, BookmarkIcon, ApiIcon, SynchronizerIcon, GroupAddIcon, MoreOperatorIcon, WrapperIcon, AltArrowDownIcon, CaretDownIcon, CaretUpIcon } from "@/assets/icons/environment/index"
 import { HelfGlobalIcon, RoundArrowRight } from '@/assets/icons/environment/index'
-import { environment_query, environment_query_by_group } from '@/commands/environment'
+import { environment_query, environment_query_by_group, environment_batch_move_to_group } from '@/commands/environment'
 import { useRouter, useRoute } from 'vue-router'
-import { OneFrameIcon } from '@/assets/icons/environment/index.ts'
+import { OneFrameIcon } from '@/assets/icons/environment/index'
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 import { browser_starts, browser_stops, browser_start } from '@/commands/browser'
 import { toast } from 'vue-sonner'
 import { useBrowserStatusStore } from "@/stores/browser";
 import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
 import { environment_group_query } from "@/commands/environment-group"
+import { setgroups } from 'process'
 
 const browserStatusStore = useBrowserStatusStore();
 const router = useRouter()
@@ -292,13 +305,26 @@ const editUAModel = ref(false)
 const searchQuery = ref('')
 const sortColumn = ref('id');
 const sortOrder = ref('asc');
+const flag = ref(false) //重新查询表格数据
 
+watch(() => flag.value, (_) => { //需要做数据的重新查询
+    getList()
+})
+watch(
+    () => [delEnvModel.value, cleanCacheModel.value], // 监听多个值
+    ([newDelEnvModel, newCleanCacheModel]) => {
+        if (!newDelEnvModel && !newCleanCacheModel) {
+            console.log("关闭弹窗:", newDelEnvModel, newCleanCacheModel);
+
+            getM(); // 如果任意一个值变为 false，调用 getM
+        }
+    }
+);
 // 拖拽状态
 const isDragging = ref(false);
 const startX = ref(0); // 拖拽起始位置
 const scrollLeft = ref(0); // 容器初始滚动位置
 const scrollContainer = ref<HTMLElement | null>(null); // 容器 DOM 引用
-
 // 开始拖拽
 const startDrag = (event: MouseEvent) => {
     isDragging.value = true;
@@ -307,21 +333,18 @@ const startDrag = (event: MouseEvent) => {
     scrollContainer.value?.classList.add('cursor-grabbing'); // 添加抓取样式
     scrollContainer.value?.classList.remove('cursor-grab');
 };
-
 // 拖拽中
 const onDrag = (event: MouseEvent) => {
     if (!isDragging.value || !scrollContainer.value) return;
     const x = event.pageX - startX.value; // 计算鼠标移动的距离
     scrollContainer.value.scrollLeft = scrollLeft.value - x; // 调整容器的滚动位置
 };
-
 // 停止拖拽
 const stopDrag = () => {
     isDragging.value = false;
     scrollContainer.value?.classList.remove('cursor-grabbing'); // 移除抓取样式
     scrollContainer.value?.classList.add('cursor-grab');
 };
-
 // 清理事件监听器
 onMounted(() => {
     if (scrollContainer.value) {
@@ -331,7 +354,6 @@ onMounted(() => {
         scrollContainer.value.addEventListener('mouseleave', stopDrag);
     }
 });
-
 onUnmounted(() => {
     if (scrollContainer.value) {
         scrollContainer.value.removeEventListener('mousedown', startDrag);
@@ -347,17 +369,54 @@ const exportEnv = () => {
 const allActions = ref<any>([])  //全部操作
 const allColumns = ref<any>([])  //全部列
 const regularItems = [
-    "刷新指纹",
-    "编辑环境",
-    "导出Profile",
-    "转移",
-    "复制环境ID",
-    "同步Cookie",
-    "运维授权",
-    "清除缓存",
-    "删除环境",
+    { id: 1, label: "编辑环境", active: (id: number) => simpleEditEnv(id) },
+    { id: 2, label: "导出Profile", active: (id: number) => simpleOp(exportEnvModel, id) },
+    { id: 3, label: "转移", active: (id: number) => simpleOp(transferEnvModel, id) },
+    { id: 4, label: "复制环境ID", active: (id: number) => copyEnvId(id) },
+    { id: 5, label: "同步Cookie", active: (id: number) => syncCookie(id) },
+    { id: 6, label: "运维授权", active: (id: number) => auth(id) },
+    { id: 7, label: "清除缓存", active: (id: number) => simpleOp(cleanCacheModel, id) },
+    { id: 8, label: "删除环境", active: (id: number) => simpleOp(delEnvModel, id) },
 ];
-
+//单个操作
+const simpleOp = (model: any, id: number) => {
+    messageData.value = originData.value.find((item: any) => item.id === id)
+    messageData.value = [messageData.value]
+    model.value = true
+}
+// 同步Cookie
+const syncCookie = (id: number) => {
+    console.log("同步Cookie:", id);
+    toast.warning("同步Cookie中")
+    setTimeout(() => {
+        toast.success("同步Cookie成功")
+    }, 1000)
+}
+//运维授权
+const auth = (id: number) => {
+    toast.warning("功能开发中")
+}
+// 复制
+const copyEnvId = async (id: number) => {
+    try {
+        // 查找对应的 uuid
+        const item = originData.value.find((item: any) => item.id === id);
+        if (!item) {
+            console.error("未找到对应的数据");
+            return;
+        }
+        const uuid = item.uuid;
+        // 使用 Clipboard API 复制到剪贴板
+        await navigator.clipboard.writeText(uuid);
+        // 提示用户复制成功
+        toast.success("UUID 已复制到剪贴板");
+    } catch (error) {
+        toast.error("复制失败，请重试"); // 提示用户复制失败
+    }
+};
+const simpleEditEnv = (id: number) => {
+    router.push({ path: '/environment/create/environment-advanced-create', query: { env: JSON.stringify(originData.value.find((item: any) => item.id === id)) } })
+}
 const operateSelect = (val: any) => {
     allActions.value = val
 }
@@ -373,16 +432,22 @@ const handleTableOperate = (index: number) => {
         chooseIndex.value = index
     }
 }
-
 const visibleActions = computed(() => {
     // console.log("??:", allActions.value);
     return allActions.value.filter((action: any) => action.visible)
 })
+// 屎山越叠越高
 //启动单个环境
 const startEnv = (uuid: string) => {
     browser_start(uuid).then((res: any) => {
-        toast.success(res.message)
-        browserStatusStore.updateStatus(uuid, true)
+        if (res.code == 1) {
+            browserStatusStore.updateStatus(uuid, true)
+            toast.success(res.message)
+        } else {
+            toast.error("启动失败，可能环境已被转移")
+        }
+    }).catch((res) => {
+        toast.error("启动失败：", res)
     })
 }
 // 单个关闭
@@ -395,10 +460,14 @@ const stopEnv = (uuid: string) => {
 // 批量启动
 const startAll = () => {
     browser_starts(selectedItems.value).then((res: any) => {
-        toast.success(res.message)
-        selectedItems.value.forEach((item: string) => {
-            browserStatusStore.updateStatus(item, true)
-        })
+        if (res.code == 1) {
+            toast.success(res.message)
+            selectedItems.value.forEach((item: string) => {
+                browserStatusStore.updateStatus(item, true)
+            })
+        } else {
+            toast.error("启动失败，可能环境已被转移")
+        }
     })
 }
 // 批量关闭
@@ -457,6 +526,14 @@ const editStartPage = () => {
 //编辑UA
 const editUA = () => {
     editUAModel.value = true
+}
+//修改分组
+const setGroups = (item: any) => {
+    console.log("修改分组：", selectedItems.value, item);
+    environment_batch_move_to_group(selectedItems.value, item.key).then((res: any) => {
+        toast.success(res.message)
+        flag.value = !flag.value
+    })
 }
 // 添加分组后重新做分组查询
 const groupList = ref<any>([])
@@ -523,12 +600,6 @@ const headOperate = ref([
     }
 ])
 
-// const statusText = {
-//     ready: '准备好',
-//     complete: '完成',
-//     not_ready: '未准备好'
-// }
-
 const tableData = ref<any>([])
 const filterData = computed(() => {
     // Filter the tableData based on the search query
@@ -552,7 +623,7 @@ const filterData = computed(() => {
     // Map the sorted and filtered data to include only visible columns
     return sortedData.map((item: any) => {
         const visibleKeys = ['ind', ...visibleColumns.value.map((col: any) => col.key)];
-        const filteredItem: Record<string, any> = { uuid: item.uuid };
+        const filteredItem: Record<string, any> = { uuid: item.uuid, id: item.id };
         visibleKeys.forEach((key: any) => {
             if (key !== 'id' && key in item) {
                 filteredItem[key] = item[key];
@@ -609,18 +680,21 @@ const toggleSelectItem = (envUuid: string) => {
 defineExpose({
     selectedItems
 })
+
+//赋值被选中的内容
+const getM = () => {
+    messageData.value = []
+    originData.value.forEach((item: any) => {
+        if (selectedItems.value.includes(item.uuid)) {
+            messageData.value.push(item)
+        }
+    })
+}
 //监听多选框的变化
 watch(
     () => selectedItems.value,
-    (newVal) => {
-        messageData.value = []
-        originData.value.forEach((item: any) => {
-            if (newVal.includes(item.uuid)) {
-                messageData.value.push(item)
-            }
-        })
-        // console.log("选择的数据：", messageData.value);
-
+    (_) => {
+        getM()
     },
     { deep: true } // 深度监听
 );
@@ -652,7 +726,6 @@ const getList = () => {
 const dealTableData = () => {
     let ind = 1;  //序号
     originData.value = JSON.parse(JSON.stringify(tableData.value));
-    // console.log("originData:", originData.value);
     // 将字段与表头对上
     tableData.value = tableData.value.map((item: any) => {
         return {
@@ -660,9 +733,9 @@ const dealTableData = () => {
             id: item.id,
             name: item.name,
             action: '启动',
-            status: '启动中',
+            status: '未启动',
             account: item.accounts.platform + item.accounts.platform_account,
-            proxy: item.proxy_username,
+            proxy: (item.proxy_host || '--') + ':' + (item.proxy_port || '--'),
             description: item.description,
             tab: item.tag_name,
             groupName: item.group_name,
@@ -670,6 +743,11 @@ const dealTableData = () => {
             lastOpen: '最后启动',
             uuid: item.uuid,
         }
+    })
+}
+const getStatus = () => {
+    tableData.value.map((item: any) => {
+        return browserStatusStore.getStatus(item.uuid) ? item.status = '已启动' : item.status = '未启动'
     })
 }
 onMounted(() => {

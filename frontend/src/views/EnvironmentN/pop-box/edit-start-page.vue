@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
+import Input from '@/components/input.vue';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Switch from '@/components/ui/switch/Switch.vue';
 
@@ -14,14 +16,25 @@ const cancel = () => {
     emit('close')
 }
 const commit = () => {
-    emit('close')
+    console.log("提交表单：", forms.value);
+    
+    // emit('close')
 }
+
+interface Form {
+    id: number;
+    value: string;
+}
+const forms = ref<Form[]>([
+    {id: 1, value: ''}
+])
 </script>
 
 <template>
     <Model :open="props.open" title="修改启动页" @close="emit('close')" class="min-w-[600px]">
 
-        <div class="w-full py-6 px-[30px] space-y-3">
+        <!-- 原版 -->
+        <!-- <div class="w-full py-6 px-[30px] space-y-3">
             <div>
                 <p class="flex items-center justify-between font-[600]"> <span>环境启动后将打开指定网页</span> <span
                         class="text-gray-400">已选择项目 1</span></p>
@@ -63,6 +76,18 @@ const commit = () => {
                     </div>
                 </div>
             </div>
+        </div> -->
+
+        <div class="w-full px-6 space-y-3">
+            <div><span class="text-gray-400">已选择项目 1</span>
+            </div>
+            <div class="flex w-full space-x-4">
+                <span class="font-[600]">启动打开网页</span>
+                <div class="flex-1 space-y-3">
+                    <Input v-for="item in forms" placeholder="输入网页地址" class="w-full" v-model="item.value"/>
+                </div>
+            </div>
+            <a href="#" class="text-blue-300 hover:text-blue-600 w-full flex justify-end" @click="forms.push({id: forms.length+1, value: ''})">添加</a>
         </div>
 
         <!-- footer -->

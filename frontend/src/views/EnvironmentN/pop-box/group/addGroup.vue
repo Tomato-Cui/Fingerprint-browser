@@ -30,14 +30,13 @@ const commit = () => {
         toast.success(res.message)
         emit('close')
         cleanFrom()
-        // window.location.reload()
         emit('searchGroup')
     })
 }
 </script>
 
 <template>
-    <Model :open="props.open" title="新建分组">
+    <Model :open="props.open" title="新建分组" @close="emit('close')">
         <div class="w-full space-y-3 px-6 py-4">
             <div class="flex w-full items-center">
                 <div>分组名称：</div>
@@ -49,7 +48,7 @@ const commit = () => {
             </div>
         </div>
         <!-- footer -->
-        <div class="w-full px-4 py-2 flex justify-end items-center border-t">
+        <div class="w-full px-4 py-2 flex justify-end items-center border-t space-x-4">
             <cancelButton @click="emit('close')">取消</cancelButton>
             <primaryButton @click="commit" @keydown.enter="commit">确定</primaryButton>
         </div>

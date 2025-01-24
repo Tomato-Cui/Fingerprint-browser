@@ -197,7 +197,7 @@ pub async fn advanced_modify(
 
     let json_response = client::REQUEST
         .put(
-            client::Client::build_url("/environments/advanced-modify")?,
+            client::Client::build_url("/environments/modify/advanced")?,
             &data,
         )
         .await?;

@@ -40,6 +40,7 @@
                   type="text"
                   v-model="loginForm.email"
                   required
+                  autocomplete="off"
                   class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
                   placeholder="请输入您的邮箱"
                 />
@@ -672,5 +673,10 @@ const registerSendCode = () => {
 input[type="password"]::-ms-reveal,
 input[type="password"]::-webkit-credentials-auto-fill-button {
   display: none;
+}
+
+input:-webkit-autofill {
+  background-color: transparent !important;
+  color: inherit !important;
 }
 </style>

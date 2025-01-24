@@ -92,6 +92,7 @@ import { XIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-vue-next'
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
+import { toast } from 'vue-sonner';
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -146,6 +147,7 @@ const cancel = () => {
     emit('close')
 }
 const commit = () => {
+    toast.success('清除缓存成功')
     emit('close')
 }
 </script>

@@ -3,10 +3,10 @@
         <!-- 内容区域 -->
         <div class="p-6 space-y-6">
             <!-- 警告信息 -->
-            <div class="bg-amber-50 rounded-lg p-4 flex items-center gap-3">
+            <div class="bg-amber-50 rounded-lg p-4 flex items-center gap-3 shadow-lg border border-amber-200">
                 <AlertCircleIcon class="w-5 h-5 text-amber-500 flex-shrink-0" />
                 <p class="text-sm text-gray-700">
-                    「转移」操作将把您选择环境的所有权限移交给另一个MoreLogin团队。此操作无法撤销，请谨慎操作！
+                    「转移」操作将把您选择环境的所有权限移交给另一个团队。此操作无法撤销，请谨慎操作！
                 </p>
             </div>
 
@@ -36,11 +36,11 @@
             <!-- 接收方邮箱 -->
             <div class="space-y-2 flex items-center">
                 <label class="text-gray-700 font-[600] w-[150px]">接受方邮箱地址</label>
-                <Input v-model="recipientEmail" type="email" placeholder="请输入接受方邮箱地址"/>
+                <Input v-model="recipientEmail" type="email" placeholder="请输入接受方邮箱地址" />
             </div>
 
             <!-- 验证码 -->
-            <div class="flex">
+            <!-- <div class="flex">
                 <label class="text-gray-700 font-[600] w-[150px]">验证邮箱</label>
                 <div class="flex-1">
                     <div class="text-sm text-gray-600">
@@ -55,7 +55,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <!-- 底部按钮 -->
@@ -72,11 +72,14 @@ import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
 import Input from '@/components/input.vue';
-import { XIcon, AlertCircleIcon } from 'lucide-vue-next'
+import { AlertCircleIcon } from 'lucide-vue-next'
+import { environment_transfer_history_batch_create } from '@/commands/environment-transfer-history';
+import { toast } from 'vue-sonner';
 
 const props = defineProps({
     open: Boolean,
     data: Array,
+    isChange: Boolean,
     selectedCount: {
         type: Number,
         default: 1
@@ -87,7 +90,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['close', 'confirm'])
+const emit = defineEmits(['close', 'confirm', 'update:isChange'])
 
 const syncProxy = ref(false)
 const recipientEmail = ref('')
@@ -116,6 +119,15 @@ const cancel = () => {
     emit('close')
 }
 const commit = () => {
-    emit('close')
+    let uuids = props.data?.map((e: any) => e.uuid)
+    environment_transfer_history_batch_create(uuids as string[], recipientEmail.value).then((res: any) => {
+        if (res.code === 1) {
+            toast.success(res.message)
+            emit('update:isChange')
+            emit('close')
+        }else{
+            toast.error(res.message)
+        }
+    })
 }
 </script>

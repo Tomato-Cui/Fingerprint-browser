@@ -84,6 +84,7 @@ export interface FingerprintParams {
 }
 
 export interface EnvironmentAdvancedForm {
+    id?: number;
     name: string;
     description: string;
     browser: RadioInterface;
@@ -136,6 +137,112 @@ export const useEnvironmentAdvancedFormStore = defineStore('environment-advanced
         fingerprint: defaultFingerPrint as any,
     });
 
+    //重置表单
+    const resetForm = () => {
+        
+        forms.value = {
+            name: '',
+            description: '',
+            browser: { value: 'chrome' },
+            ua: generateRandomUserAgent(),
+            os: { value: 'Windows' },
+            encryPtSwitch: { value: "关闭" },
+            numbers: 1,
+            group: 0,
+            tag: 0,
+            use_proxy: false,
+            proxy: {
+                kind: 'NO Proxy (本地直连)',
+                host: '',
+                port: '',
+                username: '',
+                password: '',
+            },
+            account: {
+                platform: '',
+                platform_url: '',
+                platform_account: '',
+                platform_password: '',
+                platform_description: '',
+            },
+            cookie: '',
+            setting: {
+                startedBrowserDefaultUrl: '0',
+                startedBrowserAccountUrlIsOpen: false,
+                startedBrowserStayCheckHome: false,
+            },
+            fingerprint: {
+                timezone: {
+                    value: 'ip', // value 的类型是 'ip' | 'custom'
+                },
+                webRTC: {
+                    value: 'random', // value 的类型是 'real' | 'random' | 'manual' | 'disabled'
+                },
+                geolocation: {
+                    value: false, // value 的类型是 boolean
+                },
+                language: {
+                    value: 'match', // value 的类型是 'match' | 'custom'
+                },
+                resolution: {
+                    value: 'real', // value 的类型是 'real' | 'custom'
+                },
+                fonts: {
+                    value: 'real', // value 的类型是 'real' | 'custom'
+                },
+                canvas: {
+                    value: 'noise', // value 的类型是 'noise' | 'real'
+                },
+                webGL: {
+                    value: 'noise',
+                },
+                webGPU: {
+                    value: 'real', // value 的类型是 'real' | 'disabled'
+                },
+                audioContext: {
+                    value: 'noise', // value 的类型是 'noise' | 'real'
+                },
+                mediaDevices: {
+                    value: 'noise', // value 的类型是 'noise' | 'real'
+                },
+                clientRects: {
+                    value: 'noise', // value 的类型是 'noise' | 'real'
+                },
+                speechVoices: {
+                    value: 'random', // value 的类型是 'random' | 'real'
+                },
+                hardwareConcurrency: {
+                    value: '1', // value 的类型是 number
+                },
+                deviceMemory: {
+                    value: '1', // value 的类型是 '8GB' | '4GB' | '2GB' | '1GB'
+                },
+                deviceName: {
+                    value: 'real', // value 的类型是 'custom' | 'real'
+                },
+                macAddress: {
+                    value: 'real', // value 的类型是 'custom' | 'real'
+                },
+                doNotTrack: {
+                    value: true, // value 的类型是 boolean
+                },
+                bluetooth: {
+                    value: 'random', // value 的类型是 'random' | 'real'
+                },
+                battery: {
+                    value: 'random', // value 的类型是 'random' | 'real'
+                },
+                portScanning: {
+                    value: true, // value 的类型是 boolean
+                },
+                startupParams: {
+                    value: '', // value 的类型是 string
+                },
+            },
+        };
+    };
+
+
     const getFingerprintData = () => {
         let fingerprint = forms.value.fingerprint as any;
         const extractedValues = Object.keys(fingerprint).reduce((acc: any, key: any) => {
@@ -162,7 +269,7 @@ export const useEnvironmentAdvancedFormStore = defineStore('environment-advanced
     }
 
     return {
-        forms, randomUA, getData, defaultFingerprintHandle,
+        forms, randomUA, getData, defaultFingerprintHandle, resetForm
     }
 });
 

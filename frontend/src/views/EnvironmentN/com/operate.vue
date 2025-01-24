@@ -39,7 +39,6 @@
                     </label>
                 </div>
             </div>
-            {{ props.groupData }}
             <div class="mt-4 flex justify-end space-x-2">
                 <button @click="cancelSet" class="rounded-md px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">
                     取消
@@ -55,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
+import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits, computed } from 'vue'
 import { AltArrowDownIcon, RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
 import { environment_group_query } from '@/commands/environment-group'
 
@@ -76,7 +75,8 @@ const allActions = ref([
     { key: 'stop', label: '停止', icon: StopCircleIcon, visible: true, action: () => emit('stopAll') },
     { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ key: 'addTab', label: '新增标签', active: () => emit('addLabel') }, { key: 'reset', label: '重设标签', active: () => emit('resetLabel') }, { key: 'clean', label: '清空标签', active: () => emit('cleanLabel') }] },
     { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ key: 'addGroup', label: '增加分组', active: () => emit('addGroup') }] },
-    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: void (0), children: [{ key: 'export1', label: '导出已选', active: () => emit('exportEnv') }, { key: 'export2', label: '导出最近50条', active: () => emit('exportEnv') }] },
+    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: () => emit('exportEnv')},
+    // , children: [{ key: 'export1', label: '导出已选', active: () => emit('exportEnv') }, { key: 'export2', label: '导出最近50条', active: () => emit('exportEnv') }] 
     { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true, action: () => emit('editStartPage') },
     { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true, action: () => emit('editUa') },
     { key: 'proxy', label: '修改代理', icon: PlateIcon, visible: true, action: () => emit('editProxy') },
@@ -87,16 +87,24 @@ const allActions = ref([
     { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: () => emit('delEnv') },
 ])
 
-watch(() => props.groupData, (newVal) => {
-    if (!newVal)return;
-    if (newVal.length === 0) return;
+watch(() => props.groupData.length, (newVal) => {
+    if (!props.groupData) return;
+    if (props.groupData.length === 0) return;
     allActions.value = allActions.value.map((item: any) => {  //找到分组的操作
         if (item.key === 'group') {
-            return { ...item, children: [...newVal] }
+            //处理groupData的字段
+            let list = props.groupData.map((e: any) => {
+                return {
+                    key: e.id,
+                    label: e.value,
+                }
+            })
+            return { ...item, children: [...list, { key: 'addGroup', label: '增加分组', active: () => emit('addGroup') }] }
         } else {
             return item
         }
     })
+    emit('select', allActions.value)
 })
 
 const copyActions = ref([])

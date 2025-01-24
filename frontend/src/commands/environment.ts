@@ -82,6 +82,7 @@ export interface EnvironmentFingerprint {
 }
 
 export interface EnvironmentDetailWithAdvanceCreateRequest {
+    id?: number;
     uuid?: string;
     team_id?: number;
     proxy_id?: number;
