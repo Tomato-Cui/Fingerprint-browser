@@ -1,7 +1,7 @@
 <template>
-    <div class="rounded-xl flex-1 px-4 py-2 w-full h-full flex flex-col">
+    <div class="rounded-xl flex-1 px-4 w-full h-full flex flex-col">
         <!-- Header Section -->
-        <header class="mb-4 flex items-c enter justify-between h-[40px]">
+        <header class="flex items-c enter justify-between h-[40px]">
             <div class="flex items-center space-x-4 w-auto">
                 <h1 class="text-xl font-semibold w-[105px]">环境管理</h1>
                 <!-- <div class="w-full">

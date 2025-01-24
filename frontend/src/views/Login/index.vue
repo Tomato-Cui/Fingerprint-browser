@@ -186,7 +186,6 @@
                   </svg>
                 </div>
               </div>
-              -->
 
               <div>
                 <label class="text-gray-800 text-sm mb-2 block">邮箱</label>
@@ -598,8 +597,7 @@ const handleRegister = () => {
   register(
     registerForm.value.email,
     registerForm.value.code,
-    // registerForm.value.username,
-    "",
+    registerForm.value.username,
     registerForm.value.password
   )
     .then((res) => {
