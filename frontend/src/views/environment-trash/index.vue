@@ -93,14 +93,13 @@ const loadData = () => {
         proxy: item.proxy_host ? item.proxy_host + ":" + item.proxy_port : "--",
         account: item.accounts.platform || "--",
         description: item.description || "--",
-        tag: item.tag_name || "abc",
+        tag: item.tag_name || "--",
         group: item.group_name || "--",
         message: {
           from: item.delete_from_user_nickname,
           deleted_at: item.deleted_at,
         },
       }));
-      data.value[0].tag = "1";
       dataCache.value = JSON.parse(JSON.stringify(data.value));
     }
   );

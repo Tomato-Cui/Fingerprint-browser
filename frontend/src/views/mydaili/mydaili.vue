@@ -154,7 +154,7 @@ const saveModal = async () => {
   console.log("currentId.value", currentId.value);
   console.log("payload", payload);
 
-  await environment_proxies_modify(currentId.value.id, payload);
+  await environment_proxies_modify(payload);
   isOpen.value = false;
   loadData(pagination.pageIndex, pagination.pageSize);
 };
