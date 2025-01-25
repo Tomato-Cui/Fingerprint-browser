@@ -14,29 +14,8 @@ const updateStore = useUpdateStore();
 onMounted(async () => {
   const update = await check();
   if (!update || !update.available) return;
-
+  versionInfo.value = update;
   updateStore.updateDialogOpen();
-
-  let downloaded = 0;
-  let contentLength = 0;
-
-  try {
-    await update.download((event) => {
-      switch (event.event) {
-        case "Started":
-          contentLength = event.data.contentLength as number;
-          break;
-        case "Progress":
-          downloaded += event.data.chunkLength;
-          break;
-        case "Finished":
-          break;
-      }
-    });
-
-    versionInfo.value = update;
-    contentLength;
-  } catch {}
 });
 
 watch(versionInfo, () => {
@@ -48,9 +27,6 @@ const installHanle = async () => {
   const update = await check();
   if (!update || !update.available) return;
 
-  versionInfo.value = update;
-  updateStore.updateDialogOpen();
-
   let downloaded = 0;
   let contentLength = 0;
 
@@ -68,7 +44,6 @@ const installHanle = async () => {
       }
     });
 
-    versionInfo.value = update;
     contentLength;
   } catch {}
 
