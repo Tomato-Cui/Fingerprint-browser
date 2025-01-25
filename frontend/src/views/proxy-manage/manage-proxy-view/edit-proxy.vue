@@ -1,30 +1,41 @@
 <script setup lang="ts">
+import Model from "@/components/model/model.vue";
 import { EyeIcon, EyeOffIcon } from "lucide-vue-next";
-import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
-import router from "@/router";
-import { environment_proxies_create } from "@/commands/environment-proxy";
-
-import { ref, watch } from "vue";
-import { ip_info } from "@/commands";
+import { environment_proxies_modify } from "@/commands/environment-proxy";
+import { ref } from "vue";
 import { toast } from "vue-sonner";
+import { ip_info } from "@/commands";
 
-interface Props {
-  modelValue?: "warning" | "block";
-}
+// interface Props {
+//   modelValue?: "warning" | "block";
+// }
 
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: "warning",
+// const props = withDefaults(defineProps<Props>(), {
+//   modelValue: "warning",
+// });
+
+const props = defineProps({
+  editProxy: {
+    type: Boolean,
+    default: false,
+  },
+  proxy: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
-const emit = defineEmits<{
-  (e: "update:modelValue", value: "warning" | "block"): void;
-}>();
+// const emit = defineEmits<{
+//   (e: "update:modelValue", value: "warning" | "block"): void;
+// }>();
 
-const selected = ref<"warning" | "block">(props.modelValue);
+const emit = defineEmits(["update:editProxy"]);
 
-watch(selected, (newValue) => {
-  emit("update:modelValue", newValue);
-});
+// const selected = ref<"warning" | "block">(props.modelValue);
+
+// watch(selected, (newValue) => {
+//   emit("update:modelValue", newValue);
+// });
 
 interface FormData {
   proxyType: string;
@@ -49,6 +60,7 @@ const formData = ref<FormData>({
 });
 
 const payload = {
+  id: props.proxy.id,
   kind: formData.value.proxyType,
   host: formData.value.ipQueryChannel,
   port: formData.value.proxyServer,
@@ -58,73 +70,75 @@ const payload = {
   ipChangeAction: formData.value.ipChangeAction,
 };
 
-const handleCheckProxy = async () => {
-  // Split proxyServer into host and port
-  const [host, port] = formData.value.proxyServer.split(":");
-
-  const res = await ip_info(
-    formData.value.proxyType,
-    host,
-    port,
-    formData.value.proxyAccount,
-    formData.value.proxyPassword
-  );
-  if (res.code == 1) {
-    toast.success("代理检测成功");
-  } else {
-    toast.warning(res.message);
-  }
-
-  console.log("res", res);
-};
 const handleSubmit = () => {
-  // Validate IP address and port format
+  // Validate IP address format
   const ipPortRegex = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/;
   if (!ipPortRegex.test(formData.value.proxyServer)) {
     alert("请输入有效的IP地址和端口，格式如: 192.168.1.1:7890");
     return;
   }
 
-  // Additional IP validation
-  const [ip] = formData.value.proxyServer.split(":");
-  const ipParts = ip.split(".");
-  const isValidIP = ipParts.every((part) => {
-    const num = parseInt(part);
-    return num >= 0 && num <= 255;
-  });
-
-  // Split proxyServer into host and port
-  const [host, port] = formData.value.proxyServer.split(":");
-  payload.host = host;
-  payload.port = port;
-  payload.kind = formData.value.proxyType;
-  payload.username = formData.value.proxyAccount;
-  payload.password = formData.value.proxyPassword;
-
-  if (!isValidIP) {
-    alert("IP地址的每个部分必须在0-255之间");
+  // Validate proxy account length
+  if (
+    !formData.value.proxyAccount ||
+    formData.value.proxyAccount.length < 1 ||
+    formData.value.proxyAccount.length > 8
+  ) {
+    alert("代理账号长度必须在1-8个字符之间");
     return;
   }
 
-  environment_proxies_create(payload);
+  // const id = Number(proxy.proxy.id);
 
-  // Add your form submission logic here
-  router.push("/private-proxy");
+  payload.kind = formData.value.proxyType;
+  const [host, port] = formData.value.proxyServer.split(":");
+  payload.host = host;
+  payload.port = port;
+  payload.username = formData.value.proxyAccount;
+  payload.password = formData.value.proxyPassword;
+  payload.ipMonitoring = formData.value.ipMonitoring;
+  payload.ipChangeAction = formData.value.ipChangeAction;
+
+  // Pass both id and payload to environment_proxies_modify
+  environment_proxies_modify(payload); // TODO: Replace 0 with actual proxy ID
+  toast.success("修改成功");
+  emit("update:editProxy", false);
+};
+
+const handleCheckProxy = async () => {
+  // Split proxyServer into host and port
+  const [host, port] = formData.value.proxyServer.split(":");
+
+  await ip_info(
+    formData.value.proxyType,
+    host,
+    port,
+    formData.value.proxyAccount,
+    formData.value.proxyPassword
+  );
+
+  toast.success("代理检测成功");
 };
 </script>
 
 <template>
-  <Layout>
-    <template v-slot:new-proxy-content>
+  <Model
+    class=""
+    title="编辑代理"
+    :open="props.editProxy"
+    @close="() => emit('update:editProxy', false)"
+  >
+    <div class="flex flex-col gap-y-4 mb-2">
+      <!-- Form -->
       <div
         @submit.prevent="handleSubmit"
-        class="flex flex-col justify-start pt-3 space-y-6 w-full h-full"
+        class="flex flex-col justify-start pt-3 space-y-6 border border-yellow-500"
       >
         <div
           class="flex flex-col justify-start px-12 pt-3 space-y-6 w-full h-full"
         >
           <!-- Proxy Type -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -141,7 +155,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- IP Query Channel -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -158,7 +172,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- Proxy Server -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -168,29 +182,29 @@ const handleSubmit = () => {
             <input
               v-model="formData.proxyServer"
               type="text"
-              placeholder="请输入代理服务器地址，格式如: 192.168.1.1:7890"
+              placeholder="请输入代理服务器地址"
               class="flex-1 p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <!-- Proxy Account -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
               代理账号
+              <span class="text-red-500">*</span>
             </label>
             <input
               v-model="formData.proxyAccount"
               type="text"
-              :maxlength="8"
               placeholder="请输入代理账号"
               class="flex-1 p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <!-- Proxy Password -->
-          <div class="flex gap-4 items-start w-[500px]">
+          <div class="flex gap-4 items-start w-[400px]">
             <label
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
@@ -215,7 +229,7 @@ const handleSubmit = () => {
           </div>
 
           <!-- IP Change Monitoring -->
-          <div class="flex gap-4 w-[500px]">
+          <div class="flex gap-4 w-[400px]">
             <div class="flex flex-row items-end">
               <label
                 class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
@@ -246,7 +260,7 @@ const handleSubmit = () => {
           <!-- Additional IP Monitoring Settings -->
           <div
             v-if="formData.ipMonitoring"
-            class="flex flex-row mt-4 space-y-4 w-[500px]"
+            class="flex flex-row mt-4 space-y-4 w-[400px]"
           >
             <div class="flex flex-row">
               <div class="flex items-start">
@@ -257,7 +271,35 @@ const handleSubmit = () => {
                 >
               </div>
 
-              <div class="flex flex-col gap-y-3 justify-start w-[95px]">
+              <!-- <div class="flex flex-col gap-2 ml-8">
+                <label class="flex gap-2 items-center">
+                  <input
+                    type="radio"
+                    v-model="formData.ipChangeAction"
+                    value="warning"
+                    class="w-4 h-4 rounded-full border-2 border-gray-400 appearance-none cursor-pointer checked:bg-blue-500 checked:ring-0 focus:outline-none"
+                  />
+                  <span
+                    class="font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
+                    >警告</span
+                  >
+                </label>
+
+                <label class="flex gap-2 items-center">
+                  <input
+                    type="radio"
+                    v-model="formData.ipChangeAction"
+                    value="block"
+                    class="w-4 h-4 rounded-full border-2 border-gray-400 appearance-none cursor-pointer checked:bg-blue-500 checked:ring-0 focus:outline-none"
+                  />
+                  <span
+                    class="font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
+                    >禁止访问</span
+                  >
+                </label>
+              </div> -->
+
+              <div class="flex flex-col ml-4 gap-y-3 justify-start w-[95px]">
                 <label class="flex items-start cursor-pointer">
                   <div
                     class="flex relative justify-center items-center w-6 h-6"
@@ -288,7 +330,10 @@ const handleSubmit = () => {
                       "
                     ></div>
                   </div>
-                  <span class="text-[15px] text-gray-800">警告</span>
+                  <span
+                    class="flex gap-1 w-24 ml-2 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
+                    >警告</span
+                  >
                 </label>
 
                 <label class="flex items-start cursor-pointer">
@@ -321,7 +366,10 @@ const handleSubmit = () => {
                       "
                     ></div>
                   </div>
-                  <span class="text-[15px] text-gray-800">禁止访问</span>
+                  <span
+                    class="flex gap-1 ml-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
+                    >禁止访问</span
+                  >
                 </label>
               </div>
             </div>
@@ -334,20 +382,29 @@ const handleSubmit = () => {
         >
           <button
             type="button"
-            class="px-6 py-2 rounded-lg border hover:bg-gray-50"
+            class="py-2 text-blue-500 rounded-lg"
             @click="handleCheckProxy"
           >
             代理检测
           </button>
+
+          <button
+            type="button"
+            @click="() => emit('update:editProxy', false)"
+            class="px-6 py-2 rounded-lg border hover:bg-gray-50"
+          >
+            取消
+          </button>
+
           <button
             type="submit"
-            class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            class="px-6 py-2 mr-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             @click="handleSubmit"
           >
-            确认添加
+            确认
           </button>
         </div>
       </div>
-    </template>
-  </Layout>
+    </div>
+  </Model>
 </template>

@@ -144,6 +144,7 @@ const closeModal = () => {
 
 const saveModal = async () => {
   const payload = {
+    id: currentId.value.id,
     kind: form.proxyService,
     host: form.host,
     port: form.port,
@@ -154,7 +155,7 @@ const saveModal = async () => {
   console.log("currentId.value", currentId.value);
   console.log("payload", payload);
 
-  await environment_proxies_modify(currentId.value.id, payload);
+  await environment_proxies_modify(payload);
   isOpen.value = false;
   loadData(pagination.pageIndex, pagination.pageSize);
 };
@@ -171,7 +172,6 @@ const toggleDropdown = (id: any) => {
     activeDropdown.value = id;
   }
 };
-
 
 const deleteOpenHandle = async (id: number) => {
   await environment_proxies_delete(id);
@@ -262,42 +262,55 @@ const paginationClickHandle = (index: number) => {
   pagination.pageIndex = index;
 };
 
-const groupSelect = ref("")
+const groupSelect = ref("");
 /**
  * 查询分组下代理
- * @param value 
+ * @param value
  */
 const groupSelectHandle = (value: string) => {
   groupSelect.value = value;
 };
-watch(() => groupSelect.value, (v) => {
-  console.log("groupSelect:", v);
-  if (v != '0') {
-    environment_proxies_query_by_group(+v, pagination.pageIndex, pagination.pageSize).then((res) => {
-      pagination.total = res.data.total;
-      data.value = res.data.data;
-    });
-  }else{
-    loadData(pagination.pageIndex, pagination.pageSize);
+watch(
+  () => groupSelect.value,
+  (v) => {
+    console.log("groupSelect:", v);
+    if (v != "0") {
+      environment_proxies_query_by_group(
+        +v,
+        pagination.pageIndex,
+        pagination.pageSize
+      ).then((res) => {
+        pagination.total = res.data.total;
+        data.value = res.data.data;
+      });
+    } else {
+      loadData(pagination.pageIndex, pagination.pageSize);
+    }
   }
-});
+);
 </script>
 
 <template>
   <div class="flex flex-col p-4 bg-gray-50 h-main">
     <!-- Table Container with fixed height and scroll -->
-    <div class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow" style="padding: 20px">
+    <div
+      class="flex overflow-hidden flex-col flex-1 bg-white rounded-lg shadow"
+      style="padding: 20px"
+    >
       <!-- Header Actions -->
       <div class="flex justify-between mb-6">
         <div class="flex gap-4">
           <GroupSelect @select="groupSelectHandle" />
-          <button @click="adddaili"
-            class="flex gap-2 items-center px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+          <button
+            @click="adddaili"
+            class="flex gap-2 items-center px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          >
             <UserPlusIcon class="w-5 h-5" />
             添加代理
           </button>
           <button
-            class="flex gap-2 items-center px-4 py-2 text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-50">
+            class="flex gap-2 items-center px-4 py-2 text-blue-600 rounded-lg border border-blue-600 hover:bg-blue-50"
+          >
             <SearchIcon class="w-5 h-5" />
             检查代理
           </button>
@@ -305,25 +318,40 @@ watch(() => groupSelect.value, (v) => {
         <div class="flex gap-4">
           <Popover v-model:open="groupisOpen">
             <PopoverTrigger as-child>
-              <TooltipButton title="分组管理"
-                class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500">
+              <TooltipButton
+                title="分组管理"
+                class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
+              >
                 <groupIcons class="w-5 h-5" />
               </TooltipButton>
             </PopoverTrigger>
-            <PopoverContent class="p-6 w-48 text-sm min-w-48" align="end" style="min-width: 500px">
+            <PopoverContent
+              class="p-6 w-48 text-sm min-w-48"
+              align="end"
+              style="min-width: 500px"
+            >
               <div class="w-full">
                 <div class="flex justify-between items-center mb-4">
                   <h3 class="text-lg font-medium">分组管理</h3>
-                  <button @click="closePopover" class="text-gray-400 hover:text-gray-600">
+                  <button
+                    @click="closePopover"
+                    class="text-gray-400 hover:text-gray-600"
+                  >
                     <XIcon class="w-5 h-5" />
                   </button>
                 </div>
 
                 <div class="flex gap-2 mb-4">
-                  <input v-model="newGroupName" type="text" placeholder="请输入分组名"
-                    class="flex-1 px-3 py-2 text-sm rounded-md border focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                  <button @click="addGroup"
-                    class="flex gap-1 items-center px-3 py-2 text-sm text-gray-600 rounded-md border hover:border-blue-500 hover:text-blue-500">
+                  <input
+                    v-model="newGroupName"
+                    type="text"
+                    placeholder="请输入分组名"
+                    class="flex-1 px-3 py-2 text-sm rounded-md border focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    @click="addGroup"
+                    class="flex gap-1 items-center px-3 py-2 text-sm text-gray-600 rounded-md border hover:border-blue-500 hover:text-blue-500"
+                  >
                     <PlusIcon class="w-4 h-4" />
                     添加
                   </button>
@@ -331,20 +359,38 @@ watch(() => groupSelect.value, (v) => {
 
                 <div class="max-h-[300px] overflow-y-auto">
                   <div class="grid grid-cols-3 gap-3">
-                    <div v-for="(group, index) in groups" :key="index"
+                    <div
+                      v-for="(group, index) in groups"
+                      :key="index"
                       class="relative p-2 text-sm rounded-md border group hover:border-blue-500"
-                      :class="{ 'border-blue-500': editingIndex === index }">
-                      <input v-if="editingIndex === index" v-model="editingName" @blur="saveEdit(groups, index)"
-                        @keyup.enter="saveEdit(groups, index)" ref="editInput" class="w-full text-sm outline-none" />
+                      :class="{ 'border-blue-500': editingIndex === index }"
+                    >
+                      <input
+                        v-if="editingIndex === index"
+                        v-model="editingName"
+                        @blur="saveEdit(groups, index)"
+                        @keyup.enter="saveEdit(groups, index)"
+                        ref="editInput"
+                        class="w-full text-sm outline-none"
+                      />
                       <span v-else>{{ (group as any).name }}</span>
 
-                      <div class="hidden absolute right-1 top-1/2 gap-1 items-center -translate-y-1/2 group-hover:flex"
-                        :class="{ '!flex': editingIndex === index }">
-                        <button title="修改" @click="startEdit(groups, index)"
-                          class="p-1 text-blue-500 hover:text-blue-600">
+                      <div
+                        class="hidden absolute right-1 top-1/2 gap-1 items-center -translate-y-1/2 group-hover:flex"
+                        :class="{ '!flex': editingIndex === index }"
+                      >
+                        <button
+                          title="修改"
+                          @click="startEdit(groups, index)"
+                          class="p-1 text-blue-500 hover:text-blue-600"
+                        >
                           <PencilIcon class="w-4 h-4" />
                         </button>
-                        <button title="删除" @click="deleteGroup(index)" class="p-1 text-blue-500 hover:text-blue-600">
+                        <button
+                          title="删除"
+                          @click="deleteGroup(index)"
+                          class="p-1 text-blue-500 hover:text-blue-600"
+                        >
                           <TrashIcon class="w-4 h-4" />
                         </button>
                       </div>
@@ -353,28 +399,36 @@ watch(() => groupSelect.value, (v) => {
                 </div>
 
                 <div class="flex gap-3 justify-center pt-4 mt-4 border-t">
-                  <button @click="confirm"
-                    class="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                  <button
+                    @click="confirm"
+                    class="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  >
                     确定
                   </button>
-                  <button @click="closePopover"
-                    class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200">
+                  <button
+                    @click="closePopover"
+                    class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
                     取消
                   </button>
                 </div>
               </div>
             </PopoverContent>
-
-
           </Popover>
 
-          <TooltipButton title="多选删除" @click="deleteAll()"
-            class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500">
+          <TooltipButton
+            title="多选删除"
+            @click="deleteAll()"
+            class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
+          >
             <TrashIcon class="w-5 h-5" />
           </TooltipButton>
 
-          <TooltipButton title="设置" @click="openSetModal"
-            class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500">
+          <TooltipButton
+            title="设置"
+            @click="openSetModal"
+            class="p-2 rounded hover:bg-gray-0 border-[1px] border-gray-300 hover:border-[1px] hover:border-blue-600 active:bg-blue-50 hover:text-blue-500"
+          >
             <SettingsIcon class="w-5 h-5" />
           </TooltipButton>
         </div>
@@ -386,7 +440,12 @@ watch(() => groupSelect.value, (v) => {
           <thead class="sticky top-0 z-10 bg-gray-50">
             <tr>
               <th class="p-4 text-left">
-                <input type="checkbox" class="rounded border-gray-300" v-model="selectAll" @change="toggleAll" />
+                <input
+                  type="checkbox"
+                  class="rounded border-gray-300"
+                  v-model="selectAll"
+                  @change="toggleAll"
+                />
               </th>
               <th class="p-4 text-sm font-medium text-left text-gray-600">
                 序号
@@ -413,10 +472,19 @@ watch(() => groupSelect.value, (v) => {
           </thead>
 
           <tbody>
-            <tr v-for="(row, index) in data" :key="index" class="hover:bg-blue-100 h-[20px]"
-              :class="{ 'bg-blue-50': row.selected }" @click="toggleRowSelection(row)">
+            <tr
+              v-for="(row, index) in data"
+              :key="index"
+              class="hover:bg-blue-100 h-[20px]"
+              :class="{ 'bg-blue-50': row.selected }"
+              @click="toggleRowSelection(row)"
+            >
               <td class="p-4 text-left">
-                <input type="checkbox" class="rounded border-gray-300" v-model="row.selected" />
+                <input
+                  type="checkbox"
+                  class="rounded border-gray-300"
+                  v-model="row.selected"
+                />
               </td>
 
               <td class="p-4 text-sm text-left">
@@ -433,8 +501,10 @@ watch(() => groupSelect.value, (v) => {
                   <!-- 更多按钮 -->
                   <More>
                     <MoreTrigger>
-                      <MoreVerticalIcon @click="toggleDropdown(row.id)"
-                        class="w-4 h-4 text-gray-600 cursor-pointer hover:text-gray-900" />
+                      <MoreVerticalIcon
+                        @click="toggleDropdown(row.id)"
+                        class="w-4 h-4 text-gray-600 cursor-pointer hover:text-gray-900"
+                      />
                     </MoreTrigger>
                     <MoreContent>
                       <MoreItem class="cursor-pointer" @click="openModal(row)">
@@ -443,7 +513,10 @@ watch(() => groupSelect.value, (v) => {
                       <MoreItem class="cursor-pointer">
                         <SquarePenIcon class="w-4 h-4" />检查
                       </MoreItem>
-                      <MoreItem class="cursor-pointer" @click="deleteOpenHandle(row.id)">
+                      <MoreItem
+                        class="cursor-pointer"
+                        @click="deleteOpenHandle(row.id)"
+                      >
                         <Trash2Icon class="w-4 h-4" />删除
                       </MoreItem>
                     </MoreContent>
@@ -462,38 +535,64 @@ watch(() => groupSelect.value, (v) => {
             共{{ pagination.total }}条.
           </div>
           <div class="space-x-2">
-            <Pagination :total="pagination.total" :itemsPerPage="pagination.pageSize" :default-page="1">
-              <PaginationList v-slot="{ items }" class="flex gap-1 items-center">
+            <Pagination
+              :total="pagination.total"
+              :itemsPerPage="pagination.pageSize"
+              :default-page="1"
+            >
+              <PaginationList
+                v-slot="{ items }"
+                class="flex gap-1 items-center"
+              >
                 <PaginationFirst @click="() => paginationClickHandle(0)" />
-                <PaginationPrev @click="() => paginationClickHandle(pagination.pageIndex - 1)" />
+                <PaginationPrev
+                  @click="() => paginationClickHandle(pagination.pageIndex - 1)"
+                />
 
                 <template v-for="(item, index) in items">
-                  <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-                    <Button :class="cn(
-                      'w-10 h-10 p-0',
-                      item.value === pagination.pageIndex + 1
-                        ? 'hover:bg-blue-700'
-                        : 'hover:bg-slate-100'
-                    )
-                      " @click="() => {
-                        paginationClickHandle(item.value - 1);
-                      }
-                        " :variant="item.value === pagination.pageIndex + 1
+                  <PaginationListItem
+                    v-if="item.type === 'page'"
+                    :key="index"
+                    :value="item.value"
+                    as-child
+                  >
+                    <Button
+                      :class="
+                        cn(
+                          'w-10 h-10 p-0',
+                          item.value === pagination.pageIndex + 1
+                            ? 'hover:bg-blue-700'
+                            : 'hover:bg-slate-100'
+                        )
+                      "
+                      @click="
+                        () => {
+                          paginationClickHandle(item.value - 1);
+                        }
+                      "
+                      :variant="
+                        item.value === pagination.pageIndex + 1
                           ? 'default'
                           : 'outline'
-                          ">
+                      "
+                    >
                       {{ item.value }}
                     </Button>
                   </PaginationListItem>
                   <PaginationEllipsis v-else :key="item.type" :index="index" />
                 </template>
 
-                <PaginationNext @click="() => paginationClickHandle(pagination.pageIndex + 1)" />
-                <PaginationLast @click="() =>
-                  paginationClickHandle(
-                    Math.ceil(pagination.total / pagination.pageSize) - 1
-                  )
-                  " />
+                <PaginationNext
+                  @click="() => paginationClickHandle(pagination.pageIndex + 1)"
+                />
+                <PaginationLast
+                  @click="
+                    () =>
+                      paginationClickHandle(
+                        Math.ceil(pagination.total / pagination.pageSize) - 1
+                      )
+                  "
+                />
               </PaginationList>
             </Pagination>
           </div>
@@ -503,12 +602,18 @@ watch(() => groupSelect.value, (v) => {
 
     <!-- Add Agent Modal -->
     <Teleport to="body">
-      <div v-if="showSetModal" class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-30">
+      <div
+        v-if="showSetModal"
+        class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-30"
+      >
         <div class="bg-white rounded-lg w-[680px] shadow-xl">
           <!-- Modal Header -->
           <div class="flex justify-between items-center p-4 border-b">
             <h3 class="text-xl font-medium">设置</h3>
-            <button @click="showSetModal = false" class="text-gray-400 hover:text-gray-600">
+            <button
+              @click="showSetModal = false"
+              class="text-gray-400 hover:text-gray-600"
+            >
               <XIcon class="w-5 h-5" />
             </button>
           </div>
@@ -520,22 +625,38 @@ watch(() => groupSelect.value, (v) => {
 
               <div class="space-y-3" style="margin-top: 30px">
                 <label class="flex gap-3 items-center">
-                  <input type="radio" name="agentType" value="random" v-model="selectedAgentType"
-                    class="w-4 h-4 text-blue-600" />
+                  <input
+                    type="radio"
+                    name="agentType"
+                    value="random"
+                    v-model="selectedAgentType"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <div class="flex">
                     <div class="font-medium">随机全部代理</div>
-                    <div class="text-sm text-gray-500" style="margin-left: 20px">
+                    <div
+                      class="text-sm text-gray-500"
+                      style="margin-left: 20px"
+                    >
                       在已添加的全部代理中随机选择一个代理
                     </div>
                   </div>
                 </label>
 
                 <label class="flex gap-3 items-center" style="margin-top: 20px">
-                  <input type="radio" name="agentType" value="selective" v-model="selectedAgentType"
-                    class="w-4 h-4 text-blue-600" />
+                  <input
+                    type="radio"
+                    name="agentType"
+                    value="selective"
+                    v-model="selectedAgentType"
+                    class="w-4 h-4 text-blue-600"
+                  />
                   <div class="flex">
                     <div class="font-medium">优选随机未使用的代理</div>
-                    <div class="text-sm text-gray-500" style="margin-left: 20px">
+                    <div
+                      class="text-sm text-gray-500"
+                      style="margin-left: 20px"
+                    >
                       优选未被使用过的代理中随机选择一个代理
                     </div>
                   </div>
@@ -546,10 +667,16 @@ watch(() => groupSelect.value, (v) => {
 
           <!-- Modal Footer -->
           <div class="flex gap-3 justify-end p-4 border-t">
-            <button @click="showSetModal = false" class="px-4 py-2 text-gray-600 rounded hover:bg-gray-100">
+            <button
+              @click="showSetModal = false"
+              class="px-4 py-2 text-gray-600 rounded hover:bg-gray-100"
+            >
               取消
             </button>
-            <button @click="handleConfirm" class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+            <button
+              @click="handleConfirm"
+              class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+            >
               确定
             </button>
           </div>
@@ -558,12 +685,18 @@ watch(() => groupSelect.value, (v) => {
     </Teleport>
 
     <!-- 编辑窗口-->
-    <div v-if="isOpen" class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
+    <div
+      v-if="isOpen"
+      class="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50"
+    >
       <div class="mx-4 w-full max-w-md bg-white rounded-lg">
         <!-- Header -->
         <div class="flex justify-between items-center p-4 border-b">
           <h2 class="text-lg font-medium">编辑代理</h2>
-          <button @click="closeModal()" class="text-gray-400 hover:text-gray-600">
+          <button
+            @click="closeModal()"
+            class="text-gray-400 hover:text-gray-600"
+          >
             <XIcon class="w-5 h-5" />
           </button>
         </div>
@@ -572,22 +705,40 @@ watch(() => groupSelect.value, (v) => {
         <div class="p-4 space-y-4">
           <!-- Smart Recognition -->
           <div>
-            <label class="block mb-1 text-sm font-medium text-gray-700">智能识别</label>
-            <textarea v-model="form.smartRecognition" rows="3"
+            <label class="block mb-1 text-sm font-medium text-gray-700"
+              >智能识别</label
+            >
+            <textarea
+              v-model="form.smartRecognition"
+              rows="3"
               class="w-full border-[1px] border-gray-300 rounded-md shadow-sm p-2 text-sm overflow-y-auto resize-none focus:border-blue-600"
-              style="height: 200px; outline: none" placeholder="[代理主机端口][IP][代理类型][用户名][密码][URL]"></textarea>
+              style="height: 200px; outline: none"
+              placeholder="[代理主机端口][IP][代理类型][用户名][密码][URL]"
+            ></textarea>
           </div>
 
           <!-- Proxy Type -->
           <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700">代理类型</label>
+            <label class="block mb-2 text-sm font-medium text-gray-700"
+              >代理类型</label
+            >
             <div class="flex space-x-4">
               <label class="flex items-center">
-                <input type="radio" v-model="form.proxyType" value="IPv4" class="w-4 h-4 text-blue-600" />
+                <input
+                  type="radio"
+                  v-model="form.proxyType"
+                  value="IPv4"
+                  class="w-4 h-4 text-blue-600"
+                />
                 <span class="ml-2 text-sm">IPv4</span>
               </label>
               <label class="flex items-center">
-                <input type="radio" v-model="form.proxyType" value="IPv6" class="w-4 h-4 text-blue-600" />
+                <input
+                  type="radio"
+                  v-model="form.proxyType"
+                  value="IPv6"
+                  class="w-4 h-4 text-blue-600"
+                />
                 <span class="ml-2 text-sm">IPv6</span>
               </label>
             </div>
@@ -595,11 +746,16 @@ watch(() => groupSelect.value, (v) => {
 
           <!-- Proxy Service -->
           <div>
-            <label class="block mb-2 text-sm font-medium text-gray-700">代理服务</label>
+            <label class="block mb-2 text-sm font-medium text-gray-700"
+              >代理服务</label
+            >
             <div class="flex space-x-2">
               <Select v-model="form.proxyService">
                 <SelectTrigger>
-                  <SelectValue placeholder="SOCKS5" class="p-2 w-full rounded-lg outline-none" />
+                  <SelectValue
+                    placeholder="SOCKS5"
+                    class="p-2 w-full rounded-lg outline-none"
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -608,30 +764,46 @@ watch(() => groupSelect.value, (v) => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <input v-model="form.host" type="text"
+              <input
+                v-model="form.host"
+                type="text"
                 class="flex-1 p-2 text-sm rounded-md border border-gray-300 shadow-sm focus:border-blue-600"
-                placeholder="89.116.77.90" />
+                placeholder="89.116.77.90"
+              />
               <span class="flex items-center text-gray-500">:</span>
-              <input v-model="form.port" type="text"
+              <input
+                v-model="form.port"
+                type="text"
                 class="p-2 w-20 text-sm rounded-md border border-gray-300 shadow-sm focus:border-blue-600"
-                placeholder="8085" />
+                placeholder="8085"
+              />
             </div>
           </div>
 
           <!-- Username -->
           <div>
-            <label class="block mb-1 text-sm font-medium text-gray-700">用户名</label>
-            <input v-model="form.username" type="text"
+            <label class="block mb-1 text-sm font-medium text-gray-700"
+              >用户名</label
+            >
+            <input
+              v-model="form.username"
+              type="text"
               class="p-2 w-full text-sm rounded-md border border-gray-300 shadow-sm focus:border-blue-600"
-              placeholder="hmdybckg" />
+              placeholder="hmdybckg"
+            />
           </div>
 
           <!-- Password -->
           <div>
-            <label class="block mb-1 text-sm font-medium text-gray-700">密码</label>
-            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+            <label class="block mb-1 text-sm font-medium text-gray-700"
+              >密码</label
+            >
+            <input
+              v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
               class="p-2 w-full text-sm rounded-md border border-gray-300 shadow-sm focus:border-blue-600"
-              placeholder="vx*br*zwq#9z" />
+              placeholder="vx*br*zwq#9z"
+            />
           </div>
 
           <!-- Parse URL -->
@@ -640,13 +812,18 @@ watch(() => groupSelect.value, (v) => {
               解析URL
               <span class="text-gray-400">(选填)</span>
             </label>
-            <input v-model="form.parseUrl" type="text"
-              class="p-2 w-full text-sm rounded-md border border-gray-300 shadow-sm" />
+            <input
+              v-model="form.parseUrl"
+              type="text"
+              class="p-2 w-full text-sm rounded-md border border-gray-300 shadow-sm"
+            />
           </div>
 
           <!-- Submit Button -->
-          <button @click="saveModal()"
-            class="px-4 py-2 w-full text-white bg-blue-500 rounded-md transition-colors hover:bg-blue-600">
+          <button
+            @click="saveModal()"
+            class="px-4 py-2 w-full text-white bg-blue-500 rounded-md transition-colors hover:bg-blue-600"
+          >
             保存
           </button>
         </div>

@@ -178,18 +178,18 @@ watch(checks, () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full overflow-hidden">
+  <div class="flex overflow-hidden flex-col h-full">
     <div class="flex justify-between px-4">
-      <div class="flex items-center justify-betwee gap-x-2 mt-1 mb-2">
-        <h3 class="font-semibold tracking-tight text-xl flex items-end">
+      <div class="flex gap-x-2 items-center mt-1 mb-2 justify-betwee">
+        <h3 class="flex items-end text-xl font-semibold tracking-tight">
           团队
         </h3>
       </div>
-      <div class="flex items-center justify-between mb-2 gap-4 select-none">
-        <div class="flex items-center gap-2 flex-1 pt-1">
+      <div class="flex gap-4 justify-between items-center mb-2 select-none">
+        <div class="flex flex-1 gap-2 items-center pt-1">
           <TooltipButton
             title="刷新"
-            class="border rounded-md h-8 w-8 flex items-center justify-center"
+            class="flex justify-center items-center w-8 h-8 rounded-md border"
           >
             <IconRefresh class="cursor-pointer" @click="() => loadData()" />
           </TooltipButton>
@@ -233,7 +233,7 @@ watch(checks, () => {
         </div>
       </div>
     </div>
-    <div class="px-4 space-x-2 pb-2" v-if="selected.length > 0">
+    <div class="px-4 pb-2 space-x-2" v-if="selected.length > 0">
       <Button
         class="px-2 py-1 bg-[#5050FA] text-white hover:bg-[#5d5dff]"
         @click="batchHandles.unblockeds"

@@ -1,7 +1,7 @@
 <template>
   <div class="font-[sans-serif] bg-gray-900 md:h-screen">
-    <div class="grid md:grid-cols-2 items-center gap-8 h-full">
-      <div class="max-md:order-1 p-4">
+    <div class="grid gap-8 items-center h-full md:grid-cols-2">
+      <div class="p-4 max-md:order-1">
         <img
           src="https://readymadeui.com/signin-image.webp"
           class="lg:max-w-[80%] w-full h-full object-contain block mx-auto"
@@ -17,25 +17,25 @@
           <form
             v-if="isLoginOrRegisterOrReset === 'login'"
             key="login"
-            class="max-w-lg w-full mx-auto"
+            class="mx-auto w-full max-w-lg"
             @keydown.enter="handleLogin"
           >
             <div class="mb-12">
-              <h3 class="text-gray-800 text-4xl font-extrabold">登录</h3>
-              <p class="text-gray-800 text-sm mt-4">
+              <h3 class="text-4xl font-extrabold text-gray-800">登录</h3>
+              <p class="mt-4 text-sm text-gray-800">
                 没有账号？
                 <a
                   href="javascript:void(0);"
                   @click="switchForm('register')"
-                  class="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap"
+                  class="ml-1 font-semibold text-blue-600 whitespace-nowrap hover:underline"
                   >注册</a
                 >
               </p>
             </div>
 
             <div>
-              <label class="text-gray-800 text-xs block mb-2">账号</label>
-              <div class="relative flex items-center">
+              <label class="block mb-2 text-xs text-gray-800">账号</label>
+              <div class="flex relative items-center">
                 <input
                   type="text"
                   v-model="loginForm.email"
@@ -77,13 +77,13 @@
             </div>
 
             <div class="mt-8">
-              <label class="text-gray-800 text-xs block mb-2">密码</label>
-              <div class="relative flex items-center">
+              <label class="block mb-2 text-xs text-gray-800">密码</label>
+              <div class="flex relative items-center">
                 <input
                   v-model="loginForm.password"
                   :type="showPassword ? 'text' : 'password'"
                   required
-                  class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                  class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                   placeholder="请输入密码"
                 />
                 <svg
@@ -108,12 +108,12 @@
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  class="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  class="w-4 h-4 text-blue-600 rounded border-gray-300 shrink-0 focus:ring-blue-500"
                   @click="() => (loginForm.rememberMe = !loginForm.rememberMe)"
                 />
                 <label
                   for="remember-me"
-                  class="text-gray-800 ml-3 block text-sm"
+                  class="block ml-3 text-sm text-gray-800"
                 >
                   记住密码
                 </label>
@@ -122,7 +122,7 @@
                 <a
                   href="javascript:void(0);"
                   @click="switchForm('reset')"
-                  class="text-blue-600 hover:underline font-semibold"
+                  class="font-semibold text-blue-600 hover:underline"
                 >
                   忘记密码?
                 </a>
@@ -145,7 +145,7 @@
           <form
             v-else-if="isLoginOrRegisterOrReset === 'register'"
             key="register"
-            class="max-w-lg w-full mx-auto"
+            class="mx-auto w-full max-w-lg"
             @submit.prevent="void 0"
             @keydown.enter="handleRegister"
           >
@@ -188,22 +188,22 @@
               </div>
 
               <div>
-                <label class="text-gray-800 text-sm mb-2 block">邮箱</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-sm text-gray-800">邮箱</label>
+                <div class="flex relative items-center">
                   <input
                     name="email"
                     type="email"
                     required
                     v-model="registerForm.email"
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入您的邮箱"
                   />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="#bbb"
                     stroke="#bbb"
-                    class="w-4 h-4 absolute right-4"
+                    class="absolute right-4 w-4 h-4"
                     viewBox="0 0 682.667 682.667"
                   >
                     <defs>
@@ -235,14 +235,14 @@
               </div>
 
               <div class="mt-8">
-                <label class="text-gray-800 text-xs block mb-2">密码</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-xs text-gray-800">密码</label>
+                <div class="flex relative items-center">
                   <input
                     v-model="registerForm.password"
                     :type="showPassword ? 'text' : 'password'"
                     required
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入密码"
                   />
                   <svg
@@ -262,14 +262,14 @@
               </div>
 
               <div>
-                <label class="text-gray-800 text-sm mb-2 block">验证码</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-sm text-gray-800">验证码</label>
+                <div class="flex relative items-center">
                   <input
                     type="text"
                     required
                     v-model="registerForm.code"
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入验证码"
                   />
                   <svg
@@ -305,17 +305,17 @@
                 type="button"
                 @click="handleRegister"
                 :disabled="loading"
-                class="w-full py-3 px-4 tracking-wider text-sm rounded-full text-white bg-gray-700 hover:bg-gray-800 focus:outline-none"
+                class="px-4 py-3 w-full text-sm tracking-wider text-white bg-gray-700 rounded-full hover:bg-gray-800 focus:outline-none"
               >
                 {{ loading ? "注册中..." : "注册" }}
               </button>
             </div>
-            <p class="text-gray-800 text-sm mt-6 text-center">
+            <p class="mt-6 text-sm text-center text-gray-800">
               已经存在账号?
               <a
                 href="javascript:void(0);"
                 @click="switchForm('login')"
-                class="text-blue-600 font-semibold hover:underline ml-1"
+                class="ml-1 font-semibold text-blue-600 hover:underline"
                 >这里登录</a
               >
             </p>
@@ -325,31 +325,31 @@
           <form
             v-else
             key="reset"
-            class="max-w-lg w-full mx-auto"
+            class="mx-auto w-full max-w-lg"
             @keydown.enter="handleReset"
           >
             <div class="mb-6">
-              <h3 class="text-gray-800 text-2xl font-bold">找回密码</h3>
+              <h3 class="text-2xl font-bold text-gray-800">找回密码</h3>
             </div>
 
             <div class="space-y-6">
               <div>
-                <label class="text-gray-800 text-sm mb-2 block">邮箱</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-sm text-gray-800">邮箱</label>
+                <div class="flex relative items-center">
                   <input
                     name="email"
                     type="email"
                     required
                     v-model="resetForm.email"
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入您的邮箱"
                   />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="#bbb"
                     stroke="#bbb"
-                    class="w-4 h-4 absolute right-4"
+                    class="absolute right-4 w-4 h-4"
                     viewBox="0 0 682.667 682.667"
                   >
                     <defs>
@@ -381,14 +381,14 @@
               </div>
 
               <div class="mt-8">
-                <label class="text-gray-800 text-xs block mb-2">新密码</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-xs text-gray-800">新密码</label>
+                <div class="flex relative items-center">
                   <input
                     v-model="resetForm.password1"
                     :type="resetShowPassword1 ? 'text' : 'password'"
                     required
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入密码"
                   />
                   <svg
@@ -408,14 +408,14 @@
               </div>
 
               <div class="mt-8">
-                <label class="text-gray-800 text-xs block mb-2">确认密码</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-xs text-gray-800">确认密码</label>
+                <div class="flex relative items-center">
                   <input
                     v-model="resetForm.password2"
                     :type="resetShowPassword2 ? 'text' : 'password'"
                     required
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入密码"
                   />
                   <svg
@@ -435,14 +435,14 @@
               </div>
 
               <div>
-                <label class="text-gray-800 text-sm mb-2 block">验证码</label>
-                <div class="relative flex items-center">
+                <label class="block mb-2 text-sm text-gray-800">验证码</label>
+                <div class="flex relative items-center">
                   <input
                     type="text"
                     required
                     v-model="resetForm.code"
                     @keydown.enter.prevent
-                    class="w-full text-sm border-b border-gray-300 focus:border-gray-800 px-2 py-3 outline-none"
+                    class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
                     placeholder="请输入验证码"
                   />
                   <svg
@@ -478,16 +478,16 @@
                 type="button"
                 @click="handleReset"
                 :disabled="loading"
-                class="w-full py-3 px-4 tracking-wider text-sm rounded-full text-white bg-gray-700 hover:bg-gray-800 focus:outline-none"
+                class="px-4 py-3 w-full text-sm tracking-wider text-white bg-gray-700 rounded-full hover:bg-gray-800 focus:outline-none"
               >
                 {{ loading ? "修改中..." : "修改" }}
               </button>
             </div>
-            <p class="text-gray-800 text-sm mt-6 text-center">
+            <p class="mt-6 text-sm text-center text-gray-800">
               <a
                 href="javascript:void(0);"
                 @click="switchForm('login')"
-                class="text-blue-600 font-semibold hover:underline ml-1"
+                class="ml-1 font-semibold text-blue-600 hover:underline"
                 >返回登录</a
               >
             </p>

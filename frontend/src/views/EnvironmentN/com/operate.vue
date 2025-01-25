@@ -8,7 +8,7 @@
             </div>
             <div class="space-y-3 pr-2" ref="divHeight">
                 <div class="flex items-center justify-between gap-4">
-                    <FrameIcon class="size-5 text-gray-200" />
+                    <FrameIcon class="size-5 text-gray-300" />
                     <div class="w-full h-[40px] bg-[#7744ff] flex rounded-lg items-center">
                         <RoundArrowRight class="size-6 mx-3" />
                         <span class="text-white">启动</span>
@@ -23,13 +23,13 @@
                         </div>
                     </label>
                 </div>
-                <div v-for="action in allActions" :key="action.key" class="flex items-center justify-between gap-4"
-                    v-show="action.key !== 'start'">
-                    <FrameIcon class="size-5" />
+                <div v-for="(action, index) in allActions" :key="action.key"
+                    class="flex items-center justify-between gap-4" v-show="action.key !== 'start'" draggable="true"
+                    @dragstart="handleDragStart(index)" @dragover="handleDragOver(index)" @drop="handleDrop">
+                    <FrameIcon class="size-5 text-gray-700 cursor-move" />
                     <div class="flex items-center bg-[#EDEDFF80] w-full h-[40px] pl-[10px] rounded-lg">
                         <component :is="action.icon" class="mr-2 h-4 w-4" />
                         <span class="text-sm flex-1">{{ action.label }}</span>
-                        <!-- <AltArrowDownIcon v-show="action.children" class="size-5" /> -->
                     </div>
                     <label class="relative inline-flex cursor-pointer items-center">
                         <input type="checkbox" v-model="action.visible" class="peer sr-only">
@@ -58,6 +58,28 @@ import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vu
 import { StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
 import { environment_group_query } from '@/commands/environment-group'
 
+// 拖拽排序逻辑
+let draggedIndex = ref<number | null>(null)
+
+const handleDragStart = (index: number) => {
+    draggedIndex.value = index
+}
+
+const handleDragOver = (index: number) => {
+    event?.preventDefault()
+    if (draggedIndex.value === null) return
+    if (draggedIndex.value !== index) {
+        // 交换数组元素
+        const draggedItem = allActions.value[draggedIndex.value]
+        allActions.value.splice(draggedIndex.value, 1)
+        allActions.value.splice(index, 0, draggedItem)
+        draggedIndex.value = index
+    }
+}
+
+const handleDrop = () => {
+    draggedIndex.value = null
+}
 
 onMounted(() => {
     emit('select', allActions.value)
@@ -75,7 +97,7 @@ const allActions = ref([
     { key: 'stop', label: '停止', icon: StopCircleIcon, visible: true, action: () => emit('stopAll') },
     { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ key: 'addTab', label: '新增标签', active: () => emit('addLabel') }, { key: 'reset', label: '重设标签', active: () => emit('resetLabel') }, { key: 'clean', label: '清空标签', active: () => emit('cleanLabel') }] },
     { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ key: 'addGroup', label: '增加分组', active: () => emit('addGroup') }] },
-    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: () => emit('exportEnv')},
+    { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: () => emit('exportEnv') },
     // , children: [{ key: 'export1', label: '导出已选', active: () => emit('exportEnv') }, { key: 'export2', label: '导出最近50条', active: () => emit('exportEnv') }] 
     { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true, action: () => emit('editStartPage') },
     { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true, action: () => emit('editUa') },

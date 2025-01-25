@@ -135,11 +135,11 @@ const nextPage = () => {
       </button>
     </div> -->
 
-    <div class="flex flex-col mx-2 mt-2 h-full">
+    <div class="flex overflow-y-auto flex-col flex-1 mx-2 mt-2">
       <div class="w-full rounded-lg border border-gray-200">
         <table class="min-w-full">
           <!-- Table Header -->
-          <thead class="bg-gray-50">
+          <thead class="sticky top-0 bg-gray-50">
             <tr>
               <th scope="col" class="py-3.5 pr-3 pl-4 w-12 text-left">
                 <input
@@ -196,7 +196,10 @@ const nextPage = () => {
             <tr
               v-for="Groupmanage in groupmanage"
               :key="Groupmanage.id"
-              class="hover:bg-gray-50"
+              :class="{
+                'hover:bg-gray-50': !Groupmanage.selected, // 鼠标悬停时背景色
+                'bg-blue-100': Groupmanage.selected, // 选中时背景色
+              }"
             >
               <td class="py-4 pr-3 pl-4 whitespace-nowrap">
                 <input
@@ -247,7 +250,7 @@ const nextPage = () => {
 
     <!-- pagination -->
     <div
-      class="flex justify-end items-center pt-3 mb-2 border-t border-gray-200"
+      class="flex left-0 justify-end items-center pt-3 mb-2 border-t border-gray-200"
     >
       <span class="text-sm text-gray-500">共 {{ totalItems }} 项</span>
       <div class="flex gap-2 items-center">
