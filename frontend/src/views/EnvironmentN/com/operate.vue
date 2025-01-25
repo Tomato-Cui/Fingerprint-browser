@@ -4,9 +4,11 @@
             class="mt-16 absolute border mr-4 w-[320px] rounded-lg bg-white p-4 shadow-lg z-40 right-0 top-0">
             <div class="mb-4 flex items-center justify-between border-b pb-1">
                 <h3 class="text-lg font-medium">快捷设置</h3>
-                <!-- <RefreshSquareIcon class="size-6" /> -->
+                <TooltipButton title="重置">
+                    <RefreshSquareIcon class="cursor-pointer size-6" @click="refresh" />
+                </TooltipButton>
             </div>
-            <div class="space-y-3 pr-2" ref="divHeight">
+            <div class="space-y-2 pr-2" ref="divHeight">
                 <div class="flex items-center justify-between gap-4">
                     <FrameIcon class="size-5 text-gray-300" />
                     <div class="w-full h-[40px] bg-[#7744ff] flex rounded-lg items-center">
@@ -23,21 +25,28 @@
                         </div>
                     </label>
                 </div>
-                <div v-for="(action, index) in allActions" :key="action.key"
-                    class="flex items-center justify-between gap-4" v-show="action.key !== 'start'" draggable="true"
-                    @dragstart="handleDragStart(index)" @dragover="handleDragOver(index)" @drop="handleDrop">
-                    <FrameIcon class="size-5 text-gray-700 cursor-move" />
-                    <div class="flex items-center bg-[#EDEDFF80] w-full h-[40px] pl-[10px] rounded-lg">
-                        <component :is="action.icon" class="mr-2 h-4 w-4" />
-                        <span class="text-sm flex-1">{{ action.label }}</span>
-                    </div>
-                    <label class="relative inline-flex cursor-pointer items-center">
-                        <input type="checkbox" v-model="action.visible" class="peer sr-only">
-                        <div
-                            class="h-5 w-9 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full">
+                <TransitionGroup name="list" tag="div">
+                    <div v-for="(action, index) in allActions" :key="action.key"
+                        class="flex items-center justify-between gap-4 transition-all duration-300 ease-in-out space-y-2"
+                        v-show="action.key !== 'start'"
+                        :class="{ 'opacity-50': draggedIndex === index, 'border-t-2 border-blue-500': dragOverIndex === index }"
+                        draggable="true" @dragstart="handleDragStart($event, index)"
+                        @dragenter="handleDragEnter($event, index)" @dragover.prevent
+                        @dragleave="handleDragLeave($event, index)" @drop="handleDrop($event, index)"
+                        @dragend="handleDragEnd">
+                        <FrameIcon class="size-5 text-gray-700 cursor-move" />
+                        <div class="flex items-center bg-[#EDEDFF80] w-full h-[40px] pl-[10px] rounded-lg">
+                            <component :is="action.icon" class="mr-2 h-4 w-4" />
+                            <span class="text-sm flex-1">{{ action.label }}</span>
                         </div>
-                    </label>
-                </div>
+                        <label class="relative inline-flex cursor-pointer items-center">
+                            <input type="checkbox" v-model="action.visible" class="peer sr-only">
+                            <div
+                                class="h-5 w-9 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full">
+                            </div>
+                        </label>
+                    </div>
+                </TransitionGroup>
             </div>
             <div class="mt-4 flex justify-end space-x-2">
                 <button @click="cancelSet" class="rounded-md px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">
@@ -55,30 +64,78 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
-import { StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
+import { RefreshSquareIcon, StopCircleIcon, HelfGlobalIcon, RoundArrowRight, BookmarkCircleIcon, FileTextIcon, FileRightIcon, RulerPenIcon, RuleCrossPenIcon, PlateIcon, HomeSmileIcon, RoundTransferHorizontal, ForbidRoundTransferHorizontal, ClearCacheIcon, TrashBinTrashIcon, FrameIcon } from '@/assets/icons/environment/index'
 import { environment_group_query } from '@/commands/environment-group'
+import TooltipButton from "@/components/tooltip-button.vue";
 
 // 拖拽排序逻辑
 let draggedIndex = ref<number | null>(null)
+let dragOverIndex = ref<number | null>(null)
+let dragTimeout = ref<any>(null)
 
-const handleDragStart = (index: number) => {
+const handleDragStart = (event: DragEvent, index: number) => {
     draggedIndex.value = index
-}
-
-const handleDragOver = (index: number) => {
-    event?.preventDefault()
-    if (draggedIndex.value === null) return
-    if (draggedIndex.value !== index) {
-        // 交换数组元素
-        const draggedItem = allActions.value[draggedIndex.value]
-        allActions.value.splice(draggedIndex.value, 1)
-        allActions.value.splice(index, 0, draggedItem)
-        draggedIndex.value = index
+    if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move'
+        event.dataTransfer.setData('text/plain', index.toString())
     }
 }
 
-const handleDrop = () => {
+const handleDragEnter = (event: DragEvent, index: number) => {
+    event.preventDefault()
+    if (draggedIndex.value === null || draggedIndex.value === index) return
+
+    // 清除之前的超时
+    if (dragTimeout.value !== null) {
+        clearTimeout(dragTimeout.value)
+    }
+
+    // 设置一个新的超时来执行交换
+    dragTimeout.value = setTimeout(() => {
+        const rect = (event.target as HTMLElement).getBoundingClientRect()
+        const y = event.clientY - rect.top
+        const height = rect.bottom - rect.top
+
+        if (y > height / 2) {
+            // 如果鼠标在元素的下半部分，就把当前元素移到拖动元素的后面
+            if (index < draggedIndex.value!) {
+                return
+            }
+        } else {
+            // 如果鼠标在元素的上半部分，就把当前元素移到拖动元素的前面
+            if (index > draggedIndex.value!) {
+                return
+            }
+        }
+
+        const draggedItem = allActions.value[draggedIndex.value!]
+        allActions.value.splice(draggedIndex.value!, 1)
+        allActions.value.splice(index, 0, draggedItem)
+        draggedIndex.value = index
+        dragOverIndex.value = index
+    }, 1) // 100毫秒的延迟
+}
+
+const handleDragLeave = (event: DragEvent, index: number) => {
+    if (dragOverIndex.value === index) {
+        dragOverIndex.value = null
+    }
+}
+
+const handleDrop = (event: DragEvent, index: number) => {
+    event.preventDefault()
+    if (dragTimeout.value !== null) {
+        clearTimeout(dragTimeout.value)
+    }
+    dragOverIndex.value = null
+}
+
+const handleDragEnd = () => {
+    if (dragTimeout.value !== null) {
+        clearTimeout(dragTimeout.value)
+    }
     draggedIndex.value = null
+    dragOverIndex.value = null
 }
 
 onMounted(() => {
@@ -108,6 +165,24 @@ const allActions = ref([
     { key: 'clearCache', label: '清除缓存', icon: ClearCacheIcon, visible: true, action: () => emit('cleanCache') },
     { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: () => emit('delEnv') },
 ])
+const refresh = () => {
+    allActions.value = [
+        { key: 'start', label: '启动', icon: StopCircleIcon, visible: true, action: () => emit('startAll') },
+        { key: 'stop', label: '停止', icon: StopCircleIcon, visible: true, action: () => emit('stopAll') },
+        { key: 'tag', label: '设置标签', icon: BookmarkCircleIcon, visible: true, action: void (0), children: [{ key: 'addTab', label: '新增标签', active: () => emit('addLabel') }, { key: 'reset', label: '重设标签', active: () => emit('resetLabel') }, { key: 'clean', label: '清空标签', active: () => emit('cleanLabel') }] },
+        { key: 'group', label: '设置分组', icon: FileTextIcon, visible: true, action: void (0), children: [{ key: 'addGroup', label: '增加分组', active: () => emit('addGroup') }] },
+        { key: 'export', label: '导出环境', icon: FileRightIcon, visible: true, action: () => emit('exportEnv') },
+        // , children: [{ key: 'export1', label: '导出已选', active: () => emit('exportEnv') }, { key: 'export2', label: '导出最近50条', active: () => emit('exportEnv') }] 
+        { key: 'edit', label: '修改启动页', icon: RulerPenIcon, visible: true, action: () => emit('editStartPage') },
+        { key: 'ua', label: '修改UA', icon: RuleCrossPenIcon, visible: true, action: () => emit('editUa') },
+        { key: 'proxy', label: '修改代理', icon: PlateIcon, visible: true, action: () => emit('editProxy') },
+        { key: 'env', label: '修改环境信息', icon: HomeSmileIcon, visible: true, action: () => emit('editEnvInfo') },
+        { key: 'transfer', label: '转移', icon: RoundTransferHorizontal, visible: true, action: () => emit('transferEnv') },
+        { key: 'cancelTransfer', label: '取消转移', icon: ForbidRoundTransferHorizontal, visible: true, action: () => emit('untransferEnv') },
+        { key: 'clearCache', label: '清除缓存', icon: ClearCacheIcon, visible: true, action: () => emit('cleanCache') },
+        { key: 'delEnvironment', label: '删除环境', icon: TrashBinTrashIcon, visible: true, action: () => emit('delEnv') },
+    ]
+}
 
 watch(() => props.groupData.length, (_) => {
     if (!props.groupData) return;
@@ -234,5 +309,21 @@ onUnmounted(() => {
 .modal-fade-enter-from,
 .modal-fade-leave-to {
     opacity: 0;
+}
+
+.list-move,
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.list-leave-active {
+    position: absolute;
 }
 </style>

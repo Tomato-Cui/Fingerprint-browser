@@ -73,7 +73,7 @@ const selectPageSize = (size: number) => {
             <More class="w-full">
                 <MoreTrigger @click="" class="w-full">
                     <button @click="togglePageSizeDropdown"
-                        class="flex items-center space-x-1 rounded-lg border px-3 py-1.5 hover:bg-gray-50 w-[105px]">
+                        class="flex items-center space-x-1 rounded-lg border px-3 py-1.5 hover:bg-gray-50 w-[108px]">
                         <span>{{ pageSize }}条/页</span>
                         <AltArrowDownIcon class="h-4 w-4 transition-transform rotate-180"/>
                     </button>
