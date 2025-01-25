@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
@@ -130,4 +130,8 @@ const commit = () => {
         }
     })
 }
+
+watch(() => props.open, (_) => {
+    recipientEmail.value = ''
+})
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <div class="rounded-xl flex-1 px-4 py-2 w-full h-full flex flex-col">
+    <div class="rounded-xl flex-1 px-4 py-2 w-full h-full flex flex-col select-none">
         <!-- Header Section -->
         <header class="mb-4 flex items-c enter justify-between h-[40px]">
             <div class="flex items-center space-x-4 w-auto">
@@ -28,14 +28,7 @@
                             @update:on-tag-select="(v) => (selectFilterRef.tag = v)"
                             @update:on-group-select="(v) => (selectFilterRef.group = v)"
                             @update:reset="resetSelectFilterHandle" />
-                        <!-- <button @click="filterOpt"
-                            class="flex border border-gray-300 px-2 py-1 gap-2 rounded-lg h-[35px] items-center">
-                            <component :is="FilterIcon" class="size-5" />筛选
-                        </button> -->
                     </div>
-                    <!-- 筛选 -->
-                    <!-- <SearchChoose :open="showSearchChoose" @close="showSearchChoose = false"
-                        class="absolute top-10 shadow-xl border" /> -->
 
                 </div>
 
@@ -52,7 +45,7 @@
         </header>
 
         <!-- Tabs -->
-        <GroupChoose class="flex flex-col flex-1" :data="groupList">
+        <GroupChoose class="flex flex-col flex-1 select-none" :data="groupList">
             <!-- Action Buttons -->
             <div class="mb-4 flex items-center space-x-2 h-[60px]">
                 <!-- <OpenBrowserIcon class="w-[106px] h-[43px]" :class="{'cursor-not-allowed': selectedItems.length==0, 'hover:bg-gray-50 cursor-pointer': selectedItems.length!=0}" @click="selectedItems.length!=0 ? startAll() : void(0)" /> -->
@@ -65,7 +58,7 @@
                         <HelfGlobalIcon class="size-[51px] opacity-10" />
                     </div>
                 </div>
-                <div class="flex flex-1 overflow-x-auto scrollbar-hide space-x-2 cursor-grab"
+                <div class="flex flex-1 overflow-x-auto scrollbar-hide space-x-2 cursor-grab select-none"
                     @mousedown.stop="startDrag" @mousemove="onDrag" @mouseup="stopDrag" ref="scrollContainer">
                     <More class="flex min-w-fit" v-for="action in visibleActions" :key="action.key">
                         <MoreTrigger class="min-w-fit">
@@ -116,10 +109,9 @@
 
             <!-- Table -->
             <div class="rounded-lg flex-1 overflow-auto flex flex-col">
-                <table class="min-w-full">
-                    <!-- {{ sortColumn }} -->
-                    <thead class="w-full sticky top-0 z-10">
-                        <tr class="border-b bg-popover">
+                <table class="min-w-full overflow-auto">
+                    <thead class="w-full sticky top-0 z-10 overflow-auto">
+                        <tr class="border-b bg-popover overflow-auto">
                             <th class="w-12 py-3 pl-4 text-left">
                                 <input type="checkbox"
                                     class="rounded border-gray-300 data-[state=checked]:bg-[#5050FA] size-3.5"
@@ -128,7 +120,7 @@
                             </th>
                             <template v-for="column in visibleColumns" :key="column.key">
                                 <th v-if="column.key === 'id'"
-                                    class="px-2 py-3 text-left text-sm font-medium text-gray-600 cursor-pointer"
+                                    class="px-2 py-3 text-left text-sm font-medium text-gray-600 cursor-pointer min-w-[70px]"
                                     @click="handleSort('id')">
                                     <div class="flex items-center justify-between border-r">
                                         <span>序号</span>
@@ -139,7 +131,7 @@
                                     </div>
                                 </th>
                                 <th v-if="column.key === 'name'"
-                                    class="px-2 py-3 text-left text-sm font-medium text-gray-600 cursor-pointer"
+                                    class="px-2 py-3 text-left text-sm font-medium text-gray-600 cursor-pointer min-w-fit"
                                     @click="handleSort('name')">
                                     <div class="flex items-center justify-between border-r">
                                         <span>环境名称</span>
@@ -150,13 +142,14 @@
                                     </div>
                                 </th>
                                 <th v-if="column.key !== 'id' && column.key !== 'name'"
-                                    class="px-2 py-3 text-left text-sm font-medium text-gray-600">
+                                    class="px-2 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px]">
                                     <div class="flex items-center justify-between border-r">
                                         <span>{{ column.label }}</span>
                                     </div>
                                 </th>
                             </template>
-                            <th class="px-4 py-3 text-right relative w-8">
+                            <!-- 固定在右侧的列 -->
+                            <th class="px-4 py-3 text-right sticky right-0 bg-background">
                                 <button @click="showColumnsModal = !showColumnsModal">
                                     <WrapperIcon class="size-5" />
                                 </button>
@@ -164,7 +157,6 @@
                                 <TableTheadChoose :open="showColumnsModal" @close="showColumnsModal = false"
                                     @select="theadChoose" class="absolute right-0 top-0 w-[320px]" />
                             </th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -175,12 +167,9 @@
                                     class="rounded border-gray-300 data-[state=checked]:bg-[#5050FA] size-3.5"
                                     :checked="selectedItems.includes(item.uuid)" @click="toggleSelectItem(item.uuid)" />
                             </td>
-                            <!-- <td class="px-2 py-3">{{ item }}</td> -->
-                            <!-- 每一格 -->
                             <template v-for="(value, key) in item as Record<string, any>" :key="key">
                                 <td class="px-2 py-3 text-sm" v-if="key != 'uuid' && key != 'id'">
-                                    <!-- 操作格 -->
-                                    <div v-if="key === 'action'" class="flex justify-between items-center ">
+                                    <div v-if="key === 'action'" class="flex justify-between items-center">
                                         <span
                                             @click="!browserStatusStore.getStatus(item.uuid) ? startEnv(item.uuid) : stopEnv(item.uuid)"
                                             :class="{ 'border-[#5050fa] bg-[#EDEDFF] text-blue-500 hover:bg-blue-100': !browserStatusStore.getStatus(item.uuid), 'border-red-300 bg-red-50 text-red-500 hover:bg-red-100': browserStatusStore.getStatus(item.uuid) }"
@@ -200,7 +189,6 @@
                                             </More>
                                         </span>
                                     </div>
-                                    <!-- 状态格 -->
                                     <div v-else-if="key === 'status'" class="flex items-center gap-x-2">
                                         <div class="size-1.5 rounded-full" :class="{
                                             'bg-green-500': browserStatusStore.getStatus(item.uuid),
@@ -208,13 +196,15 @@
                                         }"></div>
                                         {{ !browserStatusStore.getStatus(item.uuid) ? '未启动' : '已启动' }}
                                     </div>
-                                    <!-- 其他格 -->
                                     <div v-else class="flex justify-between items-center text-sm">
                                         <span>{{ value || '--' }}</span>
                                     </div>
                                 </td>
                             </template>
-                            <td></td>
+                            <!-- 固定在右侧的列 -->
+                            <td class="px-4 py-3 text-right sticky right-0 bg-background">
+                                <!-- 这里可以放置操作按钮或其他内容 -->
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -308,7 +298,7 @@ const editUAModel = ref(false)
 const searchQuery = ref('')
 const sortColumn = ref('id');
 const sortOrder = ref('asc');
-const flag = ref(false) //重新查询表格数据
+const flag = ref(false) //修改后是否需要重新查询表格数据的标志
 
 watch(() => flag.value, (_) => { //需要做数据的重新查询
     getList()
@@ -472,6 +462,12 @@ const stopAll = () => {
             browserStatusStore.updateStatus(item, false)
         })
     })
+}
+const optModelFun = (m: any) => {
+    console.log("MMMMMM:", m);
+
+    m.value = true
+    console.log("MMMMMM2:", editUAModel.value);
 }
 //编辑代理
 const editProxy = () => {
@@ -697,6 +693,7 @@ watch(
 watch(() => route.params.id, () => {
     getList()
 })
+//筛选部分
 const selectFilterRef = reactive<any>({
     proxy: false,
     account: "",
@@ -720,7 +717,7 @@ watch(selectFilterRef, (_) => {
             selectFilterRef.group ? selectFilterRef.group == item.group_name : true
         );
 
-        dealTableData(tData)
+    dealTableData(tData)
 });
 const resetSelectFilterHandle = () => {
     selectFilterRef.proxy = false
@@ -729,6 +726,21 @@ const resetSelectFilterHandle = () => {
     selectFilterRef.group = ''
 };
 
+function formatDate(inputDate: string): string {
+    // 将输入字符串转换为 Date 对象
+    const date = new Date(inputDate);
+    // 提取年月日时分秒
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从 0 开始，需要加 1
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    // 拼接成目标格式
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+
 const originData = ref<any>([])
 const messageData = ref<any>([])  //用于传入操作组件的数据
 const dataCache = ref<any>([])  //用于筛选
@@ -736,43 +748,52 @@ const getList = () => {
     if (route.params.id === '0') {
         environment_query(PageObj.pageNum, PageObj.pageSize).then((res: any) => {
             PageObj.total = res.data.total
-            tableData.value = res.data.data
+            tableData.value = res.data.data.map((item: any) => {
+                return { ...item, created_at: formatDate(item.created_at) }
+            })
             dealTableData(tableData.value)  //字段处理
             dataCache.value = JSON.parse(JSON.stringify(res.data.data))
         })
     } else {
         environment_query_by_group(+route.params.id, PageObj.pageNum, PageObj.pageSize).then((res: any) => {
             PageObj.total = res.data.total
-            tableData.value = res.data.data
+            tableData.value = res.data.data.map((item: any) => {
+                return { ...item, created_at: formatDate(item.created_at) }
+            })
             dealTableData(tableData.value)
             dataCache.value = JSON.parse(JSON.stringify(res.data.data))
         })
     }
+    selectedItems.value.length = 0
 }
 
+/**
+ * 处理表格数据
+ * @param data 待处理数据
+ */
 const dealTableData = (data: any) => {
-    let ind = 1;  //序号
+    let ind = 1; // 序号
     originData.value = JSON.parse(JSON.stringify(tableData.value));
+
     // 将字段与表头对上
     tableData.value = data.map((item: any) => {
         return {
-            ind: ind++,
+            ind: ind++, // 序号递增
             id: item.id,
             name: item.name,
             action: '启动',
             status: '未启动',
-            account: item.accounts.platform + item.accounts.platform_account,
-            proxy: item.proxy_host ? item.proxy_host + ":" + item.proxy_port : "--",
-            description: item.description,
-            tab: item.tag_name,
-            groupName: item.group_name,
+            account: item.accounts?.platform + item.accounts?.platform_account || '--', // 使用可选链避免报错
+            proxy: item.proxy_host ? `${item.proxy_host}:${item.proxy_port}` : '--',
+            description: item.description || '--',
+            tab: item.tag_name || '--',
+            groupName: item.group_name || '--',
             create_at: item.created_at,
             lastOpen: '最后启动',
             uuid: item.uuid,
-        }
-    })
-    // dataCache.value = JSON.parse(JSON.stringify(tableData.value))
-}
+        };
+    });
+};
 
 onMounted(() => {
     getList()
