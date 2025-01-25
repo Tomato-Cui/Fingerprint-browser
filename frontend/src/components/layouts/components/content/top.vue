@@ -14,6 +14,9 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const toEnvrionmentCreatePage = () =>
   router.push("/environment/create/environment-simple-create");
+
+const toEnvrionmentImportPage = () =>
+  router.push("/environment/create/environment-batch-import");
 </script>
 
 <template>
@@ -40,6 +43,7 @@ const toEnvrionmentCreatePage = () =>
       <SidebarMenuItem>
         <SidebarMenuButton
           tooltip="批量导入/创建"
+          @click="toEnvrionmentImportPage"
           class="p-0 pl-4 h-12 flex rounded-sm relative group-data-[state=collapsed]:justify-center gap-x-4 bg-white dark:text-black dark:hover:bg-white"
         >
           <component :is="IconImport" class="size-5" />
