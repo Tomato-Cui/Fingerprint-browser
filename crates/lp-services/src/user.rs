@@ -127,13 +127,17 @@ pub async fn register_send(email: &str) -> Result<bool, ServiceError> {
 
     let code = lp_commons::encryption::random_code();
 
+    let html_body = format!(
+        r#"<div style="font-family: Arial, sans-serif; color: #333; max-width: 400px; margin: 2rem auto;"><h1 style="color: #007BFF;">{}, 欢迎注册！</h1><p>这是您的验证码：</p><div style="font-size: 2rem; font-weight: bold; color: #28a745; margin: 1rem 0;">{}</div><p>如果您没有请求此验证码，请忽略此邮件。</p></div>"#,
+        email, code
+    );
     let ok = lp_commons::util::send_email(
         &config.email.smtp_username,
         &config.email.smtp_password,
         &config.email.smtp_server,
         email,
-        &format!("{} ,welcome", email),
-        &format!("code: {}", code),
+        &format!("{} , welcome", email),
+        &html_body,
     );
     if let Err(e) = ok {
         return Err(ServiceError::Error(e.to_string()));

@@ -89,6 +89,9 @@ fn register_plugins(app_handle: &AppHandle) {
     app_handle
         .plugin(tauri_plugin_updater::Builder::new().build())
         .unwrap();
+
+    #[cfg(desktop)]
+    app_handle.plugin(tauri_plugin_upload::init()).unwrap();
 }
 
 // Register the update processor

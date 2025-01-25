@@ -1,6 +1,6 @@
 [app]
-id = "com.ads-hubstudio.browser"
-name = "ads-hubstudio"
+id = "com.fantasy-browser.browser"
+name = "fantasy-browser"
 remote_switch = false
 # remote_url = 'http://119.28.117.240:5678/'
 remote_url = 'http://192.168.6.122:5678/'
@@ -13,7 +13,7 @@ browser_extensions_location = "browser-extensions"
 
 [database]
 driver = "sqlite3"
-url = "ads-hubstudio.db"
+url = "fantasy-browser.db"
 location = "cache"
 
 [email]

@@ -29,7 +29,7 @@ export const useWsStore = defineStore('websocket-store', () => {
     const connect = async (token: string) => {
         try {
             state = {
-                ws: await WebSocket.connect('ws://127.0.0.1:5678/ws', {
+                ws: await WebSocket.connect('ws://192.168.6.122:5678/ws', {
                     headers: {
                         'authorization': `Bearer ${token}`
                     }

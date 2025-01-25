@@ -32,7 +32,7 @@ impl BrowserChildInfo {
     pub async fn format(&self) -> Result<Vec<String>, anyhow::Error> {
         let breeze_fp = format!(
             "--breeze-fp={}",
-            lp_commons::encryption::base64_encode(&serde_json::to_string(&self.environemnt_info)?)
+            lp_commons::encryption::base64_encode(&self.environemnt_info.fp_info())
         );
         let new_window = "--new-window".to_string();
         let window_size = format!(
@@ -46,9 +46,9 @@ impl BrowserChildInfo {
 
         let window_position = format!("--window-position={},{}", offset, offset);
 
-        let user_agent = format!("--user-agent={}", self.environemnt_info.ua.clone(),);
+        let _user_agent = format!("--user-agent={}", self.environemnt_info.ua.clone(),);
         let accept_lang = format!(
-            "--accept-lang={}",
+            "--breeze_lang={}",
             self.environemnt_info.languages.clone().unwrap_or_default()
         );
         let no_first_run = "--no-first-run".to_string();
@@ -81,7 +81,7 @@ impl BrowserChildInfo {
             window_position,
             new_window,
             accept_lang,
-            user_agent,
+            // user_agent,
             user_data_dir,
             breeze_fp,
             browser_unique,

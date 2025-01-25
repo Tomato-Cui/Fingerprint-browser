@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
 use sqlx::FromRow;
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
@@ -64,7 +64,6 @@ pub struct EnvironmentDetailWithResponse {
     pub tag_description: Option<String>, //分组描述
 
     pub accounts: Option<Value>,
-
 
     // Fields from Proxy
     pub proxy_kind: Option<String>,
@@ -131,4 +130,58 @@ pub struct EnvironmentDetailWithAdvanceCreateRequest {
     pub proxy_password: Option<String>,
     pub proxy_user_uuid: Option<String>,
     pub proxy_environment_group_id: Option<i32>,
+}
+
+impl EnvironmentDetailWithResponse {
+    pub fn fp_info(&self) -> String {
+        let _value = json!({
+            // "os": self.os,
+            // "country": self.country,
+            // "region": self.region,
+            // "city": self.city,
+            // "language": self.language,
+            // "languages": self.languages,
+            // "timezone": self.timezone,
+            // "geography": self.geography,
+            // "geo_tips": self.geo_tips,
+            // "geo_rule": self.geo_rule,
+            // "longitude": self.longitude,
+            // "latitude": self.latitude,
+            // "radius": self.radius,
+            // "height": self.height,
+            // "width": self.width,
+            // "fonts": self.fonts,
+            // "web_rtc": self.web_rtc,
+            // "web_rtc_local_ip": self.web_rtc_local_ip,
+            // "canvas": self.canvas,
+            // "webgl": self.webgl,
+            // "hardware_acceleration": self.hardware_acceleration,
+            // "webgl_info": self.webgl_info,
+            // "audio_context": self.audio_context,
+            // "speech_voices": self.speech_voices,
+            // "media": self.media,
+            // "cpu": self.cpu,
+            // "memory": self.memory,
+            // "do_not_track": self.do_not_track,
+            // "battery": self.battery,
+            // "port_scan": self.port_scan,
+        });
+
+        let value = json!({
+            "gl_ven": "Google",
+            "gl_rend": "Intel, Intel(R) UHD Graphics 630 Direct3D11 vs_5_0 ps_5_0, D3D11-24.20.100.6345",
+            "os_ver": "9.6.0",
+            "os_mem": 8,
+            "proc_num": 8,
+            "audio": 25,
+            "h": 1024,
+            "w": 1280,
+            "la": 34.0366,
+            "lo": 118.1567,
+            "breeze_lang": "zh-CN",
+            "v_l": [10, 20, 30],
+        });
+
+        value.to_string()
+    }
 }

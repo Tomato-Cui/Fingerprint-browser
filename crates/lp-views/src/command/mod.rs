@@ -10,6 +10,7 @@ pub mod environment_tag;
 pub mod environment_transfer_history;
 pub mod environment_trash;
 pub mod extension;
+pub mod kernel;
 pub mod message;
 pub mod operation_log;
 pub mod os;
@@ -30,6 +31,7 @@ pub use environment_tag as environment_tag_command;
 pub use environment_transfer_history as environment_transfer_history_command;
 pub use environment_trash as environment_trash_command;
 pub use extension as extension_command;
+pub use kernel as kernel_command;
 pub use message as message_command;
 pub use operation_log as operation_log_command;
 pub use team as team_command;
@@ -227,6 +229,9 @@ pub fn register_handles() -> impl Fn(Invoke<tauri::Wry>) -> bool + Send + Sync +
         browser_command::browser_status,
         operation_log_command::opeartion_query,
         operation_log_command::opeartion_query_by_team,
+        kernel_command::kernel_location,
+        kernel_command::unzip_kernel_zip,
+        kernel_command::latest_kernel,
         os::platform,
         ip_info,
         init_command,

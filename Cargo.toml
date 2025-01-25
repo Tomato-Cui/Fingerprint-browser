@@ -58,6 +58,7 @@ uuid = { version = "1.11.0", features = [
 ] }
 regex = "1.5.4"
 lettre = "0.11"
+zip = "2.2.2"
 
 # internal crate dependencies
 lp_apis = { path = "./crates/lp-apis" }
