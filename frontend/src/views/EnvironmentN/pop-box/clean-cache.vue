@@ -87,11 +87,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { XIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-vue-next'
+import { ref } from 'vue'
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
+import { toast } from 'vue-sonner';
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -101,51 +101,51 @@ const props = defineProps<{
 
 const clearLocal = ref(false)
 const clearCloud = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(2)
+// const pageSize = ref(10)
+// const total = ref(2)
 
-const tableData = ref([
-    {
-        id: 1,
-        selected: true,
-        name: 'P-1',
-        platform: 'P-1',
-        group: '',
-        proxy: '- -',
-        status: 'running'
-    },
-    {
-        id: 2,
-        selected: false,
-        name: 'P-2',
-        platform: 'P-1',
-        group: '',
-        proxy: '- -',
-        status: 'stopped'
-    }
-])
+// const tableData = ref([
+//     {
+//         id: 1,
+//         selected: true,
+//         name: 'P-1',
+//         platform: 'P-1',
+//         group: '',
+//         proxy: '- -',
+//         status: 'running'
+//     },
+//     {
+//         id: 2,
+//         selected: false,
+//         name: 'P-2',
+//         platform: 'P-1',
+//         group: '',
+//         proxy: '- -',
+//         status: 'stopped'
+//     }
+// ])
 
-const selectAll = computed({
-    get: () => tableData.value.every(item => item.selected),
-    set: (value) => tableData.value.forEach(item => item.selected = value)
-})
+// const selectAll = computed({
+//     get: () => tableData.value.every(item => item.selected),
+//     set: (value) => tableData.value.forEach(item => item.selected = value)
+// })
 
-const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+// const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
-const toggleSelectAll = () => {
-    const newValue = !selectAll.value
-    tableData.value.forEach(item => item.selected = newValue)
-}
+// const toggleSelectAll = () => {
+//     const newValue = !selectAll.value
+//     tableData.value.forEach(item => item.selected = newValue)
+// }
 
-const toggleStatus = (item: any) => {
-    item.status = item.status === 'running' ? 'stopped' : 'running'
-}
+// const toggleStatus = (item: any) => {
+//     item.status = item.status === 'running' ? 'stopped' : 'running'
+// }
 
 const cancel = () => {
     emit('close')
 }
 const commit = () => {
+    toast.success('清除缓存成功')
     emit('close')
 }
 </script>

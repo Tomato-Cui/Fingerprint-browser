@@ -21,7 +21,8 @@
         "fullscreen": false,
         "center": true,
         "contentProtected": false,
-        "devtools": false
+        "devtools": false,
+        "dragDropEnabled": false
       }
     ],
     "security": {
@@ -50,7 +51,7 @@
       "tsp": false,
       "webviewInstallMode": {
         "silent": true,
-        "type": "offlineInstaller"
+        "type": "downloadBootstrapper"
       },
       "wix": {
         "language": "zh-CN"
@@ -63,7 +64,7 @@
         "installMode": "passive"
       },
       "endpoints": ["https://github.com/liusnew/lpbrowser-release/releases/latest/download/latest.json"],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFNUFGRjJCRDNEMTgwODkKUldTSmdOSFRLLzlhbmd4TUF0L1NHZmI2VWdSNzBpRTZBeU4vZVp6dEp0UTM5RllWUHorN1lKcWYK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEI5MDBBQjM2QzYzODU3MEUKUldRT1Z6akdOcXNBdWIvck5oeURjbWNVeWM4ejFCanFjZUp1cndlV2NXbmdjYlJKMVlsUTZhb1kK"
     }
   }
 }

@@ -1,49 +1,18 @@
 <script setup lang="ts">
 import { cn } from "@/util/lib";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
-import {
   IconRulerCrossPen,
   IconStarFallMinimalistic,
-  IconLoginArrow,
 } from "@/assets/icons/environment-creates/simple-create/index";
 import { useRouter, useRoute } from "vue-router";
 
 import SelectFilter from "./select-filter.vue";
 
 import { onMounted, reactive, ref, watch } from "vue";
-import { Circle, Filter } from "@/assets/icons/environment-group-manage";
-import {
-  SearchIcon,
-  ChevronRightIcon,
-  ChevronLeftIcon,
-} from "@/assets/icons/environment-bookmark-image";
+import { Circle } from "@/assets/icons/environment-group-manage";
+import { SearchIcon } from "@/assets/icons/environment-bookmark-image";
 
-import { PrimaryButton, CancelButton } from "@/components/button";
-
-import BuyProxy from "./manage-proxy-view/buy-proxy.vue";
-import { environment_group_query } from "@/commands/environment-group";
-import {
-  AddCheck,
-  AddProxy,
-  Buy,
-  Setting,
-} from "@/assets/icons/proxy-manage-image";
-import SetField from "./setting.vue";
-
-import {
-  FileText,
-  PenModify,
-  Plate,
-  Round,
-} from "@/assets/icons/proxy-manage-image";
-import {
-  environment_proxies_batch_delete,
-  environment_proxies_query,
-} from "@/commands/environment-proxy";
+import { AddProxy } from "@/assets/icons/proxy-manage-image";
 import {
   environment_trash_delete_batch,
   environment_trash_query,
@@ -72,16 +41,16 @@ const tabs = [
   },
 ];
 
-const cols = [
-  { id: 1, title: "序号" },
-  { id: 2, title: "环境名称" },
-  { id: 3, title: "账号信息" },
-  { id: 4, title: "代理信息" },
-  { id: 5, title: "备注" },
-  { id: 6, title: "标签" },
-  { id: 7, title: "分组" },
-  { id: 8, title: "删除信息" },
-];
+// const cols = [
+//   { id: 1, title: "序号" },
+//   { id: 2, title: "环境名称" },
+//   { id: 3, title: "账号信息" },
+//   { id: 4, title: "代理信息" },
+//   { id: 5, title: "备注" },
+//   { id: 6, title: "标签" },
+//   { id: 7, title: "分组" },
+//   { id: 8, title: "删除信息" },
+// ];
 const actionBtns = ref<any[]>([
   {
     id: 1,
@@ -164,40 +133,40 @@ const loadData = () => {
 const actionBtnActiveHandle = (v: boolean) => {
   actionBtns.value = actionBtns.value.map((item) => ({ ...item, disabled: v }));
 };
-const updatePageSizeHandle = (pageS: number) => {
-  pagination.pageSize = pageS;
-};
-const updatePageHandle = (pageS: number) => {
-  pagination.pageNum = pageS;
-};
+// const updatePageSizeHandle = (pageS: number) => {
+//   pagination.pageSize = pageS;
+// };
+// const updatePageHandle = (pageS: number) => {
+//   pagination.pageNum = pageS;
+// };
 
-const selectHandles = {
-  selectHandle: (v: boolean, item: string) => {
-    if (!v) {
-      selected.value = selected.value.filter(
-        (selectedItem) => selectedItem !== item
-      );
-    } else {
-      selected.value = [...selected.value, item];
-    }
-  },
-  selectAllHandle: (items: any[]) => {
-    selected.value = items;
-  },
-};
+// const selectHandles = {
+//   selectHandle: (v: boolean, item: string) => {
+//     if (!v) {
+//       selected.value = selected.value.filter(
+//         (selectedItem) => selectedItem !== item
+//       );
+//     } else {
+//       selected.value = [...selected.value, item];
+//     }
+//   },
+//   selectAllHandle: (items: any[]) => {
+//     selected.value = items;
+//   },
+// };
 
-const searchHandle = (sub: string) => {
-  let currents = dataCache.value.filter((item) =>
-    item.name.toLowerCase().includes(sub.toLowerCase())
-  );
-  if (currents.length == 0) {
-    data.value = [];
-  } else if (sub.length == 0) {
-    data.value = JSON.parse(JSON.stringify(dataCache.value));
-  } else {
-    data.value = currents;
-  }
-};
+// const searchHandle = (sub: string) => {
+//   let currents = dataCache.value.filter((item) =>
+//     item.name.toLowerCase().includes(sub.toLowerCase())
+//   );
+//   if (currents.length == 0) {
+//     data.value = [];
+//   } else if (sub.length == 0) {
+//     data.value = JSON.parse(JSON.stringify(dataCache.value));
+//   } else {
+//     data.value = currents;
+//   }
+// };
 
 onMounted(loadData);
 watch(selected, () => {

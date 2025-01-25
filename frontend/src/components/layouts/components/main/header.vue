@@ -144,9 +144,9 @@ const funPer = () => {
       <div class="flex gap-x-4 items-center relative">
         <button
           @click="funUp"
-          class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
+          class="dark:outline-slate-900 text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
         >
-          <IconRestart class="text-white" /> 更新
+          <IconRestart class="" /> 更新
         </button>
         <Update
           :open="updateDialog"
@@ -157,7 +157,7 @@ const funPer = () => {
         />
         <button
           @click="funMes"
-          class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
+          class="dark:outline-slate-900 text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
         >
           <IconMailbox />信息
         </button>
@@ -171,7 +171,7 @@ const funPer = () => {
         <More class="flex w-5">
           <MoreTrigger class="min-w-fit">
             <button
-              class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
+              class="dark:outline-slate-900 text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
             >
               <IconHeadphonesRound />联系我们
             </button>
@@ -184,7 +184,7 @@ const funPer = () => {
 
         <button
           @click="router.push('/accountSet')"
-          class="text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
+          class="dark:outline-slate-900 text-sm border rounded-md px-2 py-1.5 flex gap-x-2 font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 hover:bg-[#5050FA] hover:text-white"
         >
           <IconSettings />系统设置
         </button>

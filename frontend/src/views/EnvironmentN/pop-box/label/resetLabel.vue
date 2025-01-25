@@ -61,25 +61,20 @@ import { Model } from '@/components/model'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { XIcon, CheckIcon } from 'lucide-vue-next'
 import { environment_tag_query } from '@/commands/environment-tag'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/select";
+import { environment_batch_move_to_tag } from '@/commands/environment'
+import { toast } from 'vue-sonner'
 
 const props = defineProps({
     open: Boolean,
     data: Array,
+    isChange: Boolean,
     selectedCount: {
         type: Number,
         default: 1
     }
 })
 
-const emit = defineEmits(['close', 'confirm'])
+const emit = defineEmits(['close', 'confirm', 'update:isChange'])
 
 // Sample tags data
 const availableTags = ref<any>([])
@@ -114,7 +109,21 @@ const close = () => {
 }
 
 const confirm = () => {
-    emit('confirm', selectedTags.value)
+    //
+    let envUuid = <any>[]
+    props.data?.forEach((item: any) => {
+        envUuid.push(item.uuid as string)
+    })
+    if (selectedTags.value.length === 0) {
+        toast.warning('请选择标签')
+        return
+    }
+
+
+    environment_batch_move_to_tag(envUuid, selectedTags.value[0].id).then((res: any) => {
+        toast.success(res.message)
+        emit('update:isChange', !props.isChange)
+    })
     close()
 }
 

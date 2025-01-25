@@ -12,13 +12,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps } from "vue";
+import { defineEmits } from "vue";
 import { OneFrameIcon } from '@/assets/icons/environment/index'
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
-
-const props = defineProps({
-  open: Boolean, // 控制显示与隐藏
-});
 
 const emit = defineEmits(["close"]);
 
@@ -34,7 +30,6 @@ const regularItems = [
   "删除环境",
 ];
 
-const destructiveItems = ["清除缓存", "删除环境"];
 </script>
 
 <style>

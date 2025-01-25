@@ -6,18 +6,10 @@ import {
   ChevronRightIcon,
   ChevronLeftIcon,
 } from "@/assets/icons/environment-bookmark-image";
-
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import EditProxy from "./edit-proxy.vue";
-
-import {
-  FileText,
-  PenModify,
-  Plate,
-  Round,
-} from "@/assets/icons/proxy-manage-image";
-
+import { Round } from "@/assets/icons/proxy-manage-image";
 import { Setting } from "@/assets/icons/proxy-manage-image";
 
 import {
@@ -27,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   environment_proxies_delete,
-  environment_proxies_modify,
   environment_proxies_query,
 } from "@/commands/environment-proxy";
 import { environment_proxies_batch_delete } from "@/commands/environment-proxy";
@@ -36,17 +27,18 @@ import { toast } from "vue-sonner";
 import { AlertModel } from "@/components/alert-model";
 import { ip_info } from "@/commands";
 
-interface FormData {
-  proxyType: string;
-  ipQueryChannel: string;
-  proxyServer: string;
-  proxyAccount: string;
-  proxyPassword: string;
-  ipMonitoring: boolean;
-  ipChangeAction: "warning" | "block";
-}
+// interface FormData {
+//   proxyType: string;
+//   ipQueryChannel: string;
+//   proxyServer: string;
+//   proxyAccount: string;
+//   proxyPassword: string;
+//   ipMonitoring: boolean;
+//   ipChangeAction: "warning" | "block";
+// }
 
-const copyProxyId = (proxy: Proxymanage) => {
+// proxy: Proxymanage
+const copyProxyId = () => {
   toast("复制成功");
 };
 
@@ -70,10 +62,10 @@ const toggleSelectAll = () => {
   });
 };
 
-const deleteProxymanage = (Proxymanage: Proxymanage) => {
-  environment_proxies_delete(Proxymanage.id);
-  privateproxyloadData();
-};
+// const deleteProxymanage = (Proxymanage: Proxymanage) => {
+//   environment_proxies_delete(Proxymanage.id);
+//   privateproxyloadData();
+// };
 
 interface Proxymanage {
   id: number;
@@ -485,8 +477,9 @@ const nextPage = () => {
                       编辑
                     </button>
 
+                    <!-- @click="copyProxyId(Proxymanage)" -->
                     <button
-                      @click="copyProxyId(Proxymanage)"
+                      @click="copyProxyId"
                       class="px-2 text-[#FA8C16] rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFF7E6]"
                     >
                       复制代理ID

@@ -37,8 +37,10 @@ const tabs = [
 <template>
   <Card className="w-full h-full flex flex-col p-0 select-none">
     <CardHeader class="p-0 px-4">
-      <CardTitle class="mt-1 mb-2 text-xl">新建环境</CardTitle>
+      <CardTitle class="mt-1 mb-2 text-xl" v-if="!route.query.env">新建环境</CardTitle>
+      <CardTitle class="mt-1 mb-2 text-xl" v-else>编辑环境</CardTitle>
       <ul
+      v-if="!route.query.env"
         class="flex justify-start px-0 pb-0 w-full text-sm bg-white rounded-none border-b"
       >
         <li

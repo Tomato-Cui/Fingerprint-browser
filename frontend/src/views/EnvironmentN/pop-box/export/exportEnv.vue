@@ -1,17 +1,14 @@
 <template>
-    <Model :open="props.open" title="导出环境" @close="emit('close')" class="min-w-[700px]">
-        <!-- Content -->
+    <!-- 设计的弹窗 -->
+    <!-- <Model :open="props.open" title="导出环境" @close="emit('close')" class="min-w-[700px]">
         <div class="p-6 space-y-6">
-            <!-- Info Message -->
             <div class="bg-white rounded-lg p-3 flex items-start gap-3 border shadow-xl">
                 <InfoCircleIcon class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <span class="text-sm text-gray-700">Cookie 信息过多时可使用「文本文件」导出</span>
             </div>
 
-            <!-- Selected Items -->
             <div class="text-sm text-gray-600">已选择项目 {{ selectedCount }}</div>
 
-            <!-- File Type Selection -->
             <div class="space-x-10 flex items-center">
                 <label class="text-gray-700 font-[600]">文件类型</label>
                 <div class="space-y-3">
@@ -30,7 +27,6 @@
                 </div>
             </div>
 
-            <!-- Sync Password Toggle -->
             <div class="flex items-center space-x-10">
                 <span class="text-gray-700 font-[600]">同步密码</span>
                 <div class="flex items-center space-x-4">
@@ -39,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- Verification Code -->
             <div class="flex space-x-10">
                 <label class="text-gray-700 font-[600]">代理类型</label>
                 <div>
@@ -58,7 +53,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="flex justify-end gap-3 p-4 border-t">
             <cancelButton @click="close">
                 取消
@@ -67,17 +61,23 @@
                 确认导出
             </primaryButton>
         </div>
-    </Model>
+    </Model> -->
+
+    <!--  -->
+      <AlertModel :open="props.open" title="导出文件" @close="close" @submit="confirm" @cancel="close">
+        确定导出吗
+      </AlertModel>
 </template>
 
 <script setup lang="ts">
-import { Model } from '@/components/model'
-import primaryButton from '@/components/button/primary-button.vue'
-import cancelButton from '@/components/button/cancel-button.vue'
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import Switch from '@/components/ui/switch/Switch.vue';
-import { ref } from 'vue'
-import { InfoCircleIcon } from '@/assets/icons/system-operation'
+import { AlertModel } from '@/components/alert-model';
+// import { Model } from '@/components/model'
+// import primaryButton from '@/components/button/primary-button.vue'
+// import cancelButton from '@/components/button/cancel-button.vue'
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import Switch from '@/components/ui/switch/Switch.vue';
+// import { ref } from 'vue'
+// import { InfoCircleIcon } from '@/assets/icons/system-operation'
 import { convertToCSV, downloadCSV } from "@/util/lib";
 import { toast } from 'vue-sonner';
 
@@ -92,14 +92,10 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm'])
 
-const fileType = ref('excel')
-const syncPassword = ref(false)
-const verificationCode = ref('')
+// const fileType = ref('excel')
+// const syncPassword = ref(false)
+// const verificationCode = ref('')
 
-const sendVerificationCode = () => {
-    // Implement verification code sending logic
-    console.log('Sending verification code...')
-}
 
 const close = () => {
     emit('close')

@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import Model from "@/components/model/model.vue";
-import { reactive } from "vue";
-import { PlusIcon, ListIcon, EyeIcon, EyeOffIcon } from "lucide-vue-next";
-import router from "@/router";
-import {
-  environment_proxies_create,
-  environment_proxies_modify,
-} from "@/commands/environment-proxy";
+import { EyeIcon, EyeOffIcon } from "lucide-vue-next";
+import { environment_proxies_modify } from "@/commands/environment-proxy";
 import { ref } from "vue";
 import { toast } from "vue-sonner";
 import { ip_info } from "@/commands";
@@ -114,7 +109,7 @@ const handleCheckProxy = async () => {
   // Split proxyServer into host and port
   const [host, port] = formData.value.proxyServer.split(":");
 
-  const res = await ip_info(
+  await ip_info(
     formData.value.proxyType,
     host,
     port,

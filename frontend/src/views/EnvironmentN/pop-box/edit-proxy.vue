@@ -2,10 +2,8 @@
 import { Model } from '@/components/model';
 import primaryButton from '@/components/button/primary-button.vue';
 import cancelButton from '@/components/button/cancel-button.vue';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import Switch from '@/components/ui/switch/Switch.vue';
-import { ref } from 'vue'
-import { QuestionCircleIcon, ShoppingCartIcon } from '@/assets/icons/environment/operate';
+import { ref, reactive, watch } from 'vue'
+import { QuestionCircleIcon } from '@/assets/icons/environment/operate';
 // import EmptyFolder from '@/assets/icons/environment/operate/Empty folder 1.png';
 import { IconEmptyFolder } from '@/assets/icons/environment-trash/index';
 import {
@@ -18,19 +16,42 @@ import {
 } from "@/components/select";
 import BuyProxy from './buy-proxy.vue';
 import Input from '@/components/input.vue';
-import Checkbox from '@/components/ui/checkbox/Checkbox.vue';
+import { environment_modify_proxy } from '@/commands/environment-proxy';
+import { toast } from 'vue-sonner';
 
 const props = defineProps({
     open: Boolean,
-    data: <any>[]
+    data: <any>[],
+    isChange: Boolean
 })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'update:isChange'])
+watch(() => props.open, (val) => {
+    if (val) {
+        activeTab.value = 'same'
+        chooseProxy.value = 1
+        forms.kind = ''
+        forms.host = ''
+        forms.port = ''
+        forms.username = ''
+        forms.password = ''
+    }
+})
 
 const cancel = () => {
     emit('close')
 }
 const commit = () => {
-    emit('close')
+    try {
+        // 检查是否有环境正在使用中
+        props.data.forEach((item: any) => {
+            environment_modify_proxy(item.uuid, forms)
+        })
+        toast.success('修改代理成功');
+        emit('update:isChange', !props.isChange)
+        emit('close')
+    } catch (error) {
+        toast.error('删除环境失败，请重试');
+    }
 }
 
 const tabs = [
@@ -38,6 +59,7 @@ const tabs = [
     { id: 'different', name: '不同代理' }
 ]
 const proxy = ref([
+    { id: 0, value: 'NO Proxy (本地直连)' },
     { id: 1, value: 'HTTP' },
     { id: 2, value: 'HTTPS' },
     { id: 3, value: 'SSH' },
@@ -55,11 +77,9 @@ const proxy = ref([
     { id: 15, value: 'Trojan' },
     { id: 16, value: 'Shadowsocks' },
 ])
-const proxyType = ref<string>('HTTP')
 
 const activeTab = ref('same')
 const protocolType = ref('auto')
-const ipChannel = ref('ip2location')
 const chooseProxy = ref(1)
 const buyProxyModel = ref(false)
 
@@ -79,25 +99,31 @@ const protocolList = [
     { id: 3, value: 'SOCKS5' },
     { id: 4, value: 'SSH' }
 ]
-const IPFindList = [
-    { id: 1, value: 'IP2Location' },
-    { id: 2, value: 'MaxMind' },
-    { id: 3, value: 'DB-IP' },
-    { id: 4, value: 'IP-API' }
-]
+// const IPFindList = [
+//     { id: 1, value: 'IP2Location' },
+//     { id: 2, value: 'MaxMind' },
+//     { id: 3, value: 'DB-IP' },
+//     { id: 4, value: 'IP-API' }
+// ]
 
 const clearProxies = () => {
     proxyList.value.forEach(proxy => proxy.value = '')
 }
 
-const testProxy = () => {
-    console.log('Testing proxies...')
-}
-const proxyMenu = [
-    { value: 1, label: '新代理' },
-    { value: 2, label: '选择已有代理' }
-]
-
+// const testProxy = () => {
+//     console.log('Testing proxies...')
+// }
+// const proxyMenu = [
+//     { value: 1, label: '新代理' },
+//     { value: 2, label: '选择已有代理' }
+// ]
+const forms = reactive({
+    kind: '',
+    host: '',
+    port: '',
+    username: '',
+    password: ''
+})
 
 </script>
 
@@ -176,9 +202,9 @@ const proxyMenu = [
                         <div class="flex items-center justify-between gap-5">
                             <span class="text-gray-700">IP查询渠道</span>
                             <div class="flex-1">
-                                <Select>
-                                    <SelectTrigger>
-                                        <SelectValue v-model="ipChannel" placeholder="选择协议类型"
+                                <!-- <Select >
+                                    <SelectTrigger disabled>
+                                        <SelectValue v-model="ipChannel" placeholder="IP2location"
                                             class="p-2 w-full rounded-lg outline-none" />
                                     </SelectTrigger>
 
@@ -189,14 +215,23 @@ const proxyMenu = [
                                             </SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
+                                </Select> -->
+                                <Select>
+                                    <SelectTrigger class="w" disabled>
+                                        <SelectValue placeholder="IP2Location"
+                                            class="w-full p-2 rounded-lg outline-none" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value="IP2Location"> IP2Location </SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
                                 </Select>
                             </div>
                         </div>
-
-
                     </div>
                     <div v-if="activeTab === 'same'">
-                        <p class="text-gray-500 mx-8 my-4">已选择代理 1</p>
+                        <p class="text-gray-500 mx-8 my-4">已选择代理 {{ props.data.length }}</p>
                         <div class="flex items-center gap-4 mb-4 mx-12">
                             <span class="w-[100px] font-[600]">代理</span>
                             <div class="flex items-center rounded-lg gap-4 border px-2 py-1">
@@ -209,27 +244,56 @@ const proxyMenu = [
                                     选择已有代理
                                 </button>
                             </div>
-                            <div class="flex items-center gap-2 cursor-pointer" @click="buyProxyModel = true">
+                            <!-- <div class="flex items-center gap-2 cursor-pointer" @click="buyProxyModel = true">
                                 <ShoppingCartIcon class="size-5" />
                                 <span class="text-[#5050FA]">购买代理</span>
-                            </div>
+                            </div> -->
                         </div>
-                        <div v-if="chooseProxy == 1" class="flex items-center gap-4 mx-12">
-                            <span class="w-[100px] font-[600]">代理类型 <span class="text-red-600">*</span></span>
-                            <div class="flex-1">
-                                <Select>
-                                    <SelectTrigger>
-                                        <SelectValue v-model="proxyType" placeholder="选择代理类型"
-                                            class="p-2 w-full rounded-lg outline-none" />
-                                    </SelectTrigger>
+                        <div v-if="chooseProxy == 1" class="flex flex-col gap-4 mx-12">
+                            <div class="flex items-center gap-4">
+                                <span class="w-[100px] font-[600]">代理类型 <span class="text-red-600">*</span></span>
+                                <div class="flex flex-col flex-1">
+                                    <div class="flex-1">
+                                        <Select v-model="forms.kind">
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="选择代理类型"
+                                                    class="p-2 w-full rounded-lg outline-none" />
+                                            </SelectTrigger>
 
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem v-for="item in proxy" :value="item.value">{{ item.value }}
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectItem v-for="item in proxy" :value="item.value">{{ item.value
+                                                        }}
+                                                    </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col space-y-4"
+                                v-if="forms.kind !== 'NO Proxy (本地直连)' && forms.kind !== ''">
+                                <div className="flex gap-4 items-center">
+                                    <p class="w-[100px] text-left text-sm relative font-[600]">代理主机 <span
+                                            class="text-red-600">*</span>
+                                    </p>
+                                    <Input v-model="forms.host" class="flex-1" placeholder="输入代理主机" />
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <p class="w-[100px] text-left text-sm relative font-[600]">
+                                        代理端口 <span class="text-red-600">*</span>
+                                    </p>
+                                    <Input v-model="forms.port" class="flex-1" placeholder="输入代理端口" />
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <p class="w-[100px] text-left text-sm font-[600]">代理账号</p>
+                                    <Input v-model="forms.username" class="flex-1" placeholder="输入代理账号" />
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <p class="w-[100px] text-left text-sm font-[600]">代理密码</p>
+                                    <Input v-model="forms.password" class="flex-1" placeholder="输入代理密码" />
+                                </div>
                             </div>
                         </div>
                         <div v-else class="flex flex-col items-center justify-center p-6">
@@ -244,7 +308,7 @@ const proxyMenu = [
 
         <!-- footer -->
         <div class="px-4 py-2 w-full flex items-center justify-end border-t space-x-3">
-            <a href="#" class="text-blue-500 hover:text-blue-600">代理检测</a>
+            <!-- <a href="#" class="text-blue-500 hover:text-blue-600">代理检测</a> -->
             <cancelButton @click="cancel">取消</cancelButton>
             <primaryButton @click="commit">确认</primaryButton>
         </div>

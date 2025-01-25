@@ -35,7 +35,7 @@ const emits = defineEmits<Emits>();
       "
       @click="() => emits('update:check', item)"
     >
-      <component
+    <component
         v-if="item.icon"
         :is="item.icon"
         :class="

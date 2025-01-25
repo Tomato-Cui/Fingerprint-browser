@@ -214,7 +214,7 @@ const submit = () => {
     console.log('提交订单')
 }
 
-const close = () => {
-    // 关闭弹窗
-}
+// const close = () => {
+//     // 关闭弹窗
+// }
 </script>

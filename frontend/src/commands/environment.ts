@@ -82,6 +82,7 @@ export interface EnvironmentFingerprint {
 }
 
 export interface EnvironmentDetailWithAdvanceCreateRequest {
+    id?: number;
     uuid?: string;
     team_id?: number;
     proxy_id?: number;
@@ -193,8 +194,17 @@ export const environment_modify_info = async (
     return await invoke('environment_modify_info', { environmentUuid, payload })
 };
 
+
+export const environment_advanced_modify = async (environmentUuid: string, payload: EnvironmentDetailWithAdvanceCreateRequest): Promise<any> => {
+    return await invoke('environment_advanced_modify', { environmentUuid, payload })
+};
+
 export const environment_modify_basic_info = async (environmentUuid: string, payload: Environment): Promise<any> => {
     return await invoke('environment_modify_basic_info', { environmentUuid, payload })
+};
+
+export const environment_modify_default_url = async (environmentUuid: string, defaultUrls: String): Promise<any> => {
+    return await invoke('environment_modify_default_url', { environmentUuid, defaultUrls })
 };
 
 export const environment_move_to_group = async (
