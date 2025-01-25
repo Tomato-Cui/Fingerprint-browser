@@ -1,4 +1,5 @@
 use std::{
+    fs,
     net::{IpAddr, SocketAddr},
     path::PathBuf,
 };
@@ -201,4 +202,40 @@ pub fn calculate_pagination(page_num: u32, page_size: u32, total: i64) -> (u32, 
     let mut offset = (page_num - 1) * page_size;
     offset = if offset <= 0 { 0 } else { offset };
     (offset, page_size)
+}
+
+pub fn unzip(filepath: &str, extract_to: &str) -> Result<bool, anyhow::Error> {
+    let file = fs::File::open(filepath)?;
+    let mut archive = zip::ZipArchive::new(file)?;
+
+    let extract_path = std::path::Path::new(extract_to);
+    let extract_path = extract_path
+        .parent()
+        .ok_or_else(|| anyhow::anyhow!("extract path load failed."))?;
+    if !extract_path.exists() {
+        fs::create_dir_all(extract_path)?;
+    }
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+        let outpath = match file.enclosed_name() {
+            Some(path) => extract_path.join(path),
+            None => continue,
+        };
+
+        if file.is_dir() {
+            fs::create_dir_all(&outpath)?;
+        } else {
+            if let Some(parent) = outpath.parent() {
+                if !parent.exists() {
+                    fs::create_dir_all(parent)?;
+                }
+            }
+
+            let mut outfile = fs::File::create(&outpath)?;
+            std::io::copy(&mut file, &mut outfile)?;
+        }
+    }
+
+    Ok(true)
 }

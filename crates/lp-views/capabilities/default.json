@@ -8,6 +8,7 @@
     "theme:default",
     "updater:default",
     "websocket:default",
-    "process:default"
+    "process:default",
+    "upload:default"
   ]
 }

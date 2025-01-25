@@ -316,6 +316,11 @@ import {
 import { toast } from "vue-sonner";
 import { useBrowserStatusStore } from "@/stores/browser";
 import { environment_group_query } from "@/commands/environment-group";
+import {
+  kernel_location,
+  latest_kernel,
+  install_location,
+} from "@/commands/kernel";
 
 const browserStatusStore = useBrowserStatusStore();
 const router = useRouter();
@@ -487,21 +492,48 @@ const visibleActions = computed(() => {
     // console.log("??:", allActions.value);
     return allActions.value.filter((action: any) => action.visible);
 });
-// 屎山越叠越高
+
+const kerneleocationExist = async () => {
+  let kernelLocationE = localStorage.getItem("kernel_location") ? true : false;
+  if (kernelLocationE) return true;
+
+  let versions = await latest_kernel();
+  let version = versions.data.version;
+  let url;
+  try {
+    url = versions.data.platforms["windows-x86_64"].url;
+  } catch {}
+
+  let locationResp = await kernel_location(version);
+  let { location, exist } = locationResp.data;
+  if (exist) {
+    localStorage.setItem("kernel_location", location);
+    return true;
+  }
+
+  await install_location(url, location, ({ progress, total }) => {
+    console.log(`Downloaded ${progress} of ${total} bytes`);
+  });
+
+  return kernelLocationE;
+};
+
 //启动单个环境
-const startEnv = (uuid: string) => {
-    browser_start(uuid)
-        .then((res: any) => {
-            if (res.code == 1) {
-                browserStatusStore.updateStatus(uuid, true);
-                toast.success(res.message);
-            } else {
-                toast.error("启动失败，可能环境已被转移");
-            }
-        })
-        .catch((res) => {
-            toast.error("启动失败：", res);
-        });
+const startEnv = async (uuid: string) => {
+  await kerneleocationExist();
+
+  browser_start(uuid)
+    .then((res: any) => {
+      if (res.code == 1) {
+        browserStatusStore.updateStatus(uuid, true);
+        toast.success(res.message);
+      } else {
+        toast.error("启动失败，可能环境已被转移");
+      }
+    })
+    .catch((res) => {
+      toast.error("启动失败：", res);
+    });
 };
 // 单个关闭
 const stopEnv = (uuid: string) => {
@@ -511,17 +543,19 @@ const stopEnv = (uuid: string) => {
     });
 };
 // 批量启动
-const startAll = () => {
-    browser_starts(selectedItems.value).then((res: any) => {
-        if (res.code == 1) {
-            toast.success(res.message);
-            selectedItems.value.forEach((item: string) => {
-                browserStatusStore.updateStatus(item, true);
-            });
-        } else {
-            toast.error("启动失败，可能环境已被转移");
-        }
-    });
+const startAll = async () => {
+  await kerneleocationExist();
+
+  browser_starts(selectedItems.value).then((res: any) => {
+    if (res.code == 1) {
+      toast.success(res.message);
+      selectedItems.value.forEach((item: string) => {
+        browserStatusStore.updateStatus(item, true);
+      });
+    } else {
+      toast.error("启动失败，可能环境已被转移");
+    }
+  });
 };
 // 批量关闭
 const stopAll = () => {

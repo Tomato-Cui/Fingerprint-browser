@@ -85,6 +85,8 @@ use import_crate::*;
 
 #[cfg(windows)]
 pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Error> {
+    use std::ops::Deref;
+
     let port = get_debug_port().await?;
     let mut stauts = false;
     let mut message = "启动失败, 指定环境不存在".to_string();
@@ -98,8 +100,20 @@ pub async fn start_browser(environment_uuid: &str) -> Result<Value, anyhow::Erro
             serde_json::from_value::<EnvironmentDetailWithResponse>(current_environment_json)
                 .map_err(|_| anyhow::anyhow!(message.clone()))?;
 
-        let chrome_install_path =
-            get_chrome_install_path().ok_or(anyhow::anyhow!("chrome location get fail !"))?;
+        let app_data_location = lp_states::config::APP_DATA.deref();
+
+        let chrome_install_path = if let Some(config) = lp_states::config::get_config() {
+            let browser_drivers_location = config.app.location.browser_drivers_location.to_string();
+            app_data_location
+                .join(browser_drivers_location)
+                .join("chrome.exe")
+                .to_str()
+                .ok_or(anyhow::anyhow!("chrome location get fail !"))?
+                .to_string()
+        } else {
+            get_chrome_install_path().ok_or(anyhow::anyhow!("chrome location get fail !"))?
+        };
+
         let browser_child_info =
             processor::BrowserChildInfo::new(current_environment, port, &chrome_install_path);
         let mut actuator = ACTUATOR.controller.lock().await;
@@ -170,7 +184,7 @@ mod tests {
     async fn test_start_browser() {
         crate::setup().await;
         let _t = lp_services_remote::requests::user::login("1", "1").await;
-        let environment_uuid = "8cf8641f-e5eb-440d-b676-6175480e4521";
+        let environment_uuid = "a28c5a5a-c99d-40b5-851e-882f76f51b70";
         let result = start_browser(environment_uuid).await;
         eprintln!("{:?}", result);
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
