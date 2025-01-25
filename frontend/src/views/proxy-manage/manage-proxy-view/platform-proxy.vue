@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import Layout from "@/views/proxy-manage/manage-proxyLayout.vue";
-import { AddCheckWhite } from "@/assets/icons/proxy-manage-image/index";
 
-import SetField from "./setting.vue";
-import { environment_group_query } from "@/commands/environment-group";
-
-import { Circle, Filter } from "@/assets/icons/environment-group-manage";
 import {
-  SearchIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
 } from "@/assets/icons/environment-bookmark-image";
 
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
-
-import BuyProxy from "./manage-proxy-view/buy-proxy.vue";
+import EditProxy from "./edit-proxy.vue";
 
 import {
   FileText,
@@ -25,88 +18,51 @@ import {
   Round,
 } from "@/assets/icons/proxy-manage-image";
 
-import {
-  AddCheck,
-  AddProxy,
-  Buy,
-  Setting,
-} from "@/assets/icons/proxy-manage-image";
+import { Setting } from "@/assets/icons/proxy-manage-image";
 
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { environment_proxies_query } from "@/commands/environment-proxy";
-import { setCheckRow, getCheckRow } from "../proxy-operation-store";
-import { checkRows } from "../proxy-operation-store";
+import {
+  environment_proxies_delete,
+  environment_proxies_modify,
+  environment_proxies_query,
+} from "@/commands/environment-proxy";
 import { environment_proxies_batch_delete } from "@/commands/environment-proxy";
+import { toast } from "vue-sonner";
 
-interface Proxy {
-  id: string;
-  type: string;
-  host: string;
-  port: number;
-  username?: string;
-  password?: string;
-  refreshUrl?: string;
-  group?: string;
-  name?: string;
-  status?: string;
+import { AlertModel } from "@/components/alert-model";
+import { ip_info } from "@/commands";
+
+interface FormData {
+  proxyType: string;
+  ipQueryChannel: string;
+  proxyServer: string;
+  proxyAccount: string;
+  proxyPassword: string;
+  ipMonitoring: boolean;
+  ipChangeAction: "warning" | "block";
 }
 
-const protocolType = ref("auto");
-const ipQueryChannel = ref("IP2Location");
-const proxies = ref<Proxy[]>([]);
+const copyProxyId = (proxy: Proxymanage) => {
+  toast("复制成功");
+};
 
-const text = ref("");
+const singlehandleDeleteProxy = (id: number) => {
+  // 遍历删除每个选中的代理
 
-interface ProxyItem {
-  id: number;
-  name: string;
-  url: string;
-  selected: boolean;
-}
+  environment_proxies_delete(id);
 
-const proxyItems = ref<ProxyItem[]>([
-  {
-    id: 1,
-    name: "feishu",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-  {
-    id: 2,
-    name: "feishu2",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-  {
-    id: 3,
-    name: "feishu3",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-  {
-    id: 4,
-    name: "feishu4",
-    url: "https://gcn1b5cn2pro",
-    selected: false,
-  },
-]);
+  singleDeleteProxy.value = false;
 
-const setField = ref(false);
-
-const createProxymanage = ref(false);
+  privateproxyloadData();
+};
 
 const selectAll = ref(false);
 
 const proxyList = ref<Proxymanage[]>([]);
-
-watch(proxyList, (newVal) => {
-  setCheckRow(newVal.map((item) => item.id));
-});
 
 const toggleSelectAll = () => {
   proxyList.value.forEach((proxyList) => {
@@ -114,18 +70,16 @@ const toggleSelectAll = () => {
   });
 };
 
-const editProxymanage = (Proxymanage: Proxymanage) => {
-  console.log("Edit Proxymanage:", Proxymanage);
-};
-
 const deleteProxymanage = (Proxymanage: Proxymanage) => {
-  console.log("Delete Proxymanage:", Proxymanage);
+  environment_proxies_delete(Proxymanage.id);
+  privateproxyloadData();
 };
-
-const searchQuery = ref("");
 
 interface Proxymanage {
   id: number;
+  kind: string;
+  host: string;
+  port: string;
   name: string;
   attribution: string;
   state: string;
@@ -146,36 +100,67 @@ const totalPages = ref(1);
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
+    privateproxyloadData();
   }
 };
 
-const platformproxyloadData = () => {
-  environment_proxies_query(1, 1000).then((res) => {
+const proxy = ref();
+
+const privateproxyloadData = () => {
+  environment_proxies_query(currentPage.value, pageSize.value).then((res) => {
     let { data: data_, total } = res.data;
     totalItems.value = total;
     proxyList.value = data_;
+    totalPages.value = Math.ceil(total / pageSize.value);
   });
 };
 
-onMounted(() => platformproxyloadData());
+// 监听页码和每页条数变化
+watch([currentPage, pageSize], () => {
+  privateproxyloadData();
+});
 
-const handleDeleteProxy = async (rows: any[]) => {
-  console.log("rows", [...Object.values(rows)]);
-  console.log("checkRows", checkRows.value);
+const batchDeleteProxy = ref(false);
 
-  // Ensure checkRows.value exists and is an array
-  if (!checkRows.value || !Array.isArray(checkRows.value)) {
-    console.error("No valid rows selected for deletion");
+onMounted(() => privateproxyloadData());
+
+const checkProxyStatus = (proxy: Proxymanage) => {
+  ip_info(
+    proxy.kind,
+    proxy.host,
+    proxy.port,
+    proxy.name, // username
+    proxy.attribution // password
+  ).then((res) => {
+    if (res.code == 1) {
+      toast.success("代理检测成功");
+    } else {
+      toast.warning(res.message);
+    }
+  });
+};
+
+const handleDeleteProxy = async () => {
+  // Get selected proxy IDs
+  const selectedProxyIds = proxyList.value
+    .filter((proxy) => proxy.selected)
+    .map((proxy) => proxy.id);
+
+  if (selectedProxyIds.length === 0) {
+    toast.error("请选择要删除的代理");
     return;
   }
 
   try {
-    await environment_proxies_batch_delete(checkRows.value);
+    await environment_proxies_batch_delete(selectedProxyIds);
+    toast.success("删除成功");
+    selectAll.value = false;
+    await privateproxyloadData();
   } catch (error) {
     console.error("Failed to delete proxies:", error);
+    toast.error("删除失败");
   }
-  selectAll.value = false;
-  platformproxyloadData();
+  batchDeleteProxy.value = false;
 };
 
 interface Field {
@@ -183,6 +168,9 @@ interface Field {
   label: string;
   enabled: boolean;
 }
+
+const singleDeleteProxy = ref(false);
+
 const fields = ref<Field[]>([
   { id: "proxy_number", label: "代理序号", enabled: true },
   { id: "proxy_name", label: "代理名称", enabled: true },
@@ -198,9 +186,17 @@ const fields = ref<Field[]>([
   { id: "creation_info", label: "创建信息", enabled: true },
 ]);
 
+const editProxy = ref(false);
+
+const editProxyModify = (Proxymanage: Proxymanage) => {
+  editProxy.value = true;
+  proxy.value = Proxymanage;
+};
+
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
+    privateproxyloadData();
   }
 };
 </script>
@@ -210,7 +206,7 @@ const nextPage = () => {
     <template v-slot:manage-proxy-content>
       <div class="flex flex-col w-full h-full">
         <div class="flex flex-row gap-x-2 m-2">
-          <button
+          <!-- <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <FileText
@@ -219,9 +215,9 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               设置分组
             </span>
-          </button>
+          </button> -->
 
-          <button
+          <!-- <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <PenModify
@@ -230,9 +226,9 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               修改IP查询渠道
             </span>
-          </button>
+          </button> -->
 
-          <button
+          <!-- <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <Plate
@@ -241,11 +237,12 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               修改代理
             </span>
-          </button>
+          </button> -->
 
           <button
-            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
-            @click="handleDeleteProxy(getCheckRow())"
+            class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="batchDeleteProxy = true"
+            :disabled="!proxyList.some((p) => p.selected)"
           >
             <Round
               class="w-[20px] h-[20px] text-gray-400 items-center justify-center mx-1"
@@ -254,13 +251,37 @@ const nextPage = () => {
               删除代理
             </span>
           </button>
+
+          <AlertModel
+            class=""
+            title="删除该代理吗"
+            :open="batchDeleteProxy"
+            @close="() => (batchDeleteProxy = false)"
+            @submit="handleDeleteProxy"
+            @cancel="() => (batchDeleteProxy = false)"
+          >
+            <div class="relative bg-white rounded-xl">
+              <div class="flex gap-3">
+                <div class="flex-1">
+                  <h3 class="mb-2 text-base font-medium text-gray-900">
+                    删除该代理吗
+                  </h3>
+                  <p class="text-sm text-gray-500">
+                    您已选择
+                    {{ proxyList.filter((p) => p.selected).length }}
+                    个代理，确定要删除所选代理吗？删除后无法找回，请及时修改已配置的环境。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </AlertModel>
         </div>
 
         <div>
           <h1
             class="ml-2 font-thin text-[14px] mb-1 leading-[18px] text-gray-300"
           >
-            已选择1项
+            已选择{{ proxyList.filter((p) => p.selected).length }}项
           </h1>
         </div>
 
@@ -269,7 +290,7 @@ const nextPage = () => {
         >
           <table class="min-w-full border border-gray-200">
             <!-- Table Header -->
-            <thead class="bg-gray-50 border border-gray-200">
+            <thead class="sticky top-0 z-10 bg-gray-50 border border-gray-200">
               <tr>
                 <th scope="col" class="py-3.5 pr-3 pl-4 w-12 text-left">
                   <input
@@ -426,7 +447,7 @@ const nextPage = () => {
             </thead>
 
             <!-- Table Body -->
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="overflow-hidden bg-white divide-y divide-gray-200">
               <tr
                 v-for="Proxymanage in proxyList"
                 :key="Proxymanage.id"
@@ -458,30 +479,63 @@ const nextPage = () => {
                 <td class="px-3 py-4 text-sm whitespace-nowrap">
                   <div class="flex gap-2 justify-start items-center">
                     <button
-                      @click="editProxymanage(Proxymanage)"
+                      @click="editProxyModify(Proxymanage)"
                       class="text-[#4F46E5] hover:bg-indigo-50 px-2 rounded border border-[#5050FA] bg-[#F0F5FF]"
                     >
                       编辑
                     </button>
 
                     <button
-                      @click="deleteProxymanage(Proxymanage)"
+                      @click="copyProxyId(Proxymanage)"
                       class="px-2 text-[#FA8C16] rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFF7E6]"
                     >
-                      复制代理
+                      复制代理ID
                     </button>
 
                     <button
-                      @click="deleteProxymanage(Proxymanage)"
+                      @click="singleDeleteProxy = true"
                       class="px-2 text-red-600 rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFE2E2]"
                     >
                       删除
                     </button>
+                    <AlertModel
+                      class=""
+                      title="删除该代理吗"
+                      :open="singleDeleteProxy"
+                      @close="() => (singleDeleteProxy = false)"
+                      @submit="singlehandleDeleteProxy(Proxymanage.id)"
+                      @cancel="() => (singleDeleteProxy = false)"
+                    >
+                      <div class="relative bg-white rounded-xl">
+                        <div class="flex gap-3">
+                          <div class="flex-1">
+                            <h3
+                              class="mb-2 text-base font-medium text-gray-900"
+                            >
+                              删除该代理吗
+                            </h3>
+                            <p class="text-sm text-gray-500">
+                              确定要删除所选代理吗？删除后无法找回，请及时修改已配置的环境。
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </AlertModel>
                   </div>
                 </td>
 
                 <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                  {{ Proxymanage.state }}
+                  <div class="flex gap-2 items-center">
+                    <span>{{
+                      Proxymanage.state === "active" ? "异常" : "正常"
+                    }}</span>
+                    <button
+                      @click="checkProxyStatus(Proxymanage)"
+                      class="px-2 py-1 text-xs text-blue-600 rounded border border-blue-200 hover:bg-blue-50"
+                    >
+                      检查状态
+                    </button>
+                  </div>
                 </td>
                 <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
                   {{ Proxymanage.channel }}
@@ -538,6 +592,9 @@ const nextPage = () => {
           </select>
         </div>
       </div>
+
+      <EditProxy v-model:editProxy="editProxy" :proxy="proxy" />
+      <!-- <SingleDeleteProxy v-model:singleDeleteProxy="singleDeleteProxy" /> -->
     </template>
   </Layout>
 </template>

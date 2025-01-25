@@ -27,12 +27,16 @@ const tabs = [
 ];
 </script>
 <template>
-  <div class="h-full">
+  <div class="flex overflow-hidden flex-col h-full">
     <div class="flex flex-col h-full">
-      <h4 class="ml-6 text-2xl font-semibold leading-8">添加代理</h4>
+      <div class="flex gap-x-2 justify-between items-center px-4 mt-1 mb-2">
+        <h3 class="flex items-end text-xl font-semibold tracking-tight">
+          添加代理
+        </h3>
+      </div>
 
       <ul
-        class="flex justify-start px-0 pb-0 w-full text-sm bg-white rounded-none border-b"
+        class="flex justify-start pb-0 mx-4 w-full text-sm bg-white rounded-none border-b"
       >
         <li
           :key="item.id"

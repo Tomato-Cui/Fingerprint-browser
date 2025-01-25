@@ -3,8 +3,13 @@ import Model from "@/components/model/model.vue";
 import { reactive } from "vue";
 import { PlusIcon, ListIcon, EyeIcon, EyeOffIcon } from "lucide-vue-next";
 import router from "@/router";
-import { environment_proxies_create } from "@/commands/environment-proxy";
+import {
+  environment_proxies_create,
+  environment_proxies_modify,
+} from "@/commands/environment-proxy";
 import { ref } from "vue";
+import { toast } from "vue-sonner";
+import { ip_info } from "@/commands";
 
 // interface Props {
 //   modelValue?: "warning" | "block";
@@ -18,6 +23,10 @@ const props = defineProps({
   editProxy: {
     type: Boolean,
     default: false,
+  },
+  proxy: {
+    type: Object,
+    default: () => ({}),
   },
 });
 
@@ -56,6 +65,7 @@ const formData = ref<FormData>({
 });
 
 const payload = {
+  id: props.proxy.id,
   kind: formData.value.proxyType,
   host: formData.value.ipQueryChannel,
   port: formData.value.proxyServer,
@@ -64,11 +74,12 @@ const payload = {
   ipMonitoring: formData.value.ipMonitoring,
   ipChangeAction: formData.value.ipChangeAction,
 };
+
 const handleSubmit = () => {
   // Validate IP address format
-  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  if (!ipRegex.test(formData.value.proxyServer)) {
-    alert("请输入有效的IP地址，格式如: 192.168.1.1");
+  const ipPortRegex = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/;
+  if (!ipPortRegex.test(formData.value.proxyServer)) {
+    alert("请输入有效的IP地址和端口，格式如: 192.168.1.1:7890");
     return;
   }
 
@@ -82,22 +93,37 @@ const handleSubmit = () => {
     return;
   }
 
-  environment_proxies_create(payload);
+  // const id = Number(proxy.proxy.id);
 
-  // Add your form submission logic here
+  payload.kind = formData.value.proxyType;
+  const [host, port] = formData.value.proxyServer.split(":");
+  payload.host = host;
+  payload.port = port;
+  payload.username = formData.value.proxyAccount;
+  payload.password = formData.value.proxyPassword;
+  payload.ipMonitoring = formData.value.ipMonitoring;
+  payload.ipChangeAction = formData.value.ipChangeAction;
+
+  // Pass both id and payload to environment_proxies_modify
+  environment_proxies_modify(payload); // TODO: Replace 0 with actual proxy ID
+  toast.success("修改成功");
   emit("update:editProxy", false);
 };
 
-const addGroup = reactive({
-  groupName: "",
-  description: "",
-});
+const handleCheckProxy = async () => {
+  // Split proxyServer into host and port
+  const [host, port] = formData.value.proxyServer.split(":");
 
-const clearForm = () => {
-  addGroup.groupName = "";
-  addGroup.description = "";
+  const res = await ip_info(
+    formData.value.proxyType,
+    host,
+    port,
+    formData.value.proxyAccount,
+    formData.value.proxyPassword
+  );
+
+  toast.success("代理检测成功");
 };
-//确认
 </script>
 
 <template>
@@ -362,7 +388,7 @@ const clearForm = () => {
           <button
             type="button"
             class="py-2 text-blue-500 rounded-lg"
-            @click="() => emit('update:editProxy', false)"
+            @click="handleCheckProxy"
           >
             代理检测
           </button>

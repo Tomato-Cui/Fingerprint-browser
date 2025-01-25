@@ -153,15 +153,31 @@
             </div>
 
             <div class="space-y-6">
-              <!-- <div>
+              <div>
                 <label class="block mb-2 text-sm text-gray-800">用户名</label>
                 <div class="flex relative items-center">
-                  <input name="name" type="text" required v-model="registerForm.username" @keydown.enter.prevent
+                  <input
+                    name="name"
+                    type="text"
+                    required
+                    v-model="registerForm.username"
+                    @keydown.enter.prevent
                     class="px-2 py-3 w-full text-sm border-b border-gray-300 outline-none focus:border-gray-800"
-                    placeholder="请输入您的名字" />
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" class="absolute right-4 w-4 h-4"
-                    viewBox="0 0 24 24">
-                    <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
+                    placeholder="请输入您的名字"
+                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="#bbb"
+                    stroke="#bbb"
+                    class="absolute right-4 w-4 h-4"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      cx="10"
+                      cy="7"
+                      r="6"
+                      data-original="#000000"
+                    ></circle>
                     <path
                       d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
                       data-original="#000000"
@@ -553,21 +569,27 @@ const handleLogin = () => {
   login(loginForm.value.email, loginForm.value.password)
     .then(async (res) => {
       loading.value = false;
-      if (res.code == 1) {
-        toast.success(res.message);
-        router.push("/environment/0");
-        userStore.login({
-          account: loginForm.value.username,
-        });
+      let token = res.data.token;
+      if (res.code == 1 && token) {
+        if (token) {
+          if (loginForm.value.rememberMe) localStorage.setItem("token", token);
+          toast.success(res.message);
+          userStore.setUserInfo({
+            account: loginForm.value.email,
+          });
+          wsStore.connect(token).then(() => {});
+          router.push("/environment/0");
+        }
       } else {
         toast.warning(res.message);
       }
     })
-    .catch(() => {
+    .catch((e) => {
       loading.value = false;
       toast.warning("登录失败");
     });
-  cleanForm();
+
+  // cleanForm();
 };
 
 const handleRegister = () => {

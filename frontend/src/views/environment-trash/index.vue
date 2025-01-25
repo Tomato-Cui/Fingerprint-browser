@@ -173,18 +173,18 @@ const resetSelectFilterHandle = () => (data.value = dataCache.value);
 </script>
 
 <template>
-  <div class="flex flex-col h-full overflow-hidden">
+  <div class="flex overflow-hidden flex-col h-full">
     <div class="flex justify-between px-4">
-      <div class="flex items-center justify-betwee gap-x-2 mt-1 mb-2">
-        <h3 class="font-semibold tracking-tight text-xl flex items-end">
+      <div class="flex gap-x-2 items-center mt-1 mb-2 justify-betwee">
+        <h3 class="flex items-end text-xl font-semibold tracking-tight">
           回收站
         </h3>
         <p class="text-[#8F9BB3] text-xs flex items-center h-full">
           可恢复最近7天内删除的环境
         </p>
       </div>
-      <div class="flex items-center justify-between mb-2 gap-4 select-none">
-        <div class="flex items-center gap-2 flex-1 pt-1">
+      <div class="flex gap-4 justify-between items-center mb-2 select-none">
+        <div class="flex flex-1 gap-2 items-center pt-1">
           <div class="relative flex-1 max-w-md">
             <Search
               class="absolute left-3 top-[50%] transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10"

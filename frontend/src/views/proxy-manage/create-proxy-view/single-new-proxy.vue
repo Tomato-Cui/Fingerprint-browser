@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { PlusIcon, ListIcon, EyeIcon, EyeOffIcon } from "lucide-vue-next";
+import { EyeIcon, EyeOffIcon } from "lucide-vue-next";
 import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
 import router from "@/router";
 import { environment_proxies_create } from "@/commands/environment-proxy";
 
 import { ref, watch } from "vue";
+import { ip_info } from "@/commands";
+import { toast } from "vue-sonner";
 
 interface Props {
   modelValue?: "warning" | "block";
@@ -34,7 +36,6 @@ interface FormData {
   ipChangeAction: "warning" | "block";
 }
 
-const activeTab = ref("single");
 const showPassword = ref(false);
 
 const formData = ref<FormData>({
@@ -56,21 +57,52 @@ const payload = {
   ipMonitoring: formData.value.ipMonitoring,
   ipChangeAction: formData.value.ipChangeAction,
 };
+
+const handleCheckProxy = async () => {
+  // Split proxyServer into host and port
+  const [host, port] = formData.value.proxyServer.split(":");
+
+  const res = await ip_info(
+    formData.value.proxyType,
+    host,
+    port,
+    formData.value.proxyAccount,
+    formData.value.proxyPassword
+  );
+  if (res.code == 1) {
+    toast.success("代理检测成功");
+  } else {
+    toast.warning(res.message);
+  }
+
+  console.log("res", res);
+};
 const handleSubmit = () => {
-  // Validate IP address format
-  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  if (!ipRegex.test(formData.value.proxyServer)) {
-    alert("请输入有效的IP地址，格式如: 192.168.1.1");
+  // Validate IP address and port format
+  const ipPortRegex = /^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/;
+  if (!ipPortRegex.test(formData.value.proxyServer)) {
+    alert("请输入有效的IP地址和端口，格式如: 192.168.1.1:7890");
     return;
   }
 
-  // Validate proxy account length
-  if (
-    !formData.value.proxyAccount ||
-    formData.value.proxyAccount.length < 1 ||
-    formData.value.proxyAccount.length > 8
-  ) {
-    alert("代理账号长度必须在1-8个字符之间");
+  // Additional IP validation
+  const [ip] = formData.value.proxyServer.split(":");
+  const ipParts = ip.split(".");
+  const isValidIP = ipParts.every((part) => {
+    const num = parseInt(part);
+    return num >= 0 && num <= 255;
+  });
+
+  // Split proxyServer into host and port
+  const [host, port] = formData.value.proxyServer.split(":");
+  payload.host = host;
+  payload.port = port;
+  payload.kind = formData.value.proxyType;
+  payload.username = formData.value.proxyAccount;
+  payload.password = formData.value.proxyPassword;
+
+  if (!isValidIP) {
+    alert("IP地址的每个部分必须在0-255之间");
     return;
   }
 
@@ -84,7 +116,6 @@ const handleSubmit = () => {
 <template>
   <Layout>
     <template v-slot:new-proxy-content>
-      <!-- Form -->
       <div
         @submit.prevent="handleSubmit"
         class="flex flex-col justify-start pt-3 space-y-6 w-full h-full"
@@ -137,7 +168,7 @@ const handleSubmit = () => {
             <input
               v-model="formData.proxyServer"
               type="text"
-              placeholder="请输入代理服务器地址"
+              placeholder="请输入代理服务器地址，格式如: 192.168.1.1:7890"
               class="flex-1 p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -148,11 +179,11 @@ const handleSubmit = () => {
               class="flex gap-1 pt-2 w-24 font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
             >
               代理账号
-              <span class="text-red-500">*</span>
             </label>
             <input
               v-model="formData.proxyAccount"
               type="text"
+              :maxlength="8"
               placeholder="请输入代理账号"
               class="flex-1 p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -225,34 +256,6 @@ const handleSubmit = () => {
                   发生IP变化时</label
                 >
               </div>
-
-              <!-- <div class="flex flex-col gap-2 ml-8">
-                <label class="flex gap-2 items-center">
-                  <input
-                    type="radio"
-                    v-model="formData.ipChangeAction"
-                    value="warning"
-                    class="w-4 h-4 rounded-full border-2 border-gray-400 appearance-none cursor-pointer checked:bg-blue-500 checked:ring-0 focus:outline-none"
-                  />
-                  <span
-                    class="font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
-                    >警告</span
-                  >
-                </label>
-
-                <label class="flex gap-2 items-center">
-                  <input
-                    type="radio"
-                    v-model="formData.ipChangeAction"
-                    value="block"
-                    class="w-4 h-4 rounded-full border-2 border-gray-400 appearance-none cursor-pointer checked:bg-blue-500 checked:ring-0 focus:outline-none"
-                  />
-                  <span
-                    class="font-pingfang text-sm font-semibold text-[14px] leading-[22px]"
-                    >禁止访问</span
-                  >
-                </label>
-              </div> -->
 
               <div class="flex flex-col gap-y-3 justify-start w-[95px]">
                 <label class="flex items-start cursor-pointer">
@@ -332,6 +335,7 @@ const handleSubmit = () => {
           <button
             type="button"
             class="px-6 py-2 rounded-lg border hover:bg-gray-50"
+            @click="handleCheckProxy"
           >
             代理检测
           </button>

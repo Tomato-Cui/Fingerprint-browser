@@ -35,8 +35,8 @@ export const environment_proxies_create = async (payload: Proxy): Promise<any> =
 };
 
 // 修改代理信息
-export const environment_proxies_modify = async (id: number, payload: Proxy): Promise<any> => {
-    return await invoke('environment_proxies_modify', { id, payload })
+export const environment_proxies_modify = async (payload: Proxy): Promise<any> => {
+    return await invoke('environment_proxies_modify', { payload })
 };
 
 // 修改环境代理设置

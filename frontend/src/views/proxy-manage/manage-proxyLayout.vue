@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { cn } from "@/util/lib";
-import { getCheckRow } from "./proxy-operation-store";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,7 +12,9 @@ import {
 } from "@/assets/icons/environment-creates/simple-create/index";
 import { useRouter, useRoute } from "vue-router";
 
-import { onMounted, ref } from "vue";
+import SelectFilter from "./select-filter.vue";
+
+import { onMounted, reactive, ref, watch } from "vue";
 import { Circle, Filter } from "@/assets/icons/environment-group-manage";
 import {
   SearchIcon,
@@ -43,6 +44,13 @@ import {
   environment_proxies_batch_delete,
   environment_proxies_query,
 } from "@/commands/environment-proxy";
+import {
+  environment_trash_delete_batch,
+  environment_trash_query,
+  environment_trash_recovers,
+} from "@/commands/environment-trash";
+import { IconRecover, IconReTrash } from "@/assets/icons/environment-trash";
+import { toast } from "vue-sonner";
 
 const router = useRouter();
 
@@ -63,15 +71,172 @@ const tabs = [
     href: "/platform-proxy",
   },
 ];
+
+const cols = [
+  { id: 1, title: "序号" },
+  { id: 2, title: "环境名称" },
+  { id: 3, title: "账号信息" },
+  { id: 4, title: "代理信息" },
+  { id: 5, title: "备注" },
+  { id: 6, title: "标签" },
+  { id: 7, title: "分组" },
+  { id: 8, title: "删除信息" },
+];
+const actionBtns = ref<any[]>([
+  {
+    id: 1,
+    title: "物理删除",
+    icon: IconReTrash,
+    disabled: true,
+    handle: () => {
+      let warning = (e: any) => toast.warning("删除失败 " + e);
+
+      environment_trash_delete_batch(selected.value)
+        .then((res) => {
+          if (res.code == 1) {
+            toast.success("删除成功");
+          }
+          if (res.code != 1) warning(res.message);
+        })
+        .catch(warning);
+      loadData();
+    },
+  },
+  {
+    id: 2,
+    title: "恢复",
+    icon: IconRecover,
+    disabled: true,
+    handle: () => {
+      let warning = (e: any) => toast.warning("恢复失败 " + e);
+
+      environment_trash_recovers(selected.value)
+        .then((res) => {
+          if (res.code == 1) {
+            toast.success("恢复成功");
+          }
+          if (res.code != 1) warning(res.message);
+        })
+        .catch(warning);
+      loadData();
+    },
+  },
+]);
+
+const data = ref<any[]>([]);
+const dataCache = ref<any[]>([]);
+const selected = ref<any[]>([]);
+const pagination = reactive({
+  total: 100,
+  pageNum: 1,
+  pageSize: 17,
+});
+const selectFilterRef = reactive<any>({
+  proxy: false,
+  account: "",
+  tag: "",
+  group: "",
+});
+
+const loadData = () => {
+  environment_trash_query(pagination.pageNum, pagination.pageSize).then(
+    (res) => {
+      pagination.total = res.data.total;
+      data.value = res.data.data.map((item: any) => ({
+        uuid: item.uuid,
+        name: item.name || "--",
+        proxy: item.proxy_host ? item.proxy_host + ":" + item.proxy_port : "--",
+        account: item.accounts.platform || "--",
+        description: item.description || "--",
+        tag: item.tag_name || "abc",
+        group: item.group_name || "--",
+        message: {
+          from: item.delete_from_user_nickname,
+          deleted_at: item.deleted_at,
+        },
+      }));
+      data.value[0].tag = "1";
+      dataCache.value = JSON.parse(JSON.stringify(data.value));
+    }
+  );
+};
+
+const actionBtnActiveHandle = (v: boolean) => {
+  actionBtns.value = actionBtns.value.map((item) => ({ ...item, disabled: v }));
+};
+const updatePageSizeHandle = (pageS: number) => {
+  pagination.pageSize = pageS;
+};
+const updatePageHandle = (pageS: number) => {
+  pagination.pageNum = pageS;
+};
+
+const selectHandles = {
+  selectHandle: (v: boolean, item: string) => {
+    if (!v) {
+      selected.value = selected.value.filter(
+        (selectedItem) => selectedItem !== item
+      );
+    } else {
+      selected.value = [...selected.value, item];
+    }
+  },
+  selectAllHandle: (items: any[]) => {
+    selected.value = items;
+  },
+};
+
+const searchHandle = (sub: string) => {
+  let currents = dataCache.value.filter((item) =>
+    item.name.toLowerCase().includes(sub.toLowerCase())
+  );
+  if (currents.length == 0) {
+    data.value = [];
+  } else if (sub.length == 0) {
+    data.value = JSON.parse(JSON.stringify(dataCache.value));
+  } else {
+    data.value = currents;
+  }
+};
+
+onMounted(loadData);
+watch(selected, () => {
+  actionBtnActiveHandle(selected.value.length == 0);
+});
+
+watch(
+  () => [pagination.pageNum, pagination.pageSize],
+  () => loadData()
+);
+
+watch(selectFilterRef, (_) => {
+  data.value = dataCache.value
+    .filter((item) =>
+      selectFilterRef.proxy ? item.proxy != "--" : item.proxy == "--"
+    )
+    .filter((item) =>
+      selectFilterRef.account ? selectFilterRef.account == item.account : true
+    )
+    .filter((item) =>
+      selectFilterRef.tag ? selectFilterRef.tag == item.tag : true
+    )
+    .filter((item) =>
+      selectFilterRef.group ? selectFilterRef.group == item.group : true
+    );
+});
+const resetSelectFilterHandle = () => (data.value = dataCache.value);
 </script>
 
 <template>
   <div class="flex flex-col h-full">
-    <!-- Header -->
-    <div class="flex justify-between items-center p-2 mt-1 w-full">
-      <h4 class="text-2xl font-semibold leading-8">代理管理</h4>
+    <div class="flex flex-row">
+      <div class="flex gap-x-2 justify-between items-center px-4 mt-1 mb-2">
+        <h3 class="flex items-end text-xl font-semibold tracking-tight">
+          代理管理
+        </h3>
+      </div>
 
-      <div class="flex gap-2 items-center">
+      <div class="flex flex-row gap-2 items-center mr-2 ml-auto">
         <button
           class="text-white hover:bg-[#4338CA] border font-[500] border-gray-300 text-sm rounded-md px-2 py-1.5 flex items-center outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
         >
@@ -89,7 +254,7 @@ const tabs = [
           />
         </div>
 
-        <button
+        <!-- <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
         >
           <Filter
@@ -98,18 +263,27 @@ const tabs = [
           <span class="font-sans font-semibold text-center text-black">
             筛选
           </span>
-        </button>
+        </button> -->
 
-        <button
+        <SelectFilter
+          :data="dataCache"
+          :selects="selectFilterRef"
+          class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
+          @update:on-proxy-select="(v: boolean) => (selectFilterRef.proxy = v)"
+          @update:on-account-select="(v: string) => (selectFilterRef.account = v)"
+          @update:on-tag-select="(v: string) => (selectFilterRef.tag = v)"
+          @update:on-group-select="(v: string) => (selectFilterRef.group = v)"
+          @update:reset="resetSelectFilterHandle"
+        />
+
+        <!-- <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
         >
           <AddCheck
             class="w-[14px] h-[14px] text-gray-400 items-center justify-center mx-1"
           />
-          <span class="font-sans font-semibold text-center text-black">
-            批量检测代理
-          </span>
-        </button>
+          <span class="font-sans text-center text-black"> 批量检测代理 </span>
+        </button> -->
 
         <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
@@ -118,17 +292,15 @@ const tabs = [
           <AddProxy
             class="w-[14px] h-[14px] text-gray-400 items-center justify-center mx-1"
           />
-          <span class="font-sans font-semibold text-center text-black">
-            添加代理
-          </span>
+          <span class="font-sans text-center text-black"> 添加代理 </span>
         </button>
 
-        <button
+        <!-- <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 bg-[#4F46E5] text-white outline-gray-50 hover:outline-gray-100"
         >
           <Buy class="mr-2 w-[11.67px] h-[11.67px]" />
           购买代理
-        </button>
+        </button> -->
       </div>
     </div>
 
@@ -163,7 +335,7 @@ const tabs = [
       </ul>
     </div>
 
-    <div class="flex flex-col grow">
+    <div class="flex overflow-auto flex-col grow">
       <slot name="manage-proxy-content"></slot>
     </div>
   </div>
