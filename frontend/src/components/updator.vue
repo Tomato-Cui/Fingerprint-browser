@@ -65,11 +65,11 @@ const before = () => {
     <DialogContent
       class="p-4 shadow-[0_20px_50px_rgba(8,_112,_184,_0.1)] rounded-sm max-w-[388px]"
     >
-      <div class="w-full pt-4 flex justify-center items-center">
+      <div class="flex justify-center items-center pt-4 w-full">
         <IconLogo class="w-12 h-12" />
       </div>
       <div
-        class="bg-purple-50 p-2 min-h-20 max-h-48 rounded-md text-sm flex items-start gap-x-2 overflow-y-auto"
+        class="flex overflow-y-auto gap-x-2 items-start p-2 max-h-48 text-sm bg-purple-50 rounded-md min-h-20"
       >
         <div class="w-6">
           <BadgePlusIcon class="text-purple-800" />

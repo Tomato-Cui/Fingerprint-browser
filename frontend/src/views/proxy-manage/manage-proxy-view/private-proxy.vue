@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import Layout from "@/views/proxy-manage/manage-proxyLayout.vue";
 
 import {
@@ -9,8 +9,14 @@ import {
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import EditProxy from "./edit-proxy.vue";
-import { Round } from "@/assets/icons/proxy-manage-image";
-import { Setting } from "@/assets/icons/proxy-manage-image";
+import ModifyProxy from "./modify-proxy.vue";
+import {
+  Round,
+  FileText,
+  PenModify,
+  Setting,
+  Plate,
+} from "@/assets/icons/proxy-manage-image";
 
 import {
   DropdownMenu,
@@ -26,21 +32,15 @@ import { toast } from "vue-sonner";
 
 import { AlertModel } from "@/components/alert-model";
 import { ip_info } from "@/commands";
-
-// interface FormData {
-//   proxyType: string;
-//   ipQueryChannel: string;
-//   proxyServer: string;
-//   proxyAccount: string;
-//   proxyPassword: string;
-//   ipMonitoring: boolean;
-//   ipChangeAction: "warning" | "block";
-// }
+import TableTheadChoose from "@/views/proxy-manage/table-thead-choose.vue";
+import { WrapperIcon } from "@/assets/icons/environment/index";
 
 // proxy: Proxymanage
 const copyProxyId = () => {
   toast("复制成功");
 };
+
+const showColumnsModal = ref(false);
 
 const singlehandleDeleteProxy = (id: number) => {
   // 遍历删除每个选中的代理
@@ -61,11 +61,6 @@ const toggleSelectAll = () => {
     proxyList.selected = selectAll.value;
   });
 };
-
-// const deleteProxymanage = (Proxymanage: Proxymanage) => {
-//   environment_proxies_delete(Proxymanage.id);
-//   privateproxyloadData();
-// };
 
 interface Proxymanage {
   id: number;
@@ -163,26 +158,17 @@ interface Field {
 
 const singleDeleteProxy = ref(false);
 
-const fields = ref<Field[]>([
-  { id: "proxy_number", label: "代理序号", enabled: true },
-  { id: "proxy_name", label: "代理名称", enabled: true },
-  { id: "proxy_affiliation", label: "代理归属", enabled: true },
-  { id: "operation", label: "操作", enabled: true },
-  { id: "proxy_status", label: "代理状态", enabled: true },
-  { id: "ip_query", label: "IP查询渠道", enabled: true },
-  { id: "group", label: "分组", enabled: false },
-  { id: "proxy_type", label: "代理类型", enabled: false },
-  { id: "proxy_host", label: "代理主机", enabled: false },
-  { id: "browser_env", label: "浏览器环境", enabled: false },
-  { id: "cloud_phone_env", label: "云手机环境", enabled: false },
-  { id: "creation_info", label: "创建信息", enabled: true },
-]);
-
 const editProxy = ref(false);
 
 const editProxyModify = (Proxymanage: Proxymanage) => {
   editProxy.value = true;
   proxy.value = Proxymanage;
+};
+
+const modifyProxy = ref(false);
+const modifyProxyNew = () => {
+  console.log("modifyProxyNew");
+  modifyProxy.value = true;
 };
 
 const nextPage = () => {
@@ -191,6 +177,16 @@ const nextPage = () => {
     privateproxyloadData();
   }
 };
+
+const theadChoose = (val: any) => {
+  allColumns.value = val;
+};
+
+const visibleColumns = computed(() => {
+  return allColumns.value.filter((column: any) => column.visible);
+});
+
+const allColumns = ref<any>([]); //全部列
 </script>
 
 <template>
@@ -198,7 +194,7 @@ const nextPage = () => {
     <template v-slot:manage-proxy-content>
       <div class="flex flex-col w-full h-full">
         <div class="flex flex-row gap-x-2 m-2">
-          <!-- <button
+          <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <FileText
@@ -207,9 +203,9 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               设置分组
             </span>
-          </button> -->
+          </button>
 
-          <!-- <button
+          <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <PenModify
@@ -218,9 +214,10 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               修改IP查询渠道
             </span>
-          </button> -->
+          </button>
 
-          <!-- <button
+          <button
+            @click="modifyProxyNew()"
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <Plate
@@ -229,7 +226,7 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               修改代理
             </span>
-          </button> -->
+          </button>
 
           <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -292,153 +289,115 @@ const nextPage = () => {
                     @change="toggleSelectAll"
                   />
                 </th>
-                <th
-                  scope="col"
-                  class="py-3.5 pr-3 pl-4 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  代理序号
-                </th>
 
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  代理名称
-                </th>
+                <template v-for="column in visibleColumns" :key="column.key">
+                  <th
+                    v-if="column.key === 'proxy_number'"
+                    scope="col"
+                    class="py-3.5 pr-3 pl-4 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    代理序号
+                  </th>
 
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  代理归属
-                </th>
+                  <th
+                    v-if="column.key === 'name'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    代理名称
+                  </th>
 
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[205px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  操作
-                </th>
+                  <th
+                    v-if="column.key === 'proxy_affiliation'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    代理归属
+                  </th>
 
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  代理状态
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  IP查询渠道
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  分组
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  浏览器环境
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  云手机环境
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
-                >
-                  <span class="font-thin text-gray-300">|&nbsp;</span>
-                  创建信息
-                </th>
+                  <th
+                    v-if="column.key === 'operation'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[205px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    操作
+                  </th>
+
+                  <th
+                    v-if="column.key === 'proxy_status'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    代理状态
+                  </th>
+                  <th
+                    v-if="column.key === 'ip_query'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    IP查询渠道
+                  </th>
+                  <th
+                    v-if="column.key === 'group'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    分组
+                  </th>
+                  <th
+                    v-if="column.key === 'proxy_type'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    浏览器环境
+                  </th>
+                  <th
+                    v-if="column.key === 'cloud_phone_env'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[110px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    云手机环境
+                  </th>
+                  <th
+                    v-if="column.key === 'creation_info'"
+                    scope="col"
+                    class="px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[100px]"
+                  >
+                    <span class="font-thin text-gray-300">|&nbsp;</span>
+                    创建信息
+                  </th>
+                </template>
                 <th
                   scope="col"
                   class="flex justify-end items-center px-3 py-3.5 text-sm font-semibold text-left text-gray-900 min-w-[60px]"
                 >
                   <span class="font-thin text-gray-300">|&nbsp;</span>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger as-child>
-                      <Setting
-                        class="w-[16px] h-[16px] text-gray-400 mx-1 cursor-pointer"
-                      />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" class="w-72">
-                      <div
-                        class="flex justify-between items-center p-4 border-b"
-                      >
-                        <h2 class="text-lg font-medium">自定义表格字段</h2>
-                        <button
-                          class="p-2 rounded-full transition-colors hover:bg-gray-100"
-                        >
-                          <RefreshCw class="w-5 h-5 text-gray-600" />
-                        </button>
-                      </div>
+                  <button @click="showColumnsModal = !showColumnsModal">
+                    <WrapperIcon class="size-5" />
+                  </button>
 
-                      <div class="p-4 max-h-[70vh]">
-                        <div class="space-y-3">
-                          <div
-                            v-for="field in fields"
-                            :key="field.id"
-                            class="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
-                          >
-                            <div class="flex gap-3 items-center">
-                              <GripVertical class="w-4 h-4 text-gray-400" />
-                              <span class="text-gray-700">{{
-                                field.label
-                              }}</span>
-                            </div>
-                            <label
-                              class="inline-flex relative items-center cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                v-model="field.enabled"
-                                class="sr-only peer"
-                              />
-                              <div
-                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                              ></div>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="flex justify-end border-t border-gray-300">
-                        <div class="flex gap-x-4 justify-end px-2 pt-3 mb-2">
-                          <CancelButton
-                            class="px-4 border border-gray-300"
-                            @click=""
-                          >
-                            取消
-                          </CancelButton>
-                          <PrimaryButton class="px-4 !bg-[#5050FA]" @click="">
-                            确定
-                          </PrimaryButton>
-                        </div>
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <TableTheadChoose
+                    :open="showColumnsModal"
+                    @close="showColumnsModal = false"
+                    @select="theadChoose"
+                    class="absolute right-0 top-0 w-[320px]"
+                  />
                 </th>
               </tr>
             </thead>
 
             <!-- Table Body -->
+
             <tbody class="overflow-hidden bg-white divide-y divide-gray-200">
               <tr
                 v-for="Proxymanage in proxyList"
@@ -461,7 +420,7 @@ const nextPage = () => {
                   {{ Proxymanage.id }}
                 </td>
                 <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                  {{ Proxymanage.name }}
+                  {{ Proxymanage.name || "未设置" }}
                 </td>
 
                 <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
@@ -588,6 +547,7 @@ const nextPage = () => {
 
       <EditProxy v-model:editProxy="editProxy" :proxy="proxy" />
       <!-- <SingleDeleteProxy v-model:singleDeleteProxy="singleDeleteProxy" /> -->
+      <ModifyProxy v-model:modifyProxy="modifyProxy" :proxy="proxy" />
     </template>
   </Layout>
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import Layout from "@/views/proxy-manage/manage-proxyLayout.vue";
+
 import {
   ChevronRightIcon,
   ChevronLeftIcon,
@@ -8,9 +9,14 @@ import {
 import { RefreshCw, GripVertical } from "lucide-vue-next";
 import { PrimaryButton, CancelButton } from "@/components/button";
 import EditProxy from "./edit-proxy.vue";
-import { Round } from "@/assets/icons/proxy-manage-image";
-
-import { Setting } from "@/assets/icons/proxy-manage-image";
+import ModifyProxy from "./modify-proxy.vue";
+import {
+  Round,
+  FileText,
+  PenModify,
+  Setting,
+  Plate,
+} from "@/assets/icons/proxy-manage-image";
 
 import {
   DropdownMenu,
@@ -26,16 +32,6 @@ import { toast } from "vue-sonner";
 
 import { AlertModel } from "@/components/alert-model";
 import { ip_info } from "@/commands";
-
-// interface FormData {
-//   proxyType: string;
-//   ipQueryChannel: string;
-//   proxyServer: string;
-//   proxyAccount: string;
-//   proxyPassword: string;
-//   ipMonitoring: boolean;
-//   ipChangeAction: "warning" | "block";
-// }
 
 // proxy: Proxymanage
 const copyProxyId = () => {
@@ -61,11 +57,6 @@ const toggleSelectAll = () => {
     proxyList.selected = selectAll.value;
   });
 };
-
-// const deleteProxymanage = (Proxymanage: Proxymanage) => {
-//   environment_proxies_delete(Proxymanage.id);
-//   privateproxyloadData();
-// };
 
 interface Proxymanage {
   id: number;
@@ -185,6 +176,12 @@ const editProxyModify = (Proxymanage: Proxymanage) => {
   proxy.value = Proxymanage;
 };
 
+const modifyProxy = ref(false);
+const modifyProxyNew = () => {
+  console.log("modifyProxyNew");
+  modifyProxy.value = true;
+};
+
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
@@ -198,7 +195,7 @@ const nextPage = () => {
     <template v-slot:manage-proxy-content>
       <div class="flex flex-col w-full h-full">
         <div class="flex flex-row gap-x-2 m-2">
-          <!-- <button
+          <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <FileText
@@ -207,9 +204,9 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               设置分组
             </span>
-          </button> -->
+          </button>
 
-          <!-- <button
+          <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <PenModify
@@ -218,9 +215,10 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               修改IP查询渠道
             </span>
-          </button> -->
+          </button>
 
-          <!-- <button
+          <button
+            @click="modifyProxyNew()"
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
           >
             <Plate
@@ -229,7 +227,7 @@ const nextPage = () => {
             <span class="font-sans font-semibold text-center text-black">
               修改代理
             </span>
-          </button> -->
+          </button>
 
           <button
             class="text-sm border rounded-md px-2 py-1.5 bg-[#F5F5FF] flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -439,6 +437,7 @@ const nextPage = () => {
             </thead>
 
             <!-- Table Body -->
+
             <tbody class="overflow-hidden bg-white divide-y divide-gray-200">
               <tr
                 v-for="Proxymanage in proxyList"
@@ -461,7 +460,7 @@ const nextPage = () => {
                   {{ Proxymanage.id }}
                 </td>
                 <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                  {{ Proxymanage.name }}
+                  {{ Proxymanage.name || "未设置" }}
                 </td>
 
                 <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
@@ -476,9 +475,10 @@ const nextPage = () => {
                     >
                       编辑
                     </button>
+
                     <!-- @click="copyProxyId(Proxymanage)" -->
                     <button
-                      @click="copyProxyId()"
+                      @click="copyProxyId"
                       class="px-2 text-[#FA8C16] rounded hover:bg-red-50 border border-[#ED003F] bg-[#FFF7E6]"
                     >
                       复制代理ID
@@ -587,6 +587,7 @@ const nextPage = () => {
 
       <EditProxy v-model:editProxy="editProxy" :proxy="proxy" />
       <!-- <SingleDeleteProxy v-model:singleDeleteProxy="singleDeleteProxy" /> -->
+      <ModifyProxy v-model:modifyProxy="modifyProxy" :proxy="proxy" />
     </template>
   </Layout>
 </template>

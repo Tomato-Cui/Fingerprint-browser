@@ -12,7 +12,7 @@ import { onMounted, reactive, ref, watch } from "vue";
 import { Circle } from "@/assets/icons/environment-group-manage";
 import { SearchIcon } from "@/assets/icons/environment-bookmark-image";
 
-import { AddProxy } from "@/assets/icons/proxy-manage-image";
+import { AddProxy, AddCheck, Buy } from "@/assets/icons/proxy-manage-image";
 import {
   environment_trash_delete_batch,
   environment_trash_query,
@@ -245,14 +245,14 @@ const resetSelectFilterHandle = () => (data.value = dataCache.value);
           @update:reset="resetSelectFilterHandle"
         />
 
-        <!-- <button
+        <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
         >
           <AddCheck
             class="w-[14px] h-[14px] text-gray-400 items-center justify-center mx-1"
           />
           <span class="font-sans text-center text-black"> 批量检测代理 </span>
-        </button> -->
+        </button>
 
         <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 outline-gray-50 hover:outline-gray-100"
@@ -264,12 +264,12 @@ const resetSelectFilterHandle = () => (data.value = dataCache.value);
           <span class="font-sans text-center text-black"> 添加代理 </span>
         </button>
 
-        <!-- <button
+        <button
           class="text-sm border rounded-md px-2 py-1.5 flex items-center font-[500] outline outline-offset-0 hover:outline-offset-[.5px] transition-all ease-in-out duration-150 bg-[#4F46E5] text-white outline-gray-50 hover:outline-gray-100"
         >
           <Buy class="mr-2 w-[11.67px] h-[11.67px]" />
           购买代理
-        </button> -->
+        </button>
       </div>
     </div>
 
