@@ -28,13 +28,13 @@ const deviceMemory = ref<string>("1");
 </script>
 
 <template>
-  <Accordion type="single" class="w-full px-4" collapsible>
+  <Accordion type="single" class="px-4 w-full" collapsible>
     <AccordionItem value="webrtc-setting" class="border-0">
       <AccordionTrigger
-        class="hover:no-underline rounded-md text-sm p-3 bg-gray-50 mb-2"
+        class="p-3 mb-2 text-sm bg-gray-50 rounded-md hover:no-underline"
         >高级配置
       </AccordionTrigger>
-      <AccordionContent class="px-10 space-y-4 py-1">
+      <AccordionContent class="px-10 py-1 space-y-4">
         <div className="flex">
           <div class="w-32">
             <button
@@ -54,7 +54,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">时区</p>
+          <p class="w-32 text-sm text-left">时区</p>
           <div>
             <Radio
               :check="forms.fingerprint.timezone"
@@ -67,7 +67,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">WebRTC</p>
+          <p class="w-32 text-sm text-left">WebRTC</p>
           <div>
             <Radio
               :check="forms.fingerprint.webRTC"
@@ -80,7 +80,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">地理位置</p>
+          <p class="w-32 text-sm text-left">地理位置</p>
           <div>
             <Radio
               :check="forms.fingerprint.geolocation"
@@ -93,7 +93,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">语言</p>
+          <p class="w-32 text-sm text-left">语言</p>
           <div>
             <Radio
               :check="forms.fingerprint.language"
@@ -106,7 +106,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">分辨率</p>
+          <p class="w-32 text-sm text-left">分辨率</p>
           <div>
             <Radio
               :check="forms.fingerprint.resolution"
@@ -119,7 +119,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">字体</p>
+          <p class="w-32 text-sm text-left">字体</p>
           <div>
             <Radio
               :check="forms.fingerprint.fonts"
@@ -132,7 +132,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">Canvas</p>
+          <p class="w-32 text-sm text-left">Canvas</p>
           <div>
             <Radio
               :check="forms.fingerprint.canvas"
@@ -145,7 +145,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">WebGL图像</p>
+          <p class="w-32 text-sm text-left">WebGL图像</p>
           <div>
             <Radio
               :check="forms.fingerprint.webGL"
@@ -158,7 +158,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">WebGPU</p>
+          <p class="w-32 text-sm text-left">WebGPU</p>
           <div>
             <Radio
               :check="forms.fingerprint.webGPU"
@@ -171,7 +171,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">AudioContext</p>
+          <p class="w-32 text-sm text-left">AudioContext</p>
           <div>
             <Radio
               :check="forms.fingerprint.audioContext"
@@ -184,7 +184,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">媒体设备</p>
+          <p class="w-32 text-sm text-left">媒体设备</p>
           <div>
             <Radio
               :check="forms.fingerprint.mediaDevices"
@@ -197,7 +197,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">ClientRects</p>
+          <p class="w-32 text-sm text-left">ClientRects</p>
           <div>
             <Radio
               :check="forms.fingerprint.clientRects"
@@ -210,7 +210,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">SpeechVoices</p>
+          <p class="w-32 text-sm text-left">SpeechVoices</p>
           <div>
             <Radio
               :check="forms.fingerprint.speechVoices"
@@ -223,12 +223,12 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">硬件并发数</p>
+          <p class="w-32 text-sm text-left">硬件并发数</p>
           <Select v-model="hardwareConcurrency" :default-value="'1'">
             <SelectTrigger class="w-1/3">
               <SelectValue
                 placeholder="1"
-                class="w-full p-2 rounded-lg outline-none"
+                class="p-2 w-full rounded-lg outline-none"
               />
             </SelectTrigger>
             <SelectContent>
@@ -246,12 +246,12 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">设备内存</p>
+          <p class="w-32 text-sm text-left">设备内存</p>
           <Select v-model="deviceMemory" :default-value="deviceMemory">
             <SelectTrigger class="w-1/3">
               <SelectValue
                 placeholder="4"
-                class="w-full p-2 rounded-lg outline-none"
+                class="p-2 w-full rounded-lg outline-none"
               />
             </SelectTrigger>
             <SelectContent>
@@ -270,9 +270,9 @@ const deviceMemory = ref<string>("1");
 
         <div className="flex">
           <div class="w-32">
-            <p class="text-left text-sm">设备名称</p>
+            <p class="text-sm text-left">设备名称</p>
           </div>
-          <div class="grow space-y-2">
+          <div class="space-y-2 grow">
             <div class="w-32">
               <Radio
                 :check="forms.fingerprint.deviceName"
@@ -287,9 +287,9 @@ const deviceMemory = ref<string>("1");
 
         <div className="flex">
           <div class="w-32">
-            <p class="text-left text-sm">MAC地址</p>
+            <p class="text-sm text-left">MAC地址</p>
           </div>
-          <div class="grow space-y-2">
+          <div class="space-y-2 grow">
             <div class="w-[7.6rem]">
               <Radio
                 :check="forms.fingerprint.macAddress"
@@ -303,7 +303,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">Do Not Track</p>
+          <p class="w-32 text-sm text-left">Do Not Track</p>
           <div>
             <Radio
               :check="forms.fingerprint.doNotTrack"
@@ -316,7 +316,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">蓝牙</p>
+          <p class="w-32 text-sm text-left">蓝牙</p>
           <div>
             <Radio
               :check="forms.fingerprint.bluetooth"
@@ -329,7 +329,7 @@ const deviceMemory = ref<string>("1");
         </div>
 
         <div className="flex items-center">
-          <p class="w-32 text-left text-sm">电池</p>
+          <p class="w-32 text-sm text-left">电池</p>
           <div>
             <Radio
               :check="forms.fingerprint.battery"
@@ -343,10 +343,10 @@ const deviceMemory = ref<string>("1");
 
         <div className="flex">
           <div class="w-32">
-            <p class="text-left text-sm">端口扫描保护</p>
+            <p class="text-sm text-left">端口扫描保护</p>
           </div>
           <div class="grow">
-            <div class="w-full space-y-2">
+            <div class="space-y-2 w-full">
               <div class="w-[6.8rem]">
                 <Radio
                   :check="forms.fingerprint.portScanning"
@@ -362,12 +362,12 @@ const deviceMemory = ref<string>("1");
 
         <div className="flex">
           <div class="w-32">
-            <p class="text-left text-sm">启动参数</p>
+            <p class="text-sm text-left">启动参数</p>
           </div>
           <Textarea
             rows="4"
             placeholder="输入内容可以配置浏览器执行时的启动参数"
-            class="w-1/2 px-3 py-2 border rounded-md placeholder-gray-400"
+            class="px-3 py-2 w-1/2 placeholder-gray-400 rounded-md border"
             v-model="forms.fingerprint.startupParams.value"
           ></Textarea>
         </div>

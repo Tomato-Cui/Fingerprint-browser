@@ -1,10 +1,15 @@
 <template>
   <More>
     <MoreTrigger>
-      <OneFrameIcon class="h-5 w-5 cursor-pointer" />
+      <OneFrameIcon class="w-5 h-5 cursor-pointer" />
     </MoreTrigger>
     <MoreContent>
-      <MoreItem v-for="item in regularItems" :key="item" class="cursor-pointer" @click="">
+      <MoreItem
+        v-for="item in regularItems"
+        :key="item"
+        class="cursor-pointer"
+        @click=""
+      >
         {{ item }}
       </MoreItem>
     </MoreContent>
@@ -13,7 +18,7 @@
 
 <script setup lang="ts">
 import { defineEmits } from "vue";
-import { OneFrameIcon } from '@/assets/icons/environment/index'
+import { OneFrameIcon } from "@/assets/icons/environment/index";
 import { More, MoreContent, MoreItem, MoreTrigger } from "@/components/more";
 
 const emit = defineEmits(["close"]);
@@ -29,7 +34,6 @@ const regularItems = [
   "清除缓存",
   "删除环境",
 ];
-
 </script>
 
 <style>

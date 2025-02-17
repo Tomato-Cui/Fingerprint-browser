@@ -6,6 +6,8 @@ import App from './App.vue';
 import router from './router';
 import "./index.css"
 
+
+
 const pinia = createPinia();
 const app = createApp(App);
 
@@ -14,3 +16,7 @@ app.use(pinia);
 app.use(i18n);
 app.use(init);
 app.mount('#app');
+
+
+// 关闭 Vue 3 的所有 Warn
+app.config.warnHandler = () => null;

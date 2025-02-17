@@ -15,6 +15,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  id: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const emit = defineEmits(["update:editProxy"]);
@@ -71,7 +75,7 @@ const handleSubmit = () => {
   }
 
   // const id = Number(proxy.proxy.id);
-
+  payload.id = props.id;
   payload.kind = formData.value.proxyType;
   const [host, port] = formData.value.proxyServer.split(":");
   payload.host = host;

@@ -24,7 +24,7 @@ const proxies = ref<Proxy[]>([]);
 const text = ref("");
 const handleSubmit = () => {
   console.log("handleSubmit");
-  router.push("/private-proxy");
+  router.push("proxy-manage/0");
 };
 
 interface ProxyItem {
@@ -253,7 +253,7 @@ const proxyItems = ref<ProxyItem[]>([
           取消
         </button>
         <button
-          class="px-6 py-2 text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700"
+          class="px-6 py-2 mr-2 text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700"
           @click="handleSubmit"
         >
           确认

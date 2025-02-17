@@ -15,8 +15,9 @@ export const menus = [
     },
     {
         title: "代理",
-        url: "/private-proxy",
+        url: "/proxy-manage/0",
         icon: IconPlate,
+        isActive: true,
     },
     {
         title: "回收站",

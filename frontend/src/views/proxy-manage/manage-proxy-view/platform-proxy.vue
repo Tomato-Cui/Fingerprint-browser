@@ -178,7 +178,6 @@ const editProxyModify = (Proxymanage: Proxymanage) => {
 
 const modifyProxy = ref(false);
 const modifyProxyNew = () => {
-  console.log("modifyProxyNew");
   modifyProxy.value = true;
 };
 

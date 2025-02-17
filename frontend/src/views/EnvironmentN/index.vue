@@ -15,7 +15,7 @@
                 </div> -->
       </div>
       <div class="flex items-center space-x-4">
-        <div class="flex relative flex-col">
+        <div class="flex relative flex-col 0">
           <div class="flex gap-2 items-center">
             <div class="flex items-center pl-2 rounded-lg border">
               <SearchIcon class="size-5" />
@@ -38,7 +38,7 @@
           </div>
         </div>
 
-        <div class="flex relative gap-2">
+        <div class="flex relative gap-">
           <button
             v-for="item in headOperate"
             @click="item.go"
@@ -75,6 +75,7 @@
             <HelfGlobalIcon class="size-[51px] opacity-10" />
           </div>
         </div>
+
         <div
           class="flex overflow-x-auto flex-1 space-x-2 select-none scrollbar-hide cursor-grab"
           @mousedown.stop="startDrag"
@@ -165,7 +166,9 @@
       </div>
 
       <!-- Table -->
-      <div class="flex overflow-auto flex-col flex-1 rounded-lg">
+      <div
+        class="flex overflow-auto flex-col flex-1 rounded-lg border border-gray-300"
+      >
         <table class="overflow-auto min-w-full">
           <thead class="overflow-auto sticky top-0 z-10 w-full">
             <tr class="overflow-auto border-b bg-popover">
@@ -205,6 +208,7 @@
                     </div>
                   </div>
                 </th>
+
                 <th
                   v-if="column.key !== 'id' && column.key !== 'name'"
                   class="px-2 py-3 text-left text-sm font-medium text-gray-600 min-w-[150px]"
@@ -272,10 +276,11 @@
                     >
                       {{
                         !browserStatusStore.getStatus(item.uuid)
-                          ? "启动"
+                          ? "启动 "
                           : "关闭"
                       }}</span
                     >
+
                     <span class="">
                       <More class="relative top-8">
                         <MoreTrigger>
@@ -288,7 +293,7 @@
                             class="cursor-pointer"
                             @click="e.active?.(item.id)"
                           >
-                            {{ e.label }}
+                            {{ e.label + "--" + item.id }}
                           </MoreItem>
                         </MoreContent>
                       </More>
@@ -352,6 +357,8 @@
       />
     </GroupChoose>
   </div>
+
+  <!-- 导出环境 -->
   <ExportEnv
     :open="exportEnvModel"
     @close="exportEnvModel = false"
@@ -604,6 +611,7 @@ const simpleOp = (model: any, id: number) => {
   messageData.value = [messageData.value];
   model.value = true;
 };
+
 // 同步Cookie
 const syncCookie = (id: number) => {
   console.log("同步Cookie:", id);
@@ -857,16 +865,22 @@ const headOperate = ref([
 const tableData = ref<any>([]);
 
 const filterData = computed(() => {
-  // Filter the tableData based on the search query
+  // 根据搜索关键词过滤表格数据
   const filteredTableData = tableData.value.filter((item: any) =>
     item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 
-  // Sort the filtered data
+  console.log("tableData", tableData.value);
+
+  console.log("filteredTableData", filteredTableData);
+
+  // 对过滤后的数据进行排序
   const sortedData = [...filteredTableData].sort((a: any, b: any) => {
     if (sortColumn.value === "id") {
+      // 按id排序
       return sortOrder.value === "asc" ? a.ind - b.ind : b.ind - a.ind;
     } else if (sortColumn.value === "name") {
+      // 按名称排序
       return sortOrder.value === "asc"
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name);
@@ -874,13 +888,16 @@ const filterData = computed(() => {
     return 0;
   });
 
-  // Map the sorted and filtered data to include only visible columns
+  // 映射排序和过滤后的数据，只包含可见列
   return sortedData.map((item: any) => {
+    // 获取可见列的键名
     const visibleKeys = [
       "ind",
       ...visibleColumns.value.map((col: any) => col.key),
     ];
+    // 创建新的对象，只包含uuid和id
     const filteredItem: Record<string, any> = { uuid: item.uuid, id: item.id };
+    // 遍历可见列，将对应的值添加到新对象中
     visibleKeys.forEach((key: any) => {
       if (key !== "id" && key in item) {
         filteredItem[key] = item[key];
@@ -916,6 +933,8 @@ const getPageSize = (val: number) => {
 // 多选
 const selectedItems = ref<string[]>([]);
 const isAllSelected = computed(() => {
+  console.log("selectedItems.value:", selectedItems.value);
+  console.log("tableData.value:", tableData.value);
   return (
     tableData.value.length > 0 &&
     selectedItems.value.length === tableData.value.length

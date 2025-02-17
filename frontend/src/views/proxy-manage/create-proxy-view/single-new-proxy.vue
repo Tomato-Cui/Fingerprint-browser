@@ -4,7 +4,7 @@ import Layout from "@/views/proxy-manage/new-proxyLayout.vue";
 import router from "@/router";
 import { environment_proxies_create } from "@/commands/environment-proxy";
 
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { ip_info } from "@/commands";
 import { toast } from "vue-sonner";
 
@@ -107,10 +107,15 @@ const handleSubmit = () => {
   }
 
   environment_proxies_create(payload);
+  toast.success("添加成功");
 
   // Add your form submission logic here
-  router.push("/private-proxy");
+  router.push("/proxy-manage/0");
 };
+
+onMounted(() => {
+  console.log("single-new-proxy:", router.currentRoute.value);
+});
 </script>
 
 <template>
@@ -341,7 +346,7 @@ const handleSubmit = () => {
           </button>
           <button
             type="submit"
-            class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            class="px-6 py-2 mr-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             @click="handleSubmit"
           >
             确认添加

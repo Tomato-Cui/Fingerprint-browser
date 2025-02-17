@@ -24,6 +24,7 @@ import TransferEnvironment from '@/views/transferEnvironment/index.vue';
 import Recycle from '@/views/Recycle/index.vue';
 import NotFound from '@/views/not-found/index.vue';
 import Environment from '@/views/EnvironmentN/index.vue'
+import ProxyManage from '@/views/proxy-manage/manage-proxyLayout.vue'
 import AccountSet from '@/views/system-operation/system-set/account-set.vue';
 import NotifySet from '@/views/system-operation/system-set/notify-set.vue';
 import GlobeSet from '@/views/system-operation/system-set/globe-set.vue'
@@ -33,7 +34,7 @@ import EnvironmentTrash from '@/views/environment-trash/index.vue'
 import Extensions from '@/views/extensions/index.vue'
 import EnvironmentManagerBookmark from '@/views/environment-manager-bookmark/index.vue'
 import EnvironmentGroupManager from '@/views/environment-group-manager/index.vue'
-import ProxyManage from '@/views/proxy-manage/index.vue'
+
 import Team from '@/views/team/index.vue';
 import EmptyProxy from '@/views/proxy-manage/empty-proxy.vue'
 import SingleNewProxy from '@/views/proxy-manage/create-proxy-view/single-new-proxy.vue'
@@ -49,6 +50,19 @@ const routes: Array<RouteRecordRaw> = [
     name: 'login',
     component: Login,
   },
+
+  {
+    path: '/proxy-manage/:id',
+    name: 'proxy-manage',
+    component: ProxyManage,
+  },
+  // {
+  //   path: '/proxy-manage/create',
+  //   name: 'proxy-manage-create',
+  //   component: ProxyManageCreate,
+
+  // },
+
   {
     path: '/environment/:id',
     name: 'environment',
@@ -93,11 +107,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'environment-group-manager',
     component: EnvironmentGroupManager,
   },
-  {
-    path: '/proxy-manage',
-    name: 'proxy-manage',
-    component: ProxyManage,
-  },
+
   {
     path: '/enpty-proxy',
     name: 'enpty-proxy',

@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-interface BrowserStatus {
+interface ProxyStatus {
     uuid: string
     status: boolean
 }
 
 export const useBrowserStatusStore = defineStore('browserStatus', () => {
-    const browserStatus = ref<Array<BrowserStatus>>([])
+    const browserStatus = ref<Array<ProxyStatus>>([])
 
     const updateStatus = (uuid: string, status: boolean) => {
         const index = browserStatus.value.findIndex((item) => item.uuid === uuid)
