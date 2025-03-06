@@ -1,5 +1,7 @@
 ### Lp Browser
 
+![微信截图_20250307073440](https://github.com/user-attachments/assets/1a725bb8-3c67-4b8a-958b-01b424c6e678)
+
 
 
 ### 目录结构介绍
@@ -46,3 +48,5 @@
 - 执行api服务: `cargo run --bin apis`
 
 - 启动客户端程序: `cargo tauri dev`
+
+
